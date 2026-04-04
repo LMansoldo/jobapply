@@ -96,6 +96,27 @@ components:
           type: string
           format: date-time
 
+    CVLocaleVersion:
+      type: object
+      properties:
+        locale:
+          type: string
+          enum: [en, pt-BR]
+        summary:
+          type: string
+        skills:
+          type: array
+          items:
+            type: string
+        experience:
+          type: array
+          items:
+            $ref: '#/components/schemas/Experience'
+        education:
+          type: array
+          items:
+            $ref: '#/components/schemas/Education'
+
     CV:
       type: object
       properties:
@@ -131,6 +152,10 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/TailoredVersion'
+        localeVersions:
+          type: array
+          items:
+            $ref: '#/components/schemas/CVLocaleVersion'
         updatedAt:
           type: string
           format: date-time
@@ -588,7 +613,7 @@ paths:
   /cv/{id}:
     get:
       tags: [CV]
-      summary: Get CV by ID (owner only)
+      summary: Get CV by ID (owner only). Pass ?locale=en or ?locale=pt-BR to get a localized version.
       security:
         - bearerAuth: []
       parameters:
@@ -597,6 +622,13 @@ paths:
           required: true
           schema:
             type: string
+        - name: locale
+          in: query
+          required: false
+          schema:
+            type: string
+            enum: [en, pt-BR]
+          description: Return the CV with the specified locale version merged on top
       responses:
         '200':
           description: CV found
@@ -733,6 +765,135 @@ paths:
                 $ref: '#/components/schemas/Error'
         '404':
           description: CV not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /cv/{id}/version/{locale}:
+    put:
+      tags: [CV]
+      summary: Create or update a localized version of the CV (en or pt-BR)
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: locale
+          in: path
+          required: true
+          schema:
+            type: string
+            enum: [en, pt-BR]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                summary:
+                  type: string
+                  example: Experienced frontend engineer...
+                skills:
+                  type: array
+                  items:
+                    type: string
+                  example: [React, TypeScript]
+                experience:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/Experience'
+                education:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/Education'
+      responses:
+        '200':
+          description: Locale version saved
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  localeVersion:
+                    $ref: '#/components/schemas/CVLocaleVersion'
+        '400':
+          description: Invalid locale
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Invalid token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: Access denied
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: CV not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+    delete:
+      tags: [CV]
+      summary: Delete a localized version of the CV
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: locale
+          in: path
+          required: true
+          schema:
+            type: string
+            enum: [en, pt-BR]
+      responses:
+        '200':
+          description: Locale version deleted
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: en version deleted
+        '400':
+          description: Invalid locale
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Invalid token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: Access denied
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: CV or locale version not found
           content:
             application/json:
               schema:

@@ -22,6 +22,16 @@ export interface ITailoredVersion {
   createdAt: Date;
 }
 
+export type CVLocale = 'en' | 'pt-BR';
+
+export interface ICVLocaleVersion {
+  locale: CVLocale;
+  summary?: string;
+  skills: string[];
+  experience: IExperience[];
+  education: IEducation[];
+}
+
 export interface ICV extends Document {
   user: mongoose.Types.ObjectId;
   fullName: string;
@@ -33,6 +43,7 @@ export interface ICV extends Document {
   education: IEducation[];
   languages: string[];
   tailoredVersions: ITailoredVersion[];
+  localeVersions: ICVLocaleVersion[];
   updatedAt: Date;
 }
 
@@ -55,6 +66,17 @@ const tailoredVersionSchema = new Schema<ITailoredVersion>(
   { _id: false }
 );
 
+const localeVersionSchema = new Schema<ICVLocaleVersion>(
+  {
+    locale: { type: String, enum: ['en', 'pt-BR'], required: true },
+    summary: String,
+    skills: { type: [String], default: [] },
+    experience: { type: [experienceSchema], default: [] },
+    education: { type: [educationSchema], default: [] },
+  },
+  { _id: false }
+);
+
 const cvSchema = new Schema<ICV>({
   user: { type: Schema.Types.ObjectId, ref: 'User', required: true, unique: true },
   fullName: { type: String, required: true, trim: true },
@@ -66,6 +88,7 @@ const cvSchema = new Schema<ICV>({
   education: { type: [educationSchema], default: [] },
   languages: { type: [String], default: [] },
   tailoredVersions: { type: [tailoredVersionSchema], default: [] },
+  localeVersions: { type: [localeVersionSchema], default: [] },
   updatedAt: { type: Date, default: Date.now },
 });
 
