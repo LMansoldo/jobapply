@@ -5,6 +5,8 @@ info:
   version: 1.0.0
 
 servers:
+  - url: https://jobapply-api-production.up.railway.app
+    description: Production
   - url: http://localhost:3000
     description: Local
 
@@ -25,6 +27,10 @@ components:
           type: string
         email:
           type: string
+        cv:
+          type: string
+          nullable: true
+          description: ID of the user's CV, null if not yet created
 
     Job:
       type: object

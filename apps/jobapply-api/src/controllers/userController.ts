@@ -17,7 +17,7 @@ export async function register(req: Request, res: Response, next: NextFunction):
     }
 
     const user = await new User({ name, email, password }).save();
-    res.status(201).json({ user: { id: user._id, name: user.name, email: user.email } });
+    res.status(201).json({ user: { id: user._id, name: user.name, email: user.email, cv: user.cv ?? null } });
   } catch (err) {
     next(err);
   }
@@ -43,7 +43,7 @@ export async function login(req: Request, res: Response, next: NextFunction): Pr
       { expiresIn: (process.env.JWT_EXPIRES_IN ?? '7d') as any }
     );
 
-    res.json({ token, user: { id: user._id, name: user.name, email: user.email } });
+    res.json({ token, user: { id: user._id, name: user.name, email: user.email, cv: user.cv ?? null } });
   } catch (err) {
     next(err);
   }

@@ -2,6 +2,7 @@ import mongoose, { Schema, Document } from 'mongoose';
 import bcrypt from 'bcryptjs';
 import { randomUUID } from 'crypto';
 
+
 export type AccessType = 'free' | 'premium' | 'ultimate';
 
 export interface IUser extends Document {
@@ -10,6 +11,7 @@ export interface IUser extends Document {
   password: string;
   createdAt: Date;
   public_id: string;
+  cv?: mongoose.Types.ObjectId;
   access_type: AccessType;
   is_restricted: boolean;
   daily_usage: { count: number; date: Date | null };
@@ -22,6 +24,7 @@ const userSchema = new Schema<IUser>({
   password: { type: String, required: true, minlength: 8, select: false },
   createdAt: { type: Date, default: Date.now },
   public_id: { type: String, unique: true, default: () => randomUUID() },
+  cv: { type: Schema.Types.ObjectId, ref: 'CV', default: null },
   access_type: { type: String, enum: ['free', 'premium', 'ultimate'], default: 'free' },
   is_restricted: { type: Boolean, default: false },
   daily_usage: {

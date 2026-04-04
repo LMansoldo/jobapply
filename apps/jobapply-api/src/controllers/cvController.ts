@@ -15,6 +15,7 @@ export async function createCV(req: AuthRequest, res: Response, next: NextFuncti
     if (existing) { res.status(409).json({ message: 'CV already exists for this user' }); return; }
 
     const cv = await new CV({ user: req.user.id, ...req.body }).save();
+    await User.findByIdAndUpdate(req.user.id, { cv: cv._id });
     res.status(201).json({ cv });
   } catch (err) {
     next(err);
@@ -81,6 +82,7 @@ export async function deleteCV(req: AuthRequest, res: Response, next: NextFuncti
     if (cv.user.toString() !== req.user.id) { res.status(403).json({ message: 'Access denied' }); return; }
 
     await cv.deleteOne();
+    await User.findByIdAndUpdate(req.user.id, { cv: null });
     res.json({ message: 'CV deleted' });
   } catch (err: unknown) {
     if ((err as { name?: string }).name === 'CastError') { res.status(404).json({ message: 'CV not found' }); return; }
