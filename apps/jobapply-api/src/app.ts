@@ -1,4 +1,5 @@
 import express, { Request, Response, NextFunction } from 'express';
+import cors from 'cors';
 import userRoutes from './routes/userRoutes';
 import jobRoutes from './routes/jobRoutes';
 import cvRoutes from './routes/cvRoutes';
@@ -7,6 +8,10 @@ import publicRoutes from './routes/publicRoutes';
 
 const app = express();
 
+app.use(cors({
+  origin: process.env.ALLOWED_ORIGINS?.split(',') ?? '*',
+  credentials: true,
+}));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
