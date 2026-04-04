@@ -57,6 +57,16 @@ components:
           type: string
           format: date-time
 
+    Highlight:
+      type: object
+      required: [text]
+      properties:
+        text:
+          type: string
+        category:
+          type: string
+          example: architecture
+
     Experience:
       type: object
       properties:
@@ -64,12 +74,15 @@ components:
           type: string
         role:
           type: string
-        startDate:
+        location:
           type: string
-        endDate:
+        period:
           type: string
-        description:
-          type: string
+          example: "Jan 2022 - Dec 2024"
+        highlights:
+          type: array
+          items:
+            $ref: '#/components/schemas/Highlight'
 
     Education:
       type: object
@@ -78,12 +91,62 @@ components:
           type: string
         degree:
           type: string
-        field:
+        graduation:
           type: string
-        startDate:
+          example: "Dec 2022"
+
+    Summary:
+      type: object
+      properties:
+        headline:
           type: string
-        endDate:
+        focus_areas:
+          type: array
+          items:
+            type: string
+        tagline:
           type: string
+
+    SkillGroup:
+      type: object
+      required: [label, items]
+      properties:
+        label:
+          type: string
+          example: Frontend
+        items:
+          type: array
+          items:
+            type: string
+          example: [Svelte, React, TypeScript]
+
+    Skills:
+      type: object
+      properties:
+        tech:
+          type: array
+          items:
+            $ref: '#/components/schemas/SkillGroup'
+        competencies:
+          type: array
+          items:
+            $ref: '#/components/schemas/SkillGroup'
+        soft_skills:
+          type: array
+          items:
+            type: string
+
+    Objective:
+      type: object
+      properties:
+        role:
+          type: string
+          example: Senior Front-End Engineer
+        main_stack:
+          type: array
+          items:
+            type: string
+          example: [Svelte, React, TypeScript]
 
     TailoredVersion:
       type: object
@@ -102,9 +165,13 @@ components:
         locale:
           type: string
           enum: [en, pt-BR]
+        objective:
+          $ref: '#/components/schemas/Objective'
         summary:
-          type: string
+          $ref: '#/components/schemas/Summary'
         skills:
+          $ref: '#/components/schemas/Skills'
+        expertise:
           type: array
           items:
             type: string
@@ -113,9 +180,7 @@ components:
           items:
             $ref: '#/components/schemas/Experience'
         education:
-          type: array
-          items:
-            $ref: '#/components/schemas/Education'
+          $ref: '#/components/schemas/Education'
 
     CV:
       type: object
@@ -130,9 +195,17 @@ components:
           type: string
         phone:
           type: string
-        summary:
+        location:
           type: string
+        linkedin:
+          type: string
+        objective:
+          $ref: '#/components/schemas/Objective'
+        summary:
+          $ref: '#/components/schemas/Summary'
         skills:
+          $ref: '#/components/schemas/Skills'
+        expertise:
           type: array
           items:
             type: string
@@ -141,9 +214,7 @@ components:
           items:
             $ref: '#/components/schemas/Experience'
         education:
-          type: array
-          items:
-            $ref: '#/components/schemas/Education'
+          $ref: '#/components/schemas/Education'
         languages:
           type: array
           items:
@@ -200,9 +271,17 @@ components:
           type: string
         phone:
           type: string
-        summary:
+        location:
           type: string
+        linkedin:
+          type: string
+        objective:
+          $ref: '#/components/schemas/Objective'
+        summary:
+          $ref: '#/components/schemas/Summary'
         skills:
+          $ref: '#/components/schemas/Skills'
+        expertise:
           type: array
           items:
             type: string
@@ -211,9 +290,7 @@ components:
           items:
             $ref: '#/components/schemas/Experience'
         education:
-          type: array
-          items:
-            $ref: '#/components/schemas/Education'
+          $ref: '#/components/schemas/Education'
         languages:
           type: array
           items:
@@ -560,28 +637,35 @@ paths:
               properties:
                 fullName:
                   type: string
-                  example: Lucas M
+                  example: Lucas Mansoldo de Andrade
                 email:
                   type: string
                   example: lucas@test.com
                 phone:
                   type: string
-                  example: "+1 555 000-0000"
-                summary:
+                  example: "+55 21 98030-3612"
+                location:
                   type: string
+                  example: Canoas, Brazil
+                linkedin:
+                  type: string
+                  example: "https://www.linkedin.com/in/lucas-mansoldo-9216b694/"
+                objective:
+                  $ref: '#/components/schemas/Objective'
+                summary:
+                  $ref: '#/components/schemas/Summary'
                 skills:
+                  $ref: '#/components/schemas/Skills'
+                expertise:
                   type: array
                   items:
                     type: string
-                  example: [Node.js, MongoDB]
                 experience:
                   type: array
                   items:
                     $ref: '#/components/schemas/Experience'
                 education:
-                  type: array
-                  items:
-                    $ref: '#/components/schemas/Education'
+                  $ref: '#/components/schemas/Education'
                 languages:
                   type: array
                   items:
@@ -682,9 +766,17 @@ paths:
                   type: string
                 phone:
                   type: string
-                summary:
+                location:
                   type: string
+                linkedin:
+                  type: string
+                objective:
+                  $ref: '#/components/schemas/Objective'
+                summary:
+                  $ref: '#/components/schemas/Summary'
                 skills:
+                  $ref: '#/components/schemas/Skills'
+                expertise:
                   type: array
                   items:
                     type: string
@@ -693,9 +785,7 @@ paths:
                   items:
                     $ref: '#/components/schemas/Experience'
                 education:
-                  type: array
-                  items:
-                    $ref: '#/components/schemas/Education'
+                  $ref: '#/components/schemas/Education'
                 languages:
                   type: array
                   items:
@@ -795,22 +885,22 @@ paths:
             schema:
               type: object
               properties:
+                objective:
+                  $ref: '#/components/schemas/Objective'
                 summary:
-                  type: string
-                  example: Experienced frontend engineer...
+                  $ref: '#/components/schemas/Summary'
                 skills:
+                  $ref: '#/components/schemas/Skills'
+                expertise:
                   type: array
                   items:
                     type: string
-                  example: [React, TypeScript]
                 experience:
                   type: array
                   items:
                     $ref: '#/components/schemas/Experience'
                 education:
-                  type: array
-                  items:
-                    $ref: '#/components/schemas/Education'
+                  $ref: '#/components/schemas/Education'
       responses:
         '200':
           description: Locale version saved

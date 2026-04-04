@@ -39,10 +39,12 @@ export async function getCV(req: AuthRequest, res: Response, next: NextFunction)
       res.json({
         cv: {
           ...cvObj,
+          objective: version.objective ?? cvObj.objective,
           summary: version.summary ?? cvObj.summary,
-          skills: version.skills.length ? version.skills : cvObj.skills,
-          experience: version.experience.length ? version.experience : cvObj.experience,
-          education: version.education.length ? version.education : cvObj.education,
+          skills: version.skills ?? cvObj.skills,
+          expertise: version.expertise?.length ? version.expertise : cvObj.expertise,
+          experience: version.experience?.length ? version.experience : cvObj.experience,
+          education: version.education ?? cvObj.education,
           locale,
         },
       });
@@ -56,79 +58,13 @@ export async function getCV(req: AuthRequest, res: Response, next: NextFunction)
   }
 }
 
-export async function upsertCVLocaleVersion(req: AuthRequest, res: Response, next: NextFunction): Promise<void> {
-  try {
-    const locale = req.params.locale as CVLocale;
-    if (!VALID_LOCALES.includes(locale)) {
-      res.status(400).json({ message: `Invalid locale. Use: ${VALID_LOCALES.join(', ')}` });
-      return;
-    }
-
-    const cv = await CV.findById(req.params.id);
-    if (!cv) { res.status(404).json({ message: 'CV not found' }); return; }
-    if (cv.user.toString() !== req.user.id) { res.status(403).json({ message: 'Access denied' }); return; }
-
-    const { summary, skills, experience, education } = req.body as {
-      summary?: string;
-      skills?: string[];
-      experience?: unknown[];
-      education?: unknown[];
-    };
-
-    const idx = cv.localeVersions.findIndex(v => v.locale === locale);
-    const versionData = {
-      locale,
-      summary,
-      skills: skills ?? [],
-      experience: (experience ?? []) as typeof cv.localeVersions[0]['experience'],
-      education: (education ?? []) as typeof cv.localeVersions[0]['education'],
-    };
-
-    if (idx >= 0) {
-      cv.localeVersions[idx] = versionData;
-    } else {
-      cv.localeVersions.push(versionData);
-    }
-
-    await cv.save();
-    res.json({ localeVersion: cv.localeVersions.find(v => v.locale === locale) });
-  } catch (err: unknown) {
-    if ((err as { name?: string }).name === 'CastError') { res.status(404).json({ message: 'CV not found' }); return; }
-    next(err);
-  }
-}
-
-export async function deleteCVLocaleVersion(req: AuthRequest, res: Response, next: NextFunction): Promise<void> {
-  try {
-    const locale = req.params.locale as CVLocale;
-    if (!VALID_LOCALES.includes(locale)) {
-      res.status(400).json({ message: `Invalid locale. Use: ${VALID_LOCALES.join(', ')}` });
-      return;
-    }
-
-    const cv = await CV.findById(req.params.id);
-    if (!cv) { res.status(404).json({ message: 'CV not found' }); return; }
-    if (cv.user.toString() !== req.user.id) { res.status(403).json({ message: 'Access denied' }); return; }
-
-    const idx = cv.localeVersions.findIndex(v => v.locale === locale);
-    if (idx < 0) { res.status(404).json({ message: `No ${locale} version found` }); return; }
-
-    cv.localeVersions.splice(idx, 1);
-    await cv.save();
-    res.json({ message: `${locale} version deleted` });
-  } catch (err: unknown) {
-    if ((err as { name?: string }).name === 'CastError') { res.status(404).json({ message: 'CV not found' }); return; }
-    next(err);
-  }
-}
-
 export async function updateCV(req: AuthRequest, res: Response, next: NextFunction): Promise<void> {
   try {
     const cv = await CV.findById(req.params.id);
     if (!cv) { res.status(404).json({ message: 'CV not found' }); return; }
     if (cv.user.toString() !== req.user.id) { res.status(403).json({ message: 'Access denied' }); return; }
 
-    const { user: _u, tailoredVersions: _tv, ...allowed } = req.body as Record<string, unknown>;
+    const { user: _u, tailoredVersions: _tv, localeVersions: _lv, ...allowed } = req.body as Record<string, unknown>;
     Object.assign(cv, allowed);
     await cv.save();
     res.json({ cv });
@@ -161,21 +97,25 @@ export async function publishCV(req: AuthRequest, res: Response, next: NextFunct
     const user = await User.findById(req.user.id);
     if (!user) { res.status(404).json({ message: 'User not found' }); return; }
 
-    const { fullName, email, phone, summary, skills, experience, education, languages } = req.body as Partial<typeof cv>;
+    const body = req.body as Partial<typeof cv>;
 
     const published = await PublishedCV.findOneAndUpdate(
       { user: req.user.id },
       {
         user: req.user.id,
         public_id: user.public_id,
-        fullName: fullName ?? cv.fullName,
-        email: email ?? cv.email,
-        phone: phone ?? cv.phone,
-        summary: summary ?? cv.summary,
-        skills: skills ?? cv.skills,
-        experience: experience ?? cv.experience,
-        education: education ?? cv.education,
-        languages: languages ?? cv.languages,
+        fullName: body.fullName ?? cv.fullName,
+        email: body.email ?? cv.email,
+        phone: body.phone ?? cv.phone,
+        location: body.location ?? cv.location,
+        linkedin: body.linkedin ?? cv.linkedin,
+        objective: body.objective ?? cv.objective,
+        summary: body.summary ?? cv.summary,
+        skills: body.skills ?? cv.skills,
+        expertise: body.expertise ?? cv.expertise,
+        experience: body.experience ?? cv.experience,
+        education: body.education ?? cv.education,
+        languages: body.languages ?? cv.languages,
         published_at: new Date(),
       },
       { upsert: true, new: true }
@@ -213,6 +153,69 @@ export async function tailorCV(req: AuthRequest, res: Response, next: NextFuncti
     const e = err as { name?: string; status?: number; message?: string };
     if (e.name === 'CastError') { res.status(404).json({ message: 'Resource not found' }); return; }
     if (e.status) { res.status(502).json({ message: 'LLM service error', detail: e.message }); return; }
+    next(err);
+  }
+}
+
+export async function upsertCVLocaleVersion(req: AuthRequest, res: Response, next: NextFunction): Promise<void> {
+  try {
+    const locale = req.params.locale as CVLocale;
+    if (!VALID_LOCALES.includes(locale)) {
+      res.status(400).json({ message: `Invalid locale. Use: ${VALID_LOCALES.join(', ')}` });
+      return;
+    }
+
+    const cv = await CV.findById(req.params.id);
+    if (!cv) { res.status(404).json({ message: 'CV not found' }); return; }
+    if (cv.user.toString() !== req.user.id) { res.status(403).json({ message: 'Access denied' }); return; }
+
+    const { objective, summary, skills, expertise, experience, education } = req.body;
+
+    const versionData = {
+      locale,
+      ...(objective !== undefined && { objective }),
+      ...(summary !== undefined && { summary }),
+      ...(skills !== undefined && { skills }),
+      ...(expertise !== undefined && { expertise }),
+      ...(experience !== undefined && { experience }),
+      ...(education !== undefined && { education }),
+    };
+
+    const idx = cv.localeVersions.findIndex(v => v.locale === locale);
+    if (idx >= 0) {
+      cv.localeVersions[idx] = versionData as typeof cv.localeVersions[0];
+    } else {
+      cv.localeVersions.push(versionData as typeof cv.localeVersions[0]);
+    }
+
+    await cv.save();
+    res.json({ localeVersion: cv.localeVersions.find(v => v.locale === locale) });
+  } catch (err: unknown) {
+    if ((err as { name?: string }).name === 'CastError') { res.status(404).json({ message: 'CV not found' }); return; }
+    next(err);
+  }
+}
+
+export async function deleteCVLocaleVersion(req: AuthRequest, res: Response, next: NextFunction): Promise<void> {
+  try {
+    const locale = req.params.locale as CVLocale;
+    if (!VALID_LOCALES.includes(locale)) {
+      res.status(400).json({ message: `Invalid locale. Use: ${VALID_LOCALES.join(', ')}` });
+      return;
+    }
+
+    const cv = await CV.findById(req.params.id);
+    if (!cv) { res.status(404).json({ message: 'CV not found' }); return; }
+    if (cv.user.toString() !== req.user.id) { res.status(403).json({ message: 'Access denied' }); return; }
+
+    const idx = cv.localeVersions.findIndex(v => v.locale === locale);
+    if (idx < 0) { res.status(404).json({ message: `No ${locale} version found` }); return; }
+
+    cv.localeVersions.splice(idx, 1);
+    await cv.save();
+    res.json({ message: `${locale} version deleted` });
+  } catch (err: unknown) {
+    if ((err as { name?: string }).name === 'CastError') { res.status(404).json({ message: 'CV not found' }); return; }
     next(err);
   }
 }
