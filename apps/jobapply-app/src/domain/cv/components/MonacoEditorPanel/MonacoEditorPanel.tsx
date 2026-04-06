@@ -18,13 +18,11 @@ import { useTranslation } from 'react-i18next'
 import type { MonacoEditorPanelProps } from './MonacoEditorPanel.types'
 import { monacoEditorPanelStyles } from './MonacoEditorPanel.styles'
 import { Alert } from '../../../../components/Alert'
-import { Button } from '../../../../components/Button'
-import { Tooltip } from '../../../../components/Tooltip'
-import { Segmented } from '../../../../components/Segmented'
-import { Text } from '../../../../components/Typography'
+import { EditorToolbar } from '../../../../design-system/cv/EditorToolbar'
+import { PreviewTabs } from '../../../../design-system/cv/PreviewTabs'
+import { LangTabs } from '../../../../design-system/navigation/LangTabs'
 import { Colors } from '../../../../styles/theme/colors'
 import { Spacing } from '../../../../styles/theme/spacing'
-import { FontSize } from '../../../../styles/theme/typography'
 
 const { useBreakpoint } = Grid
 
@@ -39,6 +37,7 @@ export function MonacoEditorPanel({ value, onChange, errors, height = 520 }: Mon
   const screens = useBreakpoint()
   const isMobile = !screens.md
   const [mobileTab, setMobileTab] = useState<'editor' | 'preview'>('editor')
+  const [langTab, setLangTab] = useState('pt-BR')
   const editorRef = useRef<EditorInstance | null>(null)
 
   const handleMount: OnMount = useCallback((editor) => {
@@ -90,43 +89,47 @@ export function MonacoEditorPanel({ value, onChange, errors, height = 520 }: Mon
     ed.focus()
   }
 
-  const toolbarItems: Array<{ icon?: React.ReactNode; label?: string; title: string; action: () => void } | { divider: true }> = [
-    { icon: <BoldOutlined />, title: t('cv.editor.toolbar.bold'), action: () => insertWrap('**', '**') },
-    { icon: <ItalicOutlined />, title: t('cv.editor.toolbar.italic'), action: () => insertWrap('*', '*') },
-    { divider: true },
-    { label: 'H1', title: t('cv.editor.toolbar.h1'), action: () => toggleLinePrefix('# ') },
-    { label: 'H2', title: t('cv.editor.toolbar.h2'), action: () => toggleLinePrefix('## ') },
-    { label: 'H3', title: t('cv.editor.toolbar.h3'), action: () => toggleLinePrefix('### ') },
-    { divider: true },
-    { icon: <UnorderedListOutlined />, title: t('cv.editor.toolbar.bulletList'), action: () => toggleLinePrefix('- ') },
-    { icon: <OrderedListOutlined />, title: t('cv.editor.toolbar.numberedList'), action: () => toggleLinePrefix('1. ') },
-    { divider: true },
-    { icon: <MinusOutlined />, title: t('cv.editor.toolbar.divider'), action: () => insertAtCursor('\n\n---\n\n') },
+  const handleToolbarAction = (key: string) => {
+    switch (key) {
+      case 'bold': insertWrap('**', '**'); break
+      case 'italic': insertWrap('*', '*'); break
+      case 'h1': toggleLinePrefix('# '); break
+      case 'h2': toggleLinePrefix('## '); break
+      case 'h3': toggleLinePrefix('### '); break
+      case 'ul': toggleLinePrefix('- '); break
+      case 'ol': toggleLinePrefix('1. '); break
+      case 'divider': insertAtCursor('\n\n---\n\n'); break
+    }
+  }
+
+  const toolbarItems = [
+    { key: 'bold', icon: <BoldOutlined />, label: t('cv.editor.toolbar.bold'), group: 'format' },
+    { key: 'italic', icon: <ItalicOutlined />, label: t('cv.editor.toolbar.italic'), group: 'format' },
+    { key: 'h1', icon: null, label: 'H1', wide: true, group: 'heading' },
+    { key: 'h2', icon: null, label: 'H2', wide: true, group: 'heading' },
+    { key: 'h3', icon: null, label: 'H3', wide: true, group: 'heading' },
+    { key: 'ul', icon: <UnorderedListOutlined />, label: t('cv.editor.toolbar.bulletList'), group: 'list' },
+    { key: 'ol', icon: <OrderedListOutlined />, label: t('cv.editor.toolbar.numberedList'), group: 'list' },
+    { key: 'divider', icon: <MinusOutlined />, label: t('cv.editor.toolbar.divider') },
   ]
 
   return (
     <div>
-      {/* Toolbar */}
-      <div style={monacoEditorPanelStyles.toolbar}>
-        {toolbarItems.map((item, idx) =>
-          'divider' in item ? (
-            <div key={idx} style={monacoEditorPanelStyles.toolbarDivider} />
-          ) : (
-            <Tooltip key={idx} title={item.title} mouseEnterDelay={0.5}>
-              <Button
-                size="small"
-                onClick={item.action}
-                style={{ fontWeight: item.label ? 700 : undefined, minWidth: item.label ? 28 : undefined }}
-              >
-                {item.icon ?? item.label}
-              </Button>
-            </Tooltip>
-          )
-        )}
-        <div style={{ marginLeft: 'auto' }}>
-          <Text type="secondary" style={{ fontSize: FontSize.xs }}>
-            {t('cv.editor.editorTab')} · {t('cv.editor.previewTab')}
-          </Text>
+      {/* Toolbar row */}
+      <div style={{ ...monacoEditorPanelStyles.toolbar, display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: 0 }}>
+        <EditorToolbar items={toolbarItems} onAction={handleToolbarAction} />
+        <div style={{ display: 'flex', alignItems: 'center', gap: Spacing.sm, paddingRight: Spacing.md }}>
+          {isMobile && (
+            <PreviewTabs activeTab={mobileTab} onChange={setMobileTab} />
+          )}
+          <LangTabs
+            tabs={[
+              { key: 'pt-BR', label: 'PT-BR' },
+              { key: 'en', label: 'EN' },
+            ]}
+            activeKey={langTab}
+            onChange={setLangTab}
+          />
         </div>
       </div>
 
@@ -137,7 +140,7 @@ export function MonacoEditorPanel({ value, onChange, errors, height = 520 }: Mon
           style={{ borderRadius: 0, borderLeft: 'none', borderRight: 'none' }}
           message={t('cv.editor.validationErrors')}
           description={
-            <ul style={{ margin: `${Spacing.xs} 0 0`, paddingLeft: Spacing.lg1 }}>
+            <ul style={{ margin: `${Spacing.xs} 0 0`, paddingLeft: Spacing.lg0 }}>
               {errors.map((e, i) => <li key={i}>{e}</li>)}
             </ul>
           }
@@ -146,14 +149,7 @@ export function MonacoEditorPanel({ value, onChange, errors, height = 520 }: Mon
 
       {/* Mobile: tabs Editor / Preview */}
       {isMobile ? (
-        <div style={{ border: `${Spacing.px} solid ${Colors.border}`, borderRadius: `0 0 ${Spacing.sm2} ${Spacing.sm2}`, overflow: 'hidden' }}>
-          <Segmented
-            block
-            options={[t('cv.editor.editorTab'), t('cv.editor.previewTab')]}
-            value={mobileTab === 'editor' ? t('cv.editor.editorTab') : t('cv.editor.previewTab')}
-            onChange={(v) => setMobileTab(v === t('cv.editor.editorTab') ? 'editor' : 'preview')}
-            style={{ borderRadius: 0, borderBottom: `${Spacing.px} solid ${Colors.border}` }}
-          />
+        <div style={{ border: `1px solid ${Colors.border}`, borderRadius: `0 0 8px 8px`, overflow: 'hidden' }}>
           <div style={{ height: Spacing.editorHeightMobile }}>
             {mobileTab === 'editor' ? (
               <Editor
@@ -185,8 +181,8 @@ export function MonacoEditorPanel({ value, onChange, errors, height = 520 }: Mon
         </div>
       ) : (
         /* Desktop: split view */
-        <div style={{ display: 'flex', height, border: `${Spacing.px} solid ${Colors.border}`, borderRadius: `0 0 ${Spacing.sm2} ${Spacing.sm2}`, overflow: 'hidden' }}>
-          <div style={{ width: '50%', borderRight: `${Spacing.px} solid ${Colors.border}` }}>
+        <div style={{ display: 'flex', height, border: `1px solid ${Colors.border}`, borderRadius: `0 0 8px 8px`, overflow: 'hidden' }}>
+          <div style={{ width: '50%', borderRight: `1px solid ${Colors.border}` }}>
             <Editor
               height="100%"
               defaultLanguage="markdown"
