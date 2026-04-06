@@ -1,15 +1,15 @@
 import type { Preview } from '@storybook/react'
-import { ConfigProvider } from 'antd'
-import { App as AntApp } from 'antd'
+import { ConfigProvider, App as AntApp } from 'antd'
 import { BrowserRouter } from 'react-router-dom'
 import React from 'react'
 import '../src/index.css'
 import '../src/i18n'
+import { antdTheme } from '../src/styles/theme/antdTheme'
 
 const preview: Preview = {
   decorators: [
     (Story) => (
-      <ConfigProvider>
+      <ConfigProvider theme={antdTheme}>
         <AntApp>
           <BrowserRouter>
             <Story />
