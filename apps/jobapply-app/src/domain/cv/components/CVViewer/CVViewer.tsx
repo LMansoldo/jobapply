@@ -2,6 +2,7 @@
  * @file CVViewer.tsx
  * @description CVViewer component — displays a CV's personal info and locale versions as Markdown previews.
  */
+import { useState } from 'react'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import {
@@ -12,13 +13,14 @@ import {
 import { useTranslation } from 'react-i18next'
 import { localeVersionToMarkdown, downloadMarkdown, exportPDF } from '../../helpers'
 import type { CVViewerProps } from './CVViewer.types'
-import { Card } from '../../../../components/Card'
-import { Button } from '../../../../components/Button'
-import { Space } from '../../../../components/Space'
+import { CVPaper } from '../../../../design-system/cv/CVPaper'
+import { SectionBar } from '../../../../design-system/cv/SectionBar'
+import { DSCard } from '../../../../design-system/primitives/DSCard'
+import { DSButton } from '../../../../design-system/primitives/DSButton'
 import { Descriptions, DescriptionsItem } from '../../../../components/Descriptions'
-import { Tabs } from '../../../../components/Tabs'
-import { Tag } from '../../../../components/Tag'
 import { Alert } from '../../../../components/Alert'
+import { Tag } from '../../../../components/Tag'
+import { Space } from '../../../../components/Space'
 import { Spacing } from '../../../../styles/theme/spacing'
 
 /**
@@ -30,53 +32,35 @@ export function CVViewer({ cv, onEdit, isMobile }: CVViewerProps) {
   const ptBrVersion = cv.localeVersions?.find((v) => v.locale === 'pt-BR')
   const enVersion = cv.localeVersions?.find((v) => v.locale === 'en')
 
-  const tabItems = [
-    ptBrVersion && {
-      key: 'pt-BR',
-      label: '🇧🇷 Português',
-      children: (
-        <div className="markdown-preview" style={{ padding: `${Spacing.sm} ${Spacing.xs}` }}>
-          <ReactMarkdown remarkPlugins={[remarkGfm]}>
-            {localeVersionToMarkdown(ptBrVersion)}
-          </ReactMarkdown>
-        </div>
-      ),
-    },
-    enVersion && {
-      key: 'en',
-      label: '🇺🇸 English',
-      children: (
-        <div className="markdown-preview" style={{ padding: `${Spacing.sm} ${Spacing.xs}` }}>
-          <ReactMarkdown remarkPlugins={[remarkGfm]}>
-            {localeVersionToMarkdown(enVersion)}
-          </ReactMarkdown>
-        </div>
-      ),
-    },
-  ].filter(Boolean) as { key: string; label: string; children: React.ReactNode }[]
+  const sections = [
+    ptBrVersion && { key: 'pt-BR', label: '🇧🇷 Português' },
+    enVersion && { key: 'en', label: '🇺🇸 English' },
+  ].filter(Boolean) as { key: string; label: string }[]
+
+  const [activeSection, setActiveSection] = useState(sections[0]?.key ?? 'pt-BR')
+
+  const activeVersion = activeSection === 'pt-BR' ? ptBrVersion : enVersion
 
   return (
-    <div>
-      <Card
-        style={{ marginBottom: Spacing.md }}
+    <div style={{ display: 'flex', flexDirection: 'column', gap: Spacing.md }}>
+      {/* Personal info card */}
+      <DSCard
         extra={
           <Space size={isMobile ? 4 : 8}>
-            <Button
-              icon={<DownloadOutlined />}
+            <DSButton
+              variant="ghost"
               onClick={() => downloadMarkdown(cv)}
               size={isMobile ? 'small' : 'middle'}
-              style={{ padding: isMobile ? `0 ${Spacing.sm}` : Spacing.lg1 }}
             >
-              {isMobile ? '.md' : t('cv.exportMarkdown')}
-            </Button>
-            <Button
-              icon={<FilePdfOutlined />}
+              <DownloadOutlined /> {isMobile ? '.md' : t('cv.exportMarkdown')}
+            </DSButton>
+            <DSButton
+              variant="ghost"
               onClick={() => exportPDF(cv)}
               size={isMobile ? 'small' : 'middle'}
-              style={{ padding: isMobile ? `0 ${Spacing.sm}` : Spacing.lg1 }}
             >
-              {isMobile ? '.pdf' : t('cv.exportPDF')}
-            </Button>
+              <FilePdfOutlined /> {isMobile ? '.pdf' : t('cv.exportPDF')}
+            </DSButton>
           </Space>
         }
       >
@@ -94,44 +78,54 @@ export function CVViewer({ cv, onEdit, isMobile }: CVViewerProps) {
             </DescriptionsItem>
           )}
         </Descriptions>
-      </Card>
+      </DSCard>
 
-      {tabItems.length > 0 ? (
-        <Card
+      {/* CV content */}
+      {sections.length > 0 ? (
+        <DSCard
           title={t('cv.cvContent')}
           extra={
-            <Button
-              type="primary"
-              icon={<EditOutlined />}
+            <DSButton
+              variant="primary"
               onClick={onEdit}
               size={isMobile ? 'small' : 'middle'}
-              style={{ padding: isMobile ? `0 ${Spacing.sm}` : Spacing.lg1 }}
             >
-              {isMobile ? t('common.edit', 'Editar') : t('cv.editCV')}
-            </Button>
+              <EditOutlined /> {isMobile ? t('common.edit', 'Editar') : t('cv.editCV')}
+            </DSButton>
           }
         >
-          <Tabs items={tabItems} />
-        </Card>
+          {sections.length > 1 && (
+            <div style={{ marginBottom: Spacing.md }}>
+              <SectionBar sections={sections} activeKey={activeSection} onChange={setActiveSection} />
+            </div>
+          )}
+          {activeVersion && (
+            <CVPaper>
+              <div className="markdown-preview">
+                <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                  {localeVersionToMarkdown(activeVersion)}
+                </ReactMarkdown>
+              </div>
+            </CVPaper>
+          )}
+        </DSCard>
       ) : (
-        <Card>
+        <DSCard>
           <Alert
             type="warning"
             showIcon
             message={t('cv.noLocaleVersion')}
             action={
-              <Button
-                type="primary"
-                icon={<EditOutlined />}
+              <DSButton
+                variant="primary"
                 onClick={onEdit}
                 size={isMobile ? 'small' : 'middle'}
-                style={{ padding: isMobile ? `0 ${Spacing.sm}` : Spacing.lg1 }}
               >
-                {isMobile ? t('common.edit', 'Editar') : t('cv.editCV')}
-              </Button>
+                <EditOutlined /> {isMobile ? t('common.edit', 'Editar') : t('cv.editCV')}
+              </DSButton>
             }
           />
-        </Card>
+        </DSCard>
       )}
     </div>
   )
