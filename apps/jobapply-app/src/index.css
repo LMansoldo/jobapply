@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700&family=DM+Sans:wght@300;400;500;600;700&display=swap');
+
 /*
   Base: 1rem = 10px
   font-size: 62.5% = 10px / 16px (browser default)
@@ -17,6 +19,11 @@
     6.4rem = 64px
 */
 
+:root {
+  --font-head: 'Sora', sans-serif;
+  --font-body: 'DM Sans', sans-serif;
+}
+
 html {
   font-size: 62.5%;
   box-sizing: border-box;
@@ -29,6 +36,7 @@ html {
 }
 
 body {
+  font-family: var(--font-body);
   font-size: 1.6rem;
   margin: 0;
   padding: 0;
