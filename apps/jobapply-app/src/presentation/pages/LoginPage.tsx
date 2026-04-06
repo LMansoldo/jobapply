@@ -12,10 +12,9 @@ import { FeatureCard } from '../../design-system/auth/FeatureCard'
 import { SocialLoginBtn } from '../../design-system/auth/SocialLoginBtn'
 import { DSButton } from '../../design-system/primitives/DSButton'
 import { DSInput } from '../../design-system/primitives/DSInput'
-import { Colors } from '../../styles/theme/colors'
-import { FontFamily, FontWeight, FontSize } from '../../styles/theme/typography'
-import { Spacing } from '../../styles/theme/spacing'
 import { Divider } from '../../components/Divider'
+import { Spacing } from '../../styles/theme/spacing'
+import * as styles from './LoginPage.styles'
 
 interface LoginForm {
   email: string
@@ -23,16 +22,16 @@ interface LoginForm {
 }
 
 const LEFT_PANEL = (
-  <div style={{ display: 'flex', flexDirection: 'column', gap: Spacing.lg }}>
+  <div className={styles.leftPanelRoot}>
     <div>
-      <h1 style={{ fontFamily: FontFamily.heading, color: Colors.white, fontSize: '3.2rem', margin: '0 0 0.8rem', fontWeight: FontWeight.bold, lineHeight: 1.15 }}>
+      <h1 className={styles.leftHeadline}>
         Encontre sua próxima<br />oportunidade
       </h1>
-      <p style={{ color: 'rgba(255,255,255,0.65)', fontSize: FontSize.base, margin: 0, lineHeight: 1.6 }}>
+      <p className={styles.leftSubtitle}>
         Plataforma de candidatura inteligente com IA que adapta seu CV para cada vaga.
       </p>
     </div>
-    <div style={{ display: 'flex', flexDirection: 'column', gap: Spacing.sm }}>
+    <div className={styles.leftFeatures}>
       <FeatureCard icon={<RocketOutlined />} title="Candidatura com IA" description="Adapte seu CV automaticamente para cada vaga com inteligência artificial." />
       <FeatureCard icon={<FileTextOutlined />} title="CV Profissional" description="Crie e gerencie versões do seu CV em português e inglês." />
       <FeatureCard icon={<ThunderboltOutlined />} title="Score ATS" description="Analise o match do seu CV com os requisitos da vaga em segundos." />
@@ -65,25 +64,25 @@ export default function LoginPage() {
   }
 
   const RIGHT_PANEL = (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: Spacing.md }}>
-      <div style={{ marginBottom: Spacing.sm }}>
-        <h2 style={{ fontFamily: FontFamily.heading, fontSize: '2.2rem', color: Colors.textMain, margin: '0 0 0.4rem', fontWeight: FontWeight.bold }}>
+    <div className={styles.rightPanelRoot}>
+      <div className={styles.rightHeadingRow}>
+        <h2 className={styles.rightTitle}>
           {t('auth.loginTitle')}
         </h2>
-        <p style={{ color: Colors.textSub, fontSize: FontSize.base, margin: 0 }}>
+        <p className={styles.rightSubtitle}>
           {t('auth.noAccount')}{' '}
-          <Link to="/register" style={{ color: Colors.primaryDark, fontWeight: FontWeight.semibold }}>
+          <Link to="/register" className={styles.registerLink}>
             {t('auth.register')}
           </Link>
         </p>
       </div>
 
-      <div style={{ display: 'flex', flexDirection: 'column', gap: Spacing.sm }}>
+      <div className={styles.socialBtns}>
         <SocialLoginBtn provider="google" onClick={() => {}} />
         <SocialLoginBtn provider="linkedin" onClick={() => {}} />
       </div>
 
-      <Divider plain style={{ color: Colors.textSub, fontSize: FontSize.sm }}>ou entre com e-mail</Divider>
+      <Divider plain style={{ color: 'var(--text-sub)', fontSize: '1.2rem' }}>ou entre com e-mail</Divider>
 
       <Form layout="vertical" onFinish={handleSubmit} autoComplete="off">
         <FormItem
@@ -113,8 +112,8 @@ export default function LoginPage() {
         </FormItem>
       </Form>
 
-      <div style={{ background: Colors.surfaceCode, borderRadius: '8px', padding: `${Spacing.sm} ${Spacing.md}` }}>
-        <span style={{ color: Colors.textSub, fontSize: FontSize.sm }}>{t('auth.demoCredentials')}</span>
+      <div className={styles.demoBox}>
+        <span className={styles.demoText}>{t('auth.demoCredentials')}</span>
       </div>
     </div>
   )

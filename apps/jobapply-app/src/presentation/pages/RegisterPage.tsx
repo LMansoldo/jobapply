@@ -12,9 +12,8 @@ import { RoleCards } from '../../design-system/auth/RoleCards'
 import { PasswordStrength } from '../../design-system/auth/PasswordStrength'
 import { DSButton } from '../../design-system/primitives/DSButton'
 import { DSInput } from '../../design-system/primitives/DSInput'
-import { Colors } from '../../styles/theme/colors'
-import { FontFamily, FontWeight, FontSize } from '../../styles/theme/typography'
 import { Spacing } from '../../styles/theme/spacing'
+import * as styles from './RegisterPage.styles'
 
 interface RegisterForm {
   name: string
@@ -24,16 +23,16 @@ interface RegisterForm {
 }
 
 const LEFT_PANEL = (
-  <div style={{ display: 'flex', flexDirection: 'column', gap: Spacing.lg }}>
+  <div className={styles.leftPanelRoot}>
     <div>
-      <h1 style={{ fontFamily: FontFamily.heading, color: Colors.white, fontSize: '3.2rem', margin: '0 0 0.8rem', fontWeight: FontWeight.bold, lineHeight: 1.15 }}>
+      <h1 className={styles.leftHeadline}>
         Comece sua jornada profissional
       </h1>
-      <p style={{ color: 'rgba(255,255,255,0.65)', fontSize: FontSize.base, margin: 0, lineHeight: 1.6 }}>
+      <p className={styles.leftSubtitle}>
         Crie sua conta e tenha acesso a ferramentas de IA para candidaturas.
       </p>
     </div>
-    <div style={{ display: 'flex', flexDirection: 'column', gap: Spacing.sm }}>
+    <div className={styles.leftFeatures}>
       <FeatureCard icon={<RocketOutlined />} title="Candidatura com IA" description="Adapte seu CV automaticamente para cada vaga com inteligência artificial." />
       <FeatureCard icon={<FileTextOutlined />} title="CV Profissional" description="Crie e gerencie versões do seu CV em português e inglês." />
       <FeatureCard icon={<ThunderboltOutlined />} title="Score ATS" description="Analise o match do seu CV com os requisitos da vaga em segundos." />
@@ -76,14 +75,14 @@ export default function RegisterPage() {
   }
 
   const RIGHT_PANEL = (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: Spacing.md }}>
-      <div style={{ marginBottom: Spacing.xs }}>
-        <h2 style={{ fontFamily: FontFamily.heading, fontSize: '2.2rem', color: Colors.textMain, margin: '0 0 0.4rem', fontWeight: FontWeight.bold }}>
+    <div className={styles.rightPanelRoot}>
+      <div className={styles.rightHeadingRow}>
+        <h2 className={styles.rightTitle}>
           {t('auth.registerTitle')}
         </h2>
-        <p style={{ color: Colors.textSub, fontSize: FontSize.base, margin: 0 }}>
+        <p className={styles.rightSubtitle}>
           {t('auth.hasAccount')}{' '}
-          <Link to="/login" style={{ color: Colors.primaryDark, fontWeight: FontWeight.semibold }}>
+          <Link to="/login" className={styles.loginLink}>
             {t('auth.login')}
           </Link>
         </p>

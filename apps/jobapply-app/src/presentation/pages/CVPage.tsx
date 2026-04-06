@@ -28,8 +28,9 @@ import {
 } from '../../infrastructure/repositories/cvRepository'
 import { HorizontalStepper } from '../../design-system/cv/HorizontalStepper'
 import { Colors } from '../../styles/theme/colors'
-import { FontSize, FontWeight, FontFamily } from '../../styles/theme/typography'
+import { FontSize, FontWeight } from '../../styles/theme/typography'
 import { Spacing } from '../../styles/theme/spacing'
+import * as styles from './CVPage.styles'
 
 const { useBreakpoint } = Grid
 
@@ -198,7 +199,7 @@ export default function CVPage() {
 
   if (loading) {
     return (
-      <div style={{ display: 'flex', justifyContent: 'center', paddingTop: Spacing.xxxl }}>
+      <div className={styles.spinWrapper}>
         <Spin size="large" tip={t('cv.loadingCV')} />
       </div>
     )
@@ -210,9 +211,8 @@ export default function CVPage() {
   if (cv && !editMode) {
     return (
       <>
-        <div style={{ maxWidth: '128rem', margin: '0 auto' }}>
-          {/* Delete button */}
-          <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: Spacing.md }}>
+        <div className={styles.viewerRoot}>
+          <div className={styles.viewerTopBar}>
             <Popconfirm
               title={t('cv.deleteCVTitle')}
               description={t('cv.deleteCVConfirm')}
@@ -244,19 +244,11 @@ export default function CVPage() {
 
   // ── Mobile bottom nav bar ─────────────────────────────────────────────────
   const mobileBottomNav = isMobile && (
-    <div style={{
-      position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 200,
-      background: Colors.white, borderTop: `1px solid ${Colors.surfaceBorder}`,
-      display: 'flex', height: Spacing.mobileNavHeight,
-    }}>
+    <div className={styles.mobileBottomNav}>
       <button
         onClick={currentStep === 0 ? handleStep1Next : currentStep === 1 ? handleStep2Next : handleStep3Finish}
         disabled={saving}
-        style={{
-          flex: 1, border: 'none', background: Colors.primaryDark, cursor: 'pointer',
-          color: Colors.white, fontSize: FontSize.sm, fontWeight: FontWeight.bold,
-          fontFamily: FontFamily.body,
-        }}
+        className={styles.mobileNavBtn}
       >
         {saving && <CheckOutlined style={{ marginRight: 6 }} />}
         {currentStep === 2 ? t('cv.mobile.finish') : t('cv.mobile.save')}
@@ -266,12 +258,10 @@ export default function CVPage() {
 
   return (
     <>
-      <div style={{ maxWidth: '96rem', margin: '0 auto' }}>
-        {/* Horizontal stepper */}
+      <div className={styles.wizardRoot}>
         <HorizontalStepper steps={WIZARD_STEPS} current={currentStep} />
 
-        {/* Step content */}
-        <div style={{ paddingBottom: isMobile ? Spacing.mobileNavPad : 0 }}>
+        <div className={styles.stepContent(isMobile)}>
           {currentStep === 0 && (
             <CVBaseForm
               form={baseForm}
@@ -293,10 +283,10 @@ export default function CVPage() {
                 locale="pt-BR"
               />
               {!isMobile && (
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: Spacing.md, padding: `0 ${Spacing.xs}` }}>
+                <div className={styles.editorFooter}>
                   <Button onClick={() => setCurrentStep(0)}>{t('common.back')}</Button>
                   <Space>
-                    <span style={{ fontSize: FontSize.sm, color: Colors.textSub }}>{stepLabel}</span>
+                    <span className={styles.footerStepLabel}>{stepLabel}</span>
                     <Button type="primary" onClick={handleStep2Next} loading={saving}>{t('cv.editor.validateAndContinue')}</Button>
                   </Space>
                 </div>
@@ -319,10 +309,10 @@ export default function CVPage() {
                 }}
               />
               {!isMobile && (
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: Spacing.md, padding: `0 ${Spacing.xs}` }}>
+                <div className={styles.editorFooter}>
                   <Button onClick={() => setCurrentStep(1)}>{t('common.back')}</Button>
                   <Space>
-                    <span style={{ fontSize: FontSize.sm, color: Colors.textSub }}>{stepLabel}</span>
+                    <span className={styles.footerStepLabel}>{stepLabel}</span>
                     <Button onClick={handleSkipEn}>{t('cv.editor.skipStep')}</Button>
                     <Button type="primary" onClick={handleStep3Finish} loading={saving} icon={<CheckOutlined />}>
                       {t('cv.editor.validateAndFinish')}

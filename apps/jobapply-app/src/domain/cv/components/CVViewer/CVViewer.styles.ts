@@ -1,12 +1,21 @@
-/**
- * @file CVViewer.styles.ts
- * @description Style tokens for the CVViewer component.
- */
+import { css } from '@emotion/css'
 import { Spacing } from '../../../../styles/theme/spacing'
 
-/** Style objects for the CVViewer component */
-export const cvViewerStyles = {
-  tabContent: {
-    padding: `${Spacing.sm} ${Spacing.xs}`,
-  },
-} as const
+export const mobileRoot = css({
+  display: 'flex',
+  flexDirection: 'column',
+  gap: Spacing.md,
+})
+
+export const desktopGrid = css({
+  display: 'grid',
+  gridTemplateColumns: '1fr 28rem',
+  gap: Spacing.lg,
+  alignItems: 'start',
+})
+
+export const desktopActions = css({
+  marginTop: Spacing.md,
+  display: 'flex',
+  gap: Spacing.sm,
+})

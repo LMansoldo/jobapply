@@ -25,10 +25,8 @@ import type { MonacoEditorPanelProps } from './MonacoEditorPanel.types'
 import { Alert } from '../../../../components/Alert'
 import { EditorToolbar } from '../../../../design-system/cv/EditorToolbar'
 import { PreviewTabs } from '../../../../design-system/cv/PreviewTabs'
-import { Colors } from '../../../../styles/theme/colors'
-import { FontSize, FontWeight, FontFamily } from '../../../../styles/theme/typography'
 import { Spacing } from '../../../../styles/theme/spacing'
-import { BorderRadius } from '../../../../styles/theme/radius'
+import * as styles from './MonacoEditorPanel.styles'
 
 const { useBreakpoint } = Grid
 
@@ -142,7 +140,6 @@ export function MonacoEditorPanel({
     { key: 'redo', icon: <RedoOutlined />, label: 'Redo', group: 'history' },
   ]
 
-  // Row 2 toolbar items (alignment + extra)
   const row2Items = [
     { key: 'alignLeft', icon: <AlignLeftOutlined />, label: 'Alinhar esquerda', group: 'align' },
     { key: 'alignCenter', icon: <AlignCenterOutlined />, label: 'Centralizar', group: 'align' },
@@ -170,110 +167,52 @@ export function MonacoEditorPanel({
   }
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
+    <div className={styles.root}>
       {/* Card header */}
-      <div style={{
-        background: Colors.white,
-        border: `1px solid ${Colors.surfaceBorder}`,
-        borderBottom: 'none',
-        borderRadius: `${BorderRadius.base} ${BorderRadius.base} 0 0`,
-        padding: `${Spacing.md} ${Spacing.lg}`,
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-      }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: Spacing.sm }}>
-          <span style={{ fontWeight: FontWeight.semibold, fontSize: FontSize.base, color: Colors.textMain }}>{localeTitle}</span>
+      <div className={styles.cardHeader}>
+        <div className={styles.headerLeft}>
+          <span className={styles.headerTitle}>{localeTitle}</span>
           {isOptional && (
-            <span style={{
-              fontSize: FontSize.xxs, fontWeight: FontWeight.semibold,
-              background: Colors.infoBg, color: Colors.info,
-              padding: `1px ${Spacing.sm}`, borderRadius: '10px',
-            }}>
+            <span className={styles.optionalBadge}>
               {t('common.optional')}
             </span>
           )}
-          <span style={{
-            fontSize: FontSize.xxs, fontWeight: FontWeight.bold,
-            background: Colors.primaryLight, color: Colors.primaryDark,
-            padding: `1px ${Spacing.sm}`, borderRadius: '10px',
-          }}>
+          <span className={styles.localeBadge}>
             {localeBadge}
           </span>
         </div>
-        <span style={{ fontSize: FontSize.sm, color: Colors.textSub }}>
+        <span className={styles.wordCountLabel}>
           {t('cv.wordCount', { count: wordCount })}
         </span>
       </div>
 
       {/* Section navigation chips */}
-      <div style={{
-        background: Colors.surfaceLight,
-        border: `1px solid ${Colors.surfaceBorder}`,
-        borderBottom: 'none',
-        padding: `${Spacing.sm} ${Spacing.lg}`,
-        display: 'flex',
-        alignItems: 'center',
-        gap: Spacing.sm,
-        overflowX: 'auto' as const,
-      }}>
-        <span style={{ fontSize: FontSize.xxs, color: Colors.textSub, whiteSpace: 'nowrap' as const, fontWeight: FontWeight.medium }}>
+      <div className={styles.chipsBar}>
+        <span className={styles.chipsGoToLabel}>
           {t('cv.editor.goTo')}
         </span>
         {sectionChips.map((chip, i) => (
-          <button
-            key={i}
-            type="button"
-            style={{
-              background: Colors.white,
-              border: `1px solid ${Colors.surfaceBorder}`,
-              borderRadius: '12px',
-              padding: `2px ${Spacing.sm}`,
-              fontSize: FontSize.xxs,
-              fontWeight: FontWeight.medium,
-              color: Colors.textSub,
-              cursor: 'pointer',
-              whiteSpace: 'nowrap' as const,
-              fontFamily: FontFamily.body,
-              transition: 'border-color 0.15s, color 0.15s',
-            }}
-          >
+          <button key={i} type="button" className={styles.sectionChip}>
             {chip}
           </button>
         ))}
         {locale === 'en' && onTranslateFromPtBr && (
-          <button
-            type="button"
-            onClick={onTranslateFromPtBr}
-            style={{
-              marginLeft: 'auto',
-              background: Colors.primaryLight,
-              border: 'none',
-              borderRadius: '12px',
-              padding: `2px ${Spacing.md}`,
-              fontSize: FontSize.xxs,
-              fontWeight: FontWeight.semibold,
-              color: Colors.primaryDark,
-              cursor: 'pointer',
-              whiteSpace: 'nowrap' as const,
-              fontFamily: FontFamily.body,
-            }}
-          >
+          <button type="button" onClick={onTranslateFromPtBr} className={styles.translateBtn}>
             {t('cv.translateFromPtBr')}
           </button>
         )}
       </div>
 
       {/* Toolbar row 1 */}
-      <div style={{ background: Colors.white, border: `1px solid ${Colors.surfaceBorder}`, borderBottom: 'none', padding: 0, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+      <div className={styles.toolbarRow}>
         <EditorToolbar items={toolbarItems} onAction={handleToolbarAction} />
-        <div style={{ display: 'flex', alignItems: 'center', gap: Spacing.sm, paddingRight: Spacing.md }}>
+        <div className={styles.toolbarRowRight}>
           {isMobile && <PreviewTabs activeTab={mobileTab} onChange={setMobileTab} />}
         </div>
       </div>
 
       {/* Toolbar row 2 */}
-      <div style={{ background: Colors.white, border: `1px solid ${Colors.surfaceBorder}`, borderBottom: 'none', padding: 0 }}>
+      <div className={styles.toolbarRow2}>
         <EditorToolbar items={row2Items} onAction={handleToolbarAction} />
       </div>
 
@@ -292,14 +231,14 @@ export function MonacoEditorPanel({
       )}
 
       {/* Editor area */}
-      <div style={{ position: 'relative' }}>
+      <div className={styles.editorAreaRelative}>
         {isMobile ? (
-          <div style={{ border: `1px solid ${Colors.surfaceBorder}`, overflow: 'hidden' }}>
-            <div style={{ height: Spacing.editorHeightMobile }}>
+          <div className={styles.mobileBorder}>
+            <div className={styles.mobileEditorHeight}>
               {mobileTab === 'editor' ? (
                 <Editor height="100%" defaultLanguage="markdown" value={value} onChange={(v) => onChange(v ?? '')} onMount={handleMount} options={editorOptions} />
               ) : (
-                <div style={{ height: '100%', overflowY: 'auto', padding: `${Spacing.md2} ${Spacing.md}`, background: Colors.white }}>
+                <div className={styles.mobilePreviewPane}>
                   <div className="markdown-preview"><ReactMarkdown remarkPlugins={[remarkGfm]}>{value}</ReactMarkdown></div>
                 </div>
               )}
@@ -308,45 +247,28 @@ export function MonacoEditorPanel({
         ) : (
           <div>
             {/* Preview / HTML tabs */}
-            <div style={{
-              background: Colors.white,
-              border: `1px solid ${Colors.surfaceBorder}`,
-              borderBottom: 'none',
-              display: 'flex',
-              alignItems: 'center',
-              gap: 0,
-            }}>
+            <div className={styles.desktopTabsBar}>
               {(['preview', 'html'] as const).map((tab) => (
                 <button
                   key={tab}
                   type="button"
                   onClick={() => setPreviewTab(tab)}
-                  style={{
-                    padding: `${Spacing.sm} ${Spacing.md}`,
-                    border: 'none',
-                    background: 'none',
-                    fontSize: FontSize.sm,
-                    fontWeight: previewTab === tab ? FontWeight.semibold : FontWeight.regular,
-                    color: previewTab === tab ? Colors.primaryDark : Colors.textSub,
-                    borderBottom: `2px solid ${previewTab === tab ? Colors.primaryDark : 'transparent'}`,
-                    cursor: 'pointer',
-                    fontFamily: FontFamily.body,
-                  }}
+                  className={styles.previewTabBtn(previewTab === tab)}
                 >
                   {tab === 'preview' ? `📄 ${t('cv.editor.previewTab')}` : `</> ${t('cv.editor.htmlTab')}`}
                 </button>
               ))}
             </div>
 
-            <div style={{ display: 'flex', height, border: `1px solid ${Colors.surfaceBorder}`, overflow: 'hidden' }}>
-              <div style={{ width: '50%', borderRight: `1px solid ${Colors.surfaceBorder}` }}>
+            <div className={styles.splitPane(height)}>
+              <div className={styles.editorHalf}>
                 <Editor height="100%" defaultLanguage="markdown" value={value} onChange={(v) => onChange(v ?? '')} onMount={handleMount} options={editorOptions} />
               </div>
-              <div style={{ width: '50%', overflowY: 'auto', padding: `${Spacing.md} ${Spacing.lg}`, background: Colors.white }}>
+              <div className={styles.previewHalf}>
                 {previewTab === 'preview' ? (
                   <div className="markdown-preview"><ReactMarkdown remarkPlugins={[remarkGfm]}>{value}</ReactMarkdown></div>
                 ) : (
-                  <pre style={{ fontFamily: FontFamily.mono, fontSize: FontSize.xxs, color: Colors.textMain, whiteSpace: 'pre-wrap' as const, margin: 0 }}>
+                  <pre className={styles.htmlPre}>
                     {value}
                   </pre>
                 )}
@@ -357,39 +279,26 @@ export function MonacoEditorPanel({
 
         {/* Empty state overlay */}
         {showEmptyOverlay && (
-          <div style={{
-            position: 'absolute', inset: 0,
-            background: 'rgba(26,7,51,0.88)',
-            display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-            gap: Spacing.md, zIndex: 10,
-          }}>
+          <div className={styles.emptyOverlay}>
             <span style={{ fontSize: '4rem' }}>🌐</span>
-            <p style={{ margin: 0, fontFamily: FontFamily.heading, fontWeight: FontWeight.bold, fontSize: FontSize.xl, color: Colors.white, textAlign: 'center' as const }}>
+            <p className={styles.overlayTitle}>
               {t('cv.noEnVersion')}
             </p>
-            <p style={{ margin: 0, fontSize: FontSize.sm, color: 'rgba(255,255,255,0.7)', textAlign: 'center' as const, maxWidth: '40rem' }}>
+            <p className={styles.overlaySubtitle}>
               {t('cv.noEnVersionSub')}
             </p>
-            <div style={{ display: 'flex', gap: Spacing.md, marginTop: Spacing.sm }}>
+            <div className={styles.overlayBtns}>
               <button
                 type="button"
                 onClick={() => { setEmptyOverlayDismissed(true); onStartFromScratch?.() }}
-                style={{
-                  background: Colors.primaryDark, color: Colors.white, border: 'none',
-                  borderRadius: BorderRadius.full, padding: `${Spacing.sm} ${Spacing.lg}`,
-                  fontFamily: FontFamily.body, fontWeight: FontWeight.semibold, fontSize: FontSize.sm, cursor: 'pointer',
-                }}
+                className={styles.overlayPrimaryBtn}
               >
                 ✏️ {t('cv.startFromScratch')}
               </button>
               <button
                 type="button"
                 onClick={() => { setEmptyOverlayDismissed(true); onTranslateFromPtBr?.() }}
-                style={{
-                  background: 'rgba(255,255,255,0.15)', color: Colors.white, border: `1.5px solid rgba(255,255,255,0.4)`,
-                  borderRadius: BorderRadius.full, padding: `${Spacing.sm} ${Spacing.lg}`,
-                  fontFamily: FontFamily.body, fontWeight: FontWeight.semibold, fontSize: FontSize.sm, cursor: 'pointer',
-                }}
+                className={styles.overlayGhostBtn}
               >
                 🌐 {t('cv.translateFromPtBr')}
               </button>
@@ -399,19 +308,7 @@ export function MonacoEditorPanel({
       </div>
 
       {/* Status bar */}
-      <div style={{
-        background: Colors.surfaceEditor,
-        borderRadius: `0 0 ${BorderRadius.base} ${BorderRadius.base}`,
-        padding: `${Spacing.xs} ${Spacing.lg}`,
-        display: 'flex',
-        alignItems: 'center',
-        gap: Spacing.lg,
-        fontSize: FontSize.xxs,
-        color: 'rgba(255,255,255,0.5)',
-        fontFamily: FontFamily.mono,
-        border: `1px solid ${Colors.surfaceEditorBorder}`,
-        borderTop: 'none',
-      }}>
+      <div className={styles.statusBar}>
         <span>Markdown</span>
         <span>Ln {lineCol.line}, Col {lineCol.col}</span>
         <span>UTF-8</span>

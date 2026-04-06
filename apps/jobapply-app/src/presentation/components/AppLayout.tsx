@@ -17,6 +17,7 @@ import { AppHeader as DSAppHeader } from '../../design-system/layout/AppHeader'
 import { useAuth } from '../../application/providers/AuthProvider'
 import { Colors } from '../../styles/theme/colors'
 import { Spacing } from '../../styles/theme/spacing'
+import * as styles from './AppLayout.styles'
 
 const { useBreakpoint } = Grid
 
@@ -93,7 +94,7 @@ export default function AppLayout() {
   )
 
   return (
-    <div style={{ minHeight: '100vh', background: Colors.pageBg }}>
+    <div className={styles.pageRoot}>
       <DSAppHeader
         navItems={isMobile ? [] : navItems}
         rightSlot={rightSlot}

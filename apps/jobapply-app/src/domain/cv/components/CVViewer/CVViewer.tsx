@@ -12,7 +12,7 @@ import { DSCard } from '../../../../design-system/primitives/DSCard'
 import { DSButton } from '../../../../design-system/primitives/DSButton'
 import { Alert } from '../../../../components/Alert'
 import { EditOutlined } from '@ant-design/icons'
-import { Spacing } from '../../../../styles/theme/spacing'
+import * as styles from './CVViewer.styles'
 
 const COMPLETION_ITEMS = [
   { label: 'Informações básicas', done: true },
@@ -53,7 +53,7 @@ export function CVViewer({ cv, onEdit, isMobile }: CVViewerProps) {
 
   if (isMobile) {
     return (
-      <div style={{ display: 'flex', flexDirection: 'column', gap: Spacing.md }}>
+      <div className={styles.mobileRoot}>
         <CVTemplate cv={cv} locale={activeVersion} />
         <CVViewerSidebar
           activeLocale={activeLocale}
@@ -71,10 +71,10 @@ export function CVViewer({ cv, onEdit, isMobile }: CVViewerProps) {
   }
 
   return (
-    <div style={{ display: 'grid', gridTemplateColumns: '1fr 28rem', gap: Spacing.lg, alignItems: 'start' }}>
+    <div className={styles.desktopGrid}>
       <div>
         <CVTemplate cv={cv} locale={activeVersion} />
-        <div style={{ marginTop: Spacing.md, display: 'flex', gap: Spacing.sm }}>
+        <div className={styles.desktopActions}>
           <DSButton variant="ghost" onClick={() => downloadMarkdown(cv)}>
             {t('cv.exportMarkdown')}
           </DSButton>

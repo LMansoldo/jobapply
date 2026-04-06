@@ -26,18 +26,11 @@ import type { SortOption } from '../../design-system/jobs/SortDropdown'
 import { DSPagination } from '../../design-system/navigation/DSPagination'
 import { useAuth } from '../../application/providers/AuthProvider'
 import { Colors } from '../../styles/theme/colors'
-import { Shadows } from '../../styles/theme/shadows'
-import { BorderRadius } from '../../styles/theme/radius'
 import { Spacing } from '../../styles/theme/spacing'
-import { FontSize, FontWeight, FontFamily } from '../../styles/theme/typography'
+import { FontFamily, FontWeight } from '../../styles/theme/typography'
+import * as styles from './JobsPage.styles'
 
 const { useBreakpoint } = Grid
-
-const panelStyle: React.CSSProperties = {
-  background: Colors.white,
-  borderRadius: BorderRadius.base,
-  boxShadow: Shadows.sm,
-}
 
 const MOCK_ALERTS = [
   { icon: '⚛️', title: 'React Sênior · Remoto', subtitle: 'Criado há 2 dias', count: 14 },
@@ -163,9 +156,9 @@ export default function JobsPage() {
   }
 
   const jobCountRow = (
-    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: Spacing.md }}>
-      <p style={{ margin: 0, fontSize: FontSize.sm, color: Colors.textSub }}>
-        <span style={{ fontWeight: FontWeight.bold, color: Colors.textMain, fontFamily: FontFamily.heading }}>{total}</span>{' '}
+    <div className={styles.jobCountRow}>
+      <p className={styles.jobCountText}>
+        <span className={styles.jobCountNumber}>{total}</span>{' '}
         {t('jobs.jobsFound', { count: total }).replace(String(total), '').trim()}
       </p>
       <SortDropdown value={sort} onChange={(v) => { setSort(v); handleFilterChange('sort', v) }} />
@@ -173,17 +166,17 @@ export default function JobsPage() {
   )
 
   const jobListCenter = (
-    <div style={{ display: 'flex', flexDirection: 'column' }}>
+    <div className={styles.jobListWrapper}>
       {jobCountRow}
-      <div style={{ ...panelStyle, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+      <div className={styles.panelWithOverflow}>
         {loading ? (
-          <div style={{ display: 'flex', justifyContent: 'center', padding: Spacing.xxl }}>
+          <div className={styles.spinWrapper}>
             <Spin />
           </div>
         ) : jobs.length === 0 ? (
           <Empty description={t('jobs.noJobs')} style={{ padding: Spacing.xxl }} />
         ) : (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: Spacing.xs, padding: Spacing.sm }}>
+          <div className={styles.jobCardsWrapper}>
             {jobs.map((job) => (
               <JobCard
                 key={job._id}
@@ -220,7 +213,7 @@ export default function JobsPage() {
   )
 
   const rightPanel = (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: Spacing.md }}>
+    <div className={styles.rightPanelWrapper}>
       {user && (
         <ProfileCard
           user={user}
@@ -240,7 +233,7 @@ export default function JobsPage() {
     return (
       <>
         {hero}
-        <div style={{ padding: Spacing.md, display: 'flex', flexDirection: 'column', gap: Spacing.md }}>
+        <div className={styles.mobilePadding}>
           <JobFilterBar filters={filters} onFilterChange={handleFilterChange} onReload={() => loadJobs(filters)} />
           {jobListCenter}
         </div>
@@ -254,17 +247,17 @@ export default function JobsPage() {
           closable={false}
           destroyOnClose
         >
-          <div style={{ position: 'sticky', top: 0, zIndex: 10, background: Colors.white, borderBottom: `1px solid ${Colors.surfaceBorder}`, padding: `${Spacing.sm} ${Spacing.md}` }}>
+          <div className={styles.mobileModalHeader(Colors.white, Colors.surfaceBorder)}>
             <Button type="text" icon={<ArrowLeftOutlined />} onClick={() => setMobileDetailOpen(false)} style={{ fontWeight: 500 }}>
               {t('common.back')}
             </Button>
           </div>
-          <div style={{ padding: Spacing.md }}>
+          <div className={styles.mobileModalBody}>
             {selectedJob && (
               <div>
-                <h3 style={{ fontFamily: FontFamily.heading, fontWeight: FontWeight.bold, color: Colors.textMain }}>{selectedJob.title}</h3>
-                <p style={{ color: Colors.textSub, fontSize: FontSize.sm }}>{selectedJob.company}</p>
-                <p style={{ color: Colors.textMain, lineHeight: 1.7 }}>{selectedJob.description}</p>
+                <h3 className={styles.mobileJobTitle}>{selectedJob.title}</h3>
+                <p className={styles.mobileJobCompany}>{selectedJob.company}</p>
+                <p className={styles.mobileJobDescription}>{selectedJob.description}</p>
               </div>
             )}
           </div>
@@ -276,7 +269,7 @@ export default function JobsPage() {
   return (
     <>
       {hero}
-      <div style={{ marginTop: `-${Spacing.lg}` }}>
+      <div className={styles.heroOffset}>
         <PageLayout
           variant="jobs"
           left={<JobFilterBar filters={filters} onFilterChange={handleFilterChange} onReload={() => loadJobs(filters)} />}

@@ -12,9 +12,7 @@ import { SalarySlider } from '../../../../design-system/jobs/SalarySlider'
 import { DSCard } from '../../../../design-system/primitives/DSCard'
 import { DSButton } from '../../../../design-system/primitives/DSButton'
 import { CompanyLogo } from '../../../../design-system/jobs/CompanyLogo'
-import { Colors } from '../../../../styles/theme/colors'
-import { FontSize, FontWeight } from '../../../../styles/theme/typography'
-import { Spacing } from '../../../../styles/theme/spacing'
+import * as styles from './JobFilterBar.styles'
 
 const CONTRACT_OPTIONS = [
   { key: 'clt', i18nKey: 'jobs.clt', count: 1200 },
@@ -100,7 +98,7 @@ export function JobFilterBar({ filters, onFilterChange, onReload }: JobFilterBar
     <FilterPanel>
       {/* Tipo de Contrato */}
       <DSCard title={t('jobs.contractType')}>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+        <div className={styles.checkboxList}>
           {CONTRACT_OPTIONS.map((opt) => (
             <FilterCheckbox
               key={opt.key}
@@ -126,7 +124,7 @@ export function JobFilterBar({ filters, onFilterChange, onReload }: JobFilterBar
 
       {/* Nível de Experiência */}
       <DSCard title={t('jobs.experienceLevel')}>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+        <div className={styles.checkboxList}>
           {EXPERIENCE_OPTIONS.map((opt) => (
             <FilterCheckbox
               key={opt.key}
@@ -155,26 +153,24 @@ export function JobFilterBar({ filters, onFilterChange, onReload }: JobFilterBar
       </DSCard>
 
       {/* Botões */}
-      <div style={{ display: 'flex', gap: Spacing.sm }}>
-        <DSButton variant="primary" style={{ flex: 1 }} onClick={handleApply}>
+      <div className={styles.filterBtns}>
+        <DSButton variant="primary" className={styles.filterBtnFlex} onClick={handleApply}>
           {t('jobs.apply')}
         </DSButton>
-        <DSButton variant="ghost" style={{ flex: 1 }} onClick={handleClear}>
+        <DSButton variant="ghost" className={styles.filterBtnFlex} onClick={handleClear}>
           {t('jobs.clear')}
         </DSButton>
       </div>
 
       {/* Empresas em Destaque */}
       <DSCard title={t('jobs.featuredCompanies')}>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: Spacing.sm }}>
+        <div className={styles.companiesList}>
           {FEATURED_COMPANIES.map((co) => (
-            <div key={co.name} style={{ display: 'flex', alignItems: 'center', gap: Spacing.md, cursor: 'pointer' }}>
+            <div key={co.name} className={styles.companyRow}>
               <CompanyLogo name={co.name} size={32} />
-              <div style={{ flex: 1 }}>
-                <p style={{ margin: 0, fontSize: FontSize.sm, fontWeight: FontWeight.medium, color: Colors.textMain }}>
-                  {co.name}
-                </p>
-                <p style={{ margin: 0, fontSize: FontSize.xxs, color: Colors.textSub }}>
+              <div className={styles.companyInfo}>
+                <p className={styles.companyName}>{co.name}</p>
+                <p className={styles.companyJobs}>
                   {t('jobs.openPositions', { count: co.jobs })}
                 </p>
               </div>

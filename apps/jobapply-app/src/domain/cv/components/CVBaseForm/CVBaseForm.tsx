@@ -24,105 +24,45 @@ import { Row } from '../../../../components/Row'
 import { Col } from '../../../../components/Col'
 import { LANGUAGE_OPTIONS } from '../../constants'
 import { Colors } from '../../../../styles/theme/colors'
-import { FontSize, FontWeight, FontFamily } from '../../../../styles/theme/typography'
-import { Spacing } from '../../../../styles/theme/spacing'
-import { BorderRadius } from '../../../../styles/theme/radius'
-import { Shadows } from '../../../../styles/theme/shadows'
+import * as styles from './CVBaseForm.styles'
 
 export function CVBaseForm({ form, saving, hasCv, stepLabel, onNext, onBack }: CVBaseFormProps) {
   const { t } = useTranslation()
 
   return (
-    <div style={{
-      background: Colors.white,
-      borderRadius: BorderRadius.base,
-      boxShadow: Shadows.sm,
-      overflow: 'hidden',
-    }}>
+    <div className={styles.cardRoot}>
       {/* Card header */}
-      <div style={{
-        padding: `${Spacing.lg} ${Spacing.xl}`,
-        borderBottom: `1px solid ${Colors.surfaceBorder}`,
-        display: 'flex',
-        alignItems: 'center',
-        gap: Spacing.md,
-      }}>
-        <div style={{
-          width: '4rem',
-          height: '4rem',
-          borderRadius: '50%',
-          background: Colors.primaryLight,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          color: Colors.primaryDark,
-          fontSize: '1.8rem',
-          flexShrink: 0,
-        }}>
+      <div className={styles.cardHeader}>
+        <div className={styles.headerIcon}>
           <UserOutlined />
         </div>
         <div>
-          <h3 style={{ margin: 0, fontFamily: FontFamily.heading, fontWeight: FontWeight.semibold, fontSize: FontSize.lg, color: Colors.textMain }}>
+          <h3 className={styles.headerTitle}>
             {t('cv.base.personalInfo')}
           </h3>
-          <p style={{ margin: 0, fontSize: FontSize.sm, color: Colors.textSub }}>
+          <p className={styles.headerSubtitle}>
             {t('cv.base.personalInfoSub')}
           </p>
         </div>
       </div>
 
-      <div style={{ padding: `${Spacing.lg} ${Spacing.xl}` }}>
+      <div className={styles.cardBody}>
         {/* Avatar Upload Zone */}
-        <div style={{
-          border: `2px dashed ${Colors.borderPurple}`,
-          borderRadius: BorderRadius.base,
-          padding: Spacing.lg,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          marginBottom: Spacing.lg,
-          background: Colors.surfacePage,
-          cursor: 'pointer',
-        }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: Spacing.md }}>
-            <div style={{
-              width: '5.6rem',
-              height: '5.6rem',
-              borderRadius: '50%',
-              background: Colors.primaryLight,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              color: Colors.primaryDark,
-              fontSize: '2.4rem',
-              flexShrink: 0,
-            }}>
+        <div className={styles.avatarZone}>
+          <div className={styles.avatarLeft}>
+            <div className={styles.avatarCircle}>
               📷
             </div>
             <div>
-              <p style={{ margin: 0, fontWeight: FontWeight.medium, fontSize: FontSize.sm, color: Colors.textMain }}>
+              <p className={styles.avatarLabel}>
                 {t('cv.base.addPhoto')}
               </p>
-              <p style={{ margin: 0, fontSize: FontSize.xxs, color: Colors.textSub, marginTop: '2px' }}>
+              <p className={styles.avatarHint}>
                 {t('cv.base.avatarDragHint')}
               </p>
             </div>
           </div>
-          <button
-            type="button"
-            style={{
-              background: 'none',
-              border: `1.5px solid ${Colors.primaryDark}`,
-              borderRadius: BorderRadius.full,
-              color: Colors.primaryDark,
-              fontSize: FontSize.sm,
-              fontWeight: FontWeight.medium,
-              padding: `${Spacing.xs} ${Spacing.md}`,
-              cursor: 'pointer',
-              flexShrink: 0,
-              fontFamily: FontFamily.body,
-            }}
-          >
+          <button type="button" className={styles.choosePhotoBtn}>
             {t('cv.base.choosePhoto')}
           </button>
         </div>
@@ -194,14 +134,7 @@ export function CVBaseForm({ form, saving, hasCv, stepLabel, onNext, onBack }: C
       </div>
 
       {/* Footer */}
-      <div style={{
-        padding: `${Spacing.md} ${Spacing.xl}`,
-        borderTop: `1px solid ${Colors.surfaceBorder}`,
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        background: Colors.surfacePage,
-      }}>
+      <div className={styles.cardFooter}>
         {hasCv ? (
           <DSButton variant="ghost" onClick={onBack}>
             <ArrowLeftOutlined /> {t('common.back')}
@@ -209,7 +142,7 @@ export function CVBaseForm({ form, saving, hasCv, stepLabel, onNext, onBack }: C
         ) : <span />}
 
         {stepLabel && (
-          <span style={{ fontSize: FontSize.sm, color: Colors.textSub, fontWeight: FontWeight.medium }}>
+          <span className={styles.stepLabelText}>
             {stepLabel}
           </span>
         )}

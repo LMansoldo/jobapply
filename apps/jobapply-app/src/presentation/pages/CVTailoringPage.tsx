@@ -17,9 +17,7 @@ import type { Job } from '../../domain/jobs/types'
 import { fetchJobs } from '../../infrastructure/repositories/jobsRepository'
 import { tailorCV } from '../../infrastructure/repositories/cvRepository'
 import { Colors } from '../../styles/theme/colors'
-import { Spacing } from '../../styles/theme/spacing'
-import { FontSize, FontWeight, FontFamily } from '../../styles/theme/typography'
-import { BorderRadius } from '../../styles/theme/radius'
+import * as styles from './CVTailoringPage.styles'
 
 type WorkspaceTab = 'ats' | 'cover' | 'video'
 type ToneKey = 'formal' | 'direct' | 'creative' | 'confident'
@@ -48,26 +46,6 @@ const MOCK_KEYWORDS = [
   { keyword: 'Agile', status: 'weak' as const },
   { keyword: 'GraphQL', status: 'missing' as const },
 ]
-
-const tabBtnStyle = (active: boolean): React.CSSProperties => ({
-  padding: `${Spacing.sm} ${Spacing.md}`,
-  border: 'none', background: 'none',
-  fontFamily: FontFamily.body, fontSize: FontSize.sm,
-  fontWeight: FontWeight.semibold,
-  color: active ? Colors.primaryDark : Colors.textSub,
-  cursor: 'pointer',
-  borderBottom: `2px solid ${active ? Colors.primary : 'transparent'}`,
-  display: 'flex', alignItems: 'center', gap: Spacing.xs,
-  whiteSpace: 'nowrap' as const,
-  transition: 'color .15s, border-color .15s',
-})
-
-const textareaStyle: React.CSSProperties = {
-  width: '100%', minHeight: '36rem', padding: Spacing.lg,
-  border: 'none', outline: 'none',
-  fontFamily: FontFamily.body, fontSize: FontSize.base,
-  lineHeight: '1.75', color: Colors.textMain, resize: 'none', background: 'transparent',
-}
 
 export default function CVTailoringPage() {
   const { jobId } = useParams<{ jobId: string }>()
@@ -127,7 +105,7 @@ export default function CVTailoringPage() {
 
   if (loadingJob) {
     return (
-      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '60vh' }}>
+      <div className={styles.spinWrapper}>
         <Spin size="large" />
       </div>
     )
@@ -135,31 +113,15 @@ export default function CVTailoringPage() {
   if (!job) return null
 
   const contextBar = (
-    <div style={{
-      background: Colors.white,
-      borderBottom: `1px solid ${Colors.surfaceBorder}`,
-      padding: `${Spacing.sm} ${Spacing.lg}`,
-      display: 'flex',
-      alignItems: 'center',
-      gap: Spacing.md,
-      flexShrink: 0,
-    }}>
-      <button
-        type="button"
-        onClick={() => navigate('/')}
-        style={{
-          background: 'none', border: 'none', color: Colors.primaryDark,
-          fontSize: FontSize.sm, fontWeight: FontWeight.medium, cursor: 'pointer',
-          display: 'flex', alignItems: 'center', gap: Spacing.xs, fontFamily: FontFamily.body,
-        }}
-      >
+    <div className={styles.contextBar}>
+      <button type="button" onClick={() => navigate('/')} className={styles.backBtn}>
         <ArrowLeftOutlined /> {t('tailoring.backToJobs')}
       </button>
-      <div style={{ width: '1px', height: '2rem', background: Colors.surfaceBorder }} />
+      <div className={styles.contextDivider} />
       <JobContextBar job={job} lang="pt-BR" onBack={() => navigate('/')} />
-      <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: Spacing.xs }}>
-        <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: Colors.success, flexShrink: 0 }} />
-        <span style={{ fontSize: FontSize.sm, color: Colors.success, fontWeight: FontWeight.medium }}>
+      <div className={styles.analysisStatus}>
+        <span className={styles.analysisDot} />
+        <span className={styles.analysisLabel}>
           {t('tailoring.analysisComplete')}
         </span>
       </div>
@@ -167,30 +129,22 @@ export default function CVTailoringPage() {
   )
 
   const workspaceTabs = (
-    <div style={{
-      background: Colors.white,
-      borderBottom: `1px solid ${Colors.surfaceBorder}`,
-      padding: `0 ${Spacing.lg}`,
-      display: 'flex',
-      alignItems: 'center',
-      gap: Spacing.xs,
-      flexShrink: 0,
-    }}>
-      <button type="button" style={tabBtnStyle(activeTab === 'ats')} onClick={() => setActiveTab('ats')}>
+    <div className={styles.workspaceTabs}>
+      <button type="button" className={styles.tabBtn(activeTab === 'ats')} onClick={() => setActiveTab('ats')}>
         📊 {t('tailoring.ats')}
-        <span style={{ background: Colors.primaryLight, color: Colors.primaryDark, borderRadius: '10px', padding: `0 ${Spacing.xs}`, fontSize: FontSize.xxs, fontWeight: FontWeight.bold }}>
+        <span className={styles.tabBadge(Colors.primaryLight, Colors.primaryDark)}>
           {MOCK_KEYWORDS.length}
         </span>
       </button>
-      <button type="button" style={tabBtnStyle(activeTab === 'cover')} onClick={() => setActiveTab('cover')}>
+      <button type="button" className={styles.tabBtn(activeTab === 'cover')} onClick={() => setActiveTab('cover')}>
         💌 {t('tailoring.coverLetter')}
-        <span style={{ background: Colors.successBg, color: Colors.success, borderRadius: '10px', padding: `0 ${Spacing.xs}`, fontSize: FontSize.xxs, fontWeight: FontWeight.bold }}>
+        <span className={styles.tabBadge(Colors.successBg, Colors.success)}>
           NOVO
         </span>
       </button>
-      <button type="button" style={tabBtnStyle(activeTab === 'video')} onClick={() => setActiveTab('video')}>
+      <button type="button" className={styles.tabBtn(activeTab === 'video')} onClick={() => setActiveTab('video')}>
         🎬 {t('tailoring.videoScript')}
-        <span style={{ background: Colors.orangeBg, color: Colors.orange, borderRadius: '10px', padding: `0 ${Spacing.xs}`, fontSize: FontSize.xxs, fontWeight: FontWeight.bold }}>
+        <span className={styles.tabBadge(Colors.orangeBg, Colors.orange)}>
           Beta
         </span>
       </button>
@@ -198,43 +152,30 @@ export default function CVTailoringPage() {
   )
 
   const atsWorkspace = (
-    <div style={{ display: 'grid', gridTemplateColumns: '25rem 1fr 30rem', flex: 1, overflow: 'hidden' }}>
+    <div className={styles.atsGrid}>
       {/* LEFT: ATS Panel */}
-      <div style={{ background: Colors.white, borderRight: `1px solid ${Colors.surfaceBorder}`, overflowY: 'auto', padding: Spacing.lg }}>
-        <div style={{ marginBottom: Spacing.md, textAlign: 'center' as const }}>
-          <div style={{ display: 'inline-flex', flexDirection: 'column', alignItems: 'center', gap: Spacing.xs }}>
-          </div>
-        </div>
+      <div className={styles.atsLeft}>
         <ATSPanel score={MOCK_SCORE} categories={MOCK_CATEGORIES} keywords={MOCK_KEYWORDS} />
-        <div style={{
-          background: Colors.successBg, color: Colors.success, borderRadius: BorderRadius.base,
-          padding: `${Spacing.sm} ${Spacing.md}`, textAlign: 'center' as const,
-          fontSize: FontSize.sm, fontWeight: FontWeight.semibold, marginTop: Spacing.md,
-        }}>
+        <div className={styles.atsScoreBadge}>
           +{MOCK_DELTA} pts {t('tailoring.improvementBadge', { delta: MOCK_DELTA }).split('+' + MOCK_DELTA + ' pts').pop()}
         </div>
       </div>
 
       {/* CENTER: Dark editor */}
-      <div style={{ background: Colors.surfaceEditor, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
-        {/* Center toolbar */}
-        <div style={{
-          background: Colors.surfaceDarker, borderBottom: `1px solid ${Colors.surfaceEditorBorder}`,
-          padding: `${Spacing.sm} ${Spacing.lg}`, display: 'flex', alignItems: 'center', gap: Spacing.sm, flexShrink: 0,
-        }}>
-          <span style={{ fontSize: FontSize.xxs, color: 'rgba(255,255,255,0.5)', fontFamily: FontFamily.mono }}>Markdown</span>
-          <div style={{ marginLeft: 'auto', display: 'flex', gap: Spacing.sm }}>
-            <button type="button" style={{ background: Colors.success, border: 'none', borderRadius: '6px', color: Colors.white, fontSize: FontSize.xxs, fontWeight: FontWeight.semibold, padding: `3px ${Spacing.sm}`, cursor: 'pointer', fontFamily: FontFamily.body }}>
+      <div className={styles.atsCenter}>
+        <div className={styles.atsCenterToolbar}>
+          <span className={styles.toolbarMonoLabel}>Markdown</span>
+          <div className={styles.toolbarBtns}>
+            <button type="button" className={styles.acceptAllBtn}>
               {t('tailoring.acceptAll')}
             </button>
-            <button type="button" style={{ background: Colors.danger, border: 'none', borderRadius: '6px', color: Colors.white, fontSize: FontSize.xxs, fontWeight: FontWeight.semibold, padding: `3px ${Spacing.sm}`, cursor: 'pointer', fontFamily: FontFamily.body }}>
+            <button type="button" className={styles.rejectAllBtn}>
               {t('tailoring.rejectAll')}
             </button>
           </div>
         </div>
 
-        {/* Suggestion banner */}
-        <div style={{ padding: `${Spacing.sm} ${Spacing.lg}`, flexShrink: 0 }}>
+        <div className={styles.suggestionBannerPad}>
           <SuggestionBanner
             count={MOCK_SUGGESTIONS}
             current={currentSuggestion}
@@ -244,27 +185,14 @@ export default function CVTailoringPage() {
           />
         </div>
 
-        {/* Editor area */}
-        <div style={{ flex: 1, overflow: 'auto', padding: `0 ${Spacing.lg} ${Spacing.lg}` }}>
+        <div className={styles.editorArea}>
           {tailoring ? (
-            <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}>
+            <div className={styles.tailoringSpinWrapper}>
               <Spin size="large" />
             </div>
           ) : (
             <textarea
-              style={{
-                ...textareaStyle,
-                width: '100%',
-                minHeight: '40rem',
-                background: 'transparent',
-                color: 'rgba(255,255,255,0.9)',
-                fontFamily: FontFamily.mono,
-                fontSize: FontSize.sm,
-                border: `1px solid ${Colors.surfaceEditorBorder}`,
-                borderRadius: BorderRadius.base,
-                padding: Spacing.lg,
-                boxSizing: 'border-box' as const,
-              }}
+              className={styles.editorTextarea}
               value={tailoredContent}
               onChange={(e) => setTailoredContent(e.target.value)}
               placeholder={t('tailoring.cvPlaceholder')}
@@ -272,17 +200,11 @@ export default function CVTailoringPage() {
           )}
         </div>
 
-        {/* Status bar */}
-        <div style={{
-          background: Colors.surfaceDarker, borderTop: `1px solid ${Colors.surfaceEditorBorder}`,
-          padding: `${Spacing.xs} ${Spacing.lg}`,
-          display: 'flex', gap: Spacing.lg, fontSize: FontSize.xxs,
-          color: 'rgba(255,255,255,0.4)', fontFamily: FontFamily.mono, flexShrink: 0,
-        }}>
+        <div className={styles.statusBar}>
           <span>Markdown</span>
           <span>UTF-8</span>
           <span>{MOCK_SUGGESTIONS} sugestões</span>
-          <span style={{ marginLeft: 'auto' }}>Score atual: {MOCK_SCORE} → com aplicação: {MOCK_PROJECTED}</span>
+          <span className={styles.statusBarRight}>Score atual: {MOCK_SCORE} → com aplicação: {MOCK_PROJECTED}</span>
         </div>
       </div>
 
@@ -303,19 +225,19 @@ export default function CVTailoringPage() {
   )
 
   const coverTab = (
-    <div style={{ flex: 1, display: 'grid', gridTemplateColumns: '1fr 30rem', overflow: 'hidden' }}>
-      <div style={{ padding: Spacing.lg, overflowY: 'auto', background: Colors.white }}>
-        <div style={{ border: `1px solid ${Colors.surfaceBorder}`, borderRadius: BorderRadius.base, overflow: 'hidden' }}>
-          <textarea style={textareaStyle} value={coverContent} onChange={(e) => setCoverContent(e.target.value)} placeholder={t('tailoring.coverPlaceholder')} />
+    <div className={styles.coverGrid}>
+      <div className={styles.coverEditorPane}>
+        <div className={styles.coverEditorBorder}>
+          <textarea className={styles.coverTextarea} value={coverContent} onChange={(e) => setCoverContent(e.target.value)} placeholder={t('tailoring.coverPlaceholder')} />
         </div>
       </div>
-      <div style={{ borderLeft: `1px solid ${Colors.surfaceBorder}`, padding: Spacing.lg, background: Colors.surfacePage, overflowY: 'auto' }}>
-        <div style={{ background: Colors.white, border: `1px solid ${Colors.surfaceBorder}`, borderRadius: BorderRadius.base, padding: Spacing.lg, marginBottom: Spacing.md }}>
-          <p style={{ fontWeight: FontWeight.semibold, fontSize: FontSize.sm, margin: `0 0 ${Spacing.md}`, color: Colors.primaryDark }}>
+      <div className={styles.coverSidePane}>
+        <div className={styles.aiCard}>
+          <p className={styles.aiCardTitle}>
             ✦ {t('tailoring.generateWithAI')}
           </p>
           <ToneChips options={TONE_OPTIONS} value={tone} onChange={(k) => setTone(k as ToneKey)} />
-          <button type="button" style={{ width: '100%', marginTop: Spacing.md, background: Colors.primaryDark, color: Colors.white, border: 'none', borderRadius: BorderRadius.base, padding: Spacing.sm, fontFamily: FontFamily.body, fontWeight: FontWeight.semibold, fontSize: FontSize.sm, cursor: 'pointer' }}>
+          <button type="button" className={styles.aiGenBtn}>
             🔄 {t('tailoring.regenCover')}
           </button>
         </div>
@@ -324,14 +246,14 @@ export default function CVTailoringPage() {
   )
 
   const videoTab = (
-    <div style={{ flex: 1, display: 'grid', gridTemplateColumns: '1fr 30rem', overflow: 'hidden' }}>
-      <div style={{ padding: Spacing.lg, overflowY: 'auto', background: Colors.white }}>
-        <div style={{ border: `1px solid ${Colors.surfaceBorder}`, borderRadius: BorderRadius.base, overflow: 'hidden' }}>
-          <textarea style={{ ...textareaStyle, minHeight: '48rem' }} value={videoContent} onChange={(e) => setVideoContent(e.target.value)} placeholder={t('tailoring.videoPlaceholder')} />
+    <div className={styles.videoGrid}>
+      <div className={styles.videoEditorPane}>
+        <div className={styles.coverEditorBorder}>
+          <textarea className={styles.videoTextarea} value={videoContent} onChange={(e) => setVideoContent(e.target.value)} placeholder={t('tailoring.videoPlaceholder')} />
         </div>
       </div>
-      <div style={{ borderLeft: `1px solid ${Colors.surfaceBorder}`, padding: Spacing.lg, background: Colors.surfacePage, overflowY: 'auto' }}>
-        <button type="button" style={{ width: '100%', marginBottom: Spacing.md, background: Colors.primaryDark, color: Colors.white, border: 'none', borderRadius: BorderRadius.base, padding: Spacing.sm, fontFamily: FontFamily.body, fontWeight: FontWeight.semibold, fontSize: FontSize.sm, cursor: 'pointer' }}>
+      <div className={styles.videoSidePane}>
+        <button type="button" className={styles.videoScriptBtn}>
           🎬 {t('tailoring.newScript')}
         </button>
       </div>
@@ -339,7 +261,7 @@ export default function CVTailoringPage() {
   )
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', height: 'calc(100vh - 6.4rem)', overflow: 'hidden' }}>
+    <div className={styles.pageRoot}>
       {contextBar}
       {workspaceTabs}
       {activeTab === 'ats' && atsWorkspace}
