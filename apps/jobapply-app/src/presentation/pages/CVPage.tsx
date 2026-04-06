@@ -22,9 +22,7 @@ import { Form } from '../../components/Form'
 import { Popconfirm } from '../../components/Popconfirm'
 import { Space } from '../../components/Space'
 import { Spin } from '../../components/Spin'
-import { Steps } from '../../components/Steps'
 import { Tag } from '../../components/Tag'
-import { Title } from '../../components/Typography'
 import { CVBaseForm } from '../../domain/cv/components/CVBaseForm'
 import { CVViewer } from '../../domain/cv/components/CVViewer'
 import { MonacoEditorPanel } from '../../domain/cv/components/MonacoEditorPanel'
@@ -38,31 +36,36 @@ import {
   updateCV,
   updateCVLocale,
 } from '../../infrastructure/repositories/cvRepository'
+import { PageLayout } from '../../design-system/layout/PageLayout'
+import { WizardStepper } from '../../design-system/cv/WizardStepper'
+import { ScoreRing } from '../../design-system/primitives/ScoreRing'
+import { DSCard } from '../../design-system/primitives/DSCard'
 import { Colors } from '../../styles/theme/colors'
 import { FontSize } from '../../styles/theme/typography'
 import { Spacing } from '../../styles/theme/spacing'
 
 const { useBreakpoint } = Grid
 
-/** CSS injected globally for markdown preview rendering inside the editor panel. */
 const PREVIEW_CSS = `
-  .markdown-preview h1 { font-size: ${FontSize.xxl}; font-weight: 700; margin: 0 0 ${Spacing.sm}; border-bottom: ${Spacing.xxs} solid ${Colors.info}; padding-bottom: ${Spacing.sm2}; }
-  .markdown-preview h2 { font-size: ${FontSize.md2}; font-weight: 600; margin: ${Spacing.lg0} 0 ${Spacing.sm2}; color: ${Colors.textSecondary}; }
+  .markdown-preview h1 { font-size: ${FontSize.xxl}; font-weight: 700; margin: 0 0 ${Spacing.sm}; border-bottom: 2px solid ${Colors.primaryDark}; padding-bottom: ${Spacing.sm2}; }
+  .markdown-preview h2 { font-size: ${FontSize.md2}; font-weight: 600; margin: ${Spacing.lg0} 0 ${Spacing.sm2}; color: ${Colors.textSub}; }
   .markdown-preview h3 { font-size: ${FontSize.md0}; font-weight: 600; margin: ${Spacing.md0} 0 ${Spacing.xs}; }
   .markdown-preview p { margin: ${Spacing.xs} 0; font-size: ${FontSize.md0}; line-height: 1.6; }
   .markdown-preview ul { margin: ${Spacing.xs} 0; padding-left: ${Spacing.lg1}; }
   .markdown-preview li { font-size: ${FontSize.md0}; line-height: 1.6; margin: ${Spacing.xxs} 0; }
   .markdown-preview strong { font-weight: 600; }
   .markdown-preview em { color: ${Colors.textMuted}; }
-  .markdown-preview hr { border: none; border-top: ${Spacing.px} solid ${Colors.borderLighter}; margin: ${Spacing.md1} 0; }
-  .markdown-preview blockquote { border-left: ${Spacing.xxs} solid ${Colors.border}; margin: ${Spacing.sm} 0; padding-left: ${Spacing.md1}; color: ${Colors.textHint}; }
-  .markdown-preview code { font-size: ${FontSize.sm}; background: ${Colors.surfaceLight}; padding: ${Spacing.px} ${Spacing.xs}; border-radius: ${Spacing.xxs}; }
+  .markdown-preview hr { border: none; border-top: 1px solid ${Colors.surfaceBorder}; margin: ${Spacing.md1} 0; }
+  .markdown-preview blockquote { border-left: 3px solid ${Colors.surfaceBorder}; margin: ${Spacing.sm} 0; padding-left: ${Spacing.md1}; color: ${Colors.textHint}; }
+  .markdown-preview code { font-size: ${FontSize.sm}; background: ${Colors.surfaceLight}; padding: 1px ${Spacing.xs}; border-radius: 3px; }
 `
 
-/**
- * CV page — three-step wizard (base info → PT-BR markdown → EN markdown).
- * When a CV with PT-BR content already exists, shows the viewer instead.
- */
+const WIZARD_STEPS = [
+  { label: 'Dados Pessoais' },
+  { label: 'CV em PT-BR' },
+  { label: 'CV em Inglês' },
+]
+
 export default function CVPage() {
   const { cvId, setCvId } = useAuth()
   const { message } = useAntApp()
@@ -84,28 +87,20 @@ export default function CVPage() {
   const [enMarkdown, setEnMarkdown] = useState(EN_TEMPLATE)
   const [enErrors, setEnErrors] = useState<string[]>([])
 
-  /** Loads the CV on mount if a cvId is known. */
   useEffect(() => {
     if (!cvId) { setLoading(false); return }
     getCV(cvId).then(applyCV).catch(() => setLoading(false))
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  /** Persists PT-BR markdown draft to localStorage on change. */
   useEffect(() => {
     if (cv?._id) localStorage.setItem(`cv_md_ptbr_${cv._id}`, ptBrMarkdown)
   }, [ptBrMarkdown, cv?._id])
 
-  /** Persists EN markdown draft to localStorage on change. */
   useEffect(() => {
     if (cv?._id) localStorage.setItem(`cv_md_en_${cv._id}`, enMarkdown)
   }, [enMarkdown, cv?._id])
 
-  /**
-   * Applies loaded CV data to local state, populating form fields and markdown editors.
-   * Server data always takes priority over localStorage drafts.
-   * @param data - CV object returned from the repository
-   */
   function applyCV(data: CV) {
     setCv(data)
     setCvId(data._id)
@@ -134,7 +129,6 @@ export default function CVPage() {
     setLoading(false)
   }
 
-  /** Validates base form and saves personal info before advancing to step 1. */
   async function handleStep1Next() {
     try {
       const values = await baseForm.validateFields()
@@ -155,7 +149,6 @@ export default function CVPage() {
     }
   }
 
-  /** Parses PT-BR markdown, validates it, and saves the locale version. */
   async function handleStep2Next() {
     const result = parseMarkdownToLocale(ptBrMarkdown, 'pt-BR')
     if (result.errors.length > 0) { setPtBrErrors(result.errors); return }
@@ -174,7 +167,6 @@ export default function CVPage() {
     }
   }
 
-  /** Parses EN markdown (if changed), validates it, and saves the locale version. */
   async function handleStep3Finish() {
     if (enMarkdown.trim() === EN_TEMPLATE.trim()) { message.success(t('cv.registerSuccess')); return }
     const result = parseMarkdownToLocale(enMarkdown, 'en')
@@ -193,13 +185,11 @@ export default function CVPage() {
     }
   }
 
-  /** Skips the EN step and marks the CV as complete. */
   function handleSkipEn() {
     setEnErrors([])
     message.success(t('cv.skipEnSuccess'))
   }
 
-  /** Deletes the current CV and resets all state. */
   async function handleDelete() {
     if (!cv) return
     setSaving(true)
@@ -224,17 +214,6 @@ export default function CVPage() {
   const ptBrDone = cv?.localeVersions?.some((v) => v.locale === 'pt-BR') ?? false
   const enDone = cv?.localeVersions?.some((v) => v.locale === 'en') ?? false
 
-  /**
-   * Returns the status of a wizard step for the Steps component.
-   * @param idx - Step index (0, 1, or 2)
-   */
-  function getStepStatus(idx: number): 'wait' | 'process' | 'finish' | 'error' {
-    if (idx === 0) return cv ? 'finish' : currentStep === 0 ? 'process' : 'wait'
-    if (idx === 1) return ptBrDone ? 'finish' : currentStep === 1 ? 'process' : 'wait'
-    if (idx === 2) return enDone ? 'finish' : currentStep === 2 ? 'process' : 'wait'
-    return 'wait'
-  }
-
   if (loading) {
     return (
       <div style={{ display: 'flex', justifyContent: 'center', paddingTop: Spacing.xxxl }}>
@@ -243,39 +222,47 @@ export default function CVPage() {
     )
   }
 
-  const pageHeader = (
-    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: Spacing.xl0 }}>
-      <Space align="center">
-        <FileTextOutlined style={{ fontSize: FontSize.xxl, color: Colors.info }} />
-        <Title level={3} style={{ margin: 0 }}>{t('cv.title')}</Title>
-      </Space>
-    </div>
-  )
-
   const previewCssTag = <style>{PREVIEW_CSS}</style>
 
-  // ── Viewer mode (CV exists and not editing) ──────────────────────────────
+  // ── Viewer mode ──────────────────────────────────────────────────────────
   if (cv && !editMode) {
     return (
-      <div style={{ maxWidth: Spacing.pageMaxWidth, margin: '0 auto', padding: `${Spacing.lg} ${Spacing.md}` }}>
-        {pageHeader}
-        <CVViewer cv={cv} onEdit={() => { setCurrentStep(0); setEditMode(true) }} isMobile={isMobile} />
-        <div style={{ marginTop: Spacing.lg, display: 'flex', justifyContent: 'center' }}>
-          <Popconfirm
-            title={t('cv.deleteCVTitle')}
-            description={t('cv.deleteCVConfirm')}
-            onConfirm={handleDelete}
-            okText={t('common.delete')}
-            okButtonProps={{ danger: true }}
-            cancelText={t('common.cancel')}
-          >
-            <Button danger icon={<DeleteOutlined />} loading={saving}>
-              {t('cv.deleteCV')}
-            </Button>
-          </Popconfirm>
-        </div>
+      <>
+        <PageLayout
+          variant="cv"
+          left={
+            <div style={{ display: 'flex', flexDirection: 'column', gap: Spacing.md }}>
+              <WizardStepper
+                steps={WIZARD_STEPS}
+                current={ptBrDone ? 2 : 1}
+              />
+              <Popconfirm
+                title={t('cv.deleteCVTitle')}
+                description={t('cv.deleteCVConfirm')}
+                onConfirm={handleDelete}
+                okText={t('common.delete')}
+                okButtonProps={{ danger: true }}
+                cancelText={t('common.cancel')}
+              >
+                <Button danger icon={<DeleteOutlined />} loading={saving} block>
+                  {t('cv.deleteCV')}
+                </Button>
+              </Popconfirm>
+            </div>
+          }
+          center={
+            <CVViewer cv={cv} onEdit={() => { setCurrentStep(0); setEditMode(true) }} isMobile={isMobile} />
+          }
+          right={
+            <DSCard title={t('cv.atsScore')}>
+              <div style={{ display: 'flex', justifyContent: 'center', padding: Spacing.md }}>
+                <ScoreRing value={ptBrDone && enDone ? 85 : ptBrDone ? 60 : 30} size={120} label="Completude" sublabel="/100" />
+              </div>
+            </DSCard>
+          }
+        />
         {previewCssTag}
-      </div>
+      </>
     )
   }
 
@@ -295,20 +282,12 @@ export default function CVPage() {
 
       {currentStep === 1 && (
         <Card bodyStyle={{ padding: isMobile ? Spacing.md1 : `${Spacing.md} ${Spacing.lg1}` }}>
-          <Alert
-            type="info"
-            showIcon
-            style={{ marginBottom: Spacing.md2 }}
-            message={t('cv.editor.ptbrHint')}
-            description={isMobile ? undefined : t('cv.editor.ptbrHintDetail')}
-          />
+          <Alert type="info" showIcon style={{ marginBottom: Spacing.md2 }} message={t('cv.editor.ptbrHint')} description={isMobile ? undefined : t('cv.editor.ptbrHintDetail')} />
           <MonacoEditorPanel value={ptBrMarkdown} onChange={setPtBrMarkdown} errors={ptBrErrors} />
           {!isMobile && (
             <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: Spacing.md }}>
               <Button icon={<CheckOutlined />} onClick={() => setCurrentStep(0)}>{t('common.back')}</Button>
-              <Button type="primary" onClick={handleStep2Next} loading={saving}>
-                {t('cv.editor.validateAndContinue')}
-              </Button>
+              <Button type="primary" onClick={handleStep2Next} loading={saving}>{t('cv.editor.validateAndContinue')}</Button>
             </div>
           )}
         </Card>
@@ -336,9 +315,7 @@ export default function CVPage() {
               <Button onClick={() => setCurrentStep(1)}>{t('common.back')}</Button>
               <Space>
                 <Button onClick={handleSkipEn}>{t('cv.editor.skipStep')}</Button>
-                <Button type="primary" onClick={handleStep3Finish} loading={saving} icon={<CheckOutlined />}>
-                  {t('cv.editor.validateAndFinish')}
-                </Button>
+                <Button type="primary" onClick={handleStep3Finish} loading={saving} icon={<CheckOutlined />}>{t('cv.editor.validateAndFinish')}</Button>
               </Space>
             </div>
           )}
@@ -351,7 +328,7 @@ export default function CVPage() {
   const mobileBottomNav = isMobile && (
     <div style={{
       position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 200,
-      background: Colors.white, borderTop: `${Spacing.px} solid ${Colors.borderLight}`,
+      background: Colors.white, borderTop: `1px solid ${Colors.surfaceBorder}`,
       display: 'flex', height: Spacing.mobileNavHeight,
     }}>
       {[
@@ -368,8 +345,8 @@ export default function CVPage() {
             style={{
               flex: 1, border: 'none', background: 'none', cursor: 'pointer',
               display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: Spacing.xxs,
-              color: active ? Colors.info : done ? Colors.success : Colors.textDisabled,
-              borderTop: active ? `${Spacing.xxs} solid ${Colors.info}` : `${Spacing.xxs} solid transparent`,
+              color: active ? Colors.primaryDark : done ? Colors.success : Colors.textDisabled,
+              borderTop: active ? `2px solid ${Colors.primaryDark}` : '2px solid transparent',
               padding: `${Spacing.sm2} 0`,
             }}
           >
@@ -378,14 +355,13 @@ export default function CVPage() {
           </button>
         )
       })}
-      <div style={{ width: Spacing.px, background: Colors.borderLight, alignSelf: 'stretch', margin: `${Spacing.sm} 0` }} />
       <button
         onClick={currentStep === 0 ? handleStep1Next : currentStep === 1 ? handleStep2Next : handleStep3Finish}
         disabled={saving}
         style={{
           flex: 1.2, border: 'none', background: 'none', cursor: 'pointer',
           display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: Spacing.xxs,
-          color: Colors.info, padding: `${Spacing.sm2} 0`,
+          color: Colors.primaryDark, padding: `${Spacing.sm2} 0`,
         }}
       >
         <span style={{ fontSize: FontSize.lg }}><CheckOutlined /></span>
@@ -396,38 +372,25 @@ export default function CVPage() {
     </div>
   )
 
-  // ── Editor mode (steps wizard) ────────────────────────────────────────────
+  // ── Editor mode (wizard) ──────────────────────────────────────────────────
   return (
-    <div style={{ maxWidth: Spacing.pageMaxWidth, margin: '0 auto', paddingBottom: isMobile ? Spacing.mobileNavPad : 0 }}>
-      {pageHeader}
-
-      {!isMobile && (
-        <Steps
-          current={currentStep}
-          onChange={cv ? setCurrentStep : undefined}
-          style={{ marginBottom: Spacing.xl0 }}
-          items={[
-            { title: t('cv.steps.base'), description: t('cv.steps.baseDescription'), status: getStepStatus(0) },
-            { title: t('cv.steps.ptbr'), description: t('cv.steps.ptbrDescription'), status: getStepStatus(1) },
-            {
-              title: (
-                <Space size={4}>
-                  {t('cv.steps.en')}
-                  <Tag color="blue" style={{ fontSize: FontSize.xxs, lineHeight: Spacing.md, padding: `0 ${Spacing.xs}` }}>
-                    {t('common.optional')}
-                  </Tag>
-                </Space>
-              ),
-              description: t('cv.steps.enDescription'),
-              status: getStepStatus(2),
-            },
-          ]}
-        />
-      )}
-
-      {stepContent}
+    <>
+      <PageLayout
+        variant="cv"
+        left={
+          <WizardStepper
+            steps={WIZARD_STEPS}
+            current={currentStep}
+          />
+        }
+        center={
+          <div style={{ paddingBottom: isMobile ? Spacing.mobileNavPad : 0 }}>
+            {stepContent}
+          </div>
+        }
+      />
       {mobileBottomNav}
       {previewCssTag}
-    </div>
+    </>
   )
 }
