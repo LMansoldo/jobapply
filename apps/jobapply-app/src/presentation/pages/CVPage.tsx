@@ -1,30 +1,20 @@
 /**
  * @file CVPage.tsx
- * @description CV management page. Orchestrates state and step flow for the CV wizard.
- * Sub-components live in src/domain/cv/components/.
+ * @description CV management page — horizontal stepper, viewer mode with CVTemplate, wizard with rich editor.
  */
 import { useState, useEffect } from 'react'
 import { Grid } from 'antd'
-import {
-  CheckOutlined,
-  DeleteOutlined,
-  FileTextOutlined,
-  GlobalOutlined,
-  UserOutlined,
-} from '@ant-design/icons'
+import { CheckOutlined, DeleteOutlined } from '@ant-design/icons'
 import { useTranslation } from 'react-i18next'
 import { useAuth } from '../../application/providers/AuthProvider'
 import { useAntApp } from '../../components/AntApp'
-import { Alert } from '../../components/Alert'
 import { Button } from '../../components/Button'
-import { Card } from '../../components/Card'
 import { Form } from '../../components/Form'
 import { Popconfirm } from '../../components/Popconfirm'
 import { Space } from '../../components/Space'
 import { Spin } from '../../components/Spin'
-import { Tag } from '../../components/Tag'
-import { CVBaseForm } from '../../domain/cv/components/CVBaseForm'
 import { CVViewer } from '../../domain/cv/components/CVViewer'
+import { CVBaseForm } from '../../domain/cv/components/CVBaseForm'
 import { MonacoEditorPanel } from '../../domain/cv/components/MonacoEditorPanel'
 import { EN_TEMPLATE, PT_BR_TEMPLATE } from '../../domain/cv/constants'
 import { localeVersionToMarkdown, parseMarkdownToLocale } from '../../domain/cv/helpers'
@@ -36,35 +26,25 @@ import {
   updateCV,
   updateCVLocale,
 } from '../../infrastructure/repositories/cvRepository'
-import { PageLayout } from '../../design-system/layout/PageLayout'
-import { WizardStepper } from '../../design-system/cv/WizardStepper'
-import { ScoreRing } from '../../design-system/primitives/ScoreRing'
-import { DSCard } from '../../design-system/primitives/DSCard'
+import { HorizontalStepper } from '../../design-system/cv/HorizontalStepper'
 import { Colors } from '../../styles/theme/colors'
-import { FontSize } from '../../styles/theme/typography'
+import { FontSize, FontWeight, FontFamily } from '../../styles/theme/typography'
 import { Spacing } from '../../styles/theme/spacing'
 
 const { useBreakpoint } = Grid
 
 const PREVIEW_CSS = `
-  .markdown-preview h1 { font-size: ${FontSize.xxl}; font-weight: 700; margin: 0 0 ${Spacing.sm}; border-bottom: 2px solid ${Colors.primaryDark}; padding-bottom: ${Spacing.sm2}; }
-  .markdown-preview h2 { font-size: ${FontSize.md2}; font-weight: 600; margin: ${Spacing.lg0} 0 ${Spacing.sm2}; color: ${Colors.textSub}; }
-  .markdown-preview h3 { font-size: ${FontSize.md0}; font-weight: 600; margin: ${Spacing.md0} 0 ${Spacing.xs}; }
-  .markdown-preview p { margin: ${Spacing.xs} 0; font-size: ${FontSize.md0}; line-height: 1.6; }
-  .markdown-preview ul { margin: ${Spacing.xs} 0; padding-left: ${Spacing.lg1}; }
-  .markdown-preview li { font-size: ${FontSize.md0}; line-height: 1.6; margin: ${Spacing.xxs} 0; }
+  .markdown-preview h1 { font-size: 2.2rem; font-weight: 700; margin: 0 0 0.8rem; border-bottom: 2px solid #7c3aed; padding-bottom: 0.6rem; }
+  .markdown-preview h2 { font-size: 1.5rem; font-weight: 600; margin: 1.8rem 0 0.6rem; color: #6b7280; }
+  .markdown-preview h3 { font-size: 1.3rem; font-weight: 600; margin: 1.0rem 0 0.4rem; }
+  .markdown-preview p { margin: 0.4rem 0; font-size: 1.3rem; line-height: 1.6; }
+  .markdown-preview ul { margin: 0.4rem 0; padding-left: 2.0rem; }
+  .markdown-preview li { font-size: 1.3rem; line-height: 1.6; margin: 0.2rem 0; }
   .markdown-preview strong { font-weight: 600; }
-  .markdown-preview em { color: ${Colors.textMuted}; }
-  .markdown-preview hr { border: none; border-top: 1px solid ${Colors.surfaceBorder}; margin: ${Spacing.md1} 0; }
-  .markdown-preview blockquote { border-left: 3px solid ${Colors.surfaceBorder}; margin: ${Spacing.sm} 0; padding-left: ${Spacing.md1}; color: ${Colors.textHint}; }
-  .markdown-preview code { font-size: ${FontSize.sm}; background: ${Colors.surfaceLight}; padding: 1px ${Spacing.xs}; border-radius: 3px; }
+  .markdown-preview em { color: #555; }
+  .markdown-preview hr { border: none; border-top: 1px solid #e9e4fc; margin: 1.4rem 0; }
+  .markdown-preview code { font-size: 1.2rem; background: #f5f5f5; padding: 1px 4px; border-radius: 3px; }
 `
-
-const WIZARD_STEPS = [
-  { label: 'Dados Pessoais' },
-  { label: 'CV em PT-BR' },
-  { label: 'CV em Inglês' },
-]
 
 export default function CVPage() {
   const { cvId, setCvId } = useAuth()
@@ -110,6 +90,9 @@ export default function CVPage() {
       phone: data.phone,
       location: data.location,
       linkedin: data.linkedin,
+      title: data.title,
+      github: data.github,
+      website: data.website,
       languages: data.languages,
     })
 
@@ -168,7 +151,7 @@ export default function CVPage() {
   }
 
   async function handleStep3Finish() {
-    if (enMarkdown.trim() === EN_TEMPLATE.trim()) { message.success(t('cv.registerSuccess')); return }
+    if (enMarkdown.trim() === EN_TEMPLATE.trim()) { message.success(t('cv.registerSuccess')); setEditMode(false); return }
     const result = parseMarkdownToLocale(enMarkdown, 'en')
     if (result.errors.length > 0) { setEnErrors(result.errors); return }
     setEnErrors([])
@@ -177,6 +160,7 @@ export default function CVPage() {
     try {
       await updateCVLocale(cv._id, 'en', result.data!)
       message.success(t('cv.saveEnSuccess'))
+      setEditMode(false)
     } catch (err: unknown) {
       const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message ?? t('cv.saveEnError')
       message.error(msg)
@@ -188,6 +172,7 @@ export default function CVPage() {
   function handleSkipEn() {
     setEnErrors([])
     message.success(t('cv.skipEnSuccess'))
+    setEditMode(false)
   }
 
   async function handleDelete() {
@@ -211,9 +196,6 @@ export default function CVPage() {
     }
   }
 
-  const ptBrDone = cv?.localeVersions?.some((v) => v.locale === 'pt-BR') ?? false
-  const enDone = cv?.localeVersions?.some((v) => v.locale === 'en') ?? false
-
   if (loading) {
     return (
       <div style={{ display: 'flex', justifyContent: 'center', paddingTop: Spacing.xxxl }}>
@@ -228,101 +210,37 @@ export default function CVPage() {
   if (cv && !editMode) {
     return (
       <>
-        <PageLayout
-          variant="cv"
-          left={
-            <div style={{ display: 'flex', flexDirection: 'column', gap: Spacing.md }}>
-              <WizardStepper
-                steps={WIZARD_STEPS}
-                current={ptBrDone ? 2 : 1}
-              />
-              <Popconfirm
-                title={t('cv.deleteCVTitle')}
-                description={t('cv.deleteCVConfirm')}
-                onConfirm={handleDelete}
-                okText={t('common.delete')}
-                okButtonProps={{ danger: true }}
-                cancelText={t('common.cancel')}
-              >
-                <Button danger icon={<DeleteOutlined />} loading={saving} block>
-                  {t('cv.deleteCV')}
-                </Button>
-              </Popconfirm>
-            </div>
-          }
-          center={
-            <CVViewer cv={cv} onEdit={() => { setCurrentStep(0); setEditMode(true) }} isMobile={isMobile} />
-          }
-          right={
-            <DSCard title={t('cv.atsScore')}>
-              <div style={{ display: 'flex', justifyContent: 'center', padding: Spacing.md }}>
-                <ScoreRing value={ptBrDone && enDone ? 85 : ptBrDone ? 60 : 30} size={120} label="Completude" sublabel="/100" />
-              </div>
-            </DSCard>
-          }
-        />
+        <div style={{ maxWidth: '128rem', margin: '0 auto' }}>
+          {/* Delete button */}
+          <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: Spacing.md }}>
+            <Popconfirm
+              title={t('cv.deleteCVTitle')}
+              description={t('cv.deleteCVConfirm')}
+              onConfirm={handleDelete}
+              okText={t('common.delete')}
+              okButtonProps={{ danger: true }}
+              cancelText={t('common.cancel')}
+            >
+              <Button danger icon={<DeleteOutlined />} loading={saving}>
+                {t('cv.deleteCV')}
+              </Button>
+            </Popconfirm>
+          </div>
+          <CVViewer cv={cv} onEdit={() => { setCurrentStep(0); setEditMode(true) }} isMobile={isMobile} />
+        </div>
         {previewCssTag}
       </>
     )
   }
 
-  // ── Step content ──────────────────────────────────────────────────────────
-  const stepContent = (
-    <>
-      {currentStep === 0 && (
-        <CVBaseForm
-          form={baseForm}
-          isMobile={isMobile}
-          hasCv={!!cv}
-          saving={saving}
-          onNext={handleStep1Next}
-          onBack={() => setEditMode(false)}
-        />
-      )}
+  // ── Wizard steps ──────────────────────────────────────────────────────────
+  const WIZARD_STEPS = [
+    { label: t('cv.steps.base'), sublabel: t('cv.steps.baseDescription') },
+    { label: t('cv.steps.ptbr'), sublabel: t('cv.steps.ptbrDescription') },
+    { label: t('cv.steps.en'), sublabel: t('cv.steps.enDescription') },
+  ]
 
-      {currentStep === 1 && (
-        <Card bodyStyle={{ padding: isMobile ? Spacing.md1 : `${Spacing.md} ${Spacing.lg1}` }}>
-          <Alert type="info" showIcon style={{ marginBottom: Spacing.md2 }} message={t('cv.editor.ptbrHint')} description={isMobile ? undefined : t('cv.editor.ptbrHintDetail')} />
-          <MonacoEditorPanel value={ptBrMarkdown} onChange={setPtBrMarkdown} errors={ptBrErrors} />
-          {!isMobile && (
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: Spacing.md }}>
-              <Button icon={<CheckOutlined />} onClick={() => setCurrentStep(0)}>{t('common.back')}</Button>
-              <Button type="primary" onClick={handleStep2Next} loading={saving}>{t('cv.editor.validateAndContinue')}</Button>
-            </div>
-          )}
-        </Card>
-      )}
-
-      {currentStep === 2 && (
-        <Card bodyStyle={{ padding: isMobile ? Spacing.md1 : `${Spacing.md} ${Spacing.lg1}` }}>
-          <Alert
-            type="info"
-            showIcon
-            style={{ marginBottom: Spacing.md2 }}
-            message={
-              <Space>
-                {t('cv.editor.enHint')}
-                <Tag color="blue" style={{ fontSize: FontSize.xxs, lineHeight: Spacing.md, padding: `0 ${Spacing.xs}` }}>
-                  {t('common.optional')}
-                </Tag>
-              </Space>
-            }
-            description={isMobile ? undefined : t('cv.editor.enHintDetail')}
-          />
-          <MonacoEditorPanel value={enMarkdown} onChange={setEnMarkdown} errors={enErrors} />
-          {!isMobile && (
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: Spacing.md }}>
-              <Button onClick={() => setCurrentStep(1)}>{t('common.back')}</Button>
-              <Space>
-                <Button onClick={handleSkipEn}>{t('cv.editor.skipStep')}</Button>
-                <Button type="primary" onClick={handleStep3Finish} loading={saving} icon={<CheckOutlined />}>{t('cv.editor.validateAndFinish')}</Button>
-              </Space>
-            </div>
-          )}
-        </Card>
-      )}
-    </>
-  )
+  const stepLabel = `Passo ${currentStep + 1} de ${WIZARD_STEPS.length}`
 
   // ── Mobile bottom nav bar ─────────────────────────────────────────────────
   const mobileBottomNav = isMobile && (
@@ -331,64 +249,91 @@ export default function CVPage() {
       background: Colors.white, borderTop: `1px solid ${Colors.surfaceBorder}`,
       display: 'flex', height: Spacing.mobileNavHeight,
     }}>
-      {[
-        { step: 0, icon: <UserOutlined />, label: t('cv.mobile.base') },
-        { step: 1, icon: <FileTextOutlined />, label: t('cv.mobile.ptbr') },
-        { step: 2, icon: <GlobalOutlined />, label: t('cv.mobile.en') },
-      ].map(({ step, icon, label }) => {
-        const done = step === 0 ? !!cv : step === 1 ? ptBrDone : enDone
-        const active = currentStep === step
-        return (
-          <button
-            key={step}
-            onClick={() => (cv || step === 0) ? setCurrentStep(step) : undefined}
-            style={{
-              flex: 1, border: 'none', background: 'none', cursor: 'pointer',
-              display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: Spacing.xxs,
-              color: active ? Colors.primaryDark : done ? Colors.success : Colors.textDisabled,
-              borderTop: active ? `2px solid ${Colors.primaryDark}` : '2px solid transparent',
-              padding: `${Spacing.sm2} 0`,
-            }}
-          >
-            <span style={{ fontSize: FontSize.lg }}>{icon}</span>
-            <span style={{ fontSize: FontSize.xs, fontWeight: active ? 600 : 400 }}>{label}</span>
-          </button>
-        )
-      })}
       <button
         onClick={currentStep === 0 ? handleStep1Next : currentStep === 1 ? handleStep2Next : handleStep3Finish}
         disabled={saving}
         style={{
-          flex: 1.2, border: 'none', background: 'none', cursor: 'pointer',
-          display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: Spacing.xxs,
-          color: Colors.primaryDark, padding: `${Spacing.sm2} 0`,
+          flex: 1, border: 'none', background: Colors.primaryDark, cursor: 'pointer',
+          color: Colors.white, fontSize: FontSize.sm, fontWeight: FontWeight.bold,
+          fontFamily: FontFamily.body,
         }}
       >
-        <span style={{ fontSize: FontSize.lg }}><CheckOutlined /></span>
-        <span style={{ fontSize: FontSize.xs, fontWeight: 600 }}>
-          {currentStep === 2 ? t('cv.mobile.finish') : t('cv.mobile.save')}
-        </span>
+        {saving && <CheckOutlined style={{ marginRight: 6 }} />}
+        {currentStep === 2 ? t('cv.mobile.finish') : t('cv.mobile.save')}
       </button>
     </div>
   )
 
-  // ── Editor mode (wizard) ──────────────────────────────────────────────────
   return (
     <>
-      <PageLayout
-        variant="cv"
-        left={
-          <WizardStepper
-            steps={WIZARD_STEPS}
-            current={currentStep}
-          />
-        }
-        center={
-          <div style={{ paddingBottom: isMobile ? Spacing.mobileNavPad : 0 }}>
-            {stepContent}
-          </div>
-        }
-      />
+      <div style={{ maxWidth: '96rem', margin: '0 auto' }}>
+        {/* Horizontal stepper */}
+        <HorizontalStepper steps={WIZARD_STEPS} current={currentStep} />
+
+        {/* Step content */}
+        <div style={{ paddingBottom: isMobile ? Spacing.mobileNavPad : 0 }}>
+          {currentStep === 0 && (
+            <CVBaseForm
+              form={baseForm}
+              isMobile={isMobile}
+              hasCv={!!cv}
+              saving={saving}
+              stepLabel={stepLabel}
+              onNext={handleStep1Next}
+              onBack={() => setEditMode(false)}
+            />
+          )}
+
+          {currentStep === 1 && (
+            <div>
+              <MonacoEditorPanel
+                value={ptBrMarkdown}
+                onChange={setPtBrMarkdown}
+                errors={ptBrErrors}
+                locale="pt-BR"
+              />
+              {!isMobile && (
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: Spacing.md, padding: `0 ${Spacing.xs}` }}>
+                  <Button onClick={() => setCurrentStep(0)}>{t('common.back')}</Button>
+                  <Space>
+                    <span style={{ fontSize: FontSize.sm, color: Colors.textSub }}>{stepLabel}</span>
+                    <Button type="primary" onClick={handleStep2Next} loading={saving}>{t('cv.editor.validateAndContinue')}</Button>
+                  </Space>
+                </div>
+              )}
+            </div>
+          )}
+
+          {currentStep === 2 && (
+            <div>
+              <MonacoEditorPanel
+                value={enMarkdown}
+                onChange={setEnMarkdown}
+                errors={enErrors}
+                locale="en"
+                isOptional
+                isEmpty={enMarkdown.trim() === EN_TEMPLATE.trim() || !enMarkdown.trim()}
+                onStartFromScratch={() => setEnMarkdown('')}
+                onTranslateFromPtBr={() => {
+                  message.info(t('cv.translateFromPtBr'))
+                }}
+              />
+              {!isMobile && (
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: Spacing.md, padding: `0 ${Spacing.xs}` }}>
+                  <Button onClick={() => setCurrentStep(1)}>{t('common.back')}</Button>
+                  <Space>
+                    <span style={{ fontSize: FontSize.sm, color: Colors.textSub }}>{stepLabel}</span>
+                    <Button onClick={handleSkipEn}>{t('cv.editor.skipStep')}</Button>
+                    <Button type="primary" onClick={handleStep3Finish} loading={saving} icon={<CheckOutlined />}>
+                      {t('cv.editor.validateAndFinish')}
+                    </Button>
+                  </Space>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+      </div>
       {mobileBottomNav}
       {previewCssTag}
     </>
