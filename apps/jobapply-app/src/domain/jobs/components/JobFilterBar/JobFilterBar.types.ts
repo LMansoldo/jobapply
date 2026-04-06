@@ -9,7 +9,7 @@ export interface JobFilterBarProps {
   /** The current filter state */
   filters: JobFilters
   /** Callback to update a single filter key */
-  onFilterChange: (key: keyof JobFilters, value: string) => void
+  onFilterChange: (key: keyof JobFilters, value: string | string[] | number | undefined) => void
   /** Callback to manually reload jobs */
   onReload: () => void
 }

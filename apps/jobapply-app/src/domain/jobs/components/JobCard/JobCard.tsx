@@ -9,12 +9,13 @@ import { DSJobCard } from '../../../../design-system/jobs/DSJobCard'
  * Displays a compact job entry for use in a scrollable job list.
  * @param props - JobCardProps
  */
-export function JobCard({ job, isSelected, onClick }: JobCardProps) {
+export function JobCard({ job, isSelected, onClick, onApply }: JobCardProps) {
   return (
     <DSJobCard
       job={job}
       isSelected={isSelected}
       onClick={() => onClick(job)}
+      onApply={onApply}
     />
   )
 }

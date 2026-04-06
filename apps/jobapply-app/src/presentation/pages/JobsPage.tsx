@@ -1,36 +1,35 @@
 /**
  * @file JobsPage.tsx
- * @description Jobs listing page. Orchestrates state and layout for the job search feature.
+ * @description Jobs listing page matching mockup — hero + 3-col layout.
  */
 import { useEffect, useState, useRef, useCallback } from 'react'
 import { Grid } from 'antd'
 import { ArrowLeftOutlined } from '@ant-design/icons'
 import { useTranslation } from 'react-i18next'
+import { useNavigate } from 'react-router-dom'
 import { useAntApp } from '../../components/AntApp'
 import { Button } from '../../components/Button'
 import { Empty } from '../../components/Empty'
 import { Modal } from '../../components/Modal'
 import { Spin } from '../../components/Spin'
 import { JobCard } from '../../domain/jobs/components/JobCard'
-import { JobDetail } from '../../domain/jobs/components/JobDetail'
 import { JobFilterBar } from '../../domain/jobs/components/JobFilterBar'
 import type { Job, JobFilters } from '../../domain/jobs/types'
-import { fetchJobs, deleteJob, tailorJobDescription } from '../../infrastructure/repositories/jobsRepository'
+import { fetchJobs, deleteJob } from '../../infrastructure/repositories/jobsRepository'
 import { PageLayout } from '../../design-system/layout/PageLayout'
-import { HeroSearch } from '../../design-system/jobs/HeroSearch'
+import { HeroSection } from '../../design-system/jobs/HeroSection'
 import { ProfileCard } from '../../design-system/jobs/ProfileCard'
+import { JobAlertsCard } from '../../design-system/jobs/JobAlertsCard'
+import { IndustryNewsCard } from '../../design-system/jobs/IndustryNewsCard'
+import { SortDropdown } from '../../design-system/jobs/SortDropdown'
+import type { SortOption } from '../../design-system/jobs/SortDropdown'
 import { DSPagination } from '../../design-system/navigation/DSPagination'
 import { useAuth } from '../../application/providers/AuthProvider'
 import { Colors } from '../../styles/theme/colors'
 import { Shadows } from '../../styles/theme/shadows'
 import { BorderRadius } from '../../styles/theme/radius'
 import { Spacing } from '../../styles/theme/spacing'
-import dayjs from 'dayjs'
-import relativeTime from 'dayjs/plugin/relativeTime'
-import 'dayjs/locale/pt-br'
-
-dayjs.extend(relativeTime)
-dayjs.locale('pt-br')
+import { FontSize, FontWeight, FontFamily } from '../../styles/theme/typography'
 
 const { useBreakpoint } = Grid
 
@@ -40,23 +39,37 @@ const panelStyle: React.CSSProperties = {
   boxShadow: Shadows.sm,
 }
 
+const MOCK_ALERTS = [
+  { icon: '⚛️', title: 'React Sênior · Remoto', subtitle: 'Criado há 2 dias', count: 14 },
+  { icon: '🔷', title: 'TypeScript · SP', subtitle: 'Criado há 5 dias', count: 7 },
+  { icon: '👑', title: 'Tech Lead Frontend', subtitle: 'Criado há 1 semana', count: 3 },
+]
+
+const MOCK_NEWS = [
+  { thumbnail: '📰', title: 'Mercado de tecnologia cresce 15% em 2025', source: 'TechBrasil', time: '2h' },
+  { thumbnail: '🤖', title: 'IA generativa transforma processos de contratação', source: 'InfoQ', time: '5h' },
+  { thumbnail: '💼', title: 'Salários de desenvolvedores React batem recorde', source: 'Glassdoor', time: '1d' },
+  { thumbnail: '🚀', title: 'Startups brasileiras abrem 8 mil vagas em TI', source: 'Startups.com.br', time: '2d' },
+]
+
 export default function JobsPage() {
   const { message } = useAntApp()
   const { t } = useTranslation()
   const { user } = useAuth()
+  const navigate = useNavigate()
   const screens = useBreakpoint()
   const isMobile = !screens.md
 
   const [jobs, setJobs] = useState<Job[]>([])
   const [total, setTotal] = useState(0)
   const [loading, setLoading] = useState(false)
-  const [tailoringId, setTailoringId] = useState<string | null>(null)
   const [deletingId, setDeletingId] = useState<string | null>(null)
   const [selectedJob, setSelectedJob] = useState<Job | null>(null)
   const [mobileDetailOpen, setMobileDetailOpen] = useState(false)
   const [filters, setFilters] = useState<JobFilters>({ page: 1, limit: 20 })
   const [keyword, setKeyword] = useState('')
   const [location, setLocation] = useState('')
+  const [sort, setSort] = useState<SortOption>('relevant')
 
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
@@ -85,7 +98,7 @@ export default function JobsPage() {
     loadJobs(filters)
   }, [filters, loadJobs])
 
-  function handleFilterChange(key: keyof JobFilters, value: string | number | undefined) {
+  function handleFilterChange(key: keyof JobFilters, value: string | string[] | number | undefined) {
     if (debounceRef.current) clearTimeout(debounceRef.current)
     const newFilters = { ...filters, [key]: value, page: 1 }
     setFilters(newFilters)
@@ -100,23 +113,23 @@ export default function JobsPage() {
     loadJobs(newF)
   }
 
+  function handleChipClick(chip: string) {
+    setKeyword(chip)
+    const newF = { ...filters, title: chip, page: 1 }
+    setFilters(newF)
+    loadJobs(newF)
+  }
+
   function handleJobClick(job: Job) {
     setSelectedJob(job)
     if (isMobile) setMobileDetailOpen(true)
   }
 
-  async function handleTailor(job: Job) {
-    setTailoringId(job._id)
-    try {
-      const res = await tailorJobDescription(job._id)
-      const updated = { ...job, tailoredDescription: res.tailoredDescription }
-      setJobs((prev) => prev.map((j) => (j._id === job._id ? updated : j)))
-      setSelectedJob((prev) => (prev?._id === job._id ? updated : prev))
-      message.success(t('jobs.tailorSuccess'))
-    } catch {
-      message.error(t('jobs.tailorError'))
-    } finally {
-      setTailoringId(null)
+  function handleApply(job: Job) {
+    if (job.url) {
+      window.open(job.url, '_blank')
+    } else {
+      message.info(t('jobs.applyJob'))
     }
   }
 
@@ -141,24 +154,27 @@ export default function JobsPage() {
     }
   }
 
+  void handleDelete // used via detail panel
+
   function handlePageChange(page: number) {
     const newF = { ...filters, page }
     setFilters(newF)
     loadJobs(newF)
   }
 
-  const jobListCenter = (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: Spacing.md }}>
-      {/* Hero search */}
-      <HeroSearch
-        keywordValue={keyword}
-        locationValue={location}
-        onKeywordChange={setKeyword}
-        onLocationChange={setLocation}
-        onSearch={handleHeroSearch}
-      />
+  const jobCountRow = (
+    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: Spacing.md }}>
+      <p style={{ margin: 0, fontSize: FontSize.sm, color: Colors.textSub }}>
+        <span style={{ fontWeight: FontWeight.bold, color: Colors.textMain, fontFamily: FontFamily.heading }}>{total}</span>{' '}
+        {t('jobs.jobsFound', { count: total }).replace(String(total), '').trim()}
+      </p>
+      <SortDropdown value={sort} onChange={(v) => { setSort(v); handleFilterChange('sort', v) }} />
+    </div>
+  )
 
-      {/* Job list */}
+  const jobListCenter = (
+    <div style={{ display: 'flex', flexDirection: 'column' }}>
+      {jobCountRow}
       <div style={{ ...panelStyle, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
         {loading ? (
           <div style={{ display: 'flex', justifyContent: 'center', padding: Spacing.xxl }}>
@@ -174,6 +190,7 @@ export default function JobsPage() {
                 job={job}
                 isSelected={!isMobile && selectedJob?._id === job._id}
                 onClick={handleJobClick}
+                onApply={handleApply}
               />
             ))}
           </div>
@@ -191,10 +208,39 @@ export default function JobsPage() {
     </div>
   )
 
+  const hero = (
+    <HeroSection
+      keywordValue={keyword}
+      locationValue={location}
+      onKeywordChange={setKeyword}
+      onLocationChange={setLocation}
+      onSearch={handleHeroSearch}
+      onChipClick={handleChipClick}
+    />
+  )
+
+  const rightPanel = (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: Spacing.md }}>
+      {user && (
+        <ProfileCard
+          user={user}
+          completionPercent={72}
+          applications={47}
+          interviews={12}
+          offers={3}
+          onViewProfile={() => navigate('/cv')}
+        />
+      )}
+      <JobAlertsCard alerts={MOCK_ALERTS} />
+      <IndustryNewsCard news={MOCK_NEWS} />
+    </div>
+  )
+
   if (isMobile) {
     return (
       <>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: Spacing.md }}>
+        {hero}
+        <div style={{ padding: Spacing.md, display: 'flex', flexDirection: 'column', gap: Spacing.md }}>
           <JobFilterBar filters={filters} onFilterChange={handleFilterChange} onReload={() => loadJobs(filters)} />
           {jobListCenter}
         </div>
@@ -213,9 +259,13 @@ export default function JobsPage() {
               {t('common.back')}
             </Button>
           </div>
-          <div style={{ overflowY: 'auto' }}>
+          <div style={{ padding: Spacing.md }}>
             {selectedJob && (
-              <JobDetail job={selectedJob} deletingId={deletingId} tailoringId={tailoringId} onDelete={handleDelete} onTailor={handleTailor} />
+              <div>
+                <h3 style={{ fontFamily: FontFamily.heading, fontWeight: FontWeight.bold, color: Colors.textMain }}>{selectedJob.title}</h3>
+                <p style={{ color: Colors.textSub, fontSize: FontSize.sm }}>{selectedJob.company}</p>
+                <p style={{ color: Colors.textMain, lineHeight: 1.7 }}>{selectedJob.description}</p>
+              </div>
             )}
           </div>
         </Modal>
@@ -224,25 +274,16 @@ export default function JobsPage() {
   }
 
   return (
-    <PageLayout
-      variant="jobs"
-      left={
-        <JobFilterBar filters={filters} onFilterChange={handleFilterChange} onReload={() => loadJobs(filters)} />
-      }
-      center={jobListCenter}
-      right={
-        <div style={{ display: 'flex', flexDirection: 'column', gap: Spacing.md }}>
-          {user && <ProfileCard user={user} completionPercent={72} />}
-          {selectedJob && (
-            <div style={{ ...panelStyle, overflow: 'hidden' }}>
-              <JobDetail job={selectedJob} deletingId={deletingId} tailoringId={tailoringId} onDelete={handleDelete} onTailor={handleTailor} />
-            </div>
-          )}
-          {!selectedJob && (
-            <Empty description={t('jobs.selectJob', 'Selecione uma vaga')} style={{ background: Colors.white, borderRadius: BorderRadius.base, padding: Spacing.xl }} />
-          )}
-        </div>
-      }
-    />
+    <>
+      {hero}
+      <div style={{ marginTop: `-${Spacing.lg}` }}>
+        <PageLayout
+          variant="jobs"
+          left={<JobFilterBar filters={filters} onFilterChange={handleFilterChange} onReload={() => loadJobs(filters)} />}
+          center={jobListCenter}
+          right={rightPanel}
+        />
+      </div>
+    </>
   )
 }

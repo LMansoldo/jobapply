@@ -9,6 +9,9 @@ export interface Job {
   url?: string
   salary?: string
   status: 'open' | 'closed' | 'applied'
+  contractType?: 'clt' | 'pj' | 'freelance' | 'internship'
+  modality?: 'remote' | 'hybrid' | 'onsite'
+  experienceLevel?: 'junior' | 'mid' | 'senior' | 'specialist'
   createdAt: string
 }
 
@@ -27,6 +30,11 @@ export interface JobFilters {
   tags?: string
   page?: number
   limit?: number
+  contractTypes?: string[]
+  modalities?: string[]
+  experienceLevels?: string[]
+  maxSalary?: number
+  sort?: 'relevant' | 'recent' | 'salary' | 'applications'
 }
 
 export interface BulkJobsPayload {

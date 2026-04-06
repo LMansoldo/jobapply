@@ -12,4 +12,6 @@ export interface JobCardProps {
   isSelected: boolean
   /** Callback when the card is clicked */
   onClick: (job: Job) => void
+  /** Callback when "Candidatar" is clicked */
+  onApply?: (job: Job) => void
 }
