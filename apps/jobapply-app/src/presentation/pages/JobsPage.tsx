@@ -1,7 +1,6 @@
 /**
  * @file JobsPage.tsx
  * @description Jobs listing page. Orchestrates state and layout for the job search feature.
- * Sub-components live in src/domain/jobs/components/.
  */
 import { useEffect, useState, useRef, useCallback } from 'react'
 import { Grid } from 'antd'
@@ -11,16 +10,21 @@ import { useAntApp } from '../../components/AntApp'
 import { Button } from '../../components/Button'
 import { Empty } from '../../components/Empty'
 import { Modal } from '../../components/Modal'
-import { Pagination } from '../../components/Pagination'
 import { Spin } from '../../components/Spin'
 import { JobCard } from '../../domain/jobs/components/JobCard'
 import { JobDetail } from '../../domain/jobs/components/JobDetail'
 import { JobFilterBar } from '../../domain/jobs/components/JobFilterBar'
 import type { Job, JobFilters } from '../../domain/jobs/types'
 import { fetchJobs, deleteJob, tailorJobDescription } from '../../infrastructure/repositories/jobsRepository'
+import { PageLayout } from '../../design-system/layout/PageLayout'
+import { HeroSearch } from '../../design-system/jobs/HeroSearch'
+import { ProfileCard } from '../../design-system/jobs/ProfileCard'
+import { DSPagination } from '../../design-system/navigation/DSPagination'
+import { useAuth } from '../../application/providers/AuthProvider'
 import { Colors } from '../../styles/theme/colors'
+import { Shadows } from '../../styles/theme/shadows'
+import { BorderRadius } from '../../styles/theme/radius'
 import { Spacing } from '../../styles/theme/spacing'
-import { FontSize } from '../../styles/theme/typography'
 import dayjs from 'dayjs'
 import relativeTime from 'dayjs/plugin/relativeTime'
 import 'dayjs/locale/pt-br'
@@ -30,21 +34,16 @@ dayjs.locale('pt-br')
 
 const { useBreakpoint } = Grid
 
-/** Shared style for container panels */
 const panelStyle: React.CSSProperties = {
   background: Colors.white,
-  borderRadius: Spacing.sm,
-  border: `${Spacing.px} solid ${Colors.borderCard}`,
-  boxShadow: `0 1px 4px ${Colors.shadowXs}`,
+  borderRadius: BorderRadius.base,
+  boxShadow: Shadows.sm,
 }
 
-/**
- * Jobs page — shows a filterable, paginated list of job applications.
- * On desktop: split view (list + detail). On mobile: list + modal detail.
- */
 export default function JobsPage() {
   const { message } = useAntApp()
   const { t } = useTranslation()
+  const { user } = useAuth()
   const screens = useBreakpoint()
   const isMobile = !screens.md
 
@@ -56,10 +55,11 @@ export default function JobsPage() {
   const [selectedJob, setSelectedJob] = useState<Job | null>(null)
   const [mobileDetailOpen, setMobileDetailOpen] = useState(false)
   const [filters, setFilters] = useState<JobFilters>({ page: 1, limit: 20 })
+  const [keyword, setKeyword] = useState('')
+  const [location, setLocation] = useState('')
 
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
-  /** Fetches jobs from the repository applying current filters. */
   const loadJobs = useCallback(
     async (f: JobFilters) => {
       setLoading(true)
@@ -85,11 +85,6 @@ export default function JobsPage() {
     loadJobs(filters)
   }, [filters, loadJobs])
 
-  /**
-   * Handles filter field changes with debounce for text inputs.
-   * @param key - Filter key to update
-   * @param value - New filter value
-   */
   function handleFilterChange(key: keyof JobFilters, value: string | number | undefined) {
     if (debounceRef.current) clearTimeout(debounceRef.current)
     const newFilters = { ...filters, [key]: value, page: 1 }
@@ -99,19 +94,17 @@ export default function JobsPage() {
     }
   }
 
-  /**
-   * Selects a job and opens the detail view.
-   * @param job - The job to display
-   */
+  function handleHeroSearch() {
+    const newF = { ...filters, title: keyword, location, page: 1 }
+    setFilters(newF)
+    loadJobs(newF)
+  }
+
   function handleJobClick(job: Job) {
     setSelectedJob(job)
     if (isMobile) setMobileDetailOpen(true)
   }
 
-  /**
-   * Triggers AI tailoring for a job description.
-   * @param job - Job to tailor
-   */
   async function handleTailor(job: Job) {
     setTailoringId(job._id)
     try {
@@ -127,10 +120,6 @@ export default function JobsPage() {
     }
   }
 
-  /**
-   * Deletes a job by ID.
-   * @param id - Job ID to delete
-   */
   async function handleDelete(id: string) {
     setDeletingId(id)
     try {
@@ -152,128 +141,108 @@ export default function JobsPage() {
     }
   }
 
-  /** Pagination change handler — updates filter page and reloads. */
   function handlePageChange(page: number) {
     const newF = { ...filters, page }
     setFilters(newF)
     loadJobs(newF)
   }
 
-  const jobCountLabel = `${total} ${t('jobs.jobsFound', 'vagas encontradas')}`
+  const jobListCenter = (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: Spacing.md }}>
+      {/* Hero search */}
+      <HeroSearch
+        keywordValue={keyword}
+        locationValue={location}
+        onKeywordChange={setKeyword}
+        onLocationChange={setLocation}
+        onSearch={handleHeroSearch}
+      />
 
-  const jobList = (
-    <>
-      <div style={{ padding: `${Spacing.md0} ${Spacing.md}`, borderBottom: `${Spacing.px} solid ${Colors.borderCard}`, fontSize: FontSize.md0, color: Colors.textPlaceholder }}>
-        {jobCountLabel}
-      </div>
-      <div style={{ flex: 1, overflowY: 'auto' }}>
+      {/* Job list */}
+      <div style={{ ...panelStyle, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
         {loading ? (
-          <div style={{ display: 'flex', justifyContent: 'center', paddingTop: Spacing.xxl }}>
+          <div style={{ display: 'flex', justifyContent: 'center', padding: Spacing.xxl }}>
             <Spin />
           </div>
         ) : jobs.length === 0 ? (
-          <Empty description={t('jobs.noJobs')} style={{ paddingTop: Spacing.xxl }} />
+          <Empty description={t('jobs.noJobs')} style={{ padding: Spacing.xxl }} />
         ) : (
-          jobs.map((job) => (
-            <JobCard
-              key={job._id}
-              job={job}
-              isSelected={!isMobile && selectedJob?._id === job._id}
-              onClick={handleJobClick}
-            />
-          ))
+          <div style={{ display: 'flex', flexDirection: 'column', gap: Spacing.xs, padding: Spacing.sm }}>
+            {jobs.map((job) => (
+              <JobCard
+                key={job._id}
+                job={job}
+                isSelected={!isMobile && selectedJob?._id === job._id}
+                onClick={handleJobClick}
+              />
+            ))}
+          </div>
         )}
-      </div>
-      {total > (filters.limit ?? 20) && (
-        <div style={{ borderTop: `${Spacing.px} solid ${Colors.borderCard}`, padding: `${Spacing.md0} ${Spacing.md}`, display: 'flex', justifyContent: 'center' }}>
-          <Pagination
+        {total > (filters.limit ?? 20) && (
+          <DSPagination
             simple
             current={filters.page}
             pageSize={filters.limit ?? 20}
             total={total}
             onChange={handlePageChange}
           />
-        </div>
-      )}
-    </>
+        )}
+      </div>
+    </div>
   )
 
-  return (
-    <>
-      <JobFilterBar
-        filters={filters}
-        onFilterChange={handleFilterChange}
-        onReload={() => loadJobs(filters)}
-      />
-
-      {/* Desktop: split layout */}
-      {!isMobile && (
-        <div style={{ display: 'flex', gap: Spacing.md1, height: 'calc(100vh - 19rem)', minHeight: '50rem' }}>
-          <div style={{ ...panelStyle, width: Spacing.sidebarWidth, flexShrink: 0, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
-            {jobList}
+  if (isMobile) {
+    return (
+      <>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: Spacing.md }}>
+          <JobFilterBar filters={filters} onFilterChange={handleFilterChange} onReload={() => loadJobs(filters)} />
+          {jobListCenter}
+        </div>
+        <Modal
+          open={mobileDetailOpen}
+          onCancel={() => setMobileDetailOpen(false)}
+          width="100vw"
+          style={{ top: 0, margin: 0, maxWidth: '100vw', padding: 0 }}
+          styles={{ content: { borderRadius: 0, padding: 0, minHeight: '100vh' }, body: { padding: 0 } }}
+          footer={null}
+          closable={false}
+          destroyOnClose
+        >
+          <div style={{ position: 'sticky', top: 0, zIndex: 10, background: Colors.white, borderBottom: `1px solid ${Colors.surfaceBorder}`, padding: `${Spacing.sm} ${Spacing.md}` }}>
+            <Button type="text" icon={<ArrowLeftOutlined />} onClick={() => setMobileDetailOpen(false)} style={{ fontWeight: 500 }}>
+              {t('common.back')}
+            </Button>
           </div>
-          <div style={{ ...panelStyle, flex: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column' }}>
-            {selectedJob ? (
-              <JobDetail
-                job={selectedJob}
-                deletingId={deletingId}
-                tailoringId={tailoringId}
-                onDelete={handleDelete}
-                onTailor={handleTailor}
-              />
-            ) : (
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', flex: 1 }}>
-                <Empty description={t('jobs.selectJob', 'Selecione uma vaga para ver os detalhes')} />
-              </div>
+          <div style={{ overflowY: 'auto' }}>
+            {selectedJob && (
+              <JobDetail job={selectedJob} deletingId={deletingId} tailoringId={tailoringId} onDelete={handleDelete} onTailor={handleTailor} />
             )}
           </div>
-        </div>
-      )}
+        </Modal>
+      </>
+    )
+  }
 
-      {/* Mobile: full-width list */}
-      {isMobile && (
-        <div style={{ ...panelStyle, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
-          {loading ? (
-            <div style={{ display: 'flex', justifyContent: 'center', padding: Spacing.xxl }}>
-              <Spin />
-            </div>
-          ) : (
-            jobList
-          )}
-        </div>
-      )}
-
-      {/* Mobile: fullscreen detail modal */}
-      <Modal
-        open={isMobile && mobileDetailOpen}
-        onCancel={() => setMobileDetailOpen(false)}
-        width="100vw"
-        style={{ top: 0, margin: 0, maxWidth: '100vw', padding: 0 }}
-        styles={{
-          content: { borderRadius: 0, padding: 0, minHeight: '100vh' },
-          body: { padding: 0 },
-        }}
-        footer={null}
-        closable={false}
-        destroyOnClose
-      >
-        <div style={{ position: 'sticky', top: 0, zIndex: 10, background: Colors.white, borderBottom: `${Spacing.px} solid ${Colors.borderCard}`, padding: `${Spacing.sm} ${Spacing.md}` }}>
-          <Button type="text" icon={<ArrowLeftOutlined />} onClick={() => setMobileDetailOpen(false)} style={{ fontWeight: 500 }}>
-            {t('common.back')}
-          </Button>
-        </div>
-        <div style={{ overflowY: 'auto', maxHeight: `calc(100vh - ${Spacing.headerHeight})` }}>
+  return (
+    <PageLayout
+      variant="jobs"
+      left={
+        <JobFilterBar filters={filters} onFilterChange={handleFilterChange} onReload={() => loadJobs(filters)} />
+      }
+      center={jobListCenter}
+      right={
+        <div style={{ display: 'flex', flexDirection: 'column', gap: Spacing.md }}>
+          {user && <ProfileCard user={user} completionPercent={72} />}
           {selectedJob && (
-            <JobDetail
-              job={selectedJob}
-              deletingId={deletingId}
-              tailoringId={tailoringId}
-              onDelete={handleDelete}
-              onTailor={handleTailor}
-            />
+            <div style={{ ...panelStyle, overflow: 'hidden' }}>
+              <JobDetail job={selectedJob} deletingId={deletingId} tailoringId={tailoringId} onDelete={handleDelete} onTailor={handleTailor} />
+            </div>
+          )}
+          {!selectedJob && (
+            <Empty description={t('jobs.selectJob', 'Selecione uma vaga')} style={{ background: Colors.white, borderRadius: BorderRadius.base, padding: Spacing.xl }} />
           )}
         </div>
-      </Modal>
-    </>
+      }
+    />
   )
 }
