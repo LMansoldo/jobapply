@@ -1,6 +1,9 @@
 /**
  * @file JobsPage.tsx
- * @description Jobs listing page matching mockup — hero + 3-col layout.
+ * @description Jobs listing page — LinkedIn-style 3-col layout:
+ *   Left: scrollable compact job list
+ *   Center: full job detail + apply/save/tailor actions
+ *   Right: profile card, alerts, industry news
  */
 import { useEffect, useState, useRef, useCallback } from 'react'
 import { Grid } from 'antd'
@@ -12,22 +15,20 @@ import { Button } from '../../components/Button'
 import { Empty } from '../../components/Empty'
 import { Modal } from '../../components/Modal'
 import { Spin } from '../../components/Spin'
-import { JobCard } from '../../domain/jobs/components/JobCard'
-import { JobFilterBar } from '../../domain/jobs/components/JobFilterBar'
+import { JobListItem } from '../../design-system/jobs/JobListItem'
+import { JobDetailPanel } from '../../design-system/jobs/JobDetailPanel'
 import type { Job, JobFilters } from '../../domain/jobs/types'
 import { fetchJobs, deleteJob } from '../../infrastructure/repositories/jobsRepository'
 import { PageLayout } from '../../design-system/layout/PageLayout'
-import { HeroSection } from '../../design-system/jobs/HeroSection'
+import { SortDropdown } from '../../design-system/jobs/SortDropdown'
+import type { SortOption } from '../../design-system/jobs/SortDropdown'
 import { ProfileCard } from '../../design-system/jobs/ProfileCard'
 import { JobAlertsCard } from '../../design-system/jobs/JobAlertsCard'
 import { IndustryNewsCard } from '../../design-system/jobs/IndustryNewsCard'
-import { SortDropdown } from '../../design-system/jobs/SortDropdown'
-import type { SortOption } from '../../design-system/jobs/SortDropdown'
 import { DSPagination } from '../../design-system/navigation/DSPagination'
 import { useAuth } from '../../application/providers/AuthProvider'
 import { Colors } from '../../styles/theme/colors'
 import { Spacing } from '../../styles/theme/spacing'
-import { FontFamily, FontWeight } from '../../styles/theme/typography'
 import * as styles from './JobsPage.styles'
 
 const { useBreakpoint } = Grid
@@ -45,6 +46,9 @@ const MOCK_NEWS = [
   { thumbnail: '🚀', title: 'Startups brasileiras abrem 8 mil vagas em TI', source: 'Startups.com.br', time: '2d' },
 ]
 
+// Jobs seen in the session (simulates LinkedIn's "Visualizado")
+const viewedSet = new Set<string>()
+
 export default function JobsPage() {
   const { message } = useAntApp()
   const { t } = useTranslation()
@@ -56,13 +60,11 @@ export default function JobsPage() {
   const [jobs, setJobs] = useState<Job[]>([])
   const [total, setTotal] = useState(0)
   const [loading, setLoading] = useState(false)
-  const [deletingId, setDeletingId] = useState<string | null>(null)
   const [selectedJob, setSelectedJob] = useState<Job | null>(null)
   const [mobileDetailOpen, setMobileDetailOpen] = useState(false)
   const [filters, setFilters] = useState<JobFilters>({ page: 1, limit: 20 })
-  const [keyword, setKeyword] = useState('')
-  const [location, setLocation] = useState('')
   const [sort, setSort] = useState<SortOption>('relevant')
+  const [dismissed, setDismissed] = useState<Set<string>>(new Set())
 
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
@@ -100,20 +102,8 @@ export default function JobsPage() {
     }
   }
 
-  function handleHeroSearch() {
-    const newF = { ...filters, title: keyword, location, page: 1 }
-    setFilters(newF)
-    loadJobs(newF)
-  }
-
-  function handleChipClick(chip: string) {
-    setKeyword(chip)
-    const newF = { ...filters, title: chip, page: 1 }
-    setFilters(newF)
-    loadJobs(newF)
-  }
-
   function handleJobClick(job: Job) {
+    viewedSet.add(job._id)
     setSelectedJob(job)
     if (isMobile) setMobileDetailOpen(true)
   }
@@ -126,28 +116,17 @@ export default function JobsPage() {
     }
   }
 
-  async function handleDelete(id: string) {
-    setDeletingId(id)
-    try {
-      await deleteJob(id)
-      message.success(t('jobs.deleteSuccess'))
-      setJobs((prev) => {
-        const next = prev.filter((j) => j._id !== id)
-        if (selectedJob?._id === id) {
-          setSelectedJob(next[0] ?? null)
-          setMobileDetailOpen(false)
-        }
-        return next
-      })
-      setTotal((n) => n - 1)
-    } catch {
-      message.error(t('jobs.deleteError'))
-    } finally {
-      setDeletingId(null)
+  function handleDismiss(id: string) {
+    setDismissed((prev) => new Set([...prev, id]))
+    if (selectedJob?._id === id) {
+      const next = jobs.find((j) => j._id !== id && !dismissed.has(j._id))
+      setSelectedJob(next ?? null)
     }
   }
 
-  void handleDelete // used via detail panel
+  function handleTailor(job: Job) {
+    navigate(`/tailor/${job._id}`)
+  }
 
   function handlePageChange(page: number) {
     const newF = { ...filters, page }
@@ -155,38 +134,43 @@ export default function JobsPage() {
     loadJobs(newF)
   }
 
-  const jobCountRow = (
-    <div className={styles.jobCountRow}>
-      <p className={styles.jobCountText}>
-        <span className={styles.jobCountNumber}>{total}</span>{' '}
-        {t('jobs.jobsFound', { count: total }).replace(String(total), '').trim()}
-      </p>
-      <SortDropdown value={sort} onChange={(v) => { setSort(v); handleFilterChange('sort', v) }} />
-    </div>
-  )
+  const visibleJobs = jobs.filter((j) => !dismissed.has(j._id))
 
-  const jobListCenter = (
-    <div className={styles.jobListWrapper}>
-      {jobCountRow}
-      <div className={styles.panelWithOverflow}>
+  // ── Left panel ──────────────────────────────────────────────────────────
+  const leftPanel = (
+    <div className={styles.leftPanel}>
+      <div className={styles.leftPanelHeader}>
+        <p className={styles.leftPanelTitle}>Vagas para você</p>
+        <p className={styles.leftPanelSubtitle}>Com base no seu perfil e candidaturas recentes</p>
+      </div>
+
+      <div className={styles.countRow}>
+        <p className={styles.countText}>
+          <span className={styles.countBold}>{total}</span>{' '}
+          {t('jobs.jobsFound', { count: total }).replace(String(total), '').trim()}
+        </p>
+        <SortDropdown value={sort} onChange={(v) => { setSort(v); handleFilterChange('sort', v) }} />
+      </div>
+
+      <div className={styles.jobListScroll}>
         {loading ? (
           <div className={styles.spinWrapper}>
             <Spin />
           </div>
-        ) : jobs.length === 0 ? (
+        ) : visibleJobs.length === 0 ? (
           <Empty description={t('jobs.noJobs')} style={{ padding: Spacing.xxl }} />
         ) : (
-          <div className={styles.jobCardsWrapper}>
-            {jobs.map((job) => (
-              <JobCard
-                key={job._id}
-                job={job}
-                isSelected={!isMobile && selectedJob?._id === job._id}
-                onClick={handleJobClick}
-                onApply={handleApply}
-              />
-            ))}
-          </div>
+          visibleJobs.map((job, i) => (
+            <JobListItem
+              key={job._id}
+              job={job}
+              isSelected={selectedJob?._id === job._id}
+              isViewed={viewedSet.has(job._id)}
+              isHot={i < 3}
+              onClick={handleJobClick}
+              onDismiss={handleDismiss}
+            />
+          ))
         )}
         {total > (filters.limit ?? 20) && (
           <DSPagination
@@ -201,17 +185,25 @@ export default function JobsPage() {
     </div>
   )
 
-  const hero = (
-    <HeroSection
-      keywordValue={keyword}
-      locationValue={location}
-      onKeywordChange={setKeyword}
-      onLocationChange={setLocation}
-      onSearch={handleHeroSearch}
-      onChipClick={handleChipClick}
-    />
+  // ── Center panel ────────────────────────────────────────────────────────
+  const centerPanel = selectedJob ? (
+    <div className={styles.centerScroll}>
+      <JobDetailPanel
+        job={selectedJob}
+        onApply={handleApply}
+        onTailor={handleTailor}
+      />
+    </div>
+  ) : (
+    <div className={styles.emptyDetail}>
+      <span style={{ fontSize: '3.6rem' }}>💼</span>
+      <p style={{ margin: 0, fontSize: '1.4rem', color: Colors.textSub }}>
+        Selecione uma vaga para ver os detalhes
+      </p>
+    </div>
   )
 
+  // ── Right panel ─────────────────────────────────────────────────────────
   const rightPanel = (
     <div className={styles.rightPanelWrapper}>
       {user && (
@@ -229,13 +221,22 @@ export default function JobsPage() {
     </div>
   )
 
+  // ── Mobile ──────────────────────────────────────────────────────────────
   if (isMobile) {
     return (
       <>
-        {hero}
         <div className={styles.mobilePadding}>
-          <JobFilterBar filters={filters} onFilterChange={handleFilterChange} onReload={() => loadJobs(filters)} />
-          {jobListCenter}
+          {visibleJobs.map((job, i) => (
+            <JobListItem
+              key={job._id}
+              job={job}
+              isSelected={selectedJob?._id === job._id}
+              isViewed={viewedSet.has(job._id)}
+              isHot={i < 3}
+              onClick={handleJobClick}
+              onDismiss={handleDismiss}
+            />
+          ))}
         </div>
         <Modal
           open={mobileDetailOpen}
@@ -254,11 +255,11 @@ export default function JobsPage() {
           </div>
           <div className={styles.mobileModalBody}>
             {selectedJob && (
-              <div>
-                <h3 className={styles.mobileJobTitle}>{selectedJob.title}</h3>
-                <p className={styles.mobileJobCompany}>{selectedJob.company}</p>
-                <p className={styles.mobileJobDescription}>{selectedJob.description}</p>
-              </div>
+              <JobDetailPanel
+                job={selectedJob}
+                onApply={handleApply}
+                onTailor={handleTailor}
+              />
             )}
           </div>
         </Modal>
@@ -267,16 +268,11 @@ export default function JobsPage() {
   }
 
   return (
-    <>
-      {hero}
-      <div className={styles.heroOffset}>
-        <PageLayout
-          variant="jobs"
-          left={<JobFilterBar filters={filters} onFilterChange={handleFilterChange} onReload={() => loadJobs(filters)} />}
-          center={jobListCenter}
-          right={rightPanel}
-        />
-      </div>
-    </>
+    <PageLayout
+      variant="linkedin"
+      left={leftPanel}
+      center={centerPanel}
+      right={rightPanel}
+    />
   )
 }

@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react'
 
-export type PageLayoutVariant = 'jobs' | 'cv' | 'tailoring'
+export type PageLayoutVariant = 'jobs' | 'cv' | 'tailoring' | 'linkedin'
 
 export interface PageLayoutProps {
   left?: ReactNode

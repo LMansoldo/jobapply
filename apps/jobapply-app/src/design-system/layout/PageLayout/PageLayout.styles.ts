@@ -18,6 +18,9 @@ export const styles = {
   gridJobs: {
     gridTemplateColumns: '28rem 1fr 30rem',
   },
+  gridLinkedin: {
+    gridTemplateColumns: '36rem 1fr 28rem',
+  },
   gridCv: {
     gridTemplateColumns: '26rem 1fr 34rem',
   },

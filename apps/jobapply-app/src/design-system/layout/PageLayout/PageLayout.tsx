@@ -5,11 +5,13 @@ export function PageLayout({ left, center, right, variant = 'jobs' }: PageLayout
   const gridVariant =
     variant === 'jobs'
       ? styles.gridJobs
-      : variant === 'cv'
-        ? styles.gridCv
-        : variant === 'tailoring'
-          ? styles.gridTailoring
-          : styles.gridDefault
+      : variant === 'linkedin'
+        ? styles.gridLinkedin
+        : variant === 'cv'
+          ? styles.gridCv
+          : variant === 'tailoring'
+            ? styles.gridTailoring
+            : styles.gridDefault
 
   const hasLeft = left !== undefined
   const hasRight = right !== undefined
