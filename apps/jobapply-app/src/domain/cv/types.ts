@@ -66,6 +66,9 @@ export interface CVLocaleVersion {
   expertise: string[]
   experience: CVLocaleExperience[]
   education: CVLocaleEducation
+  skillPercentages?: { name: string; percent: number }[]
+  languageLevels?: { name: string; level: string }[]
+  certifications?: { name: string; year: string }[]
 }
 
 export type CVLocalePayload = Omit<CVLocaleVersion, 'locale'>
@@ -86,6 +89,9 @@ export interface CV {
   phone?: string
   location?: string
   linkedin?: string
+  title?: string
+  github?: string
+  website?: string
   languages: string[]
   tailoredVersions: TailoredVersion[]
   localeVersions: CVLocaleVersion[]
@@ -98,6 +104,9 @@ export interface CVCreatePayload {
   phone?: string
   location?: string
   linkedin?: string
+  title?: string
+  github?: string
+  website?: string
   languages?: string[]
 }
 
