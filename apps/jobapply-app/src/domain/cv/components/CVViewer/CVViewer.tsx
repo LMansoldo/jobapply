@@ -1,132 +1,96 @@
 /**
  * @file CVViewer.tsx
- * @description CVViewer component — displays a CV's personal info and locale versions as Markdown previews.
+ * @description CVViewer — structured CV template + sidebar with locale toggle, actions, score, visibility.
  */
 import { useState } from 'react'
-import ReactMarkdown from 'react-markdown'
-import remarkGfm from 'remark-gfm'
-import {
-  DownloadOutlined,
-  FilePdfOutlined,
-  EditOutlined,
-} from '@ant-design/icons'
 import { useTranslation } from 'react-i18next'
-import { localeVersionToMarkdown, downloadMarkdown, exportPDF } from '../../helpers'
+import { downloadMarkdown, exportPDF } from '../../helpers'
 import type { CVViewerProps } from './CVViewer.types'
-import { CVPaper } from '../../../../design-system/cv/CVPaper'
-import { SectionBar } from '../../../../design-system/cv/SectionBar'
+import { CVTemplate } from '../../../../design-system/cv/CVTemplate'
+import { CVViewerSidebar } from '../../../../design-system/cv/CVViewerSidebar'
 import { DSCard } from '../../../../design-system/primitives/DSCard'
 import { DSButton } from '../../../../design-system/primitives/DSButton'
-import { Descriptions, DescriptionsItem } from '../../../../components/Descriptions'
 import { Alert } from '../../../../components/Alert'
-import { Tag } from '../../../../components/Tag'
-import { Space } from '../../../../components/Space'
+import { EditOutlined } from '@ant-design/icons'
 import { Spacing } from '../../../../styles/theme/spacing'
 
-/**
- * Displays a read-only view of the CV with personal info and markdown locale versions.
- * @param props - CVViewerProps
- */
+const COMPLETION_ITEMS = [
+  { label: 'Informações básicas', done: true },
+  { label: 'Experiência', done: true },
+  { label: 'Foto de perfil', done: false, color: '#fb923c' },
+  { label: 'CV em inglês', done: false, color: '#60a5fa' },
+]
+
 export function CVViewer({ cv, onEdit, isMobile }: CVViewerProps) {
   const { t } = useTranslation()
   const ptBrVersion = cv.localeVersions?.find((v) => v.locale === 'pt-BR')
   const enVersion = cv.localeVersions?.find((v) => v.locale === 'en')
 
-  const sections = [
-    ptBrVersion && { key: 'pt-BR', label: '🇧🇷 Português' },
-    enVersion && { key: 'en', label: '🇺🇸 English' },
-  ].filter(Boolean) as { key: string; label: string }[]
+  const [activeLocale, setActiveLocale] = useState<'pt-BR' | 'en'>(ptBrVersion ? 'pt-BR' : 'en')
 
-  const [activeSection, setActiveSection] = useState(sections[0]?.key ?? 'pt-BR')
+  const activeVersion = activeLocale === 'pt-BR' ? ptBrVersion : enVersion
 
-  const activeVersion = activeSection === 'pt-BR' ? ptBrVersion : enVersion
+  const ptBrDone = !!ptBrVersion
+  const enDone = !!enVersion
+  const score = ptBrDone && enDone ? 85 : ptBrDone ? 60 : 30
 
-  return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: Spacing.md }}>
-      {/* Personal info card */}
-      <DSCard
-        extra={
-          <Space size={isMobile ? 4 : 8}>
-            <DSButton
-              variant="ghost"
-              onClick={() => downloadMarkdown(cv)}
-              size={isMobile ? 'small' : 'middle'}
-            >
-              <DownloadOutlined /> {isMobile ? '.md' : t('cv.exportMarkdown')}
-            </DSButton>
-            <DSButton
-              variant="ghost"
-              onClick={() => exportPDF(cv)}
-              size={isMobile ? 'small' : 'middle'}
-            >
-              <FilePdfOutlined /> {isMobile ? '.pdf' : t('cv.exportPDF')}
-            </DSButton>
-          </Space>
-        }
-      >
-        <Descriptions column={{ xs: 1, sm: 2 }} size="small">
-          <DescriptionsItem label={t('cv.viewer.name')}>{cv.fullName}</DescriptionsItem>
-          <DescriptionsItem label={t('cv.viewer.email')}>{cv.email}</DescriptionsItem>
-          {cv.phone && <DescriptionsItem label={t('cv.viewer.phone')}>{cv.phone}</DescriptionsItem>}
-          {cv.location && <DescriptionsItem label={t('cv.viewer.location')}>{cv.location}</DescriptionsItem>}
-          {cv.linkedin && <DescriptionsItem label={t('cv.viewer.linkedin')}>{cv.linkedin}</DescriptionsItem>}
-          {cv.languages?.length > 0 && (
-            <DescriptionsItem label={t('cv.viewer.languages')}>
-              <Space size={4} wrap>
-                {cv.languages.map((l) => <Tag key={l}>{l}</Tag>)}
-              </Space>
-            </DescriptionsItem>
-          )}
-        </Descriptions>
-      </DSCard>
-
-      {/* CV content */}
-      {sections.length > 0 ? (
-        <DSCard
-          title={t('cv.cvContent')}
-          extra={
-            <DSButton
-              variant="primary"
-              onClick={onEdit}
-              size={isMobile ? 'small' : 'middle'}
-            >
-              <EditOutlined /> {isMobile ? t('common.edit', 'Editar') : t('cv.editCV')}
+  if (!activeVersion) {
+    return (
+      <DSCard>
+        <Alert
+          type="warning"
+          showIcon
+          message={t('cv.noLocaleVersion')}
+          action={
+            <DSButton variant="primary" onClick={onEdit} size={isMobile ? 'small' : 'middle'}>
+              <EditOutlined /> {t('cv.editCV')}
             </DSButton>
           }
-        >
-          {sections.length > 1 && (
-            <div style={{ marginBottom: Spacing.md }}>
-              <SectionBar sections={sections} activeKey={activeSection} onChange={setActiveSection} />
-            </div>
-          )}
-          {activeVersion && (
-            <CVPaper>
-              <div className="markdown-preview">
-                <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                  {localeVersionToMarkdown(activeVersion)}
-                </ReactMarkdown>
-              </div>
-            </CVPaper>
-          )}
-        </DSCard>
-      ) : (
-        <DSCard>
-          <Alert
-            type="warning"
-            showIcon
-            message={t('cv.noLocaleVersion')}
-            action={
-              <DSButton
-                variant="primary"
-                onClick={onEdit}
-                size={isMobile ? 'small' : 'middle'}
-              >
-                <EditOutlined /> {isMobile ? t('common.edit', 'Editar') : t('cv.editCV')}
-              </DSButton>
-            }
-          />
-        </DSCard>
-      )}
+        />
+      </DSCard>
+    )
+  }
+
+  if (isMobile) {
+    return (
+      <div style={{ display: 'flex', flexDirection: 'column', gap: Spacing.md }}>
+        <CVTemplate cv={cv} locale={activeVersion} />
+        <CVViewerSidebar
+          activeLocale={activeLocale}
+          hasPtBr={ptBrDone}
+          hasEn={enDone}
+          onLocaleChange={setActiveLocale}
+          onEdit={onEdit}
+          onExportPDF={() => exportPDF(cv)}
+          score={score}
+          completionItems={COMPLETION_ITEMS}
+          visibility={{ views: 142, searches: 38, saved: 7 }}
+        />
+      </div>
+    )
+  }
+
+  return (
+    <div style={{ display: 'grid', gridTemplateColumns: '1fr 28rem', gap: Spacing.lg, alignItems: 'start' }}>
+      <div>
+        <CVTemplate cv={cv} locale={activeVersion} />
+        <div style={{ marginTop: Spacing.md, display: 'flex', gap: Spacing.sm }}>
+          <DSButton variant="ghost" onClick={() => downloadMarkdown(cv)}>
+            {t('cv.exportMarkdown')}
+          </DSButton>
+        </div>
+      </div>
+      <CVViewerSidebar
+        activeLocale={activeLocale}
+        hasPtBr={ptBrDone}
+        hasEn={enDone}
+        onLocaleChange={setActiveLocale}
+        onEdit={onEdit}
+        onExportPDF={() => exportPDF(cv)}
+        score={score}
+        completionItems={COMPLETION_ITEMS}
+        visibility={{ views: 142, searches: 38, saved: 7 }}
+      />
     </div>
   )
 }
