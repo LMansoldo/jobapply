@@ -5,15 +5,15 @@
 import { ArrowRightOutlined, ArrowLeftOutlined } from '@ant-design/icons'
 import { useTranslation } from 'react-i18next'
 import type { CVBaseFormProps } from './CVBaseForm.types'
-import { cvBaseFormStyles } from './CVBaseForm.styles'
-import { Card } from '../../../../components/Card'
+import { WizardCard } from '../../../../design-system/cv/WizardCard'
 import { Form, FormItem } from '../../../../components/Form'
 import { Input } from '../../../../components/Input'
 import { Select } from '../../../../components/Select'
-import { Button } from '../../../../components/Button'
+import { DSButton } from '../../../../design-system/primitives/DSButton'
 import { Row } from '../../../../components/Row'
 import { Col } from '../../../../components/Col'
 import { LANGUAGE_OPTIONS } from '../../constants'
+import { Spacing } from '../../../../styles/theme/spacing'
 
 /**
  * Personal info form for step 0 of the CV creation wizard.
@@ -23,7 +23,7 @@ export function CVBaseForm({ form, saving, hasCv, onNext, onBack }: CVBaseFormPr
   const { t } = useTranslation()
 
   return (
-    <Card>
+    <WizardCard header={t('cv.base.personalInfo')}>
       <Form form={form} layout="vertical" requiredMark="optional">
         <Row gutter={[16, 0]}>
           <Col xs={24} sm={12}>
@@ -58,16 +58,16 @@ export function CVBaseForm({ form, saving, hasCv, onNext, onBack }: CVBaseFormPr
           </Col>
         </Row>
       </Form>
-      <div style={cvBaseFormStyles.navigationRow}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: Spacing.lg }}>
         {hasCv ? (
-          <Button icon={<ArrowLeftOutlined />} onClick={onBack}>
-            {t('common.back')}
-          </Button>
+          <DSButton variant="ghost" onClick={onBack}>
+            <ArrowLeftOutlined /> {t('common.back')}
+          </DSButton>
         ) : <span />}
-        <Button type="primary" onClick={onNext} loading={saving} icon={<ArrowRightOutlined />}>
-          {t('cv.base.saveAndContinue')}
-        </Button>
+        <DSButton variant="primary" onClick={onNext} loading={saving}>
+          {t('cv.base.saveAndContinue')} <ArrowRightOutlined />
+        </DSButton>
       </div>
-    </Card>
+    </WizardCard>
   )
 }
