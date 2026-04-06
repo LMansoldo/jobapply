@@ -1,9 +1,9 @@
 /**
  * @file JobsPage.tsx
- * @description Jobs listing page — LinkedIn-style 3-col layout:
+ * @description Jobs listing page — LinkedIn-style layout:
+ *   Top: JobsTopBar (profile + alerts dropdown + news dropdown + filter chips)
  *   Left: scrollable compact job list
  *   Center: full job detail + apply/save/tailor actions
- *   Right: profile card, alerts, industry news
  */
 import { useEffect, useState, useRef, useCallback } from 'react'
 import { Grid } from 'antd'
@@ -17,14 +17,11 @@ import { Modal } from '../../components/Modal'
 import { Spin } from '../../components/Spin'
 import { JobListItem } from '../../design-system/jobs/JobListItem'
 import { JobDetailPanel } from '../../design-system/jobs/JobDetailPanel'
+import { JobsTopBar } from '../../design-system/jobs/JobsTopBar'
 import type { Job, JobFilters } from '../../domain/jobs/types'
-import { fetchJobs, deleteJob } from '../../infrastructure/repositories/jobsRepository'
+import { fetchJobs } from '../../infrastructure/repositories/jobsRepository'
 import { PageLayout } from '../../design-system/layout/PageLayout'
-import { SortDropdown } from '../../design-system/jobs/SortDropdown'
 import type { SortOption } from '../../design-system/jobs/SortDropdown'
-import { ProfileCard } from '../../design-system/jobs/ProfileCard'
-import { JobAlertsCard } from '../../design-system/jobs/JobAlertsCard'
-import { IndustryNewsCard } from '../../design-system/jobs/IndustryNewsCard'
 import { DSPagination } from '../../design-system/navigation/DSPagination'
 import { useAuth } from '../../application/providers/AuthProvider'
 import { Colors } from '../../styles/theme/colors'
@@ -46,7 +43,6 @@ const MOCK_NEWS = [
   { thumbnail: '🚀', title: 'Startups brasileiras abrem 8 mil vagas em TI', source: 'Startups.com.br', time: '2d' },
 ]
 
-// Jobs seen in the session (simulates LinkedIn's "Visualizado")
 const viewedSet = new Set<string>()
 
 export default function JobsPage() {
@@ -102,6 +98,11 @@ export default function JobsPage() {
     }
   }
 
+  function handleSortChange(newSort: SortOption) {
+    setSort(newSort)
+    handleFilterChange('sort', newSort)
+  }
+
   function handleJobClick(job: Job) {
     viewedSet.add(job._id)
     setSelectedJob(job)
@@ -136,20 +137,32 @@ export default function JobsPage() {
 
   const visibleJobs = jobs.filter((j) => !dismissed.has(j._id))
 
+  // ── TopBar ──────────────────────────────────────────────────────────────
+  const topBar = user ? (
+    <JobsTopBar
+      user={user}
+      completionPercent={72}
+      applications={47}
+      interviews={12}
+      offers={3}
+      alerts={MOCK_ALERTS}
+      news={MOCK_NEWS}
+      filters={filters}
+      sort={sort}
+      onViewProfile={() => navigate('/cv')}
+      onFilterChange={handleFilterChange}
+      onSortChange={handleSortChange}
+    />
+  ) : null
+
   // ── Left panel ──────────────────────────────────────────────────────────
   const leftPanel = (
     <div className={styles.leftPanel}>
-      <div className={styles.leftPanelHeader}>
-        <p className={styles.leftPanelTitle}>Vagas para você</p>
-        <p className={styles.leftPanelSubtitle}>Com base no seu perfil e candidaturas recentes</p>
-      </div>
-
       <div className={styles.countRow}>
         <p className={styles.countText}>
           <span className={styles.countBold}>{total}</span>{' '}
           {t('jobs.jobsFound', { count: total }).replace(String(total), '').trim()}
         </p>
-        <SortDropdown value={sort} onChange={(v) => { setSort(v); handleFilterChange('sort', v) }} />
       </div>
 
       <div className={styles.jobListScroll}>
@@ -203,28 +216,11 @@ export default function JobsPage() {
     </div>
   )
 
-  // ── Right panel ─────────────────────────────────────────────────────────
-  const rightPanel = (
-    <div className={styles.rightPanelWrapper}>
-      {user && (
-        <ProfileCard
-          user={user}
-          completionPercent={72}
-          applications={47}
-          interviews={12}
-          offers={3}
-          onViewProfile={() => navigate('/cv')}
-        />
-      )}
-      <JobAlertsCard alerts={MOCK_ALERTS} />
-      <IndustryNewsCard news={MOCK_NEWS} />
-    </div>
-  )
-
   // ── Mobile ──────────────────────────────────────────────────────────────
   if (isMobile) {
     return (
       <>
+        {topBar}
         <div className={styles.mobilePadding}>
           {visibleJobs.map((job, i) => (
             <JobListItem
@@ -268,11 +264,13 @@ export default function JobsPage() {
   }
 
   return (
-    <PageLayout
-      variant="linkedin"
-      left={leftPanel}
-      center={centerPanel}
-      right={rightPanel}
-    />
+    <div>
+      {topBar}
+      <PageLayout
+        variant="linkedin"
+        left={leftPanel}
+        center={centerPanel}
+      />
+    </div>
   )
 }
