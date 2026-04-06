@@ -1,23 +1,44 @@
 import { useState } from 'react'
-import { MailOutlined, LockOutlined } from '@ant-design/icons'
+import { MailOutlined, LockOutlined, RocketOutlined, FileTextOutlined, ThunderboltOutlined } from '@ant-design/icons'
 import { Link, useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { useAntApp } from '../../components/AntApp'
-import { Button } from '../../components/Button'
-import { Card } from '../../components/Card'
 import { Form, FormItem } from '../../components/Form'
-import { Input, InputPassword } from '../../components/Input'
-import { Text, Title } from '../../components/Typography'
+import { InputPassword } from '../../components/Input'
 import { useAuth } from '../../application/providers/AuthProvider'
 import { login as loginService } from '../../infrastructure/repositories/authRepository'
+import { AuthLayout } from '../../design-system/auth/AuthLayout'
+import { FeatureCard } from '../../design-system/auth/FeatureCard'
+import { SocialLoginBtn } from '../../design-system/auth/SocialLoginBtn'
+import { DSButton } from '../../design-system/primitives/DSButton'
+import { DSInput } from '../../design-system/primitives/DSInput'
 import { Colors } from '../../styles/theme/colors'
-import { FontSize } from '../../styles/theme/typography'
+import { FontFamily, FontWeight, FontSize } from '../../styles/theme/typography'
 import { Spacing } from '../../styles/theme/spacing'
+import { Divider } from '../../components/Divider'
 
 interface LoginForm {
   email: string
   password: string
 }
+
+const LEFT_PANEL = (
+  <div style={{ display: 'flex', flexDirection: 'column', gap: Spacing.lg }}>
+    <div>
+      <h1 style={{ fontFamily: FontFamily.heading, color: Colors.white, fontSize: '3.2rem', margin: '0 0 0.8rem', fontWeight: FontWeight.bold, lineHeight: 1.15 }}>
+        Encontre sua próxima<br />oportunidade
+      </h1>
+      <p style={{ color: 'rgba(255,255,255,0.65)', fontSize: FontSize.base, margin: 0, lineHeight: 1.6 }}>
+        Plataforma de candidatura inteligente com IA que adapta seu CV para cada vaga.
+      </p>
+    </div>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: Spacing.sm }}>
+      <FeatureCard icon={<RocketOutlined />} title="Candidatura com IA" description="Adapte seu CV automaticamente para cada vaga com inteligência artificial." />
+      <FeatureCard icon={<FileTextOutlined />} title="CV Profissional" description="Crie e gerencie versões do seu CV em português e inglês." />
+      <FeatureCard icon={<ThunderboltOutlined />} title="Score ATS" description="Analise o match do seu CV com os requisitos da vaga em segundos." />
+    </div>
+  </div>
+)
 
 export default function LoginPage() {
   const [loading, setLoading] = useState(false)
@@ -43,63 +64,60 @@ export default function LoginPage() {
     }
   }
 
-  return (
-    <div
-      style={{
-        minHeight: '100vh',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        background: Colors.pageBg,
-        padding: `${Spacing.lg} ${Spacing.md}`,
-      }}
-    >
-      <Card style={{ width: '100%', maxWidth: Spacing.sidebarWidth, boxShadow: `0 0.4rem 2.4rem ${Colors.shadowMd}` }}>
-        <div style={{ textAlign: 'center', marginBottom: Spacing.xl }}>
-          <Title level={3} style={{ margin: 0 }}>
-            {t('auth.appName')}
-          </Title>
-          <Text type="secondary">{t('auth.loginTitle')}</Text>
-        </div>
+  const RIGHT_PANEL = (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: Spacing.md }}>
+      <div style={{ marginBottom: Spacing.sm }}>
+        <h2 style={{ fontFamily: FontFamily.heading, fontSize: '2.2rem', color: Colors.textMain, margin: '0 0 0.4rem', fontWeight: FontWeight.bold }}>
+          {t('auth.loginTitle')}
+        </h2>
+        <p style={{ color: Colors.textSub, fontSize: FontSize.base, margin: 0 }}>
+          {t('auth.noAccount')}{' '}
+          <Link to="/register" style={{ color: Colors.primaryDark, fontWeight: FontWeight.semibold }}>
+            {t('auth.register')}
+          </Link>
+        </p>
+      </div>
 
-        <Form layout="vertical" onFinish={handleSubmit} autoComplete="off">
-          <FormItem
-            name="email"
-            label={t('auth.email')}
-            rules={[
-              { required: true, message: t('auth.requiredEmail') },
-              { type: 'email', message: t('auth.invalidEmail') },
-            ]}
-          >
-            <Input prefix={<MailOutlined />} placeholder={t('auth.emailPlaceholder')} size="large" />
-          </FormItem>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: Spacing.sm }}>
+        <SocialLoginBtn provider="google" onClick={() => {}} />
+        <SocialLoginBtn provider="linkedin" onClick={() => {}} />
+      </div>
 
-          <FormItem
-            name="password"
-            label={t('auth.password')}
-            rules={[{ required: true, message: t('auth.requiredPassword') }]}
-          >
-            <InputPassword prefix={<LockOutlined />} placeholder={t('auth.passwordPlaceholder')} size="large" />
-          </FormItem>
+      <Divider plain style={{ color: Colors.textSub, fontSize: FontSize.sm }}>ou entre com e-mail</Divider>
 
-          <FormItem style={{ marginBottom: Spacing.sm }}>
-            <Button type="primary" htmlType="submit" loading={loading} block size="large">
-              {t('auth.login')}
-            </Button>
-          </FormItem>
+      <Form layout="vertical" onFinish={handleSubmit} autoComplete="off">
+        <FormItem
+          name="email"
+          label={t('auth.email')}
+          rules={[
+            { required: true, message: t('auth.requiredEmail') },
+            { type: 'email', message: t('auth.invalidEmail') },
+          ]}
+        >
+          <DSInput leftIcon={<MailOutlined />} placeholder={t('auth.emailPlaceholder')} filled />
+        </FormItem>
 
-          <div style={{ textAlign: 'center' }}>
-            <Text type="secondary">{t('auth.noAccount')} </Text>
-            <Link to="/register">{t('auth.register')}</Link>
-          </div>
-        </Form>
+        <FormItem
+          name="password"
+          label={t('auth.password')}
+          rules={[{ required: true, message: t('auth.requiredPassword') }]}
+          style={{ marginBottom: Spacing.md }}
+        >
+          <InputPassword prefix={<LockOutlined />} placeholder={t('auth.passwordPlaceholder')} size="large" />
+        </FormItem>
 
-        <div style={{ marginTop: Spacing.md, padding: `${Spacing.sm} ${Spacing.md1}`, background: Colors.surfaceCode, borderRadius: Spacing.sm2 }}>
-          <Text type="secondary" style={{ fontSize: FontSize.sm }}>
-            {t('auth.demoCredentials')}
-          </Text>
-        </div>
-      </Card>
+        <FormItem style={{ marginBottom: Spacing.sm }}>
+          <DSButton variant="primary" htmlType="submit" loading={loading} style={{ width: '100%' }}>
+            {t('auth.login')}
+          </DSButton>
+        </FormItem>
+      </Form>
+
+      <div style={{ background: Colors.surfaceCode, borderRadius: '8px', padding: `${Spacing.sm} ${Spacing.md}` }}>
+        <span style={{ color: Colors.textSub, fontSize: FontSize.sm }}>{t('auth.demoCredentials')}</span>
+      </div>
     </div>
   )
+
+  return <AuthLayout left={LEFT_PANEL} right={RIGHT_PANEL} />
 }
