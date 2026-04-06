@@ -1,0 +1,1254 @@
+openapi: 3.0.3
+info:
+  title: jobapply-api
+  description: REST API for job and CV management with LLM-powered tailoring.
+  version: 1.0.0
+
+servers:
+  - url: http://localhost:3000
+    description: Local
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    User:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        email:
+          type: string
+
+    Job:
+      type: object
+      properties:
+        _id:
+          type: string
+        title:
+          type: string
+        company:
+          type: string
+        location:
+          type: string
+        description:
+          type: string
+        tailoredDescription:
+          type: string
+          nullable: true
+        tags:
+          type: array
+          items:
+            type: string
+        url:
+          type: string
+        salary:
+          type: string
+        status:
+          type: string
+          enum: [open, closed, applied]
+        createdAt:
+          type: string
+          format: date-time
+
+    Experience:
+      type: object
+      properties:
+        company:
+          type: string
+        role:
+          type: string
+        startDate:
+          type: string
+        endDate:
+          type: string
+        description:
+          type: string
+
+    Education:
+      type: object
+      properties:
+        institution:
+          type: string
+        degree:
+          type: string
+        field:
+          type: string
+        startDate:
+          type: string
+        endDate:
+          type: string
+
+    TailoredVersion:
+      type: object
+      properties:
+        jobId:
+          type: string
+        tailoredContent:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+
+    CVLocaleVersion:
+      type: object
+      properties:
+        locale:
+          type: string
+          enum: [en, pt-BR]
+        summary:
+          type: string
+        skills:
+          type: array
+          items:
+            type: string
+        experience:
+          type: array
+          items:
+            $ref: '#/components/schemas/Experience'
+        education:
+          type: array
+          items:
+            $ref: '#/components/schemas/Education'
+
+    CV:
+      type: object
+      properties:
+        _id:
+          type: string
+        user:
+          type: string
+        fullName:
+          type: string
+        email:
+          type: string
+        phone:
+          type: string
+        summary:
+          type: string
+        skills:
+          type: array
+          items:
+            type: string
+        experience:
+          type: array
+          items:
+            $ref: '#/components/schemas/Experience'
+        education:
+          type: array
+          items:
+            $ref: '#/components/schemas/Education'
+        languages:
+          type: array
+          items:
+            type: string
+        tailoredVersions:
+          type: array
+          items:
+            $ref: '#/components/schemas/TailoredVersion'
+        localeVersions:
+          type: array
+          items:
+            $ref: '#/components/schemas/CVLocaleVersion'
+        updatedAt:
+          type: string
+          format: date-time
+
+    Voucher:
+      type: object
+      properties:
+        _id:
+          type: string
+        code:
+          type: string
+        name:
+          type: string
+        source_url:
+          type: string
+          nullable: true
+        expires_at:
+          type: string
+          format: date-time
+        discount_percentage:
+          type: number
+        access_type:
+          type: string
+        is_active:
+          type: boolean
+        created_at:
+          type: string
+          format: date-time
+
+    PublishedCV:
+      type: object
+      properties:
+        _id:
+          type: string
+        user:
+          type: string
+        public_id:
+          type: string
+        fullName:
+          type: string
+        email:
+          type: string
+        phone:
+          type: string
+        summary:
+          type: string
+        skills:
+          type: array
+          items:
+            type: string
+        experience:
+          type: array
+          items:
+            $ref: '#/components/schemas/Experience'
+        education:
+          type: array
+          items:
+            $ref: '#/components/schemas/Education'
+        languages:
+          type: array
+          items:
+            type: string
+        published_at:
+          type: string
+          format: date-time
+
+    Error:
+      type: object
+      properties:
+        message:
+          type: string
+
+paths:
+
+  # ─── USERS ────────────────────────────────────────────────────────────────
+
+  /users/register:
+    post:
+      tags: [Users]
+      summary: Register a new user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name, email, password]
+              properties:
+                name:
+                  type: string
+                  example: Lucas
+                email:
+                  type: string
+                  example: lucas@test.com
+                password:
+                  type: string
+                  minLength: 8
+                  example: secret123
+      responses:
+        '201':
+          description: User created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  user:
+                    $ref: '#/components/schemas/User'
+        '400':
+          description: Required fields missing
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '409':
+          description: Email already registered
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /users/login:
+    post:
+      tags: [Users]
+      summary: Login — returns JWT
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, password]
+              properties:
+                email:
+                  type: string
+                  example: lucas@test.com
+                password:
+                  type: string
+                  example: secret123
+      responses:
+        '200':
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  token:
+                    type: string
+                  user:
+                    $ref: '#/components/schemas/User'
+        '400':
+          description: Required fields missing
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Invalid credentials
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  # ─── JOBS ─────────────────────────────────────────────────────────────────
+
+  /jobs/bulk:
+    post:
+      tags: [Jobs]
+      summary: Bulk create jobs
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [jobs]
+              properties:
+                jobs:
+                  type: array
+                  minItems: 1
+                  items:
+                    type: object
+                    required: [title, company, description]
+                    properties:
+                      title:
+                        type: string
+                        example: Backend Engineer
+                      company:
+                        type: string
+                        example: Acme
+                      location:
+                        type: string
+                        example: Remote
+                      description:
+                        type: string
+                        example: Build and maintain REST APIs...
+                      tags:
+                        type: array
+                        items:
+                          type: string
+                        example: [node, mongodb]
+                      url:
+                        type: string
+                      salary:
+                        type: string
+                        example: $80,000 - $100,000
+                      status:
+                        type: string
+                        enum: [open, closed, applied]
+                        default: open
+      responses:
+        '201':
+          description: Jobs inserted
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  inserted:
+                    type: integer
+                  jobs:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Job'
+        '400':
+          description: jobs must be a non-empty array
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Invalid token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /jobs:
+    get:
+      tags: [Jobs]
+      summary: List jobs with filters and pagination
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: title
+          in: query
+          schema:
+            type: string
+          description: Partial match on title (case-insensitive)
+        - name: company
+          in: query
+          schema:
+            type: string
+          description: Partial match on company
+        - name: location
+          in: query
+          schema:
+            type: string
+          description: Partial match on location
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [open, closed, applied]
+        - name: tags
+          in: query
+          schema:
+            type: string
+          description: Comma-separated tags (e.g. node,mongodb)
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+      responses:
+        '200':
+          description: Job list
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  total:
+                    type: integer
+                  page:
+                    type: integer
+                  limit:
+                    type: integer
+                  jobs:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Job'
+        '401':
+          description: Invalid token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /jobs/{id}:
+    delete:
+      tags: [Jobs]
+      summary: Delete a job
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Job deleted
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Job deleted
+        '401':
+          description: Invalid token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Job not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /jobs/{id}/tailor-description:
+    post:
+      tags: [Jobs]
+      summary: Rewrite job description via LLM
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Description rewritten and saved
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  jobId:
+                    type: string
+                  tailoredDescription:
+                    type: string
+        '401':
+          description: Invalid token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Job not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '502':
+          description: LLM service error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  # ─── CV ───────────────────────────────────────────────────────────────────
+
+  /cv:
+    post:
+      tags: [CV]
+      summary: Create CV (one per user)
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [fullName, email]
+              properties:
+                fullName:
+                  type: string
+                  example: Lucas M
+                email:
+                  type: string
+                  example: lucas@test.com
+                phone:
+                  type: string
+                  example: "+1 555 000-0000"
+                summary:
+                  type: string
+                skills:
+                  type: array
+                  items:
+                    type: string
+                  example: [Node.js, MongoDB]
+                experience:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/Experience'
+                education:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/Education'
+                languages:
+                  type: array
+                  items:
+                    type: string
+                  example: [Portuguese, English]
+      responses:
+        '201':
+          description: CV created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  cv:
+                    $ref: '#/components/schemas/CV'
+        '401':
+          description: Invalid token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '409':
+          description: User already has a CV
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /cv/{id}:
+    get:
+      tags: [CV]
+      summary: Get CV by ID (owner only). Pass ?locale=en or ?locale=pt-BR to get a localized version.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: locale
+          in: query
+          required: false
+          schema:
+            type: string
+            enum: [en, pt-BR]
+          description: Return the CV with the specified locale version merged on top
+      responses:
+        '200':
+          description: CV found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  cv:
+                    $ref: '#/components/schemas/CV'
+        '401':
+          description: Invalid token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: Access denied
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: CV not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+    put:
+      tags: [CV]
+      summary: Update CV (owner only)
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                fullName:
+                  type: string
+                email:
+                  type: string
+                phone:
+                  type: string
+                summary:
+                  type: string
+                skills:
+                  type: array
+                  items:
+                    type: string
+                experience:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/Experience'
+                education:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/Education'
+                languages:
+                  type: array
+                  items:
+                    type: string
+      responses:
+        '200':
+          description: CV updated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  cv:
+                    $ref: '#/components/schemas/CV'
+        '401':
+          description: Invalid token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: Access denied
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: CV not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+    delete:
+      tags: [CV]
+      summary: Delete CV (owner only)
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: CV deleted
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: CV deleted
+        '401':
+          description: Invalid token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: Access denied
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: CV not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /cv/{id}/version/{locale}:
+    put:
+      tags: [CV]
+      summary: Create or update a localized version of the CV (en or pt-BR)
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: locale
+          in: path
+          required: true
+          schema:
+            type: string
+            enum: [en, pt-BR]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                summary:
+                  type: string
+                  example: Experienced frontend engineer...
+                skills:
+                  type: array
+                  items:
+                    type: string
+                  example: [React, TypeScript]
+                experience:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/Experience'
+                education:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/Education'
+      responses:
+        '200':
+          description: Locale version saved
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  localeVersion:
+                    $ref: '#/components/schemas/CVLocaleVersion'
+        '400':
+          description: Invalid locale
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Invalid token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: Access denied
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: CV not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+    delete:
+      tags: [CV]
+      summary: Delete a localized version of the CV
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: locale
+          in: path
+          required: true
+          schema:
+            type: string
+            enum: [en, pt-BR]
+      responses:
+        '200':
+          description: Locale version deleted
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: en version deleted
+        '400':
+          description: Invalid locale
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Invalid token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: Access denied
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: CV or locale version not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /cv/{id}/publish:
+    post:
+      tags: [CV]
+      summary: Publish CV (generates a public link)
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              description: Optional fields to override CV data in the published version
+              properties:
+                fullName:
+                  type: string
+                email:
+                  type: string
+                phone:
+                  type: string
+                summary:
+                  type: string
+                skills:
+                  type: array
+                  items:
+                    type: string
+                experience:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/Experience'
+                education:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/Education'
+                languages:
+                  type: array
+                  items:
+                    type: string
+      responses:
+        '200':
+          description: CV published successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  published:
+                    $ref: '#/components/schemas/PublishedCV'
+                  public_id:
+                    type: string
+                    description: Public ID for access via /public/{public_id}
+        '401':
+          description: Invalid token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: Access denied
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: CV not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /cv/{id}/tailor:
+    post:
+      tags: [CV]
+      summary: Tailor CV to a job via LLM
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [jobId]
+              properties:
+                jobId:
+                  type: string
+                  description: ID of the job to use as reference
+      responses:
+        '200':
+          description: Tailored CV in Markdown
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  tailoredCV:
+                    type: string
+                    description: Tailored CV in Markdown format
+        '400':
+          description: jobId is required
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Invalid token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: Access denied
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: CV or job not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '502':
+          description: LLM service error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  # ─── PUBLIC ───────────────────────────────────────────────────────────────
+
+  /public/{public_id}:
+    get:
+      tags: [Public]
+      summary: Access public CV (no authentication required)
+      parameters:
+        - name: public_id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Public ID generated when publishing the CV
+      responses:
+        '200':
+          description: Public CV found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  cv:
+                    $ref: '#/components/schemas/PublishedCV'
+        '404':
+          description: Public profile not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  # ─── VOUCHERS ─────────────────────────────────────────────────────────────
+
+  /vouchers:
+    post:
+      tags: [Vouchers]
+      summary: Create a voucher
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [code, name, expires_at, discount_percentage, access_type]
+              properties:
+                code:
+                  type: string
+                  example: PROMO2026
+                name:
+                  type: string
+                  example: Launch Promotion
+                source_url:
+                  type: string
+                  example: https://partner.com
+                expires_at:
+                  type: string
+                  format: date-time
+                  example: '2026-12-31T23:59:59Z'
+                discount_percentage:
+                  type: number
+                  example: 50
+                access_type:
+                  type: string
+                  example: premium
+      responses:
+        '201':
+          description: Voucher created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  voucher:
+                    $ref: '#/components/schemas/Voucher'
+        '400':
+          description: Required fields missing
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Invalid token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '409':
+          description: Voucher code already exists
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+    get:
+      tags: [Vouchers]
+      summary: List all vouchers
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Voucher list
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  vouchers:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Voucher'
+        '401':
+          description: Invalid token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /vouchers/redeem:
+    post:
+      tags: [Vouchers]
+      summary: Redeem a voucher (updates user access_type)
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [code]
+              properties:
+                code:
+                  type: string
+                  example: PROMO2026
+      responses:
+        '200':
+          description: Voucher redeemed successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  access_type:
+                    type: string
+                  discount_percentage:
+                    type: number
+                  expires_at:
+                    type: string
+                    format: date-time
+        '400':
+          description: code is required
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Invalid token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Voucher or user not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '410':
+          description: Voucher is inactive or expired
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /vouchers/{code}:
+    get:
+      tags: [Vouchers]
+      summary: Get voucher by code
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: code
+          in: path
+          required: true
+          schema:
+            type: string
+          example: PROMO2026
+      responses:
+        '200':
+          description: Voucher found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  voucher:
+                    $ref: '#/components/schemas/Voucher'
+        '401':
+          description: Invalid token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Voucher not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
