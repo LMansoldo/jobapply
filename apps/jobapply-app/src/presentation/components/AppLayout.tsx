@@ -1,9 +1,11 @@
 import { Grid } from 'antd'
 import {
-  UnorderedListOutlined,
-  FileTextOutlined,
-  LogoutOutlined,
+  ToolOutlined,
+  BankOutlined,
+  LineChartOutlined,
+  BellOutlined,
   UserOutlined,
+  LogoutOutlined,
 } from '@ant-design/icons'
 import { useNavigate, useLocation, Outlet } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
@@ -33,21 +35,6 @@ export default function AppLayout() {
 
   const userMenuItems = [
     {
-      key: '/',
-      icon: <UnorderedListOutlined />,
-      label: t('nav.jobs'),
-      onClick: () => navigate('/'),
-      style: pathname === '/' ? { color: Colors.primaryDark, fontWeight: 600 } : undefined,
-    },
-    {
-      key: '/cv',
-      icon: <FileTextOutlined />,
-      label: t('nav.cv'),
-      onClick: () => navigate('/cv'),
-      style: pathname === '/cv' ? { color: Colors.primaryDark, fontWeight: 600 } : undefined,
-    },
-    { type: 'divider' as const },
-    {
       key: 'logout',
       icon: <LogoutOutlined />,
       label: t('auth.logout'),
@@ -57,8 +44,41 @@ export default function AppLayout() {
   ]
 
   const navItems = [
-    { key: 'jobs', label: t('nav.jobs'), href: '/', active: pathname === '/' },
-    { key: 'cv', label: t('nav.cv'), href: '/cv', active: pathname === '/cv' },
+    {
+      key: 'jobs',
+      label: t('nav.jobs'),
+      icon: <ToolOutlined />,
+      href: '/',
+      active: pathname === '/',
+    },
+    {
+      key: 'companies',
+      label: t('nav.companies'),
+      icon: <BankOutlined />,
+      href: '#',
+      active: false,
+    },
+    {
+      key: 'salaries',
+      label: t('nav.salaries'),
+      icon: <LineChartOutlined />,
+      href: '#',
+      active: false,
+    },
+    {
+      key: 'alerts',
+      label: t('nav.alerts'),
+      icon: <BellOutlined />,
+      href: '#',
+      active: false,
+    },
+    {
+      key: 'profile',
+      label: t('nav.profile'),
+      icon: <UserOutlined />,
+      href: '/cv',
+      active: pathname === '/cv' || pathname.startsWith('/tailor'),
+    },
   ]
 
   const rightSlot = (
@@ -75,14 +95,13 @@ export default function AppLayout() {
   return (
     <div style={{ minHeight: '100vh', background: Colors.pageBg }}>
       <DSAppHeader
-        logoText="JobApply"
         navItems={isMobile ? [] : navItems}
         rightSlot={rightSlot}
       />
       <AppContent
         style={{
           padding: isMobile ? Spacing.md1 : Spacing.lg,
-          minHeight: `calc(100vh - 6rem)`,
+          minHeight: `calc(100vh - 6.4rem)`,
         }}
       >
         <Outlet />
