@@ -187,7 +187,27 @@
         "en": "EN",
         "save": "Salvar",
         "finish": "Finalizar"
-      }
+      },
+      "regen": "Regerar"
+    },
+    "ats": {
+      "score": "Pontuação ATS",
+      "breakdown": "Análise por categoria",
+      "keywords": "Palavras-chave"
+    },
+    "tailoring": {
+      "tabCV": "Currículo",
+      "tabCoverLetter": "Carta de apresentação",
+      "tabVideoScript": "Script de vídeo",
+      "toneTitle": "Tom da carta",
+      "videoScriptTitle": "Script para entrevista em vídeo",
+      "cvPlaceholder": "Seu CV adaptado aparecerá aqui...",
+      "coverPlaceholder": "Sua carta de apresentação aparecerá aqui...",
+      "videoPlaceholder": "Seu script de vídeo aparecerá aqui...",
+      "aiSuggestion": "Adicione métricas quantitativas para aumentar o impacto do seu CV para esta vaga.",
+      "jobNotFound": "Vaga não encontrada",
+      "loadError": "Erro ao carregar vaga",
+      "tailorError": "Erro ao adaptar CV"
     }
   },
   "en": {
@@ -378,7 +398,27 @@
         "en": "EN",
         "save": "Save",
         "finish": "Finish"
-      }
+      },
+      "regen": "Regenerate"
+    },
+    "ats": {
+      "score": "ATS Score",
+      "breakdown": "Category breakdown",
+      "keywords": "Keywords"
+    },
+    "tailoring": {
+      "tabCV": "Resume",
+      "tabCoverLetter": "Cover letter",
+      "tabVideoScript": "Video script",
+      "toneTitle": "Letter tone",
+      "videoScriptTitle": "Video interview script",
+      "cvPlaceholder": "Your tailored resume will appear here...",
+      "coverPlaceholder": "Your cover letter will appear here...",
+      "videoPlaceholder": "Your video script will appear here...",
+      "aiSuggestion": "Add quantitative metrics to increase your CV's impact for this role.",
+      "jobNotFound": "Job not found",
+      "loadError": "Failed to load job",
+      "tailorError": "Failed to tailor CV"
     }
   }
 }

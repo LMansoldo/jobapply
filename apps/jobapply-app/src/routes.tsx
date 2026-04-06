@@ -5,6 +5,7 @@ import LoginPage from './presentation/pages/LoginPage'
 import RegisterPage from './presentation/pages/RegisterPage'
 import JobsPage from './presentation/pages/JobsPage'
 import CVPage from './presentation/pages/CVPage'
+import CVTailoringPage from './presentation/pages/CVTailoringPage'
 
 function PrivateRoute({ children }: { children: JSX.Element }) {
   const { token } = useAuth()
@@ -26,6 +27,7 @@ export default function AppRoutes() {
       >
         <Route path="/" element={<JobsPage />} />
         <Route path="/cv" element={<CVPage />} />
+        <Route path="/tailoring/:jobId" element={<CVTailoringPage />} />
       </Route>
 
       {/* Catch-all */}
