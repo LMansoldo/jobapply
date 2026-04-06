@@ -9,12 +9,11 @@ import { useNavigate, useLocation, Outlet } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { Avatar } from '../../components/Avatar'
 import { Dropdown } from '../../components/Dropdown'
-import { AppLayout as Layout, AppHeader, AppContent } from '../../components/Layout'
+import { AppContent } from '../../components/Layout'
 import { Space } from '../../components/Space'
-import { Text } from '../../components/Typography'
+import { AppHeader as DSAppHeader } from '../../design-system/layout/AppHeader'
 import { useAuth } from '../../application/providers/AuthProvider'
 import { Colors } from '../../styles/theme/colors'
-import { FontSize } from '../../styles/theme/typography'
 import { Spacing } from '../../styles/theme/spacing'
 
 const { useBreakpoint } = Grid
@@ -38,14 +37,14 @@ export default function AppLayout() {
       icon: <UnorderedListOutlined />,
       label: t('nav.jobs'),
       onClick: () => navigate('/'),
-      style: pathname === '/' ? { color: Colors.info, fontWeight: 600 } : undefined,
+      style: pathname === '/' ? { color: Colors.primaryDark, fontWeight: 600 } : undefined,
     },
     {
       key: '/cv',
       icon: <FileTextOutlined />,
       label: t('nav.cv'),
       onClick: () => navigate('/cv'),
-      style: pathname === '/cv' ? { color: Colors.info, fontWeight: 600 } : undefined,
+      style: pathname === '/cv' ? { color: Colors.primaryDark, fontWeight: 600 } : undefined,
     },
     { type: 'divider' as const },
     {
@@ -57,52 +56,37 @@ export default function AppLayout() {
     },
   ]
 
+  const navItems = [
+    { key: 'jobs', label: t('nav.jobs'), href: '/', active: pathname === '/' },
+    { key: 'cv', label: t('nav.cv'), href: '/cv', active: pathname === '/cv' },
+  ]
+
+  const rightSlot = (
+    <Dropdown menu={{ items: userMenuItems }} placement="bottomRight" trigger={['click']}>
+      <Space style={{ cursor: 'pointer' }} size={8}>
+        <Avatar icon={<UserOutlined />} style={{ background: Colors.primaryDark }} size={isMobile ? 28 : 32} />
+        {!isMobile && (
+          <span style={{ color: Colors.textMain, fontSize: '1.4rem' }}>{user?.name ?? t('nav.user')}</span>
+        )}
+      </Space>
+    </Dropdown>
+  )
+
   return (
-    <Layout style={{ minHeight: '100vh' }}>
-      <AppHeader
-        style={{
-          position: 'sticky',
-          top: 0,
-          zIndex: 100,
-          display: 'flex',
-          alignItems: 'center',
-          padding: isMobile ? `0 ${Spacing.md}` : `0 ${Spacing.lg}`,
-          background: Colors.white,
-          boxShadow: `0 ${Spacing.px} ${Spacing.sm2} ${Colors.shadowSm}`,
-          height: Spacing.headerHeight,
-        }}
-      >
-        <Text
-          strong
-          style={{
-            color: Colors.secondary,
-            fontSize: isMobile ? FontSize.base : FontSize.xl,
-            letterSpacing: 1,
-            whiteSpace: 'nowrap',
-            flex: 1,
-          }}
-        >
-          JobApply
-        </Text>
-
-        <Dropdown menu={{ items: userMenuItems }} placement="bottomRight" trigger={['click']}>
-          <Space style={{ cursor: 'pointer' }} size={8}>
-            <Avatar icon={<UserOutlined />} style={{ background: Colors.primary }} size={isMobile ? 28 : 32} />
-            {!isMobile && (
-              <Text style={{ color: Colors.textBase, fontSize: FontSize.md }}>{user?.name ?? t('nav.user')}</Text>
-            )}
-          </Space>
-        </Dropdown>
-      </AppHeader>
-
+    <div style={{ minHeight: '100vh', background: Colors.pageBg }}>
+      <DSAppHeader
+        logoText="JobApply"
+        navItems={isMobile ? [] : navItems}
+        rightSlot={rightSlot}
+      />
       <AppContent
         style={{
           padding: isMobile ? Spacing.md1 : Spacing.lg,
-          minHeight: `calc(100vh - ${Spacing.headerHeight})`,
+          minHeight: `calc(100vh - 6rem)`,
         }}
       >
         <Outlet />
       </AppContent>
-    </Layout>
+    </div>
   )
 }
