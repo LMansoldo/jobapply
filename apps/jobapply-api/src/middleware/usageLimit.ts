@@ -2,7 +2,11 @@ import { Response, NextFunction } from 'express';
 import { AuthRequest } from '../types';
 import User from '../models/User';
 
-const DAILY_LIMIT = 10;
+const DAILY_LIMITS: Record<string, number> = {
+  free: 5,
+  premium: 50,
+  ultimate: Infinity,
+};
 
 function isToday(date: Date | null): boolean {
   if (!date) return false;
@@ -19,22 +23,23 @@ export async function usageLimit(req: AuthRequest, res: Response, next: NextFunc
     const user = await User.findById(req.user.id);
     if (!user) { res.status(401).json({ message: 'User not found' }); return; }
 
-    if (user.access_type === 'ultimate') { next(); return; }
-
     if (user.is_restricted) {
       res.status(403).json({ message: 'Account is restricted' });
       return;
     }
+
+    const limit = DAILY_LIMITS[user.access_type] ?? 5;
+    if (limit === Infinity) { next(); return; }
 
     if (!isToday(user.daily_usage.date)) {
       user.daily_usage.count = 0;
       user.daily_usage.date = new Date();
     }
 
-    if (user.daily_usage.count >= DAILY_LIMIT) {
+    if (user.daily_usage.count >= limit) {
       res.status(429).json({
         message: 'Daily usage limit reached',
-        limit: DAILY_LIMIT,
+        limit,
         resets_at: 'midnight',
       });
       return;
