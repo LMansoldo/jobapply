@@ -5,7 +5,8 @@ import CV, { CVLocale } from '../models/CV';
 import Job from '../models/Job';
 import User from '../models/User';
 import PublishedCV from '../models/PublishedCV';
-import { tailorCV as tailorCVService } from '../services/llmService';
+import { tailorCV as tailorCVService, generateCoverLetter as generateCoverLetterLLM, generateVideoScript as generateVideoScriptLLM } from '../services/llmService';
+import { analyzeWithATS } from '../services/atsService';
 
 const VALID_LOCALES: CVLocale[] = ['en', 'pt-BR'];
 
@@ -151,6 +152,92 @@ export async function tailorCV(req: AuthRequest, res: Response, next: NextFuncti
     await cv.save();
 
     res.json({ tailoredCV: tailoredContent });
+  } catch (err: unknown) {
+    const e = err as { name?: string; status?: number; message?: string };
+    if (e.name === 'CastError') { res.status(404).json({ message: 'Resource not found' }); return; }
+    if (e.status) { res.status(502).json({ message: 'LLM service error', detail: e.message }); return; }
+    next(err);
+  }
+}
+
+function applyLocale(cv: ReturnType<typeof CV.prototype.toObject>, locale: string) {
+  const version = (cv as { localeVersions?: Array<{ locale: string; objective?: unknown; summary?: unknown; skills?: unknown; expertise?: string[]; experience?: unknown[]; education?: unknown }> }).localeVersions?.find(v => v.locale === locale);
+  if (!version) return cv;
+  return {
+    ...cv,
+    ...(version.objective !== undefined && { objective: version.objective }),
+    ...(version.summary !== undefined && { summary: version.summary }),
+    ...(version.skills !== undefined && { skills: version.skills }),
+    ...(version.expertise?.length && { expertise: version.expertise }),
+    ...(version.experience?.length && { experience: version.experience }),
+    ...(version.education !== undefined && { education: version.education }),
+  };
+}
+
+export async function analyzeCVWithATS(req: AuthRequest, res: Response, next: NextFunction): Promise<void> {
+  try {
+    const cv = await CV.findById(req.params.id);
+    if (!cv) { res.status(404).json({ message: 'CV not found' }); return; }
+    if (cv.user.toString() !== req.user.id) { res.status(403).json({ message: 'Access denied' }); return; }
+
+    const { jobId, locale } = req.body as { jobId?: string; locale?: string };
+    if (!jobId) { res.status(400).json({ message: 'jobId is required' }); return; }
+
+    const job = await Job.findById(jobId);
+    if (!job) { res.status(404).json({ message: 'Job not found' }); return; }
+
+    const cvData = locale ? applyLocale(cv.toObject(), locale) : cv.toObject();
+    const report = await analyzeWithATS(cvData, job.description, locale);
+
+    res.json({ report });
+  } catch (err: unknown) {
+    const e = err as { name?: string; status?: number; message?: string };
+    if (e.name === 'CastError') { res.status(404).json({ message: 'Resource not found' }); return; }
+    if (e.status) { res.status(502).json({ message: 'ATS agent error', detail: e.message }); return; }
+    next(err);
+  }
+}
+
+export async function coverLetterCV(req: AuthRequest, res: Response, next: NextFunction): Promise<void> {
+  try {
+    const cv = await CV.findById(req.params.id);
+    if (!cv) { res.status(404).json({ message: 'CV not found' }); return; }
+    if (cv.user.toString() !== req.user.id) { res.status(403).json({ message: 'Access denied' }); return; }
+
+    const { jobId, locale } = req.body as { jobId?: string; locale?: string };
+    if (!jobId) { res.status(400).json({ message: 'jobId is required' }); return; }
+
+    const job = await Job.findById(jobId);
+    if (!job) { res.status(404).json({ message: 'Job not found' }); return; }
+
+    const cvData = locale ? applyLocale(cv.toObject(), locale) : cv.toObject();
+    const coverLetter = await generateCoverLetterLLM(cvData, job.description);
+
+    res.json({ coverLetter });
+  } catch (err: unknown) {
+    const e = err as { name?: string; status?: number; message?: string };
+    if (e.name === 'CastError') { res.status(404).json({ message: 'Resource not found' }); return; }
+    if (e.status) { res.status(502).json({ message: 'LLM service error', detail: e.message }); return; }
+    next(err);
+  }
+}
+
+export async function videoScriptCV(req: AuthRequest, res: Response, next: NextFunction): Promise<void> {
+  try {
+    const cv = await CV.findById(req.params.id);
+    if (!cv) { res.status(404).json({ message: 'CV not found' }); return; }
+    if (cv.user.toString() !== req.user.id) { res.status(403).json({ message: 'Access denied' }); return; }
+
+    const { jobId, locale } = req.body as { jobId?: string; locale?: string };
+    if (!jobId) { res.status(400).json({ message: 'jobId is required' }); return; }
+
+    const job = await Job.findById(jobId);
+    if (!job) { res.status(404).json({ message: 'Job not found' }); return; }
+
+    const cvData = locale ? applyLocale(cv.toObject(), locale) : cv.toObject();
+    const script = await generateVideoScriptLLM(cvData, job.description);
+
+    res.json({ script });
   } catch (err: unknown) {
     const e = err as { name?: string; status?: number; message?: string };
     if (e.name === 'CastError') { res.status(404).json({ message: 'Resource not found' }); return; }

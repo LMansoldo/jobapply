@@ -305,6 +305,71 @@ components:
           type: string
           format: date-time
 
+    PlatformScore:
+      type: object
+      properties:
+        platform:
+          type: string
+          example: Greenhouse
+        score:
+          type: number
+          example: 78
+        passed:
+          type: boolean
+        missingRequired:
+          type: array
+          items:
+            type: string
+        missingPreferred:
+          type: array
+          items:
+            type: string
+        flags:
+          type: array
+          items:
+            type: string
+        notes:
+          type: array
+          items:
+            type: string
+
+    ATSReport:
+      type: object
+      properties:
+        universalScore:
+          type: number
+          description: Average score (0-100) across all ATS platforms
+          example: 74
+        platforms:
+          type: array
+          items:
+            $ref: '#/components/schemas/PlatformScore'
+        semanticGaps:
+          type: array
+          description: High-level content gaps identified by semantic analysis
+          items:
+            type: string
+        optimalTemplate:
+          type: object
+          properties:
+            keywordsToAdd:
+              type: array
+              items:
+                type: string
+            rephraseSuggestions:
+              type: array
+              items:
+                type: string
+            formatFixes:
+              type: array
+              items:
+                type: string
+        tips:
+          type: array
+          description: Prioritized actionable recommendations
+          items:
+            type: string
+
     Error:
       type: object
       properties:
@@ -1105,6 +1170,212 @@ paths:
                   tailoredCV:
                     type: string
                     description: Tailored CV in Markdown format
+        '400':
+          description: jobId is required
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Invalid token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: Access denied
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: CV or job not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '502':
+          description: LLM service error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /cv/{id}/analyze:
+    post:
+      tags: [CV]
+      summary: Analyze CV against a job via ATS agent (scores 8 ATS platforms + semantic gaps)
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [jobId]
+              properties:
+                jobId:
+                  type: string
+                  description: ID of the job to analyze against
+                locale:
+                  type: string
+                  enum: [en, pt-BR]
+                  description: Optional locale version to use for the CV
+      responses:
+        '200':
+          description: ATS analysis report
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  report:
+                    $ref: '#/components/schemas/ATSReport'
+        '400':
+          description: jobId is required
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Invalid token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: Access denied
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: CV or job not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '502':
+          description: ATS agent error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /cv/{id}/cover-letter:
+    post:
+      tags: [CV]
+      summary: Generate a cover letter for a job via LLM
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [jobId]
+              properties:
+                jobId:
+                  type: string
+                  description: ID of the job to write the cover letter for
+                locale:
+                  type: string
+                  enum: [en, pt-BR]
+                  description: Optional locale version to use for the CV
+      responses:
+        '200':
+          description: Cover letter in Markdown
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  coverLetter:
+                    type: string
+                    description: Cover letter in Markdown format
+        '400':
+          description: jobId is required
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Invalid token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: Access denied
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: CV or job not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '502':
+          description: LLM service error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /cv/{id}/video-script:
+    post:
+      tags: [CV]
+      summary: Generate a video presentation script for a job via LLM
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [jobId]
+              properties:
+                jobId:
+                  type: string
+                  description: ID of the job to write the video script for
+                locale:
+                  type: string
+                  enum: [en, pt-BR]
+                  description: Optional locale version to use for the CV
+      responses:
+        '200':
+          description: Video script in Markdown
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  script:
+                    type: string
+                    description: Structured video presentation script in Markdown format
         '400':
           description: jobId is required
           content:

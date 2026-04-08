@@ -29,6 +29,62 @@ ${originalDescription}
   return generate(system, user);
 }
 
+export async function generateCoverLetter(cvData: object, jobDescription: string): Promise<string> {
+  const system = `You are an expert career coach and professional cover letter writer.
+You will receive a candidate's CV data (as JSON) and a job description.
+Write a compelling, personalized cover letter that:
+- Opens with a strong, engaging hook
+- Connects the candidate's top experiences to the role's key requirements
+- Uses natural, confident language — no generic filler
+- Keeps a professional but human tone
+- Is concise: 3-4 paragraphs
+- NEVER invents or fabricates any experience, skill, or credential
+Output only the cover letter in Markdown. No explanations.`;
+
+  const user = `Job Description:
+<job_description>
+${jobDescription}
+</job_description>
+
+Candidate CV (JSON):
+<cv>
+${JSON.stringify(cvData, null, 2)}
+</cv>
+
+Write the cover letter in Markdown.`;
+
+  return generate(system, user);
+}
+
+export async function generateVideoScript(cvData: object, jobDescription: string): Promise<string> {
+  const system = `You are an expert personal branding coach and video script writer.
+You will receive a candidate's CV data (as JSON) and a job description.
+Write a structured script for a short (2-3 minute) personal presentation video that:
+- Opens with a memorable introduction
+- Highlights the 2-3 most relevant experiences for this role
+- Showcases key technical skills naturally in context
+- Explains why the candidate is excited about this specific role/company
+- Closes with a confident call to action
+Structure the script with clearly labeled sections.
+Keep the language natural and spoken — as if talking to a hiring manager.
+NEVER invents or fabricates any experience, skill, or credential.
+Output only the script in Markdown. No explanations.`;
+
+  const user = `Job Description:
+<job_description>
+${jobDescription}
+</job_description>
+
+Candidate CV (JSON):
+<cv>
+${JSON.stringify(cvData, null, 2)}
+</cv>
+
+Write the video script in Markdown.`;
+
+  return generate(system, user);
+}
+
 export async function tailorCV(cvData: object, jobDescription: string): Promise<string> {
   const system = `You are an expert career coach and professional CV writer.
 You will receive a candidate's CV data (as JSON) and a job description.
