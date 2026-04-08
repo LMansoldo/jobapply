@@ -1,7 +1,8 @@
-import Anthropic from '@anthropic-ai/sdk'
+import { GoogleGenerativeAI } from '@google/generative-ai'
 import type { MappedCV, PlatformScore } from '../../types'
 
-const client = new Anthropic()
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY ?? '')
+const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash' })
 
 interface SemanticResult {
   semanticGaps: string[]
@@ -81,20 +82,15 @@ export async function semanticAnalyzerNode(state: {
 
   const prompt = buildPrompt(cv, state.input.jobDescription, state.platformScores)
 
-  const message = await client.messages.create({
-    model: 'claude-sonnet-4-20250514',
-    max_tokens: 2048,
-    messages: [{ role: 'user', content: prompt }],
-  })
-
-  const raw = message.content[0]
-  if (raw.type !== 'text') throw new Error('Unexpected response type from Claude')
+  const result = await model.generateContent(prompt)
+  const raw = result.response.text()
 
   let parsed: SemanticResult
   try {
-    parsed = JSON.parse(raw.text) as SemanticResult
+    const clean = raw.replace(/^```json\s*/i, '').replace(/```\s*$/, '').trim()
+    parsed = JSON.parse(clean) as SemanticResult
   } catch {
-    throw new Error(`Failed to parse Claude response as JSON: ${raw.text.slice(0, 200)}`)
+    throw new Error(`Failed to parse Gemini response as JSON: ${raw.slice(0, 200)}`)
   }
 
   return { semanticGaps: parsed.semanticGaps ?? [] }

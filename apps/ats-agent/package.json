@@ -9,7 +9,7 @@
     "dev": "ts-node -r dotenv/config src/server.ts"
   },
   "dependencies": {
-    "@anthropic-ai/sdk": "^0.36.0",
+    "@google/generative-ai": "^0.24.1",
     "@langchain/langgraph": "^0.2.36",
     "dotenv": "^16.4.5",
     "fastify": "^4.28.0",
