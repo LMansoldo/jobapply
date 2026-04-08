@@ -1,0 +1,23 @@
+{
+  "name": "ats-agent",
+  "version": "1.0.0",
+  "description": "Multi-platform ATS simulation agent using LangGraph.js and Claude",
+  "main": "dist/server.js",
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/server.js",
+    "dev": "ts-node -r dotenv/config src/server.ts"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.36.0",
+    "@langchain/langgraph": "^0.2.36",
+    "dotenv": "^16.4.5",
+    "fastify": "^4.28.0",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@types/node": "^20.14.0",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.4.5"
+  }
+}
