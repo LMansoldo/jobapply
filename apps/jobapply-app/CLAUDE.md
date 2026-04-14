@@ -18,11 +18,18 @@ src/
 ├── domain/             # Business domains
 │   ├── cv/
 │   │   ├── components/ # Domain-specific components (CVViewer, CVBaseForm, …)
+│   │   │   └── CVTemplate/   # Example: a complex component with subcomponents
+│   │   │       ├── CVTemplate.tsx        # Container
+│   │   │       ├── CVTemplate.styles.ts  # All styled components
+│   │   │       ├── helpers.ts            # Pure functions used only here
+│   │   │       ├── HeaderSection.tsx     # Presentational
+│   │   │       ├── SummarySection.tsx
+│   │   │       └── ...
 │   │   ├── constants/  # Magic numbers, template strings
-│   │   ├── helpers/    # Pure functions (parsers, formatters)
+│   │   ├── helpers/    # Shared pure functions across the domain
 │   │   └── types/      # TypeScript interfaces/types for this domain
 │   └── jobs/
-│       ├── components/ # JobCard, JobDetail, JobFilterBar, …
+│       ├── components/
 │       ├── constants/
 │       ├── helpers/
 │       └── types/
@@ -33,10 +40,33 @@ src/
 ├── components/         # AntD wrapper components (one per component)
 └── styles/
     └── theme/
-        ├── colors.ts     # Colors object
-        ├── spacing.ts    # Spacing object (rem scale)
-        └── typography.ts # FontSize object (rem scale)
+        ├── colors.ts
+        ├── spacing.ts
+        └── typography.ts
 ```
+---
+
+
+## Emotion Styling Rules (strict)
+
+- No inline styles: style={{}} é proibido.
+- Use styled do @emotion/styled para componentes com múltiplas regras ou props dinâmicas.
+- Use css do @emotion/css para classes utilitárias simples.
+- Arquivo .styles.ts obrigatório para cada componente que precise de estilos.
+- Estilos dinâmicos: passe props para componentes styled (ex: <SkillBarFill percent={80} />).
+- Sem magic numbers: converta pixels para rem (1rem=10px) e armazene como constantes nomeadas no topo do .styles.ts.
+
+Exemplo (do CVTemplate.styles.ts):
+
+const SKILL_BAR_HEIGHT = '0.6rem';   // 6px
+const SKILL_BAR_BORDER_RADIUS = '0.3rem';
+
+export const SkillBarFill = styled.div<{ percent: number }>`
+  height: 100%;
+  width: ${({ percent }) => `${percent}%`};
+  background: ${Colors.gradientProgressBar};
+  border-radius: ${SKILL_BAR_BORDER_RADIUS};
+`;
 
 ---
 

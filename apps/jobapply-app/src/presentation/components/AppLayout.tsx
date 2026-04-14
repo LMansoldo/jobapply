@@ -4,6 +4,7 @@ import {
   BankOutlined,
   LineChartOutlined,
   BellOutlined,
+  FileSearchOutlined,
   UserOutlined,
   LogoutOutlined,
 } from '@ant-design/icons'
@@ -67,6 +68,13 @@ export default function AppLayout() {
       active: false,
     },
     {
+      key: 'tailoring',
+      label: t('nav.tailoring'),
+      icon: <FileSearchOutlined />,
+      href: '/tailoring',
+      active: pathname === '/tailoring',
+    },
+    {
       key: 'alerts',
       label: t('nav.alerts'),
       icon: <BellOutlined />,
@@ -78,7 +86,7 @@ export default function AppLayout() {
       label: t('nav.profile'),
       icon: <UserOutlined />,
       href: '/cv',
-      active: pathname === '/cv' || pathname.startsWith('/tailor'),
+      active: pathname === '/cv' || pathname.startsWith('/tailoring/'),
     },
   ]
 

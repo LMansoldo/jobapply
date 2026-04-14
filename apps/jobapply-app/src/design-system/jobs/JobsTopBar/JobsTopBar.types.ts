@@ -1,8 +1,26 @@
+import type { ReactNode } from 'react'
 import type { User } from '../../../domain/auth/types'
 import type { JobFilters } from '../../../domain/jobs/types'
 import type { JobAlert } from '../JobAlertsCard/JobAlertsCard.types'
 import type { NewsItem } from '../IndustryNewsCard/IndustryNewsCard.types'
 import type { SortOption } from '../SortDropdown'
+
+export interface FilterChip {
+  key: string
+  label: string
+}
+
+export interface FilterChipsRowProps {
+  chips: FilterChip[]
+  active: string[]
+  renderChip: (chip: FilterChip, isActive: boolean) => ReactNode
+}
+
+export interface SearchBarProps {
+  value: string
+  onChange: (value: string) => void
+  placeholder?: string
+}
 
 export interface JobsTopBarProps {
   user: User

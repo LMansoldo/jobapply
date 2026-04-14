@@ -64,11 +64,11 @@ export function JobsTopBar({
     onFilterChange('contractTypes', [])
     onFilterChange('modalities', [])
     onFilterChange('sort', undefined)
-    onSortChange('relevant')
+    onSortChange('newest')
   }
 
   const hasActiveFilters =
-    activeContracts.length > 0 || activeModalities.length > 0 || sort !== 'relevant'
+    activeContracts.length > 0 || activeModalities.length > 0 || sort !== 'newest'
 
   // ── Alert dropdown panel ────────────────────────────────────────────────
   const alertsPanel = (

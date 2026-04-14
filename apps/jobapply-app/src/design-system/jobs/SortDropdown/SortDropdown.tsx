@@ -8,10 +8,8 @@ export function SortDropdown({ value, onChange }: SortDropdownProps) {
   const { t } = useTranslation()
 
   const options: { value: SortOption; label: string }[] = [
-    { value: 'relevant', label: t('jobs.sortRelevant') },
-    { value: 'recent', label: t('jobs.sortRecent') },
-    { value: 'salary', label: t('jobs.sortSalary') },
-    { value: 'applications', label: t('jobs.sortApplications') },
+    { value: 'newest', label: t('jobs.sortNewest') },
+    { value: 'oldest', label: t('jobs.sortOldest') },
   ]
 
   return (

@@ -34,7 +34,7 @@ export interface JobFilters {
   modalities?: string[]
   experienceLevels?: string[]
   maxSalary?: number
-  sort?: 'relevant' | 'recent' | 'salary' | 'applications'
+  sort?: 'newest' | 'oldest'
 }
 
 export interface BulkJobsPayload {

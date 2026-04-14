@@ -1,9 +1,7 @@
 import type { Job } from '../../../domain/jobs/types'
-import type { CV, CVLocaleVersion } from '../../../domain/cv/types'
 
 export interface TailoringPreviewPanelProps {
-  cv: CV | null
-  locale: CVLocaleVersion | null
+  markdownContent?: string
   job: Job | null
   currentScore: number
   projectedScore: number

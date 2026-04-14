@@ -1,4 +1,4 @@
-export type SortOption = 'relevant' | 'recent' | 'salary' | 'applications'
+export type SortOption = 'newest' | 'oldest'
 
 export interface SortDropdownProps {
   value: SortOption

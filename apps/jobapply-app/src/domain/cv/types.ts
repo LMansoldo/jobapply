@@ -10,38 +10,63 @@ export interface Experience {
 export interface Education {
   institution: string
   degree: string
-  field: string
-  startDate: string
+  field?: string
+  startDate?: string
   endDate?: string
+  location?: string
+  period?: string
+}
+
+// ─── Standalone domain types ─────────────────────────────────────────────────
+
+export interface Language {
+  language: string
+  level: string
+  score?: string
+}
+
+export interface Certification {
+  name: string
+  organization?: string
+  date?: string
+}
+
+// ─── ATS Report types ────────────────────────────────────────────────────────
+
+export interface RephraseEntry {
+  from: string
+  to: string
+}
+
+export interface ATSPlatformScore {
+  platform: string
+  score: number
+  missingPreferred?: string[]
+}
+
+export interface ATSTip {
+  tip: string
+  priority: string
+}
+
+export interface ATSOptimalTemplate {
+  keywordsToAdd: string[]
+  keywordsToRephrase: RephraseEntry[]
+  formatFixes: string[]
+}
+
+export interface ATSReport {
+  universalScore: number
+  platforms: ATSPlatformScore[]
+  tips: ATSTip[]
+  optimalTemplate: ATSOptimalTemplate
 }
 
 // ─── New locale version structure ─────────────────────────────────────────────
 
-export interface CVLocaleObjective {
-  role: string
-  main_stack: string[]
-}
-
-export interface CVLocaleSummary {
-  headline: string
-  focus_areas: string[]
-  tagline: string
-}
-
 export interface CVLocaleSkillGroup {
   label: string
   items: string[]
-}
-
-export interface CVLocaleSkills {
-  tech: CVLocaleSkillGroup[]
-  competencies: CVLocaleSkillGroup[]
-  soft_skills: string[]
-}
-
-export interface CVLocaleExperienceHighlight {
-  text: string
-  category: string
 }
 
 export interface CVLocaleExperience {
@@ -49,26 +74,35 @@ export interface CVLocaleExperience {
   company: string
   location: string
   period: string
-  highlights: CVLocaleExperienceHighlight[]
+  context?: string
+  highlights: string[]
 }
 
 export interface CVLocaleEducation {
   degree: string
   institution: string
-  graduation: string
+  location?: string
+  period?: string
+  details?: string
+}
+
+export interface CVLocaleProject {
+  name: string
+  url?: string
+  description: string
+  highlights?: string[]
 }
 
 export interface CVLocaleVersion {
   locale: 'en' | 'pt-BR'
-  objective: CVLocaleObjective
-  summary: CVLocaleSummary
-  skills: CVLocaleSkills
-  expertise: string[]
+  summary: string
+  skills: CVLocaleSkillGroup[]
   experience: CVLocaleExperience[]
-  education: CVLocaleEducation
-  skillPercentages?: { name: string; percent: number }[]
+  education?: CVLocaleEducation[]
+  certifications?: { name: string; org?: string; date?: string }[]
+  projects?: CVLocaleProject[]
   languageLevels?: { name: string; level: string }[]
-  certifications?: { name: string; year: string }[]
+  skillPercentages?: { name: string; percent: number }[]
 }
 
 export type CVLocalePayload = Omit<CVLocaleVersion, 'locale'>
@@ -92,6 +126,7 @@ export interface CV {
   title?: string
   github?: string
   website?: string
+  portfolio?: string
   languages: string[]
   tailoredVersions: TailoredVersion[]
   localeVersions: CVLocaleVersion[]
@@ -107,6 +142,7 @@ export interface CVCreatePayload {
   title?: string
   github?: string
   website?: string
+  portfolio?: string
   languages?: string[]
 }
 

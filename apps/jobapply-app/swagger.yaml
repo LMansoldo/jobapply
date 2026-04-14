@@ -5,6 +5,8 @@ info:
   version: 1.0.0
 
 servers:
+  - url: https://jobapply-api-production.up.railway.app
+    description: Production
   - url: http://localhost:3000
     description: Local
 
@@ -25,6 +27,10 @@ components:
           type: string
         email:
           type: string
+        cv:
+          type: string
+          nullable: true
+          description: ID of the user's CV, null if not yet created
 
     Job:
       type: object
@@ -57,33 +63,104 @@ components:
           type: string
           format: date-time
 
+    SkillGroup:
+      type: object
+      required: [label, items]
+      properties:
+        label:
+          type: string
+          example: Frameworks & Libraries
+        items:
+          type: array
+          items:
+            type: string
+          example: [React, Next.js, Node.js]
+
     Experience:
       type: object
       properties:
-        company:
-          type: string
         role:
           type: string
-        startDate:
+        company:
           type: string
-        endDate:
+        location:
           type: string
-        description:
+        period:
           type: string
+          example: "01/2022 - 12/2024"
+        context:
+          type: string
+          description: One sentence describing the team, product, or context
+          example: Led front-end development for a B2B SaaS platform serving 200+ enterprise clients.
+        highlights:
+          type: array
+          description: Achievement bullets with metrics
+          items:
+            type: string
+          example: ["Reduced page load time by 40% via code splitting, improving Lighthouse score from 62 to 94."]
 
     Education:
       type: object
       properties:
-        institution:
-          type: string
         degree:
           type: string
+          example: Bachelor's
         field:
           type: string
-        startDate:
+          example: Computer Science
+        institution:
           type: string
-        endDate:
+        location:
           type: string
+        period:
+          type: string
+          example: "01/2018 - 12/2022"
+        notes:
+          type: string
+          description: Optional relevant coursework, thesis, or GPA
+
+    Language:
+      type: object
+      required: [language, level]
+      properties:
+        language:
+          type: string
+          example: English
+        level:
+          type: string
+          example: Fluent
+        score:
+          type: string
+          example: TOEFL 105
+
+    Certification:
+      type: object
+      required: [name, organization]
+      properties:
+        name:
+          type: string
+          example: AWS Certified Solutions Architect
+        organization:
+          type: string
+          example: Amazon Web Services
+        date:
+          type: string
+          example: "03/2024"
+
+    Project:
+      type: object
+      required: [name]
+      properties:
+        name:
+          type: string
+        url:
+          type: string
+        description:
+          type: string
+        highlights:
+          type: array
+          items:
+            type: string
 
     TailoredVersion:
       type: object
@@ -107,15 +184,11 @@ components:
         skills:
           type: array
           items:
-            type: string
+            $ref: '#/components/schemas/SkillGroup'
         experience:
           type: array
           items:
             $ref: '#/components/schemas/Experience'
-        education:
-          type: array
-          items:
-            $ref: '#/components/schemas/Education'
 
     CV:
       type: object
@@ -130,12 +203,20 @@ components:
           type: string
         phone:
           type: string
+        location:
+          type: string
+        linkedin:
+          type: string
+        github:
+          type: string
+        portfolio:
+          type: string
         summary:
           type: string
         skills:
           type: array
           items:
-            type: string
+            $ref: '#/components/schemas/SkillGroup'
         experience:
           type: array
           items:
@@ -147,7 +228,15 @@ components:
         languages:
           type: array
           items:
-            type: string
+            $ref: '#/components/schemas/Language'
+        certifications:
+          type: array
+          items:
+            $ref: '#/components/schemas/Certification'
+        projects:
+          type: array
+          items:
+            $ref: '#/components/schemas/Project'
         tailoredVersions:
           type: array
           items:
@@ -200,12 +289,20 @@ components:
           type: string
         phone:
           type: string
+        location:
+          type: string
+        linkedin:
+          type: string
+        github:
+          type: string
+        portfolio:
+          type: string
         summary:
           type: string
         skills:
           type: array
           items:
-            type: string
+            $ref: '#/components/schemas/SkillGroup'
         experience:
           type: array
           items:
@@ -217,10 +314,115 @@ components:
         languages:
           type: array
           items:
-            type: string
+            $ref: '#/components/schemas/Language'
+        certifications:
+          type: array
+          items:
+            $ref: '#/components/schemas/Certification'
+        projects:
+          type: array
+          items:
+            $ref: '#/components/schemas/Project'
         published_at:
           type: string
           format: date-time
+
+    PlatformScore:
+      type: object
+      properties:
+        platform:
+          type: string
+          example: Greenhouse
+        score:
+          type: number
+          example: 78
+        passed:
+          type: boolean
+        missingRequired:
+          type: array
+          items:
+            type: string
+        missingPreferred:
+          type: array
+          items:
+            type: string
+        flags:
+          type: array
+          items:
+            type: string
+        notes:
+          type: array
+          items:
+            type: string
+
+    RephraseSuggestion:
+      type: object
+      properties:
+        from:
+          type: string
+          description: Original phrase in the CV
+          example: "responsible for managing"
+        to:
+          type: string
+          description: Suggested replacement aligned with the job description
+          example: "led end-to-end delivery of"
+
+    ATSReport:
+      type: object
+      properties:
+        universalScore:
+          type: number
+          description: Average score (0-100) across all ATS platforms
+          example: 74
+        platforms:
+          type: array
+          items:
+            $ref: '#/components/schemas/PlatformScore'
+        semanticGaps:
+          type: array
+          description: High-level content gaps identified by semantic analysis
+          items:
+            type: string
+        optimalTemplate:
+          type: object
+          properties:
+            sectionsOrder:
+              type: array
+              description: Recommended CV section order
+              items:
+                type: string
+              example: [contact, objective, summary, skills, expertise, experience, education, languages]
+            keywordsToAdd:
+              type: array
+              description: Keywords missing from the CV that should be added
+              items:
+                type: string
+            keywordsToRephrase:
+              type: array
+              description: Phrases in the CV that should be reworded to match the job description
+              items:
+                $ref: '#/components/schemas/RephraseSuggestion'
+            formatFixes:
+              type: array
+              description: Format issues detected (dates, columns, encoding, etc.)
+              items:
+                type: string
+        tips:
+          type: array
+          description: Prioritized actionable recommendations
+          items:
+            type: object
+            properties:
+              priority:
+                type: string
+                enum: [critical, high, medium]
+              tip:
+                type: string
+              applicableTo:
+                type: array
+                description: ATS platforms this tip applies to
+                items:
+                  type: string
 
     Error:
       type: object
@@ -428,6 +630,13 @@ paths:
           schema:
             type: string
           description: Comma-separated tags (e.g. node,mongodb)
+        - name: sort
+          in: query
+          schema:
+            type: string
+            enum: [newest, oldest]
+            default: newest
+          description: Sort by creation date
         - name: page
           in: query
           schema:
@@ -464,6 +673,40 @@ paths:
                 $ref: '#/components/schemas/Error'
 
   /jobs/{id}:
+    get:
+      tags: [Jobs]
+      summary: Get job by ID
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Job found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  job:
+                    $ref: '#/components/schemas/Job'
+        '401':
+          description: Invalid token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Job not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
     delete:
       tags: [Jobs]
       summary: Delete a job
@@ -560,20 +803,28 @@ paths:
               properties:
                 fullName:
                   type: string
-                  example: Lucas M
+                  example: Lucas Mansoldo de Andrade
                 email:
                   type: string
                   example: lucas@test.com
                 phone:
                   type: string
-                  example: "+1 555 000-0000"
+                  example: "+55 21 98030-3612"
+                location:
+                  type: string
+                  example: Canoas, Brazil
+                linkedin:
+                  type: string
+                github:
+                  type: string
+                portfolio:
+                  type: string
                 summary:
                   type: string
                 skills:
                   type: array
                   items:
-                    type: string
-                  example: [Node.js, MongoDB]
+                    $ref: '#/components/schemas/SkillGroup'
                 experience:
                   type: array
                   items:
@@ -585,8 +836,15 @@ paths:
                 languages:
                   type: array
                   items:
-                    type: string
-                  example: [Portuguese, English]
+                    $ref: '#/components/schemas/Language'
+                certifications:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/Certification'
+                projects:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/Project'
       responses:
         '201':
           description: CV created
@@ -682,12 +940,20 @@ paths:
                   type: string
                 phone:
                   type: string
+                location:
+                  type: string
+                linkedin:
+                  type: string
+                github:
+                  type: string
+                portfolio:
+                  type: string
                 summary:
                   type: string
                 skills:
                   type: array
                   items:
-                    type: string
+                    $ref: '#/components/schemas/SkillGroup'
                 experience:
                   type: array
                   items:
@@ -699,7 +965,15 @@ paths:
                 languages:
                   type: array
                   items:
-                    type: string
+                    $ref: '#/components/schemas/Language'
+                certifications:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/Certification'
+                projects:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/Project'
       responses:
         '200':
           description: CV updated
@@ -797,20 +1071,14 @@ paths:
               properties:
                 summary:
                   type: string
-                  example: Experienced frontend engineer...
                 skills:
                   type: array
                   items:
-                    type: string
-                  example: [React, TypeScript]
+                    $ref: '#/components/schemas/SkillGroup'
                 experience:
                   type: array
                   items:
                     $ref: '#/components/schemas/Experience'
-                education:
-                  type: array
-                  items:
-                    $ref: '#/components/schemas/Education'
       responses:
         '200':
           description: Locale version saved
@@ -1009,6 +1277,224 @@ paths:
                   tailoredCV:
                     type: string
                     description: Tailored CV in Markdown format
+        '400':
+          description: jobId is required
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Invalid token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: Access denied
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: CV or job not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '502':
+          description: LLM service error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /cv/{id}/analyze:
+    post:
+      tags: [CV]
+      summary: Analyze CV against a job via ATS agent (scores 8 ATS platforms + semantic gaps)
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [jobId]
+              properties:
+                jobId:
+                  type: string
+                  description: ID of the job to analyze against
+                locale:
+                  type: string
+                  enum: [en, pt-BR]
+                  description: Override locale. If omitted, detected automatically from the job description language.
+      responses:
+        '200':
+          description: ATS analysis report
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  report:
+                    $ref: '#/components/schemas/ATSReport'
+                  locale:
+                    type: string
+                    enum: [en, pt-BR]
+                    description: Locale used for the CV (auto-detected or from request)
+        '400':
+          description: jobId is required
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Invalid token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: Access denied
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: CV or job not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '502':
+          description: ATS agent error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /cv/{id}/cover-letter:
+    post:
+      tags: [CV]
+      summary: Generate a cover letter for a job via LLM
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [jobId]
+              properties:
+                jobId:
+                  type: string
+                  description: ID of the job to write the cover letter for
+                locale:
+                  type: string
+                  enum: [en, pt-BR]
+                  description: Override locale. If omitted, detected automatically from the job description language.
+      responses:
+        '200':
+          description: Cover letter in Markdown
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  coverLetter:
+                    type: string
+                    description: Cover letter in Markdown format
+                  locale:
+                    type: string
+                    enum: [en, pt-BR]
+                    description: Locale used for the CV (auto-detected or from request)
+        '400':
+          description: jobId is required
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Invalid token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: Access denied
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: CV or job not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '502':
+          description: LLM service error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /cv/{id}/video-script:
+    post:
+      tags: [CV]
+      summary: Generate a video presentation script for a job via LLM
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [jobId]
+              properties:
+                jobId:
+                  type: string
+                  description: ID of the job to write the video script for
+                locale:
+                  type: string
+                  enum: [en, pt-BR]
+                  description: Override locale. If omitted, detected automatically from the job description language.
+      responses:
+        '200':
+          description: Video script in Markdown
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  script:
+                    type: string
+                    description: Structured video presentation script in Markdown format
+                  locale:
+                    type: string
+                    enum: [en, pt-BR]
+                    description: Locale used for the CV (auto-detected or from request)
         '400':
           description: jobId is required
           content:

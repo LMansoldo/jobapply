@@ -17,6 +17,9 @@
   },
   "dependencies": {
     "@ant-design/icons": "^5.3.7",
+    "@emotion/css": "^11.13.5",
+    "@emotion/react": "^11.14.0",
+    "@emotion/styled": "^11.14.0",
     "@monaco-editor/react": "^4.7.0",
     "antd": "^5.17.0",
     "axios": "^1.7.2",

@@ -373,3 +373,25 @@ export const newsMeta = css({
   fontSize: FontSize.xxs,
   color: Colors.textSub,
 })
+
+// ── Filter chips row ───────────────────────────────────────────────────────
+
+export const chipsGroup = css({
+  display: 'flex',
+  alignItems: 'center',
+  gap: Spacing.sm,
+  flexWrap: 'wrap' as const,
+})
+
+// ── Search bar ─────────────────────────────────────────────────────────────
+
+export const searchWrapper = css({
+  flex: 1,
+  minWidth: '20rem',
+  maxWidth: '36rem',
+})
+
+export const searchIcon = css({
+  color: Colors.textSub,
+  fontSize: FontSize.md,
+})

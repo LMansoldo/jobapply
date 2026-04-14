@@ -27,6 +27,7 @@ export default function AppRoutes() {
       >
         <Route path="/" element={<JobsPage />} />
         <Route path="/cv" element={<CVPage />} />
+        <Route path="/tailoring" element={<CVTailoringPage />} />
         <Route path="/tailoring/:jobId" element={<CVTailoringPage />} />
       </Route>
 

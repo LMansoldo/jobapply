@@ -7,4 +7,5 @@ export interface DSJobCardProps {
   variant?: DSJobCardVariant
   isSelected?: boolean
   onClick?: () => void
+  onApply?: (job: Job) => void
 }

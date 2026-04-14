@@ -6,4 +6,5 @@ export interface StepItem {
 export interface HorizontalStepperProps {
   steps: StepItem[]
   current: number
+  onStepClick?: (step: number) => void
 }

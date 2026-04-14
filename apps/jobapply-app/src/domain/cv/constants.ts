@@ -10,105 +10,91 @@ export const LANGUAGE_OPTIONS = [
 ].map((l) => ({ label: l, value: l }))
 
 /** Default PT-BR markdown template for the CV editor */
-export const PT_BR_TEMPLATE = `# Objetivo
-**Cargo:** Engenheiro Front-End Sênior
-**Stack principal:** Svelte, React, TypeScript
+export const PT_BR_TEMPLATE = `## Resumo
 
-# Resumo
-**Headline:** Engenheiro Front-End Sênior com 7+ anos construindo plataformas financeiras escaláveis.
-**Áreas de foco:** Fintech, Visualização de Dados, PWA
-**Tagline:** Especializado em Svelte, React e TypeScript — entrego código limpo, performático e orientado a negócio.
+Engenheiro Front-End Sênior com 7+ anos construindo plataformas financeiras escaláveis usando Svelte, React, TypeScript e Node.js. Histórico comprovado em liderar times e entregar produtos usados por milhares de usuários. Atualmente focado em design systems e engenharia de IA.
 
-# Skills Técnicas
-## Frontend
-Svelte, React, Redux, Next.js, Tailwind CSS, Ant Design
+## Skills
 
-## Linguagens
-TypeScript, JavaScript, PHP
+**Languages:** TypeScript, JavaScript, PHP, Elixir
+**Frameworks & Libraries:** Svelte, React, Redux, Next.js, Tailwind CSS, Ant Design
+**Tools & Platforms:** Vite, Webpack, Docker, Git, Jenkins, GitHub Actions, AWS
+**Testing:** Jest, Cypress, Playwright
+**AI Engineering:** AI Agents, MCP Servers, RAG, Prompt Engineering, LangChain
+**Methodologies:** TDD, Agile, Scrum, Clean Architecture, Code Review, CI/CD
 
-## Backend & Cloud
-Node.js, Express, AWS Lambda
+## Experiência Profissional
 
-# Competências
-## API & Integração
-APIs RESTful, GraphQL, WebSockets
+### Desenvolvedor Front-End Sênior | Venturus | Brasília, Brasil (Remoto)
+**06/2025 – Presente**
 
-## Processos & Qualidade
-Testes Automatizados, Code Review, CI/CD
+Desenvolvo ferramentas internas com IA e oriento desenvolvedores juniores em consultoria para clientes empresariais.
 
-# Soft Skills
-- Entrega de alto valor equilibrando qualidade e ciclos ágeis de entrega
-- Resolução de problemas complexos com pensamento crítico e visão sistêmica
-- Comunicação clara com stakeholders técnicos e de negócio
+- Orientei 4 desenvolvedores juniores por meio de pair programming e code reviews semanais, acelerando suas habilidades em 3 meses.
+- Desenvolvi agentes de IA para pré-análise de bugs e testes E2E — reduzindo tempo de debug em 60%.
+- Desenvolvi MCP Servers com contexto de projeto — reduzindo AI slop em prompts em 50%.
 
-# Expertise
-- Atualiza continuamente o conhecimento técnico acompanhando evoluções de frameworks e boas práticas
-- Capacidade comprovada de fazer a ponte entre times técnicos e stakeholders de produto
+### Desenvolvedor Front-End Sênior | Ília Digital (JPMC) | Brasília, Brasil (Remoto)
+**04/2022 – 04/2025**
 
-# Experiência
+Liderei o desenvolvimento front-end para plataformas bancárias e de investimento usadas por milhares de clientes do JPMC.
 
-## Desenvolvedor Front-End Sênior | Venturus | Brasília, Brasil | Jun 2025 - Presente
-- [architecture] Mentoro desenvolvedores Jr. na aplicação de boas práticas e uso eficiente de IA.
-- [innovation] Desenvolvi agentes de IA para análise de bugs — reduzindo tempo de debug em 60%.
+- Liderei MVP para gestão de contas e investimentos com Svelte, TypeScript, Tailwind e Vite — reduzindo problemas de ciclo de vida em 90%.
+- Entreguei PWA para despesas e transferências — reduzi tempo de carregamento em 40% via lazy loading e code splitting.
+- Projetei biblioteca de componentes usada por 5 squads — reduziu tempo de desenvolvimento em 70%.
 
-## Desenvolvedor Front-End Sênior | Ília Digital (JPMC) | Brasília, Brasil | Abr 2022 - Abr 2025
-- [architecture] Liderei o MVP para gestão de contas bancárias com Svelte e TypeScript.
-- [integration] Integrei APIs do JPMorgan seguindo padrões rigorosos de segurança financeira.
+## Formação
 
-# Formação
-**Grau:** Bacharelado em Sistemas de Informação
-**Instituição:** Universidade Estácio de Sá
-**Conclusão:** Dez 2022
+### Bacharelado em Sistemas de Informação
+**Universidade Estácio de Sá** | Rio de Janeiro, Brasil | **01/2018 – 12/2022**
+
+## Idiomas
+
+- Português: Nativo
+- Inglês: Fluente
 `
 
 /** Default EN markdown template for the CV editor */
-export const EN_TEMPLATE = `# Objective
-**Role:** Senior Front-End Engineer
-**Main stack:** Svelte, React, TypeScript
+export const EN_TEMPLATE = `## Summary
 
-# Summary
-**Headline:** Senior Front-End Engineer with 7+ years building scalable financial platforms and fintech products.
-**Focus areas:** Fintech, Data Visualization, PWA
-**Tagline:** Specialized in Svelte, React and TypeScript — delivering clean, performant, business-oriented code.
+Senior Front-End Engineer with 7+ years building scalable financial platforms using Svelte, React, TypeScript, and Node.js. Proven track record of leading teams and delivering products used by thousands of users. Currently focused on design systems and AI engineering.
 
-# Technical Skills
-## Frontend
-Svelte, React, Redux, Next.js, Tailwind CSS, Ant Design
+## Skills
+
+**Languages:** TypeScript, JavaScript, PHP, Elixir
+**Frameworks & Libraries:** Svelte, React, Redux, Next.js, Tailwind CSS, Ant Design
+**Tools & Platforms:** Vite, Webpack, Docker, Git, Jenkins, GitHub Actions, AWS
+**Testing:** Jest, Cypress, Playwright
+**AI Engineering:** AI Agents, MCP Servers, RAG, Prompt Engineering, LangChain
+**Methodologies:** TDD, Agile, Scrum, Clean Architecture, Code Review, CI/CD
+
+## Professional Experience
+
+### Senior Front-End Developer | Venturus | Brasília, Brazil (Remote)
+**06/2025 – Present**
+
+Develop AI-powered internal tools and mentor junior developers in a consultancy serving enterprise clients.
+
+- Mentored 4 junior developers through weekly pair programming and code reviews, accelerating their skills by 3 months.
+- Built AI agents for pre-analysis of bugs and E2E testing — reducing debug time by 60%.
+- Developed MCP Servers with project context — reducing AI slop in prompts by 50%.
+
+### Senior Front-End Developer | Ília Digital (JPMC) | Brasília, Brazil (Remote)
+**04/2022 – 04/2025**
+
+Led front-end development for banking and investment platforms used by thousands of JPMC clients.
+
+- Led MVP for bank accounts and investments using Svelte, TypeScript, Tailwind, and Vite — reducing lifecycle issues by 90%.
+- Delivered PWA for expenses and transfers — reduced loading times by 40% via lazy loading and code splitting.
+- Designed component library used across 5 squads — decreased sprint development time by 70%.
+
+## Education
+
+### Bachelor in Information Systems
+**Estácio de Sá University** | Rio de Janeiro, Brazil | **01/2018 – 12/2022**
 
 ## Languages
-TypeScript, JavaScript, PHP
 
-## Backend & Cloud
-Node.js, Express, AWS Lambda
-
-# Competencies
-## API & Integration
-RESTful APIs, GraphQL, WebSockets
-
-## Process & Quality
-Automated Testing, Code Review, CI/CD
-
-# Soft Skills
-- Delivering high value while balancing quality and agile delivery cycles
-- Solving complex problems with critical thinking and systemic vision
-- Clear communication with both technical teams and business stakeholders
-
-# Expertise
-- Continuously updates technical knowledge following framework evolution and best practices
-- Proven ability to bridge the gap between technical teams and product stakeholders
-
-# Experience
-
-## Senior Front-End Developer | Venturus | Brasília, Brazil | Jun 2025 - Present
-- [architecture] Mentoring Jr. developers on best practices and efficient use of AI.
-- [innovation] Developed AI agents for bug analysis — reducing debugging time by 60%.
-
-## Senior Front-End Developer | Ília Digital (JPMC) | Brasília, Brazil | Apr 2022 - Apr 2025
-- [architecture] Led MVP for bank account management with Svelte and TypeScript.
-- [integration] Integrated JPMorgan APIs following strict financial security standards.
-
-# Education
-**Degree:** Bachelor in Information Systems
-**Institution:** Estácio de Sá University
-**Graduation:** Dec 2022
+- Portuguese: Native
+- English: Fluent
 `

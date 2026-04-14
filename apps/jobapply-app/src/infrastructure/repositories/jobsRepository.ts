@@ -19,7 +19,7 @@ function delay(ms = 500) {
 export async function fetchJobs(filters: JobFilters = {}): Promise<PaginatedJobsResponse> {
   if (USE_MOCK) {
     await delay()
-    const { title, company, location, status, tags, page = 1, limit = 20 } = filters
+    const { title, company, location, status, tags, sort = 'newest', page = 1, limit = 20 } = filters
 
     let results = [...mockJobs]
 
@@ -36,6 +36,12 @@ export async function fetchJobs(filters: JobFilters = {}): Promise<PaginatedJobs
       results = results.filter((j) => tagList.some((t) => j.tags.map((x) => x.toLowerCase()).includes(t)))
     }
 
+    results.sort((a, b) => {
+      const dateA = new Date(a.createdAt).getTime()
+      const dateB = new Date(b.createdAt).getTime()
+      return sort === 'oldest' ? dateA - dateB : dateB - dateA
+    })
+
     const total = results.length
     const start = (page - 1) * limit
     const jobs = results.slice(start, start + limit)
@@ -44,6 +50,18 @@ export async function fetchJobs(filters: JobFilters = {}): Promise<PaginatedJobs
 
   const { data } = await api.get<PaginatedJobsResponse>('/jobs', { params: filters })
   return data
+}
+
+export async function getJobById(id: string): Promise<Job> {
+  if (USE_MOCK) {
+    await delay()
+    const job = mockJobs.find((j) => j._id === id)
+    if (!job) throw { response: { data: { message: 'Vaga não encontrada' }, status: 404 } }
+    return { ...job }
+  }
+
+  const { data } = await api.get<{ job: Job }>(`/jobs/${id}`)
+  return data.job
 }
 
 export async function bulkCreateJobs(payload: BulkJobsPayload): Promise<BulkJobsResponse> {

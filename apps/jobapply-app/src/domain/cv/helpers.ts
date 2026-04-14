@@ -1,28 +1,58 @@
 /**
  * @file helpers.ts
  * @description CV domain helper functions: markdown parsing, serialization, and export utilities.
+ *
+ * Markdown format follows the standard CV template:
+ *   ## Summary        — plain text paragraph
+ *   ## Skills          — **Label:** comma-separated items
+ *   ## Experience      — ### Role | Company | Location  +  **Period**  +  context  +  bullets
+ *   ## Education       — ### Degree  +  **Institution** | Location | **Period**
+ *   ## Certifications  — bullet list: Name — Org — Date
+ *   ## Languages       — bullet list: Language: Level
  */
 import type { CV, CVLocalePayload, CVLocaleVersion } from './types'
 
-/** Result of parsing a markdown string into structured CV data */
+// ─── Parse Result ────────────────────────────────────────────────────────────
+
 export interface ParseResult {
-  /** Parsed CV locale payload, or null if there were errors */
   data: CVLocalePayload | null
-  /** List of validation error messages */
   errors: string[]
+  languages?: string[]
 }
 
+// ─── Low-level helpers ───────────────────────────────────────────────────────
+
 /**
- * Splits a markdown string into sections keyed by H1 headings.
- * @param md - The markdown string to parse
- * @returns A map from lowercased heading text to section body content
+ * Splits markdown into sections keyed by H2 headings.
  */
-export function splitH1Sections(md: string): Map<string, string> {
+export function splitH2Sections(md: string): Map<string, string> {
   const map = new Map<string, string>()
   const lines = md.split('\n')
   let heading = ''
   let body: string[] = []
 
+  for (const line of lines) {
+    if (/^## [^#]/.test(line)) {
+      if (heading) map.set(heading.toLowerCase().trim(), body.join('\n').trim())
+      heading = line.slice(3).trim()
+      body = []
+    } else {
+      body.push(line)
+    }
+  }
+  if (heading) map.set(heading.toLowerCase().trim(), body.join('\n').trim())
+  return map
+}
+
+/** Backward compat — also split on H1 if present */
+export function splitSections(md: string): Map<string, string> {
+  const h2 = splitH2Sections(md)
+  if (h2.size > 0) return h2
+  // fallback: try H1
+  const map = new Map<string, string>()
+  const lines = md.split('\n')
+  let heading = ''
+  let body: string[] = []
   for (const line of lines) {
     if (/^# [^#]/.test(line)) {
       if (heading) map.set(heading.toLowerCase().trim(), body.join('\n').trim())
@@ -36,12 +66,6 @@ export function splitH1Sections(md: string): Map<string, string> {
   return map
 }
 
-/**
- * Finds a section body by trying multiple key variations.
- * @param sections - Map of section headings to bodies
- * @param keys - One or more keys to search for (partial match)
- * @returns The section body string, or null if not found
- */
 export function findSection(sections: Map<string, string>, ...keys: string[]): string | null {
   for (const key of keys) {
     for (const [k, v] of sections) {
@@ -51,86 +75,50 @@ export function findSection(sections: Map<string, string>, ...keys: string[]): s
   return null
 }
 
-/**
- * Extracts a bold field value from a markdown body string.
- * @param body - The markdown body to search in
- * @param labels - One or more label names to try (e.g. 'Cargo', 'Role')
- * @returns The extracted field value, or empty string if not found
- */
-export function extractBoldField(body: string, ...labels: string[]): string {
-  for (const label of labels) {
-    const escaped = label.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
-    const m = body.match(new RegExp(`\\*\\*${escaped}[:\\*]*\\*?\\*?:?\\*?\\s*(.+)`, 'im'))
-    if (m?.[1]?.trim()) return m[1].trim()
-  }
-  return ''
-}
+// ─── Skills parser  (**Label:** items, items) ────────────────────────────────
 
-/**
- * Parses H2 subsections from a section body into label/items pairs.
- * @param body - The markdown section body to parse
- * @returns Array of subsection objects with label and items array
- */
-export function parseSubSections(body: string): { label: string; items: string[] }[] {
+function parseSkillsSection(body: string): { label: string; items: string[] }[] {
   const result: { label: string; items: string[] }[] = []
-  const lines = body.split('\n')
-  let current: { label: string; items: string[] } | null = null
-
-  for (const line of lines) {
-    if (line.startsWith('## ')) {
-      if (current) result.push(current)
-      current = { label: line.slice(3).trim(), items: [] }
-    } else if (current && line.trim() && !line.startsWith('#')) {
-      const items = line.split(',').map((s) => s.trim()).filter(Boolean)
-      current.items.push(...items)
+  for (const line of body.split('\n')) {
+    const m = line.match(/^\*\*([^*]+)\*\*:?\s*(.+)/)
+    if (m) {
+      result.push({
+        label: m[1].trim().replace(/:$/, ''),
+        items: m[2].split(',').map((s) => s.trim()).filter(Boolean),
+      })
     }
   }
-  if (current) result.push(current)
   return result
 }
 
-/**
- * Parses bullet point lines from a markdown section body.
- * @param body - The markdown section body to parse
- * @returns Array of bullet point strings (without the leading dash/asterisk)
- */
-export function parseBullets(body: string): string[] {
-  return body
-    .split('\n')
-    .filter((line) => /^[\s]*[-*]\s/.test(line))
-    .map((line) => line.replace(/^[\s]*[-*]\s/, '').trim())
-    .filter(Boolean)
-}
+// ─── Experience parser (### Role | Company | Location) ───────────────────────
 
-/**
- * Parses experience entries from a markdown experience section body.
- * @param body - The markdown section body containing experience entries
- * @returns Array of parsed experience objects matching CVLocalePayload['experience']
- */
-export function parseExperiences(body: string): CVLocalePayload['experience'] {
+function parseExperiences(body: string): CVLocalePayload['experience'] {
   const result: CVLocalePayload['experience'] = []
   const lines = body.split('\n')
   let current: CVLocalePayload['experience'][0] | null = null
 
   for (const line of lines) {
-    if (line.startsWith('## ')) {
+    if (line.startsWith('### ')) {
       if (current) result.push(current)
-      const header = line.slice(3).trim()
+      const header = line.slice(4).trim()
       const parts = header.split('|').map((s) => s.trim())
       current = {
         role: parts[0] ?? '',
         company: parts[1] ?? '',
         location: parts[2] ?? '',
-        period: parts[3] ?? '',
+        period: '',
         highlights: [],
       }
+    } else if (current && /^\*\*(.+)\*\*\s*$/.test(line)) {
+      // **04/2022 – 04/2025**
+      current.period = line.replace(/\*\*/g, '').trim()
     } else if (current && /^[\s]*[-*]\s/.test(line)) {
-      const item = line.replace(/^[\s]*[-*]\s/, '').trim()
-      const catMatch = item.match(/^\[(\w+)\]\s*(.+)/)
-      if (catMatch) {
-        current.highlights.push({ category: catMatch[1], text: catMatch[2].trim() })
-      } else {
-        current.highlights.push({ category: 'general', text: item })
+      current.highlights.push(line.replace(/^[\s]*[-*]\s/, '').trim())
+    } else if (current && line.trim() && !line.startsWith('#') && !line.startsWith('>') && !line.startsWith('---')) {
+      // Context line (plain text paragraph after period)
+      if (!current.context && current.period) {
+        current.context = line.trim()
       }
     }
   }
@@ -138,142 +126,209 @@ export function parseExperiences(body: string): CVLocalePayload['experience'] {
   return result
 }
 
-/**
- * Parses a full markdown string into a structured CV locale payload.
- * @param md - The markdown string to parse
- * @param locale - The target locale ('en' or 'pt-BR')
- * @returns ParseResult with data if successful, or null data and error messages
- */
+// ─── Education parser (### Degree  /  **Institution** | Location | **Period**) ─
+
+function parseEducation(body: string): CVLocalePayload['education'] {
+  const result: NonNullable<CVLocalePayload['education']> = []
+  const lines = body.split('\n')
+  let degree = ''
+
+  for (const line of lines) {
+    if (line.startsWith('### ')) {
+      degree = line.slice(4).trim()
+    } else if (degree && /^\*\*/.test(line)) {
+      // **University** | Location | **Period**
+      const clean = line.replace(/\*\*/g, '').trim()
+      const parts = clean.split('|').map((s) => s.trim())
+      result.push({
+        degree,
+        institution: parts[0] ?? '',
+        location: parts[1],
+        period: parts[2],
+      })
+      degree = ''
+    }
+  }
+  return result
+}
+
+// ─── Certifications parser (- Name — Org — Date) ────────────────────────────
+
+function parseCertifications(body: string): NonNullable<CVLocalePayload['certifications']> {
+  return body
+    .split('\n')
+    .filter((l) => /^[\s]*[-*]\s/.test(l))
+    .map((l) => {
+      const text = l.replace(/^[\s]*[-*]\s/, '').trim()
+      const parts = text.split(/\s*[—–-]\s*/)
+      return {
+        name: parts[0]?.trim() ?? text,
+        org: parts[1]?.trim(),
+        date: parts[2]?.trim(),
+      }
+    })
+}
+
+// ─── Languages parser (- Language: Level) ────────────────────────────────────
+
+function parseLanguages(body: string): NonNullable<CVLocalePayload['languageLevels']> {
+  return body
+    .split('\n')
+    .filter((l) => /^[\s]*[-*]\s/.test(l))
+    .map((l) => {
+      const text = l.replace(/^[\s]*[-*]\s/, '').trim()
+      const [name, ...rest] = text.split(':')
+      return { name: name.trim(), level: rest.join(':').trim() }
+    })
+    .filter((l) => l.name && l.level)
+}
+
+// ─── Main parser ─────────────────────────────────────────────────────────────
+
 export function parseMarkdownToLocale(md: string, locale: 'en' | 'pt-BR'): ParseResult {
   const errors: string[] = []
-  const sections = splitH1Sections(md)
+  const sections = splitSections(md)
   const pt = locale === 'pt-BR'
 
-  const objBody = findSection(sections, pt ? 'objetivo' : 'objective')
-  if (!objBody) errors.push(pt ? 'Seção "# Objetivo" não encontrada' : 'Section "# Objective" not found')
-  const objRole = extractBoldField(objBody ?? '', pt ? 'Cargo' : 'Role')
-  const objStackRaw = extractBoldField(objBody ?? '', pt ? 'Stack principal' : 'Main stack')
-  if (!objRole) errors.push(pt ? '# Objetivo: campo **Cargo** não encontrado' : '# Objective: field **Role** not found')
-  if (!objStackRaw) errors.push(pt ? '# Objetivo: campo **Stack principal** não encontrado' : '# Objective: field **Main stack** not found')
-
+  // Summary
   const sumBody = findSection(sections, pt ? 'resumo' : 'summary')
-  if (!sumBody) errors.push(pt ? 'Seção "# Resumo" não encontrada' : 'Section "# Summary" not found')
-  const headline = extractBoldField(sumBody ?? '', 'Headline')
-  const focusRaw = extractBoldField(sumBody ?? '', pt ? 'Áreas de foco' : 'Focus areas')
-  const tagline = extractBoldField(sumBody ?? '', 'Tagline')
-  if (!headline) errors.push(pt ? '# Resumo: campo **Headline** não encontrado' : '# Summary: field **Headline** not found')
+  if (!sumBody) errors.push(pt ? 'Seção "## Resumo" não encontrada' : 'Section "## Summary" not found')
+  const summary = (sumBody ?? '').split('\n').filter((l) => l.trim() && !l.startsWith('#') && !l.startsWith('>')).join(' ').trim()
 
-  const techBody = findSection(sections, pt ? 'skills técnicas' : 'technical skills')
-  const compBody = findSection(sections, pt ? 'competências' : 'competencies')
-  const softBody = findSection(sections, 'soft skills')
-  const expBody = findSection(sections, 'expertise')
+  // Skills
+  const skillsBody = findSection(sections, 'skills')
+  const skills = skillsBody ? parseSkillsSection(skillsBody) : []
 
-  const expSectionBody = findSection(sections, pt ? 'experiência' : 'experience')
-  if (!expSectionBody) errors.push(pt ? 'Seção "# Experiência" não encontrada' : 'Section "# Experience" not found')
-  const experience = expSectionBody ? parseExperiences(expSectionBody) : []
-  if (experience.length === 0) errors.push(pt ? '# Experiência: adicione ao menos uma experiência profissional' : '# Experience: add at least one work experience')
+  // Experience
+  const expBody = findSection(sections, pt ? 'experiência' : 'experience')
+  if (!expBody) errors.push(pt ? 'Seção "## Experiência" não encontrada' : 'Section "## Experience" not found')
+  const experience = expBody ? parseExperiences(expBody) : []
+  if (experience.length === 0) errors.push(pt ? 'Adicione ao menos uma experiência profissional' : 'Add at least one work experience')
 
+  // Education (optional)
   const eduBody = findSection(sections, pt ? 'formação' : 'education')
-  if (!eduBody) errors.push(pt ? 'Seção "# Formação" não encontrada' : 'Section "# Education" not found')
-  const degree = extractBoldField(eduBody ?? '', pt ? 'Grau' : 'Degree')
-  const institution = extractBoldField(eduBody ?? '', pt ? 'Instituição' : 'Institution')
-  const graduation = extractBoldField(eduBody ?? '', pt ? 'Conclusão' : 'Graduation')
-  if (!degree) errors.push(pt ? '# Formação: campo **Grau** não encontrado' : '# Education: field **Degree** not found')
-  if (!institution) errors.push(pt ? '# Formação: campo **Instituição** não encontrado' : '# Education: field **Institution** not found')
+  const education = eduBody ? parseEducation(eduBody) : undefined
+
+  // Certifications (optional)
+  const certBody = findSection(sections, pt ? 'certificações' : 'certifications')
+  const certifications = certBody ? parseCertifications(certBody) : undefined
+
+  // Languages (optional)
+  const langBody = findSection(sections, pt ? 'idiomas' : 'languages')
+  const languageLevels = langBody ? parseLanguages(langBody) : undefined
 
   if (errors.length > 0) return { data: null, errors }
 
   return {
     data: {
-      objective: {
-        role: objRole,
-        main_stack: objStackRaw.split(',').map((s) => s.trim()).filter(Boolean),
-      },
-      summary: {
-        headline,
-        focus_areas: focusRaw.split(',').map((s) => s.trim()).filter(Boolean),
-        tagline,
-      },
-      skills: {
-        tech: techBody ? parseSubSections(techBody) : [],
-        competencies: compBody ? parseSubSections(compBody) : [],
-        soft_skills: softBody ? parseBullets(softBody) : [],
-      },
-      expertise: expBody ? parseBullets(expBody) : [],
+      summary,
+      skills,
       experience,
-      education: { degree, institution, graduation },
+      education: education?.length ? education : undefined,
+      certifications: certifications?.length ? certifications : undefined,
+      languageLevels: languageLevels?.length ? languageLevels : undefined,
     },
     errors: [],
   }
 }
 
-/**
- * Converts a CVLocaleVersion back into a markdown string.
- * @param v - The CVLocaleVersion to serialize
- * @returns The markdown string representation
- */
-export function localeVersionToMarkdown(v: CVLocaleVersion): string {
+// ─── Serializer (API data → markdown) ────────────────────────────────────────
+
+export function localeVersionToMarkdown(v: CVLocaleVersion, _languages?: string[]): string {
   const pt = v.locale === 'pt-BR'
   const lines: string[] = []
 
-  lines.push(pt ? '# Objetivo' : '# Objective')
-  lines.push(`**${pt ? 'Cargo' : 'Role'}:** ${v.objective?.role ?? ''}`)
-  lines.push(`**${pt ? 'Stack principal' : 'Main stack'}:** ${v.objective?.main_stack?.join(', ') ?? ''}`)
+  // Summary
+  lines.push(pt ? '## Resumo' : '## Summary')
+  lines.push('')
+  lines.push(v.summary ?? '')
   lines.push('')
 
-  lines.push(pt ? '# Resumo' : '# Summary')
-  lines.push(`**Headline:** ${v.summary?.headline ?? ''}`)
-  lines.push(`**${pt ? 'Áreas de foco' : 'Focus areas'}:** ${v.summary?.focus_areas?.join(', ') ?? ''}`)
-  lines.push(`**Tagline:** ${v.summary?.tagline ?? ''}`)
+  // Skills
+  lines.push('## Skills')
   lines.push('')
-
-  lines.push(pt ? '# Skills Técnicas' : '# Technical Skills')
-  for (const g of v.skills?.tech ?? []) {
-    lines.push(`## ${g.label}`)
-    lines.push(g.items.join(', '))
-    lines.push('')
+  for (const g of v.skills ?? []) {
+    lines.push(`**${g.label}:** ${g.items.join(', ')}`)
   }
-
-  lines.push(pt ? '# Competências' : '# Competencies')
-  for (const g of v.skills?.competencies ?? []) {
-    lines.push(`## ${g.label}`)
-    lines.push(g.items.join(', '))
-    lines.push('')
-  }
-
-  lines.push('# Soft Skills')
-  for (const s of v.skills?.soft_skills ?? []) lines.push(`- ${s}`)
   lines.push('')
 
-  lines.push('# Expertise')
-  for (const e of v.expertise ?? []) lines.push(`- ${e}`)
-  lines.push('')
-
-  lines.push(pt ? '# Experiência' : '# Experience')
+  // Experience
+  lines.push(pt ? '## Experiência Profissional' : '## Professional Experience')
   lines.push('')
   for (const exp of v.experience ?? []) {
-    lines.push(`## ${exp.role} | ${exp.company} | ${exp.location} | ${exp.period}`)
-    for (const h of exp.highlights ?? []) lines.push(`- [${h.category}] ${h.text}`)
+    const locationPart = exp.location ? ` | ${exp.location}` : ''
+    lines.push(`### ${exp.role} | ${exp.company}${locationPart}`)
+    if (exp.period) lines.push(`**${exp.period}**`)
+    lines.push('')
+    if (exp.context) {
+      lines.push(exp.context)
+      lines.push('')
+    }
+    for (const h of exp.highlights ?? []) lines.push(`- ${h}`)
     lines.push('')
   }
 
-  lines.push(pt ? '# Formação' : '# Education')
-  lines.push(`**${pt ? 'Grau' : 'Degree'}:** ${v.education?.degree ?? ''}`)
-  lines.push(`**${pt ? 'Instituição' : 'Institution'}:** ${v.education?.institution ?? ''}`)
-  lines.push(`**${pt ? 'Conclusão' : 'Graduation'}:** ${v.education?.graduation ?? ''}`)
-  lines.push('')
+  // Education
+  if (v.education?.length) {
+    lines.push(pt ? '## Formação' : '## Education')
+    lines.push('')
+    for (const edu of v.education) {
+      lines.push(`### ${edu.degree}`)
+      const parts = [edu.institution, edu.location, edu.period].filter(Boolean)
+      lines.push(`**${parts.join(' | ')}**`)
+      if (edu.details) lines.push(edu.details)
+      lines.push('')
+    }
+  }
+
+  // Certifications
+  if (v.certifications?.length) {
+    lines.push(pt ? '## Certificações' : '## Certifications')
+    lines.push('')
+    for (const c of v.certifications) {
+      const parts = [c.name, c.org, c.date].filter(Boolean)
+      lines.push(`- ${parts.join(' — ')}`)
+    }
+    lines.push('')
+  }
+
+  // Projects
+  if (v.projects?.length) {
+    lines.push(pt ? '## Projetos' : '## Projects')
+    lines.push('')
+    for (const p of v.projects) {
+      lines.push(`### ${p.name}`)
+      if (p.url) lines.push(p.url)
+      lines.push(p.description)
+      for (const h of p.highlights ?? []) lines.push(`- ${h}`)
+      lines.push('')
+    }
+  }
+
+  // Languages
+  if (v.languageLevels?.length) {
+    lines.push(pt ? '## Idiomas' : '## Languages')
+    lines.push('')
+    for (const l of v.languageLevels) {
+      lines.push(`- ${l.name}: ${l.level}`)
+    }
+    lines.push('')
+  }
 
   return lines.join('\n')
 }
 
-/**
- * Downloads the CV content as a Markdown file.
- * @param cv - The CV object to export
- */
+// ─── Export utilities ────────────────────────────────────────────────────────
+
 export function downloadMarkdown(cv: CV): void {
   const ptBrVersion = cv.localeVersions?.find((v) => v.locale === 'pt-BR')
   const enVersion = cv.localeVersions?.find((v) => v.locale === 'en')
   const parts: string[] = []
+
+  // Header with personal info
+  const header = `# ${cv.fullName}\n\n${[cv.location, cv.email, cv.phone].filter(Boolean).join(' | ')}\n${[cv.linkedin, cv.github, cv.portfolio ?? cv.website].filter(Boolean).join(' | ')}\n`
+  parts.push(header)
+
   if (ptBrVersion) parts.push(`<!-- PT-BR -->\n${localeVersionToMarkdown(ptBrVersion)}`)
   if (enVersion) parts.push(`<!-- EN -->\n${localeVersionToMarkdown(enVersion)}`)
   const content = parts.join('\n\n---\n\n')
@@ -286,65 +341,65 @@ export function downloadMarkdown(cv: CV): void {
   URL.revokeObjectURL(url)
 }
 
-/**
- * Opens a print window with the CV formatted as HTML for PDF export.
- * @param cv - The CV object to export
- */
 export function exportPDF(cv: CV): void {
   const ptBrVersion = cv.localeVersions?.find((v) => v.locale === 'pt-BR')
   const enVersion = cv.localeVersions?.find((v) => v.locale === 'en')
 
   function versionToHtml(v: CVLocaleVersion): string {
     const pt = v.locale === 'pt-BR'
-    const sections: string[] = []
+    const s: string[] = []
 
-    sections.push(`<h2>${pt ? 'Objetivo' : 'Objective'}</h2>`)
-    sections.push(`<p><strong>${pt ? 'Cargo' : 'Role'}:</strong> ${v.objective?.role ?? ''}</p>`)
-    sections.push(`<p><strong>${pt ? 'Stack principal' : 'Main stack'}:</strong> ${v.objective?.main_stack?.join(', ') ?? ''}</p>`)
+    if (v.summary) {
+      s.push(`<h2>${pt ? 'Resumo' : 'Summary'}</h2>`)
+      s.push(`<p>${v.summary}</p>`)
+    }
 
-    sections.push(`<h2>${pt ? 'Resumo' : 'Summary'}</h2>`)
-    sections.push(`<p>${v.summary?.headline ?? ''}</p>`)
-    if (v.summary?.tagline) sections.push(`<p><em>${v.summary.tagline}</em></p>`)
-
-    if (v.skills?.tech?.length) {
-      sections.push(`<h2>${pt ? 'Skills Técnicas' : 'Technical Skills'}</h2>`)
-      for (const g of v.skills.tech) {
-        sections.push(`<p><strong>${g.label}:</strong> ${g.items.join(', ')}</p>`)
+    if (v.skills?.length) {
+      s.push(`<h2>Skills</h2>`)
+      for (const g of v.skills) {
+        s.push(`<p><strong>${g.label}:</strong> ${g.items.join(', ')}</p>`)
       }
     }
-    if (v.skills?.competencies?.length) {
-      sections.push(`<h2>${pt ? 'Competências' : 'Competencies'}</h2>`)
-      for (const g of v.skills.competencies) {
-        sections.push(`<p><strong>${g.label}:</strong> ${g.items.join(', ')}</p>`)
-      }
-    }
-    if (v.skills?.soft_skills?.length) {
-      sections.push(`<h2>Soft Skills</h2><ul>${v.skills.soft_skills.map((s) => `<li>${s}</li>`).join('')}</ul>`)
-    }
-    if (v.expertise?.length) {
-      sections.push(`<h2>Expertise</h2><ul>${v.expertise.map((e) => `<li>${e}</li>`).join('')}</ul>`)
-    }
-    if (v.experience?.length) {
-      sections.push(`<h2>${pt ? 'Experiência' : 'Experience'}</h2>`)
-      for (const exp of v.experience) {
-        sections.push(`<h3>${exp.role} — ${exp.company}</h3>`)
-        sections.push(`<p><em>${exp.location} · ${exp.period}</em></p>`)
+
+    const jobExp = (v.experience ?? []).filter((e) => e.company && e.period)
+    if (jobExp.length) {
+      s.push(`<h2>${pt ? 'Experiência Profissional' : 'Professional Experience'}</h2>`)
+      for (const exp of jobExp) {
+        s.push(`<h3>${exp.role} | ${exp.company}${exp.location ? ` | ${exp.location}` : ''}</h3>`)
+        s.push(`<p><strong>${exp.period}</strong></p>`)
+        if (exp.context) s.push(`<p>${exp.context}</p>`)
         if (exp.highlights?.length) {
-          sections.push(`<ul>${exp.highlights.map((h) => `<li><strong>[${h.category}]</strong> ${h.text}</li>`).join('')}</ul>`)
+          s.push(`<ul>${exp.highlights.map((h) => `<li>${h}</li>`).join('')}</ul>`)
         }
       }
     }
-    if (v.education) {
-      sections.push(`<h2>${pt ? 'Formação' : 'Education'}</h2>`)
-      sections.push(`<p><strong>${v.education.degree}</strong> — ${v.education.institution} (${v.education.graduation})</p>`)
+
+    if (v.education?.length) {
+      s.push(`<h2>${pt ? 'Formação' : 'Education'}</h2>`)
+      for (const edu of v.education) {
+        s.push(`<h3>${edu.degree}</h3>`)
+        s.push(`<p><strong>${[edu.institution, edu.location, edu.period].filter(Boolean).join(' | ')}</strong></p>`)
+        if (edu.details) s.push(`<p>${edu.details}</p>`)
+      }
     }
-    return sections.join('\n')
+
+    if (v.certifications?.length) {
+      s.push(`<h2>${pt ? 'Certificações' : 'Certifications'}</h2>`)
+      s.push(`<ul>${v.certifications.map((c) => `<li>${[c.name, c.org, c.date].filter(Boolean).join(' — ')}</li>`).join('')}</ul>`)
+    }
+
+    if (v.languageLevels?.length) {
+      s.push(`<h2>${pt ? 'Idiomas' : 'Languages'}</h2>`)
+      s.push(`<ul>${v.languageLevels.map((l) => `<li>${l.name}: ${l.level}</li>`).join('')}</ul>`)
+    }
+
+    return s.join('\n')
   }
 
   const header = `
     <h1>${cv.fullName}</h1>
-    <p>${[cv.email, cv.phone, cv.location, cv.linkedin].filter(Boolean).join(' · ')}</p>
-    ${cv.languages?.length ? `<p><strong>${cv.localeVersions?.[0]?.locale === 'pt-BR' ? 'Idiomas' : 'Languages'}:</strong> ${cv.languages.join(', ')}</p>` : ''}
+    <p>${[cv.location, cv.email, cv.phone].filter(Boolean).join(' | ')}</p>
+    <p>${[cv.linkedin, cv.github, cv.portfolio ?? cv.website].filter(Boolean).join(' | ')}</p>
     <hr/>
   `
 
@@ -382,3 +437,6 @@ export function exportPDF(cv: CV): void {
   win.document.close()
   setTimeout(() => { win.print() }, 300)
 }
+
+// ─── Legacy compat aliases ───────────────────────────────────────────────────
+export const splitH1Sections = splitSections

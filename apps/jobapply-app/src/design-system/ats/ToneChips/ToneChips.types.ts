@@ -1,10 +1,12 @@
+export type ToneKey = 'formal' | 'direct' | 'creative' | 'confident'
+
 export interface ToneOption {
-  key: string
+  key: ToneKey
   label: string
 }
 
 export interface ToneChipsProps {
   options: ToneOption[]
-  value: string
-  onChange: (key: string) => void
+  value: ToneKey
+  onChange: (key: ToneKey) => void
 }

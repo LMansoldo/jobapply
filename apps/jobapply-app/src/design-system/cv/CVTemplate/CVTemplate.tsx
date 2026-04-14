@@ -22,7 +22,12 @@ function SectionHeading({ children }: { children: React.ReactNode }) {
 }
 
 export function CVTemplate({ cv, locale }: CVTemplateProps) {
-  const allSkillItems = locale.skills.tech.flatMap((g) => g.items)
+  const allSkillItems = (locale.skills ?? []).flatMap((g) => g.items)
+
+  // Filter real job experience (exclude entries without company/period used as section headers)
+  const jobExperience = (locale.experience ?? []).filter(
+    (exp) => exp.company && exp.period
+  )
 
   return (
     <div style={{
@@ -54,12 +59,12 @@ export function CVTemplate({ cv, locale }: CVTemplateProps) {
           </p>
         )}
         <div style={{ display: 'flex', flexWrap: 'wrap' as const, gap: `${Spacing.xs} ${Spacing.lg}`, fontSize: FontSize.sm, color: 'rgba(255,255,255,0.85)' }}>
+          {cv.location && <span>📍 {cv.location}</span>}
           {cv.email && <span>✉ {cv.email}</span>}
           {cv.phone && <span>📞 {cv.phone}</span>}
           {cv.linkedin && <span>🔗 {cv.linkedin}</span>}
-          {cv.location && <span>📍 {cv.location}</span>}
           {cv.github && <span>🐙 {cv.github}</span>}
-          {cv.website && <span>🌐 {cv.website}</span>}
+          {(cv.portfolio ?? cv.website) && <span>🌐 {cv.portfolio ?? cv.website}</span>}
         </div>
       </div>
 
@@ -67,55 +72,87 @@ export function CVTemplate({ cv, locale }: CVTemplateProps) {
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 38%', gap: 0 }}>
         {/* LEFT column */}
         <div style={{ padding: `${Spacing.lg} ${Spacing.xl}`, borderRight: `1px solid ${Colors.surfaceBorder}` }}>
-          {/* Resumo */}
-          <SectionHeading>Resumo</SectionHeading>
-          <p style={{ fontSize: FontSize.sm, lineHeight: 1.7, color: Colors.textMain, margin: 0 }}>
-            {locale.summary.headline}
-          </p>
-
-          {/* Experiência */}
-          {locale.experience.length > 0 && (
+          {/* Summary */}
+          {locale.summary && (
             <>
-              <SectionHeading>Experiência</SectionHeading>
+              <SectionHeading>Summary</SectionHeading>
+              <p style={{ fontSize: FontSize.sm, lineHeight: 1.7, color: Colors.textMain, margin: 0 }}>
+                {locale.summary}
+              </p>
+            </>
+          )}
+
+          {/* Experience */}
+          {jobExperience.length > 0 && (
+            <>
+              <SectionHeading>Experience</SectionHeading>
               <div style={{ display: 'flex', flexDirection: 'column', gap: Spacing.lg }}>
-                {locale.experience.map((exp, i) => (
+                {jobExperience.map((exp, i) => (
                   <div key={i}>
                     <p style={{ margin: 0, fontWeight: FontWeight.semibold, fontSize: FontSize.sm, color: Colors.textMain }}>
-                      {exp.role}
+                      {exp.role} | {exp.company}
                     </p>
-                    <p style={{ margin: `2px 0`, fontSize: FontSize.xxs, color: Colors.primaryDark, fontWeight: FontWeight.medium }}>
-                      {exp.company} · {exp.location}
-                    </p>
-                    <p style={{ margin: `0 0 ${Spacing.sm}`, fontSize: FontSize.xxs, color: Colors.textSub }}>
+                    {exp.location && (
+                      <p style={{ margin: `2px 0`, fontSize: FontSize.xxs, color: Colors.primaryDark, fontWeight: FontWeight.medium }}>
+                        {exp.location}
+                      </p>
+                    )}
+                    <p style={{ margin: `0 0 ${Spacing.xs}`, fontSize: FontSize.xxs, color: Colors.textSub, fontWeight: FontWeight.semibold }}>
                       {exp.period}
                     </p>
-                    <ul style={{ margin: 0, paddingLeft: Spacing.lg, display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                      {exp.highlights.map((h, j) => (
-                        <li key={j} style={{ fontSize: FontSize.xxs, lineHeight: 1.6, color: Colors.textMain }}>
-                          {h.text}
-                        </li>
-                      ))}
-                    </ul>
+                    {exp.context && (
+                      <p style={{ margin: `0 0 ${Spacing.xs}`, fontSize: FontSize.xxs, color: Colors.textSub, fontStyle: 'italic' }}>
+                        {exp.context}
+                      </p>
+                    )}
+                    {exp.highlights.length > 0 && (
+                      <ul style={{ margin: 0, paddingLeft: Spacing.lg, display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                        {exp.highlights.map((h, j) => (
+                          <li key={j} style={{ fontSize: FontSize.xxs, lineHeight: 1.6, color: Colors.textMain }}>
+                            {h}
+                          </li>
+                        ))}
+                      </ul>
+                    )}
                   </div>
                 ))}
               </div>
             </>
           )}
 
-          {/* Educação */}
-          <SectionHeading>Educação</SectionHeading>
-          <p style={{ margin: 0, fontWeight: FontWeight.semibold, fontSize: FontSize.sm, color: Colors.textMain }}>
-            {locale.education.degree}
-          </p>
-          <p style={{ margin: `2px 0`, fontSize: FontSize.xxs, color: Colors.primaryDark }}>
-            {locale.education.institution}
-          </p>
-          <p style={{ margin: 0, fontSize: FontSize.xxs, color: Colors.textSub }}>{locale.education.graduation}</p>
+          {/* Education */}
+          {locale.education && locale.education.length > 0 && (
+            <>
+              <SectionHeading>Education</SectionHeading>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: Spacing.md }}>
+                {locale.education.map((edu, i) => (
+                  <div key={i}>
+                    <p style={{ margin: 0, fontWeight: FontWeight.semibold, fontSize: FontSize.sm, color: Colors.textMain }}>
+                      {edu.degree}
+                    </p>
+                    <p style={{ margin: `2px 0`, fontSize: FontSize.xxs, color: Colors.primaryDark, fontWeight: FontWeight.medium }}>
+                      {edu.institution}
+                    </p>
+                    {(edu.location || edu.period) && (
+                      <p style={{ margin: 0, fontSize: FontSize.xxs, color: Colors.textSub }}>
+                        {[edu.location, edu.period].filter(Boolean).join(' | ')}
+                      </p>
+                    )}
+                    {edu.details && (
+                      <p style={{ margin: `${Spacing.xs} 0 0`, fontSize: FontSize.xxs, color: Colors.textMain, lineHeight: 1.5 }}>
+                        {edu.details}
+                      </p>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </>
+          )}
         </div>
 
         {/* RIGHT column */}
         <div style={{ padding: `${Spacing.lg} ${Spacing.xl}`, background: Colors.surfacePage }}>
-          {/* Skills */}
+          {/* Skills bars */}
           {(locale.skillPercentages ?? allSkillItems.slice(0, 5).map((s) => ({ name: s, percent: 80 }))).length > 0 && (
             <>
               <SectionHeading>Skills</SectionHeading>
@@ -135,10 +172,27 @@ export function CVTemplate({ cv, locale }: CVTemplateProps) {
             </>
           )}
 
-          {/* Idiomas */}
+          {/* Skill groups */}
+          {(locale.skills ?? []).length > 0 && (
+            <>
+              <SectionHeading>Competencies</SectionHeading>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: Spacing.md }}>
+                {(locale.skills ?? []).map((group) => (
+                  <div key={group.label}>
+                    <p style={{ margin: 0, fontSize: FontSize.xxs, fontWeight: FontWeight.semibold, color: Colors.primaryDark }}>{group.label}</p>
+                    <p style={{ margin: `${Spacing.xs} 0 0`, fontSize: FontSize.xxs, color: Colors.textMain, lineHeight: 1.6 }}>
+                      {group.items.join(', ')}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            </>
+          )}
+
+          {/* Languages */}
           {locale.languageLevels && locale.languageLevels.length > 0 && (
             <>
-              <SectionHeading>Idiomas</SectionHeading>
+              <SectionHeading>Languages</SectionHeading>
               <div style={{ display: 'flex', flexDirection: 'column', gap: Spacing.sm }}>
                 {locale.languageLevels.map((lang) => (
                   <div key={lang.name} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -159,15 +213,46 @@ export function CVTemplate({ cv, locale }: CVTemplateProps) {
             </>
           )}
 
-          {/* Certificações */}
+          {/* Certifications */}
           {locale.certifications && locale.certifications.length > 0 && (
             <>
-              <SectionHeading>Certificações</SectionHeading>
+              <SectionHeading>Certifications</SectionHeading>
               <div style={{ display: 'flex', flexDirection: 'column', gap: Spacing.sm }}>
-                {locale.certifications.map((cert) => (
-                  <div key={cert.name}>
+                {locale.certifications.map((cert, i) => (
+                  <div key={i}>
                     <p style={{ margin: 0, fontSize: FontSize.xxs, fontWeight: FontWeight.semibold, color: Colors.textMain }}>{cert.name}</p>
-                    <p style={{ margin: 0, fontSize: FontSize.xxs, color: Colors.textSub }}>{cert.year}</p>
+                    {(cert.org || cert.date) && (
+                      <p style={{ margin: 0, fontSize: FontSize.xxs, color: Colors.textSub }}>
+                        {[cert.org, cert.date].filter(Boolean).join(' — ')}
+                      </p>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </>
+          )}
+
+          {/* Projects */}
+          {locale.projects && locale.projects.length > 0 && (
+            <>
+              <SectionHeading>Projects</SectionHeading>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: Spacing.md }}>
+                {locale.projects.map((proj, i) => (
+                  <div key={i}>
+                    <p style={{ margin: 0, fontSize: FontSize.xxs, fontWeight: FontWeight.semibold, color: Colors.textMain }}>{proj.name}</p>
+                    {proj.url && (
+                      <p style={{ margin: 0, fontSize: FontSize.xxs, color: Colors.blue }}>{proj.url}</p>
+                    )}
+                    <p style={{ margin: `${Spacing.xs} 0 0`, fontSize: FontSize.xxs, color: Colors.textMain, lineHeight: 1.5 }}>
+                      {proj.description}
+                    </p>
+                    {proj.highlights && proj.highlights.length > 0 && (
+                      <ul style={{ margin: `${Spacing.xs} 0 0`, paddingLeft: Spacing.md, display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                        {proj.highlights.map((h, j) => (
+                          <li key={j} style={{ fontSize: FontSize.xxs, color: Colors.textMain }}>{h}</li>
+                        ))}
+                      </ul>
+                    )}
                   </div>
                 ))}
               </div>

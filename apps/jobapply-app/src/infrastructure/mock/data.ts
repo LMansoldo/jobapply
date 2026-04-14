@@ -116,33 +116,11 @@ export const MOCK_CV: CV = {
   localeVersions: [
     {
       locale: 'pt-BR',
-      objective: {
-        role: 'Engenheiro Front-End Sênior',
-        main_stack: ['React', 'TypeScript', 'Node.js'],
-      },
-      summary: {
-        headline: 'Engenheiro Front-End Sênior com 5+ anos construindo aplicações web escaláveis.',
-        focus_areas: ['SaaS', 'Performance', 'UX Engineering'],
-        tagline: 'Especializado em React e TypeScript — código limpo e orientado a resultado.',
-      },
-      skills: {
-        tech: [
-          { label: 'Frontend', items: ['React', 'TypeScript', 'Ant Design', 'Next.js'] },
-          { label: 'Backend', items: ['Node.js', 'MongoDB', 'REST APIs'] },
-        ],
-        competencies: [
-          { label: 'Processos', items: ['Git', 'Code Review', 'CI/CD'] },
-        ],
-        soft_skills: [
-          'Comunicação clara com times técnicos e de negócio',
-          'Entrega orientada a valor e qualidade',
-          'Mentoria e desenvolvimento de desenvolvedores júnior',
-        ],
-      },
-      expertise: [
-        'Construção de interfaces complexas e performáticas com React e TypeScript',
-        'Integração com APIs REST e design de contratos de API',
-        'Liderança técnica e code review em times ágeis',
+      summary: 'Engenheiro Front-End Sênior com 5+ anos construindo aplicações web escaláveis. Especializado em React e TypeScript — código limpo e orientado a resultado.',
+      skills: [
+        { label: 'Frontend', items: ['React', 'TypeScript', 'Ant Design', 'Next.js'] },
+        { label: 'Backend', items: ['Node.js', 'MongoDB', 'REST APIs'] },
+        { label: 'Processos', items: ['Git', 'Code Review', 'CI/CD'] },
       ],
       experience: [
         {
@@ -150,9 +128,10 @@ export const MOCK_CV: CV = {
           company: 'Tech Corp',
           location: 'Brasília, Brasil',
           period: 'Mar 2021 - Presente',
+          context: 'Liderança técnica do produto SaaS principal.',
           highlights: [
-            { category: 'architecture', text: 'Liderou o desenvolvimento frontend do produto SaaS principal com React e Ant Design.' },
-            { category: 'mentorship', text: 'Mentorou desenvolvedores júnior em boas práticas de React e TypeScript.' },
+            'Liderou o desenvolvimento frontend do produto SaaS principal com React e Ant Design.',
+            'Mentorou desenvolvedores júnior em boas práticas de React e TypeScript.',
           ],
         },
         {
@@ -161,16 +140,11 @@ export const MOCK_CV: CV = {
           location: 'Remoto',
           period: 'Jun 2019 - Fev 2021',
           highlights: [
-            { category: 'development', text: 'Desenvolveu features full-stack com React e Node.js consumidas por clientes web e mobile.' },
-            { category: 'integration', text: 'Implementou APIs RESTful com Node.js e MongoDB.' },
+            'Desenvolveu features full-stack com React e Node.js consumidas por clientes web e mobile.',
+            'Implementou APIs RESTful com Node.js e MongoDB.',
           ],
         },
       ],
-      education: {
-        degree: 'Bacharel em Ciência da Computação',
-        institution: 'Universidade Federal de Minas Gerais',
-        graduation: 'Dez 2019',
-      },
       skillPercentages: [
         { name: 'React', percent: 95 },
         { name: 'TypeScript', percent: 90 },
@@ -182,9 +156,17 @@ export const MOCK_CV: CV = {
         { name: 'Português', level: 'Nativo' },
         { name: 'Inglês', level: 'Avançado' },
       ],
+      education: [
+        {
+          degree: 'Bacharel em Ciência da Computação',
+          institution: 'Universidade Federal de Minas Gerais',
+          location: 'Belo Horizonte, Brasil',
+          period: '2015 – 2019',
+        },
+      ],
       certifications: [
-        { name: 'AWS Cloud Practitioner', year: '2023' },
-        { name: 'Meta Front-End Developer', year: '2022' },
+        { name: 'AWS Cloud Practitioner', org: 'Amazon Web Services', date: '2023' },
+        { name: 'Meta Front-End Developer', org: 'Meta', date: '2022' },
       ],
     },
   ],
