@@ -7,10 +7,9 @@ import { Shadows } from '../../../styles/theme/shadows'
 
 export const panel = css({
   background: Colors.white,
-  borderRadius: BorderRadius.base,
-  boxShadow: Shadows.sm,
-  border: `1px solid ${Colors.surfaceBorder}`,
-  overflow: 'hidden',
+  flex: 1,
+  display: 'flex',
+  flexDirection: 'column',
 })
 
 export const header = css({
@@ -189,6 +188,11 @@ export const divider = css({
   margin: `0 0 ${Spacing.lg}`,
 })
 
+export const dividerWithTopMargin = css({
+  borderTop: `1px solid ${Colors.surfaceBorder}`,
+  margin: `${Spacing.xl} 0 ${Spacing.lg}`,
+})
+
 export const sectionTitle = css({
   fontFamily: FontFamily.heading,
   fontWeight: FontWeight.semibold,
@@ -220,9 +224,6 @@ export const salary = css({
 
 export const emptyPanel = css({
   background: Colors.white,
-  borderRadius: BorderRadius.base,
-  boxShadow: Shadows.sm,
-  border: `1px solid ${Colors.surfaceBorder}`,
   display: 'flex',
   flexDirection: 'column',
   alignItems: 'center',
@@ -232,6 +233,7 @@ export const emptyPanel = css({
   color: Colors.textSub,
   gap: Spacing.md,
   minHeight: '32rem',
+  flex: 1,
 })
 
 export const emptyIcon = css({

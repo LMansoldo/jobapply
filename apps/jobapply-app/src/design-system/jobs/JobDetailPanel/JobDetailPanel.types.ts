@@ -5,4 +5,5 @@ export interface JobDetailPanelProps {
   onApply?: (job: Job) => void
   onSave?: (job: Job) => void
   onTailor?: (job: Job) => void
+  showHeader?: boolean
 }

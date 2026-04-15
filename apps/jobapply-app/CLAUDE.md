@@ -49,15 +49,15 @@ src/
 
 ## Emotion Styling Rules (strict)
 
-- No inline styles: style={{}} é proibido.
-- Use styled do @emotion/styled para componentes com múltiplas regras ou props dinâmicas.
-- Use css do @emotion/css para classes utilitárias simples.
-- Arquivo .styles.ts obrigatório para cada componente que precise de estilos.
-- Estilos dinâmicos: passe props para componentes styled (ex: <SkillBarFill percent={80} />).
-- Sem magic numbers: converta pixels para rem (1rem=10px) e armazene como constantes nomeadas no topo do .styles.ts.
+- No inline styles – `style={{}}` is forbidden in any component file.
+- Always use `styled` from `@emotion/styled` for components with more than one style rule or dynamic props.
+- Use `css` from `@emotion/css` for simple, reusable class strings (e.g., utility classes).
+- Companion `.styles.ts` file – every component that requires styles must have a `ComponentName.styles.ts` file exporting all styled artifacts.
+- Dynamic styles: pass props to `styled` components (e.g., `<SkillBarFill percent={80} />`). Compute class names or CSS variables when needed.
+- No magic numbers – all pixel values must be converted to `rem` (using the `1rem = 10px` scale) and stored as named constants at the top of the `.styles.ts` file.
 
-Exemplo (do CVTemplate.styles.ts):
-
+Example (from `CVTemplate.styles.ts`):
+```
 const SKILL_BAR_HEIGHT = '0.6rem';   // 6px
 const SKILL_BAR_BORDER_RADIUS = '0.3rem';
 
@@ -67,7 +67,7 @@ export const SkillBarFill = styled.div<{ percent: number }>`
   background: ${Colors.gradientProgressBar};
   border-radius: ${SKILL_BAR_BORDER_RADIUS};
 `;
-
+```
 ---
 
 ## AntD Component Wrappers
@@ -103,9 +103,10 @@ import { FontSize } from '../../styles/theme/typography'
 
 ---
 
-## i18n
+## i18n – Two categories
 
-All user-visible strings must use `useTranslation` from `react-i18next`. No hardcoded strings in JSX.
+### 1. UI strings (fixed labels, buttons, error messages)
+Use `useTranslation` from `react-i18next` inside the component. No hardcoded strings in JSX.
 
 ```ts
 const { t } = useTranslation()
@@ -116,6 +117,13 @@ t('auth.loginSuccess', { name: user.name })
 ```
 
 Translations live in `src/i18n/translations.json` (keys for `pt-BR` and `en`).
+
+### 2. Domain content (dynamic data that is already localized)
+Examples: job descriptions, CV sections, user-generated text. These come from the backend or locale props and do NOT use `useTranslation`. They are passed as props to presentational components.
+
+> Rule: If the string is part of the UI chrome, use `t()`. If it's business data (like a CV summary or experience highlights), it must be injected via props.
+
+Translations for UI live in `src/i18n/translations.json` (keys for `pt-BR` and `en`).
 
 ---
 
@@ -136,6 +144,36 @@ No inline sub-components, no direct AntD imports, no hardcoded strings or colors
 Auxiliary functions → `domain/<name>/helpers/`  
 Types/interfaces → `domain/<name>/types/`  
 Magic values / template strings → `domain/<name>/constants/`
+
+---
+
+## Component Architecture Rules (mandatory)
+
+- Single Responsibility: every component has exactly one job. If you cannot describe it in one sentence without "and", split it.
+- Container / Presentational split:
+  - Container (`Foo.tsx`): owns state, hooks, event handlers. No visual logic.
+  - Presentational (`FooBar.tsx`): pure render from props. Only allowed hook is `useTranslation`. Zero local state.
+- File size: no component file should exceed ~80 lines of JSX. Extract if it does.
+- One component per file: never export two components from the same file.
+- Sub-component naming: prefix with the parent name (`JobsHero` → `HeroHeadline`, `HeroSearchForm`, `HeroQuickChips`).
+- `helpers.ts` is mandatory in every domain component directory. Pure functions and constants live there — never inline in component files.
+- Custom hooks: extract `useState`/`useEffect`/`useCallback`/`useRef` logic beyond 3 lines into a hook in `domain/<name>/hooks/`.
+- Render props: when a child needs to render variable content, use a render prop instead of internal conditions.
+- No inline styles — ever: `style={{}}` props are forbidden. Use `@emotion/styled` or `@emotion/css` exclusively. All styles go into a `*.styles.ts` file. No exceptions.
+
+---
+
+## Reference Refactor: `CVTemplate`
+
+A complete refactor of the CV template component was done following all the rules above. It serves as a living example:
+
+- Container: `CVTemplate.tsx` – receives `cv` and `locale`, normalizes skills, renders the grid.
+- Presentational components: `HeaderSection`, `SummarySection`, `ExperienceSection`, `EducationSection`, `SkillsSection`, `LanguagesSection`, `CertificationsSection` – each in its own file, only rendering from props.
+- Styles: `CVTemplate.styles.ts` – all styled components, no magic numbers, all units in `rem`.
+- Helpers: `helpers.ts` – pure functions for flattening skills, normalizing percentages, and mapping language levels to colors.
+- No inline styles, no direct AntD, no hardcoded strings – the only strings are section titles (which could be i18n-ed later if needed) and domain data from `locale`.
+
+This refactor proves the pattern works and should be followed for any new complex component.
 
 ---
 

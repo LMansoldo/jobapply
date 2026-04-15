@@ -1,3 +1,4 @@
+import styled from '@emotion/styled'
 import { css } from '@emotion/css'
 import { Colors } from '../../../styles/theme/colors'
 import { Shadows } from '../../../styles/theme/shadows'
@@ -9,12 +10,9 @@ import { FontSize, FontWeight, FontFamily } from '../../../styles/theme/typograp
 
 export const leftPanel = css({
   background: Colors.white,
-  borderRadius: BorderRadius.base,
-  boxShadow: Shadows.sm,
-  border: `1px solid ${Colors.surfaceBorder}`,
-  overflow: 'hidden',
   display: 'flex',
   flexDirection: 'column',
+  height: 'calc(100vh - 12rem)', // Altura fixa
 })
 
 export const leftPanelHeader = css({
@@ -58,7 +56,18 @@ export const countBold = css({
 export const jobListScroll = css({
   overflowY: 'auto',
   flex: 1,
-  maxHeight: 'calc(100vh - 44rem)',
+})
+
+export const paginationContainer = css({
+  padding: `${Spacing.sm} ${Spacing.md}`,
+  borderTop: `1px solid ${Colors.surfaceBorder}`,
+  background: Colors.white,
+  position: 'sticky',
+  bottom: 0,
+  zIndex: 1,
+  display: 'flex',
+  justifyContent: 'center',
+  boxSizing: 'border-box',
 })
 
 export const spinWrapper = css({
@@ -69,15 +78,8 @@ export const spinWrapper = css({
 
 // ── Center panel — job detail ────────────────────────────────────────────────
 
-export const centerScroll = css({
-
-})
-
 export const emptyDetail = css({
   background: Colors.white,
-  borderRadius: BorderRadius.base,
-  boxShadow: Shadows.sm,
-  border: `1px solid ${Colors.surfaceBorder}`,
   display: 'flex',
   flexDirection: 'column',
   alignItems: 'center',
@@ -87,6 +89,7 @@ export const emptyDetail = css({
   color: Colors.textSub,
   gap: Spacing.md,
   minHeight: '32rem',
+  flex: 1,
 })
 
 // ── Empty detail placeholder ──────────────────────────────────────────────────
@@ -95,6 +98,7 @@ const EMPTY_TEXT_SIZE = FontSize.md // 1.4rem = 14px
 
 export const emptyIcon = css({
   fontSize: EMPTY_ICON_SIZE,
+  color: Colors.textSub,
 })
 
 export const emptyText = css({
@@ -165,3 +169,20 @@ export const mobileJobDescription = css({
   color: Colors.textMain,
   lineHeight: 1.7,
 })
+
+// ── Center panel with fixed height ──────────────────────────────────────────────
+export const CenterPanel = styled.div`
+  min-height: calc(100vh - 12rem); /* Altura mínima fixa */
+  padding: ${Spacing.md};
+  background: ${Colors.white};
+  display: flex;
+  flex-direction: column;
+`
+
+// ── Right panel wrapper for JobFilterBar ──────────────────────────────────────
+export const JobFilterBarWrapper = styled.div`
+  height: calc(100vh - 12rem); /* Altura fixa */
+  overflow-y: auto;
+  padding: ${Spacing.md};
+  background: ${Colors.surfaceLight};
+`

@@ -93,6 +93,10 @@
       "cityStatePlaceholder": "Cidade ou estado",
       "searchPlaceholder": "Buscar vagas, empresas…",
       "locationPlaceholder": "Cidade, estado ou remoto",
+      "search": {
+        "label": "Buscar",
+        "placeholder": "Buscar vagas por cargo ou empresa"
+      },
       "company": "Empresa",
       "location": "Localização",
       "status": "Status",
@@ -498,6 +502,10 @@
       "cityStatePlaceholder": "City or state",
       "searchPlaceholder": "Search jobs, companies…",
       "locationPlaceholder": "City, state or remote",
+      "search": {
+        "label": "Search",
+        "placeholder": "Search jobs by role or company"
+      },
       "company": "Company",
       "location": "Location",
       "status": "Status",

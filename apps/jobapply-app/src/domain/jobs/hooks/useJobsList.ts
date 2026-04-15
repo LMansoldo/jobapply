@@ -12,14 +12,12 @@ export interface UseJobsListReturn {
   filters: JobFilters
   sort: SortOption
   search: string
-  location: string
   dismissed: Set<string>
   // Handlers
   handleFilterChange: (key: keyof JobFilters, value: string | string[] | number | undefined) => void
   handleSortChange: (sort: SortOption) => void
   handleSearchChange: (value: string) => void
-  handleLocationChange: (value: string) => void
-  handlePageChange: (page: number, pageSize: number) => void
+  handlePageChange: (page: number) => void
   handleDismiss: (id: string) => void
   handleClearAll: () => void
 }
@@ -36,7 +34,6 @@ export function useJobsList(onError: () => void): UseJobsListReturn {
 
   // ── UI-only state (controlled inputs, no fetch until debounce fires) ──────
   const [search, setSearch] = useState('')
-  const [location, setLocation] = useState('')
   const [sort, setSort] = useState<SortOption>('newest')
   const [dismissed, setDismissed] = useState<Set<string>>(new Set())
 
@@ -93,21 +90,14 @@ export function useJobsList(onError: () => void): UseJobsListReturn {
     debounceRef.current = setTimeout(() => commitWithReset({ title: value }), 400)
   }
 
-  function handleLocationChange(value: string) {
-    setLocation(value)
-    if (debounceRef.current) clearTimeout(debounceRef.current)
-    debounceRef.current = setTimeout(() => commitWithReset({ location: value }), 400)
-  }
 
   function handleSortChange(newSort: SortOption) {
     setSort(newSort)
     commitWithReset({ sort: newSort })
   }
 
-  function handlePageChange(page: number, pageSize: number) {
-    // When only the page changes, keep the current limit.
-    // When the page size changes, AntD resets page to 1 automatically.
-    setFilters((f) => ({ ...f, page, limit: pageSize }))
+  function handlePageChange(page: number) {
+    setFilters((f) => ({ ...f, page }))
   }
 
   function handleDismiss(id: string) {
@@ -118,7 +108,6 @@ export function useJobsList(onError: () => void): UseJobsListReturn {
     if (debounceRef.current) clearTimeout(debounceRef.current)
     setSort('newest')
     setSearch('')
-    setLocation('')
     setFilters({ page: 1, limit: 20, sort: 'newest' })
   }
 
@@ -129,12 +118,10 @@ export function useJobsList(onError: () => void): UseJobsListReturn {
     filters,
     sort,
     search,
-    location,
     dismissed,
     handleFilterChange,
     handleSortChange,
     handleSearchChange,
-    handleLocationChange,
     handlePageChange,
     handleDismiss,
     handleClearAll,

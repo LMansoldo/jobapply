@@ -1,37 +1,41 @@
 import type { PageLayoutProps } from './PageLayout.types'
-import { styles } from './PageLayout.styles'
+import { Wrapper, Grid, GRID_JOBS, GRID_LINKEDIN, GRID_CV, GRID_TAILORING, GRID_DEFAULT } from './PageLayout.styles'
+
+const GRID_VARIANTS = {
+  jobs: GRID_JOBS,
+  linkedin: GRID_LINKEDIN,
+  cv: GRID_CV,
+  tailoring: GRID_TAILORING,
+  default: GRID_DEFAULT,
+} as const
 
 export function PageLayout({ left, center, right, variant = 'jobs' }: PageLayoutProps) {
-  const gridVariant =
-    variant === 'jobs'
-      ? styles.gridJobs
-      : variant === 'linkedin'
-        ? styles.gridLinkedin
-        : variant === 'cv'
-          ? styles.gridCv
-          : variant === 'tailoring'
-            ? styles.gridTailoring
-            : styles.gridDefault
-
   const hasLeft = left !== undefined
   const hasRight = right !== undefined
 
-  const autoColumns =
-    !hasLeft && !hasRight
-      ? '1fr'
-      : !hasLeft
-        ? `1fr ${gridVariant.gridTemplateColumns.split(' ').pop()}`
-        : !hasRight
-          ? `${gridVariant.gridTemplateColumns.split(' ')[0]} 1fr`
-          : gridVariant.gridTemplateColumns
+  const gridVariant = GRID_VARIANTS[variant] || GRID_VARIANTS.default
+
+  const [leftCol, centerCol, rightCol] = gridVariant.split(' ')
+
+  let autoColumns: string
+
+  if (!hasLeft && !hasRight) {
+    autoColumns = '1fr'
+  } else if (!hasLeft) {
+    autoColumns = `1fr ${rightCol}`
+  } else if (!hasRight) {
+    autoColumns = `${leftCol} 1fr`
+  } else {
+    autoColumns = gridVariant
+  }
 
   return (
-    <div style={styles.wrapper}>
-      <div style={{ ...styles.grid, gridTemplateColumns: autoColumns }}>
+    <Wrapper>
+      <Grid templateColumns={autoColumns}>
         {hasLeft && <aside>{left}</aside>}
         <main>{center}</main>
         {hasRight && <aside>{right}</aside>}
-      </div>
-    </div>
+      </Grid>
+    </Wrapper>
   )
 }

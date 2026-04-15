@@ -16,8 +16,6 @@ import { AppContent } from '../../components/Layout'
 import { Space } from '../../components/Space'
 import { AppHeader as DSAppHeader } from '../../design-system/layout/AppHeader'
 import { useAuth } from '../../application/providers/AuthProvider'
-import { Colors } from '../../styles/theme/colors'
-import { Spacing } from '../../styles/theme/spacing'
 import * as styles from './AppLayout.styles'
 
 const { useBreakpoint } = Grid
@@ -92,12 +90,12 @@ export default function AppLayout() {
 
   const rightSlot = (
     <Dropdown menu={{ items: userMenuItems }} placement="bottomRight" trigger={['click']}>
-      <Space style={{ cursor: 'pointer' }} size={8}>
-        <Avatar icon={<UserOutlined />} style={{ background: Colors.primaryDark }} size={isMobile ? 28 : 32} />
+      <styles.UserSpace size={8}>
+        <styles.UserAvatar icon={<UserOutlined />} size={isMobile ? 28 : 32} />
         {!isMobile && (
-          <span style={{ color: Colors.textMain, fontSize: '1.4rem' }}>{user?.name ?? t('nav.user')}</span>
+          <styles.UserName>{user?.name ?? t('nav.user')}</styles.UserName>
         )}
-      </Space>
+      </styles.UserSpace>
     </Dropdown>
   )
 
@@ -107,14 +105,9 @@ export default function AppLayout() {
         navItems={isMobile ? [] : navItems}
         rightSlot={rightSlot}
       />
-      <AppContent
-        style={{
-          padding: isMobile ? Spacing.md1 : Spacing.lg,
-          minHeight: `calc(100vh - 6.4rem)`,
-        }}
-      >
+      <styles.AppContentStyled isMobile={isMobile}>
         <Outlet />
-      </AppContent>
+      </styles.AppContentStyled>
     </div>
   )
 }

@@ -39,7 +39,7 @@ function timeAgo(dateStr: string): string {
   return `Há ${months} ${months > 1 ? 'meses' : 'mês'}`
 }
 
-export function JobDetailPanel({ job, onApply, onSave, onTailor }: JobDetailPanelProps) {
+export function JobDetailPanel({ job, onApply, onSave, onTailor, showHeader = true }: JobDetailPanelProps) {
   const { t } = useTranslation()
   const [saved, setSaved] = useState(false)
 
@@ -56,20 +56,22 @@ export function JobDetailPanel({ job, onApply, onSave, onTailor }: JobDetailPane
   return (
     <div className={styles.panel}>
       {/* Header */}
-      <div className={styles.header}>
-        <div className={styles.headerLeft}>
-          <CompanyLogo name={job.company} size={48} />
-          <p className={styles.companyName}>{job.company}</p>
+      {showHeader && (
+        <div className={styles.header}>
+          <div className={styles.headerLeft}>
+            <CompanyLogo name={job.company} size={48} />
+            <p className={styles.companyName}>{job.company}</p>
+          </div>
+          <div className={styles.headerActions}>
+            <button type="button" className={styles.iconBtn} aria-label="Compartilhar">
+              <ShareAltOutlined />
+            </button>
+            <button type="button" className={styles.iconBtn} aria-label="Mais opções">
+              <EllipsisOutlined />
+            </button>
+          </div>
         </div>
-        <div className={styles.headerActions}>
-          <button type="button" className={styles.iconBtn} aria-label="Compartilhar">
-            <ShareAltOutlined />
-          </button>
-          <button type="button" className={styles.iconBtn} aria-label="Mais opções">
-            <EllipsisOutlined />
-          </button>
-        </div>
-      </div>
+      )}
 
       {/* Body */}
       <div className={styles.body}>
@@ -142,7 +144,7 @@ export function JobDetailPanel({ job, onApply, onSave, onTailor }: JobDetailPane
         {/* Tags list */}
         {job.tags.length > 0 && (
           <>
-            <div className={styles.divider} style={{ marginTop: '2.4rem' }} />
+            <div className={styles.dividerWithTopMargin} />
             <h2 className={styles.sectionTitle}>Competências</h2>
             <div className={styles.tagRow}>
               {job.tags.map((tag) => (

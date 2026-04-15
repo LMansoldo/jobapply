@@ -5,9 +5,9 @@
  *   Left: scrollable compact job list with pagination
  *   Center: full job detail + apply/tailor actions
  */
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Grid } from '../../../components/Grid'
-import { ArrowLeftOutlined } from '@ant-design/icons'
+import { ArrowLeftOutlined, FileSearchOutlined } from '@ant-design/icons'
 import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
 import { useAntApp } from '../../../components/AntApp'
@@ -44,13 +44,22 @@ export default function JobsPage() {
     loading,
     filters,
     search,
-    location,
     dismissed,
     handleSearchChange,
-    handleLocationChange,
     handlePageChange,
     handleDismiss: dismissFromHook,
   } = useJobsList(() => message.error(t('jobs.loadError')))
+
+  // Seleciona a primeira vaga não descartada quando a lista é carregada
+  useEffect(() => {
+    if (!loading && jobs.length > 0 && !selectedJob) {
+      const firstNonDismissed = jobs.find(job => !dismissed.has(job._id))
+      if (firstNonDismissed) {
+        viewedSet.add(firstNonDismissed._id)
+        setSelectedJob(firstNonDismissed)
+      }
+    }
+  }, [loading, jobs, dismissed, selectedJob])
 
   function handleJobClick(job: Job) {
     viewedSet.add(job._id)
@@ -69,7 +78,9 @@ export default function JobsPage() {
   function handleDismiss(id: string) {
     dismissFromHook(id)
     if (selectedJob?._id === id) {
-      const next = jobs.find((j) => j._id !== id && !dismissed.has(j._id))
+      // Cria um novo conjunto com a vaga descartada
+      const newDismissed = new Set([...dismissed, id])
+      const next = jobs.find((j) => j._id !== id && !newDismissed.has(j._id))
       setSelectedJob(next ?? null)
     }
   }
@@ -84,9 +95,7 @@ export default function JobsPage() {
   const topBar = (
     <JobsHero
       search={search}
-      location={location}
       onSearchChange={handleSearchChange}
-      onLocationChange={handleLocationChange}
     />
   )
 
@@ -120,35 +129,40 @@ export default function JobsPage() {
             />
           ))
         )}
-        {total > (filters.limit ?? 20) && (
+      </div>
+      {total > 20 && (
+        <div className={styles.paginationContainer}>
           <DSPagination
             current={filters.page ?? 1}
-            pageSize={filters.limit ?? 20}
+            pageSize={20}
             total={total}
-            onChange={handlePageChange}
-            showSizeChanger
-            pageSizeOptions={[10, 20, 50, 100]}
+            onChange={(page) => handlePageChange(page)}
           />
-        )}
-      </div>
+        </div>
+      )}
     </div>
   )
 
   // ── Center panel ────────────────────────────────────────────────────────
   const centerPanel = selectedJob ? (
-    <div className={styles.centerScroll}>
+    <styles.CenterPanel>
       <JobDetailPanel
         job={selectedJob}
         onApply={handleApply}
         onTailor={handleTailor}
       />
-    </div>
+    </styles.CenterPanel>
   ) : (
-    <div className={styles.emptyDetail}>
-      <span className={styles.emptyIcon}>💼</span>
-      <p className={styles.emptyText}>{t('jobs.selectJobHint')}</p>
-    </div>
+    <styles.CenterPanel>
+      <div className={styles.emptyDetail}>
+        <FileSearchOutlined className={styles.emptyIcon} />
+        <p className={styles.emptyText}>{t('jobs.selectJobHint')}</p>
+      </div>
+    </styles.CenterPanel>
   )
+
+  // ── Right panel ─────────────────────────────────────────────────────────
+  const rightPanel = null
 
   // ── Mobile ──────────────────────────────────────────────────────────────
   if (isMobile) {
@@ -176,7 +190,6 @@ export default function JobsPage() {
           styles={styles.mobileModalStyles}
           footer={null}
           closable={false}
-          destroyOnClose
         >
           <div className={styles.mobileModalHeader}>
             <Button type="text" icon={<ArrowLeftOutlined />} onClick={() => setMobileDetailOpen(false)} className={styles.backBtnText}>
@@ -189,6 +202,7 @@ export default function JobsPage() {
                 job={selectedJob}
                 onApply={handleApply}
                 onTailor={handleTailor}
+                showHeader={false}
               />
             )}
           </div>
@@ -204,6 +218,7 @@ export default function JobsPage() {
         variant="linkedin"
         left={leftPanel}
         center={centerPanel}
+        right={rightPanel}
       />
     </div>
   )

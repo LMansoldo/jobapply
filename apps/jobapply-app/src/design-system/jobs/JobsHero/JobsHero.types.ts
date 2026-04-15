@@ -7,12 +7,9 @@ export interface HeroHeadlineProps {
 
 export interface HeroSearchFormProps {
   search: string
-  location: string
   searchPlaceholder: string
-  locationPlaceholder: string
   searchLabel: string
   onSearchChange: (value: string) => void
-  onLocationChange: (value: string) => void
   onSubmit: () => void
 }
 
@@ -23,8 +20,6 @@ export interface HeroQuickChipsProps {
 
 export interface JobsHeroProps {
   search: string
-  location: string
   onSearchChange: (value: string) => void
-  onLocationChange: (value: string) => void
   onSubmit?: () => void
 }

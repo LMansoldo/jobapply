@@ -1,16 +1,13 @@
-/** Presentational: dual-field search pill (keyword + location) with Buscar button. */
-import { SearchOutlined, EnvironmentOutlined } from '@ant-design/icons'
+/** Presentational: single-field search pill (keyword only) with Buscar button. */
+import { SearchOutlined } from '@ant-design/icons'
 import type { HeroSearchFormProps } from './JobsHero.types'
 import * as styles from './JobsHero.styles'
 
 export function HeroSearchForm({
   search,
-  location,
   searchPlaceholder,
-  locationPlaceholder,
   searchLabel,
   onSearchChange,
-  onLocationChange,
   onSubmit,
 }: HeroSearchFormProps) {
   function handleKeyDown(e: React.KeyboardEvent) {
@@ -31,20 +28,6 @@ export function HeroSearchForm({
           onChange={(e) => onSearchChange(e.target.value)}
           onKeyDown={handleKeyDown}
           placeholder={searchPlaceholder}
-        />
-      </div>
-
-      <div className={styles.formDivider} />
-
-      <div className={styles.inputSection}>
-        <EnvironmentOutlined className={styles.inputIcon} />
-        <input
-          className={styles.inputNative}
-          type="text"
-          value={location}
-          onChange={(e) => onLocationChange(e.target.value)}
-          onKeyDown={handleKeyDown}
-          placeholder={locationPlaceholder}
         />
       </div>
 

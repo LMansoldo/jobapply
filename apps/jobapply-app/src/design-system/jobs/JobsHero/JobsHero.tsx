@@ -10,24 +10,17 @@ import { QUICK_CHIPS } from './helpers'
 import type { JobsHeroProps } from './JobsHero.types'
 import * as styles from './JobsHero.styles'
 
-export function JobsHero({ search, location, onSearchChange, onLocationChange, onSubmit }: JobsHeroProps) {
+export function JobsHero({ search, onSearchChange, onSubmit }: JobsHeroProps) {
   const { t } = useTranslation()
 
   return (
     <section className={styles.hero}>
       <div className={styles.inner}>
-        <HeroHeadline
-          title={t('jobs.heroTitle')}
-          subtitle={t('jobs.heroSubtitle')}
-        />
         <HeroSearchForm
           search={search}
-          location={location}
-          searchPlaceholder={t('jobs.jobKeywordPlaceholder')}
-          locationPlaceholder={t('jobs.cityStatePlaceholder')}
-          searchLabel={t('jobs.search')}
+          searchPlaceholder={t('jobs.search.placeholder')}
+          searchLabel={t('jobs.search.label')}
           onSearchChange={onSearchChange}
-          onLocationChange={onLocationChange}
           onSubmit={onSubmit ?? (() => {})}
         />
         <HeroQuickChips
