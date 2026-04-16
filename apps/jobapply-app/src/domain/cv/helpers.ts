@@ -341,6 +341,21 @@ export function downloadMarkdown(cv: CV): void {
   URL.revokeObjectURL(url)
 }
 
+/**
+ * Downloads a markdown string as a .md file.
+ * @param content The markdown content to download
+ * @param filename Optional filename (without extension). Defaults to 'tailored-cv'.
+ */
+export function downloadMarkdownText(content: string, filename = 'tailored-cv'): void {
+  const blob = new Blob([content], { type: 'text/markdown' })
+  const url = URL.createObjectURL(blob)
+  const a = document.createElement('a')
+  a.href = url
+  a.download = `${filename}.md`
+  a.click()
+  URL.revokeObjectURL(url)
+}
+
 export function exportPDF(cv: CV): void {
   const ptBrVersion = cv.localeVersions?.find((v) => v.locale === 'pt-BR')
   const enVersion = cv.localeVersions?.find((v) => v.locale === 'en')
@@ -436,6 +451,491 @@ export function exportPDF(cv: CV): void {
 </html>`)
   win.document.close()
   setTimeout(() => { win.print() }, 300)
+}
+
+// ─── PDF Export using pdfMake directly ──────────────────────────────────────
+
+import * as pdfMake from 'pdfmake/build/pdfmake'
+
+// Initialize pdfMake with fonts
+async function initializePdfMake(): Promise<void> {
+  if (typeof window === 'undefined') return
+
+  try {
+    // Load pdfMake and vfs_fonts (contains Roboto fonts)
+    const pdfMakeModule = await import('pdfmake/build/pdfmake')
+    const vfsFonts = await import('pdfmake/build/vfs_fonts')
+
+    // Assign vfs to pdfMake
+    ;(pdfMakeModule.default as any).vfs = vfsFonts.default
+
+    // Register Roboto fonts from vfs_fonts (available fonts)
+    ;(pdfMakeModule.default as any).fonts = {
+      Roboto: {
+        normal: 'Roboto-Regular.ttf',
+        bold: 'Roboto-Medium.ttf',
+        italics: 'Roboto-Italic.ttf',
+        bolditalics: 'Roboto-MediumItalic.ttf'
+      }
+    }
+  } catch (error) {
+    console.warn('Failed to initialize pdfMake:', error)
+  }
+}
+
+
+/**
+ * Downloads markdown content as a styled PDF using pdfMake directly
+ * @param markdownContent The markdown content to convert to PDF
+ * @param fullName The full name for the filename
+ * @param locale The locale for the filename
+ * @param jobTitle The job title for the filename
+ */
+export async function downloadMarkdownAsPdf(
+  markdownContent: string,
+  cv: CV,
+  locale: string,
+  jobTitle: string
+): Promise<void> {
+  try {
+    // Try to initialize pdfMake
+    await initializePdfMake()
+
+    // Create filename with format: full_name_locale_job_title
+    const safeFullName = cv.fullName.replace(/[^a-zA-Z0-9\s]/g, '').replace(/\s+/g, '_')
+    const safeLocale = locale.replace(/[^a-zA-Z0-9-]/g, '')
+    const safeJobTitle = jobTitle.replace(/[^a-zA-Z0-9\s]/g, '').replace(/\s+/g, '_')
+    const filename = `${safeFullName}_${safeLocale}_${safeJobTitle}.pdf`
+
+    // Convert markdown to pdfMake content with CV contact info
+    const content = convertMarkdownToPdfMake(markdownContent, cv, jobTitle)
+
+    // PDF document definition with Arial/Helvetica 12pt
+    const docDefinition: any = {
+      pageSize: 'A4' as const,
+      pageMargins: [25, 20, 25, 20] as [number, number, number, number], // left, top, right, bottom in mm
+      defaultStyle: {
+        fontSize: 12,
+        lineHeight: 1.5,
+      },
+      styles: {
+        header: {
+          fontSize: 24,
+          fontWeight: 600,
+          marginBottom: 10,
+        },
+        subheader: {
+          fontSize: 14,
+          fontWeight: 600,
+          marginBottom: 5,
+          color: '#333',
+        },
+        sectionTitle: {
+          fontSize: 16,
+          fontWeight: 600,
+          marginTop: 15,
+          marginBottom: 8,
+          borderBottom: [1, 'solid', '#1677ff'],
+        },
+        jobTitle: {
+          fontSize: 14,
+          fontWeight: 600,
+          marginBottom: 15,
+          color: '#555',
+        },
+        normal: {
+          fontSize: 12,
+          marginBottom: 6,
+        },
+        bold: {
+          fontWeight: 600,
+        },
+        italic: {
+          italics: true,
+        },
+        list: {
+          marginBottom: 6,
+        },
+        listItem: {
+          marginBottom: 4,
+        },
+      },
+      content: content,
+    }
+    
+
+    // Use Roboto fonts registered in initializePdfMake()
+    docDefinition.defaultStyle.font = 'Roboto'
+
+    // Create and download PDF
+    const pdfDoc = pdfMake.createPdf(docDefinition)
+    pdfDoc.download(filename)
+
+  } catch (error) {
+    console.error('Error generating PDF with pdfMake:', error)
+    // Fallback to browser print if library fails
+    await downloadMarkdownAsPdfFallback(markdownContent, cv, locale, jobTitle)
+  }
+}
+
+/**
+ * Convert markdown to pdfMake content array
+ */
+function convertMarkdownToPdfMake(
+  markdownContent: string,
+  cv: CV,
+  jobTitle: string
+): any[] {
+  const content: any[] = []
+
+  // Add header with contact info (same format as downloadMarkdown function)
+  const contactLine1 = [cv.location, cv.email, cv.phone].filter(Boolean).join(' | ')
+  const contactLine2 = [cv.linkedin, cv.github, cv.portfolio ?? cv.website].filter(Boolean).join(' | ')
+
+  content.push(
+    { text: cv.fullName, style: 'header' },
+    { text: jobTitle, style: 'jobTitle' }
+  )
+
+  if (contactLine1) {
+    content.push({ text: contactLine1, style: 'normal', marginBottom: 4 })
+  }
+
+  if (contactLine2) {
+    content.push({ text: contactLine2, style: 'normal', marginBottom: 15 })
+  }
+
+  content.push(
+    { canvas: [{ type: 'line', x1: 0, y1: 0, x2: 515, y2: 0, lineWidth: 1, lineColor: '#ccc' }], marginBottom: 15 }
+  )
+
+  // Parse markdown lines
+  const lines = markdownContent.split('\n')
+  let inList = false
+  let listItems: any[] = []
+
+  for (const line of lines) {
+    const trimmed = line.trim()
+
+    if (!trimmed) {
+      // Empty line - close list if open
+      if (inList && listItems.length > 0) {
+        content.push({
+          ul: listItems,
+          style: 'list',
+        })
+        listItems = []
+        inList = false
+      }
+      content.push({ text: '', marginBottom: 6 })
+      continue
+    }
+
+    // Check for headers
+    if (trimmed.startsWith('# ')) {
+      // H1 - already handled in header
+      continue
+    } else if (trimmed.startsWith('## ')) {
+      // H2 - section title
+      if (inList && listItems.length > 0) {
+        content.push({
+          ul: listItems,
+          style: 'list',
+        })
+        listItems = []
+        inList = false
+      }
+      const title = trimmed.substring(3).trim()
+      content.push({ text: title, style: 'sectionTitle' })
+    } else if (trimmed.startsWith('### ')) {
+      // H3 - subsection
+      if (inList && listItems.length > 0) {
+        content.push({
+          ul: listItems,
+          style: 'list',
+        })
+        listItems = []
+        inList = false
+      }
+      const title = trimmed.substring(4).trim()
+      content.push({ text: title, style: 'subheader' })
+    } else if (trimmed.match(/^[-*+]\s/)) {
+      // List item
+      inList = true
+      const itemText = trimmed.substring(2).trim()
+      // Parse bold/italic in list items
+      const parsedText = parseInlineFormatting(itemText)
+      listItems.push({ text: parsedText, style: 'listItem' })
+    } else if (trimmed.match(/^\d+\.\s/)) {
+      // Ordered list item
+      inList = true
+      const itemText = trimmed.replace(/^\d+\.\s/, '').trim()
+      const parsedText = parseInlineFormatting(itemText)
+      listItems.push({ text: parsedText, style: 'listItem' })
+    } else {
+      // Regular paragraph
+      if (inList && listItems.length > 0) {
+        content.push({
+          ul: listItems,
+          style: 'list',
+        })
+        listItems = []
+        inList = false
+      }
+
+      // Parse inline formatting (bold, italic, etc.)
+      const parsedText = parseInlineFormatting(trimmed)
+      content.push({ text: parsedText, style: 'normal' })
+    }
+  }
+
+  // Close any open list
+  if (inList && listItems.length > 0) {
+    content.push({
+      ul: listItems,
+      style: 'list',
+    })
+  }
+
+  return content
+}
+
+/**
+ * Parse inline markdown formatting (bold, italic) for pdfMake
+ */
+function parseInlineFormatting(text: string): any {
+  // Simple parsing for **bold** and *italic*
+  const parts: any[] = []
+  let currentText = ''
+  let i = 0
+
+  while (i < text.length) {
+    if (text.substring(i, i + 3) === '***') {
+      // Bold and italic
+      if (currentText) {
+        parts.push({ text: currentText })
+        currentText = ''
+      }
+      i += 3
+      let end = text.indexOf('***', i)
+      if (end === -1) end = text.length
+      const content = text.substring(i, end)
+      parts.push({ text: content, bold: true, italics: true })
+      i = end + 3
+    } else if (text.substring(i, i + 2) === '**') {
+      // Bold
+      if (currentText) {
+        parts.push({ text: currentText })
+        currentText = ''
+      }
+      i += 2
+      let end = text.indexOf('**', i)
+      if (end === -1) end = text.length
+      const content = text.substring(i, end)
+      parts.push({ text: content, bold: true })
+      i = end + 2
+    } else if (text[i] === '*') {
+      // Italic
+      if (currentText) {
+        parts.push({ text: currentText })
+        currentText = ''
+      }
+      i += 1
+      let end = text.indexOf('*', i)
+      if (end === -1) end = text.length
+      const content = text.substring(i, end)
+      parts.push({ text: content, italics: true })
+      i = end + 1
+    } else if (text.substring(i, i + 2) === '__') {
+      // Alternative bold syntax
+      if (currentText) {
+        parts.push({ text: currentText })
+        currentText = ''
+      }
+      i += 2
+      let end = text.indexOf('__', i)
+      if (end === -1) end = text.length
+      const content = text.substring(i, end)
+      parts.push({ text: content, bold: true })
+      i = end + 2
+    } else if (text[i] === '_') {
+      // Alternative italic syntax
+      if (currentText) {
+        parts.push({ text: currentText })
+        currentText = ''
+      }
+      i += 1
+      let end = text.indexOf('_', i)
+      if (end === -1) end = text.length
+      const content = text.substring(i, end)
+      parts.push({ text: content, italics: true })
+      i = end + 1
+    } else {
+      currentText += text[i]
+      i += 1
+    }
+  }
+
+  if (currentText) {
+    parts.push({ text: currentText })
+  }
+
+  // If only one part with no formatting, return as plain text
+  if (parts.length === 1 && !parts[0].bold && !parts[0].italics) {
+    return parts[0].text
+  }
+
+  return parts
+}
+
+/**
+ * Fallback PDF generation using browser print
+ */
+async function downloadMarkdownAsPdfFallback(
+  markdownContent: string,
+  cv: CV,
+  locale: string,
+  jobTitle: string
+): Promise<void> {
+  return new Promise((resolve, reject) => {
+    try {
+      // Simple markdown to HTML conversion
+      let htmlContent = markdownContent
+        // Headers
+        .replace(/^##### (.+)$/gm, '<h5>$1</h5>')
+        .replace(/^#### (.+)$/gm, '<h4>$1</h4>')
+        .replace(/^### (.+)$/gm, '<h3>$1</h3>')
+        .replace(/^## (.+)$/gm, '<h2>$1</h2>')
+        .replace(/^# (.+)$/gm, '<h1>$1</h1>')
+        // Bold and italic
+        .replace(/\*\*\*(.+?)\*\*\*/g, '<strong><em>$1</em></strong>')
+        .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+        .replace(/\*(.+?)\*/g, '<em>$1</em>')
+        // Code
+        .replace(/`(.+?)`/g, '<code>$1</code>')
+        // Links
+        .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2">$1</a>')
+
+      // Handle lists - convert list items and wrap in ul/ol
+      const lines = htmlContent.split('\n')
+      const processedLines: string[] = []
+      let inList = false
+      let listItems: string[] = []
+
+      for (const line of lines) {
+        const trimmed = line.trim()
+        if (trimmed.match(/^[-*+]\s/)) {
+          // List item
+          if (!inList) {
+            inList = true
+          }
+          const content = trimmed.substring(2)
+          listItems.push(`<li>${content}</li>`)
+        } else if (trimmed.match(/^\d+\.\s/)) {
+          // Ordered list item
+          if (!inList) {
+            inList = true
+          }
+          const content = trimmed.replace(/^\d+\.\s/, '')
+          listItems.push(`<li>${content}</li>`)
+        } else {
+          // Not a list item
+          if (inList && listItems.length > 0) {
+            processedLines.push(`<ul>${listItems.join('')}</ul>`)
+            listItems = []
+            inList = false
+          }
+          processedLines.push(line)
+        }
+      }
+
+      // Handle any remaining list items
+      if (inList && listItems.length > 0) {
+        processedLines.push(`<ul>${listItems.join('')}</ul>`)
+      }
+
+      htmlContent = processedLines.join('\n')
+
+      // Handle paragraphs (double newlines)
+      htmlContent = htmlContent.replace(/\n\n/g, '</p><p>')
+      htmlContent = `<p>${htmlContent}</p>`
+
+      // Clean up empty paragraphs
+      htmlContent = htmlContent.replace(/<p><\/p>/g, '')
+      htmlContent = htmlContent.replace(/<p>\s*<\/p>/g, '')
+
+      const wrappedHtml = htmlContent
+
+      // Add contact info (same format as downloadMarkdown function)
+      const contactLine1 = [cv.location, cv.email, cv.phone].filter(Boolean).join(' | ')
+      const contactLine2 = [cv.linkedin, cv.github, cv.portfolio ?? cv.website].filter(Boolean).join(' | ')
+
+      const htmlDoc = `<!DOCTYPE html>
+<html lang="${locale}">
+<head>
+  <meta charset="utf-8">
+  <title>CV – ${cv.fullName}</title>
+  <style>
+    @page { size: A4; margin: 18mm 20mm; }
+    * { box-sizing: border-box; }
+    body { font-family: Verdana, Arial, sans-serif; font-size: 12pt; color: #1a1a1a; max-width: 170mm; margin: 0 auto; line-height: 1.55; }
+    h1 { font-size: 22pt; margin: 0 0 4px; }
+    h2 { font-size: 14pt; font-weight: 700; border-bottom: 1.5px solid #1677ff; padding-bottom: 3px; margin: 18px 0 8px; color: #111; text-transform: uppercase; letter-spacing: .5px; }
+    h3 { font-size: 13pt; font-weight: 600; margin: 10px 0 2px; }
+    p, div { margin: 3px 0; }
+    ul { margin: 4px 0; padding-left: 18px; }
+    li { margin: 2px 0; }
+    em { color: #555; }
+    hr { border: none; border-top: 1px solid #ddd; margin: 14px 0; }
+    strong { font-weight: 600; }
+    br { margin-bottom: 8px; }
+    .contact-info { font-size: 10.5pt; color: #555; margin: 4px 0; }
+  </style>
+</head>
+<body>
+  <h1>${cv.fullName}</h1>
+  <p>${jobTitle}</p>
+  ${contactLine1 ? `<div class="contact-info">${contactLine1}</div>` : ''}
+  ${contactLine2 ? `<div class="contact-info">${contactLine2}</div>` : ''}
+  <hr/>
+  ${wrappedHtml}
+</body>
+</html>`
+
+      const win = window.open('', '_blank')
+      if (!win) {
+        reject(new Error('Could not open print window'))
+        return
+      }
+
+      win.document.write(htmlDoc)
+      win.document.close()
+
+      let printed = false
+      const printTimeout = setTimeout(() => {
+        if (!printed) {
+          win.print()
+          printed = true
+          setTimeout(() => {
+            win.close()
+            resolve()
+          }, 1000)
+        }
+      }, 500)
+
+      // Also try to detect when print dialog closes
+      win.onbeforeunload = () => {
+        clearTimeout(printTimeout)
+        if (!printed) {
+          printed = true
+          resolve()
+        }
+      }
+
+    } catch (error) {
+      reject(error)
+    }
+  })
 }
 
 // ─── Legacy compat aliases ───────────────────────────────────────────────────

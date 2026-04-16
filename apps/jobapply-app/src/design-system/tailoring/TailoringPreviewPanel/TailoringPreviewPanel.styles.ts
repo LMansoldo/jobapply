@@ -72,6 +72,16 @@ export const TabContent = styled.div`
   max-height: 40vh;
 `
 
+export const PreviewTitle = styled.p`
+  font-weight: ${FontWeight.bold};
+  margin-bottom: ${Spacing.sm};
+  color: ${Colors.textMain};
+`
+
+export const PreviewPlaceholder = styled.p`
+  color: ${Colors.textSub};
+`
+
 export const MarkdownWrapper = styled.div`
   font-family: ${FontFamily.body};
   font-size: ${FontSize.xxs};

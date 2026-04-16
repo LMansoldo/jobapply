@@ -177,6 +177,12 @@ export const atsScoreBadge = css({
   marginTop: Spacing.md,
 })
 
+export const reanalyzeWrapper = css({
+  display: 'flex',
+  justifyContent: 'center',
+  marginTop: Spacing.md,
+})
+
 export const atsCenter = css({
   background: Colors.surfaceEditor,
   display: 'flex',

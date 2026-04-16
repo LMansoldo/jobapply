@@ -22,7 +22,6 @@ export function TailoringContextBar({
 
   return (
     <div className={S.contextBar}>
-      <div className={S.contextDivider} />
       {job ? (
         <JobContextBar job={job} lang={lang} onBack={onBack} />
       ) : (

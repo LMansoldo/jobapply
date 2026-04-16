@@ -226,3 +226,9 @@ export const mobileOnly = css({
 export const modalContent = css({
   color: 'rgba(255,255,255,0.9)',
 })
+
+export const suggestionsButtonWrapper = css({
+  padding: `0 ${Spacing.lg} ${Spacing.sm}`,
+  display: 'flex',
+  justifyContent: 'center',
+})

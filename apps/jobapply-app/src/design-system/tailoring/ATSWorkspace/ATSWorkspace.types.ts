@@ -45,8 +45,6 @@ export interface ATSWorkspaceProps {
   onReanalyze: () => void
   /** Callback for PDF download */
   onDownloadPDF: () => void
-  /** Callback for DOCX download */
-  onDownloadDOCX: () => void
   /** Callback for markdown export */
   onExportMarkdown: () => void
   /** Callback to save as version */

@@ -1,7 +1,19 @@
+export interface EditorKeywords {
+  toAdd: string[]
+  toRephrase: Array<{ from: string; to: string }>
+}
+
 export interface TailoringEditorPanelProps {
   value: string
   onChange: (v: string) => void
   locale?: 'pt-BR' | 'en'
+  editorKeywords?: EditorKeywords
+  onInsertKeyword?: (keyword: string) => void
+  onReplaceKeyword?: (from: string, to: string) => void
+  /** Show red notification dot when there's analysis or reanalysis */
+  hasAnalysisNotification?: boolean
+  /** Job title for adding objective section */
+  jobTitle?: string
 }
 
 export interface TailoringEditorHandle {

@@ -13,7 +13,15 @@ import {
   EyeInvisibleOutlined,
   ClearOutlined,
   HistoryOutlined,
+  FileOutlined,
+  DownOutlined,
 } from '@ant-design/icons'
+import { Modal } from '../../../components/Modal'
+import { Button } from '../../../components/Button'
+import { Colors } from '../../../styles/theme/colors'
+import { Spacing } from '../../../styles/theme/spacing'
+import { FontSize, FontFamily, FontWeight } from '../../../styles/theme/typography'
+import { BorderRadius } from '../../../styles/theme/radius'
 import type { TailoringEditorPanelProps, TailoringEditorHandle } from './TailoringEditorPanel.types'
 import { applyDiffDecorations, useTextDiff } from './TailoringEditorPanel.helpers'
 import * as S from './TailoringEditorPanel.styles'
@@ -28,6 +36,20 @@ injectGlobal`
   @keyframes te-fade-rephrase {
     0%   { background: rgba(245, 158, 11, 0.45); }
     100% { background: transparent; }
+  }
+  @keyframes pulse {
+    0% {
+      transform: scale(1);
+      opacity: 1;
+    }
+    50% {
+      transform: scale(1.2);
+      opacity: 0.8;
+    }
+    100% {
+      transform: scale(1);
+      opacity: 1;
+    }
   }
   .te-highlight-add {
     border-radius: 2px;
@@ -95,11 +117,15 @@ const GROUPS = ['format', 'heading', 'list', 'insert', 'history', 'diff']
 
 
 export const TailoringEditorPanel = forwardRef<TailoringEditorHandle, TailoringEditorPanelProps>(
-  function TailoringEditorPanel({ value, onChange, locale = 'pt-BR' }, ref) {
+  function TailoringEditorPanel({ value, onChange, locale = 'pt-BR', editorKeywords, onInsertKeyword, onReplaceKeyword, hasAnalysisNotification = false, jobTitle }, ref) {
     const editorRef = useRef<EditorInstance | null>(null)
     const decorationsRef = useRef<string[]>([])
     const diffDecorationsRef = useRef<string[]>([])
     const [lineCol, setLineCol] = useState({ line: 1, col: 1 })
+    const [fileMenuOpen, setFileMenuOpen] = useState(false)
+    const [phrasesModalOpen, setPhrasesModalOpen] = useState(false)
+    const [keywordsSubmenuOpen, setKeywordsSubmenuOpen] = useState(false)
+    const fileMenuRef = useRef<HTMLDivElement>(null)
 
     // Text diff management
     const {
@@ -158,6 +184,21 @@ export const TailoringEditorPanel = forwardRef<TailoringEditorHandle, TailoringE
         diffDecorationsRef.current = editorRef.current.deltaDecorations(diffDecorationsRef.current, [])
       }
     }, [diffChanges, showDiff])
+
+    // Close file menu when clicking outside
+    useEffect(() => {
+      function handleClickOutside(event: MouseEvent) {
+        if (fileMenuRef.current && !fileMenuRef.current.contains(event.target as Node)) {
+          setFileMenuOpen(false)
+        }
+      }
+      if (fileMenuOpen) {
+        document.addEventListener('mousedown', handleClickOutside)
+        return () => {
+          document.removeEventListener('mousedown', handleClickOutside)
+        }
+      }
+    }, [fileMenuOpen])
 
     function flashDecoration(range: { startLineNumber: number; startColumn: number; endLineNumber: number; endColumn: number }, className: string, durationMs: number) {
       const ed = editorRef.current
@@ -289,6 +330,25 @@ export const TailoringEditorPanel = forwardRef<TailoringEditorHandle, TailoringE
       ed.focus()
     }
 
+    function insertObjectiveSection() {
+      const ed = editorRef.current
+      if (!ed) return
+
+      const objectiveText = locale === 'pt-BR'
+        ? `# Objetivo\n\n${jobTitle || 'Posição desejada'}\n\n`
+        : `# Objective\n\n${jobTitle || 'Desired position'}\n\n`
+
+      // Insert at the beginning of the document
+      ed.executeEdits('objective', [{
+        range: { startLineNumber: 1, startColumn: 1, endLineNumber: 1, endColumn: 1 },
+        text: objectiveText,
+      }])
+      ed.focus()
+
+      // Scroll to top
+      ed.revealLineInCenter(1)
+    }
+
     function handleAction(key: string) {
       switch (key) {
         case 'bold': insertWrap('**', '**'); break
@@ -329,9 +389,318 @@ export const TailoringEditorPanel = forwardRef<TailoringEditorHandle, TailoringE
 
     const localeLabel = locale === 'pt-BR' ? 'PT-BR' : 'EN'
 
+    // File dropdown menu
+    const fileMenu = (
+      <div style={{
+        position: 'absolute',
+        top: '100%',
+        left: 0,
+        background: Colors.surfaceDarker,
+        border: `1px solid ${Colors.surfaceEditorBorder}`,
+        borderRadius: BorderRadius.xs,
+        minWidth: '200px',
+        zIndex: 1000,
+        boxShadow: '0 4px 12px rgba(0,0,0,0.3)',
+      }}>
+        <div style={{
+          padding: `${Spacing.xs} 0`,
+        }}>
+          {/* Keywords to Add submenu */}
+          <div
+            style={{
+              position: 'relative',
+            }}
+            onMouseEnter={() => setKeywordsSubmenuOpen(true)}
+            onMouseLeave={() => setKeywordsSubmenuOpen(false)}
+          >
+            <div
+              style={{
+                width: '100%',
+                padding: `${Spacing.xs} ${Spacing.md}`,
+                background: 'transparent',
+                color: 'rgba(255,255,255,0.8)',
+                textAlign: 'left',
+                fontSize: FontSize.sm,
+                fontFamily: FontFamily.body,
+                cursor: 'pointer',
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+              }}
+            >
+              <span>Keywords to Add</span>
+              <DownOutlined style={{ fontSize: '10px' }} />
+            </div>
+            {/* Keywords submenu */}
+            {editorKeywords?.toAdd && editorKeywords.toAdd.length > 0 && keywordsSubmenuOpen && (
+              <div style={{
+                position: 'absolute',
+                left: '100%',
+                top: 0,
+                background: Colors.surfaceDarker,
+                border: `1px solid ${Colors.surfaceEditorBorder}`,
+                borderRadius: BorderRadius.xs,
+                minWidth: '180px',
+                maxHeight: '300px',
+                overflowY: 'auto',
+                boxShadow: '0 4px 12px rgba(0,0,0,0.3)',
+              }}>
+                {editorKeywords.toAdd.map((keyword, index) => (
+                  <button
+                    key={index}
+                    type="button"
+                    onClick={() => {
+                      onInsertKeyword?.(keyword)
+                      setFileMenuOpen(false)
+                    }}
+                    style={{
+                      width: '100%',
+                      padding: `${Spacing.xs} ${Spacing.md}`,
+                      background: 'transparent',
+                      border: 'none',
+                      color: 'rgba(255,255,255,0.8)',
+                      textAlign: 'left',
+                      fontSize: FontSize.sm,
+                      fontFamily: FontFamily.body,
+                      cursor: 'pointer',
+                      whiteSpace: 'nowrap',
+                    }}
+                  >
+                    {keyword}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Phrases to Change */}
+          <button
+            type="button"
+            onClick={() => {
+              setPhrasesModalOpen(true)
+              setFileMenuOpen(false)
+            }}
+            style={{
+              width: '100%',
+              padding: `${Spacing.xs} ${Spacing.md}`,
+              background: 'transparent',
+              border: 'none',
+              color: 'rgba(255,255,255,0.8)',
+              textAlign: 'left',
+              fontSize: FontSize.sm,
+              fontFamily: FontFamily.body,
+              cursor: 'pointer',
+            }}
+          >
+            Phrases to Change
+          </button>
+
+          {/* Add Objective Section */}
+          <button
+            type="button"
+            onClick={() => {
+              insertObjectiveSection()
+              setFileMenuOpen(false)
+            }}
+            disabled={!jobTitle}
+            style={{
+              width: '100%',
+              padding: `${Spacing.xs} ${Spacing.md}`,
+              background: 'transparent',
+              border: 'none',
+              color: jobTitle ? 'rgba(255,255,255,0.8)' : 'rgba(255,255,255,0.4)',
+              textAlign: 'left',
+              fontSize: FontSize.sm,
+              fontFamily: FontFamily.body,
+              cursor: jobTitle ? 'pointer' : 'not-allowed',
+            }}
+          >
+            Add Objective Section
+          </button>
+        </div>
+      </div>
+    )
+
+    // Phrases modal
+    const phrasesModal = (
+      <Modal
+        open={phrasesModalOpen}
+        onCancel={() => setPhrasesModalOpen(false)}
+        title={null}
+        footer={null}
+        width={600}
+        styles={{
+          body: {
+            background: Colors.gradientAiToolbar,
+            border: `1px solid rgba(124,58,237,0.2)`,
+            padding: 0,
+            margin: 0,
+          },
+          content: {
+            background: Colors.gradientAiToolbar,
+            border: `1px solid rgba(124,58,237,0.2)`,
+          },
+        }}
+      >
+        <div style={{
+          padding: `${Spacing.lg} ${Spacing.xl}`,
+        }}>
+          {/* Header with pulse dot */}
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: Spacing.sm,
+            marginBottom: Spacing.lg,
+          }}>
+            <span style={{
+              width: '8px',
+              height: '8px',
+              borderRadius: '50%',
+              background: Colors.primaryDark,
+              flexShrink: 0,
+              animation: 'pulse 2s infinite'
+            }} />
+            <span style={{
+              fontSize: FontSize.md,
+              color: Colors.primaryDark,
+              fontWeight: FontWeight.semibold,
+            }}>
+              Phrases to Change
+            </span>
+          </div>
+
+          <div style={{
+            maxHeight: '400px',
+            overflowY: 'auto',
+          }}>
+            {editorKeywords?.toRephrase && editorKeywords.toRephrase.length > 0 ? (
+              editorKeywords.toRephrase.map((phrase, index) => (
+                <div
+                  key={index}
+                  style={{
+                    padding: `${Spacing.md} ${Spacing.lg}`,
+                    background: 'rgba(255, 255, 255, 0.05)',
+                    border: `1px solid rgba(124,58,237,0.1)`,
+                    marginBottom: Spacing.sm,
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: Spacing.md,
+                  }}
+                >
+                  <div style={{ flex: 1 }}>
+                    <div style={{
+                      fontSize: FontSize.sm,
+                      color: Colors.primaryDark,
+                      marginBottom: Spacing.xs,
+                      fontWeight: FontWeight.medium,
+                    }}>
+                      <span style={{ opacity: 0.7 }}>From:</span> {phrase.from}
+                    </div>
+                    <div style={{
+                      fontSize: FontSize.sm,
+                      color: 'rgba(255,255,255,0.8)',
+                    }}>
+                      <span style={{ opacity: 0.7 }}>To:</span> {phrase.to}
+                    </div>
+                  </div>
+                  <Button
+                    size="small"
+                    type="primary"
+                    onClick={() => {
+                      onReplaceKeyword?.(phrase.from, phrase.to)
+                      setPhrasesModalOpen(false)
+                    }}
+                    style={{
+                      background: Colors.primaryDark,
+                      border: 'none',
+                      borderRadius: BorderRadius.full,
+                      color: Colors.white,
+                      fontSize: FontSize.xxs,
+                      fontWeight: FontWeight.semibold,
+                      padding: `${Spacing.xs} ${Spacing.md}`,
+                      cursor: 'pointer',
+                      fontFamily: FontFamily.body,
+                      minWidth: '80px',
+                    }}
+                  >
+                    Replace
+                  </Button>
+                </div>
+              ))
+            ) : (
+              <div style={{
+                padding: Spacing.xl,
+                textAlign: 'center',
+                color: Colors.primaryDark,
+                opacity: 0.7,
+                fontSize: FontSize.sm,
+              }}>
+                No phrases to change
+              </div>
+            )}
+          </div>
+
+          {/* Close button */}
+          <div style={{
+            display: 'flex',
+            justifyContent: 'flex-end',
+            marginTop: Spacing.lg,
+            paddingTop: Spacing.md,
+            borderTop: `1px solid rgba(124,58,237,0.2)`,
+          }}>
+            <Button
+              onClick={() => setPhrasesModalOpen(false)}
+              style={{
+                background: 'none',
+                border: `1px solid ${Colors.primaryDark}`,
+                borderRadius: '6px',
+                color: Colors.primaryDark,
+                fontSize: FontSize.xxs,
+                fontWeight: FontWeight.medium,
+                padding: `2px ${Spacing.md}`,
+                cursor: 'pointer',
+                fontFamily: FontFamily.body,
+              }}
+            >
+              Close
+            </Button>
+          </div>
+        </div>
+      </Modal>
+    )
+
     return (
       <S.Root>
         <S.Toolbar>
+          {/* File dropdown */}
+          <div style={{ position: 'relative' }} ref={fileMenuRef}>
+            <S.ToolbarBtn
+              type="button"
+              onClick={() => setFileMenuOpen(!fileMenuOpen)}
+              style={{ display: 'flex', alignItems: 'center', gap: Spacing.xs, position: 'relative' }}
+            >
+              <FileOutlined />
+              File
+              <DownOutlined style={{ fontSize: '10px' }} />
+              {hasAnalysisNotification && (
+                <div style={{
+                  position: 'absolute',
+                  top: '-4px',
+                  right: '-4px',
+                  width: '8px',
+                  height: '8px',
+                  borderRadius: '50%',
+                  backgroundColor: '#ff4d4f',
+                  boxShadow: '0 0 0 1px rgba(0,0,0,0.5)',
+                  animation: 'pulse 1.5s infinite',
+                }} />
+              )}
+            </S.ToolbarBtn>
+            {fileMenuOpen && fileMenu}
+          </div>
+
+          <S.ToolbarDivider />
+
           {GROUPS.map((group, gi) => {
             const items = TOOLBAR_ITEMS.filter((i) => i.group === group)
             return (
@@ -371,6 +740,7 @@ export const TailoringEditorPanel = forwardRef<TailoringEditorHandle, TailoringE
           <span>{wordCount} palavras</span>
           <S.StatusRight>{localeLabel}</S.StatusRight>
         </S.StatusBar>
+        {phrasesModal}
       </S.Root>
     )
   }

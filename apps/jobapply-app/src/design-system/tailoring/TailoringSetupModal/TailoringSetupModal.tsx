@@ -1,6 +1,8 @@
 import { useTranslation } from 'react-i18next'
+import { BulbOutlined } from '@ant-design/icons'
 import { Modal } from '../../../components/Modal'
 import { Button } from '../../../components/Button'
+import { Alert } from '../../../components/Alert'
 import type { TailoringSetupModalProps } from './TailoringSetupModal.types'
 import * as S from './TailoringSetupModal.styles'
 
@@ -10,6 +12,7 @@ export function TailoringSetupModal({
   locales,
   selectedLocale,
   jobDescription,
+  job,
   onLocaleChange,
   onJobDescriptionChange,
   onStepChange,
@@ -64,14 +67,24 @@ export function TailoringSetupModal({
       {step === 2 && (
         <>
           <div className={S.setupTip}>
-            <span>💡</span>
+            <BulbOutlined />
             <p className={S.setupTipText}>{t('tailoring.setupJdTip')}</p>
           </div>
-          <textarea
-            className={S.setupJdTextarea}
-            value={jobDescription}
-            onChange={(e) => onJobDescriptionChange(e.target.value)}
-          />
+
+          {!job?.description ? (
+            <textarea
+              className={S.setupJdTextarea}
+              value={jobDescription}
+              onChange={(e) => onJobDescriptionChange(e.target.value)}
+            />
+          ) : (
+            <Alert
+              message={t('tailoring.setupModal.descriptionLoaded')}
+              type="info"
+              showIcon
+            />
+          )}
+
           <div className={S.setupModalFooter}>
             {totalSteps > 1
               ? <Button onClick={() => onStepChange(1)}>{t('common.back')}</Button>

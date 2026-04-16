@@ -1,4 +1,5 @@
 import type { WorkspaceSetupResult } from '../../../domain/cv/hooks/useTailoringWorkspace'
+import type { Job } from '../../../domain/jobs/types'
 
 export interface TailoringSetupModalProps {
   /** Whether the modal is open */
@@ -11,6 +12,8 @@ export interface TailoringSetupModalProps {
   selectedLocale: 'en' | 'pt-BR'
   /** Job description text */
   jobDescription: string
+  /** Job object (optional) */
+  job?: Job
   /** Callback when locale changes */
   onLocaleChange: (locale: 'en' | 'pt-BR') => void
   /** Callback when job description changes */

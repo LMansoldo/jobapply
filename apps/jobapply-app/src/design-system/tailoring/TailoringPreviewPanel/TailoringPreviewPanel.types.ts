@@ -7,7 +7,6 @@ export interface TailoringPreviewPanelProps {
   projectedScore: number
   scoreDelta: number
   onDownloadPDF?: () => void
-  onDownloadDOCX?: () => void
   onExportMarkdown?: () => void
   onSaveAsVersion?: () => void
 }

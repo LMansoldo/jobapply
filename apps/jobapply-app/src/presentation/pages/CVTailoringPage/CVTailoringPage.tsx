@@ -8,14 +8,18 @@ import { useParams, useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { useAntApp } from '../../../components/AntApp'
 import { Spin } from '../../../components/Spin'
+import { Button } from '../../../components/Button'
+import { Drawer } from '../../../components/Drawer'
 import { TailoringSetupModal } from '../../../design-system/tailoring/TailoringSetupModal'
 import { TailoringContextBar } from '../../../design-system/tailoring/TailoringContextBar'
 import { TailoringWorkspaceTabs } from '../../../design-system/tailoring/TailoringWorkspaceTabs'
 import { ATSWorkspace } from '../../../design-system/tailoring/ATSWorkspace'
+import { ATSPanel } from '../../../design-system/ats/ATSPanel'
 import { CoverLetterWorkspace } from '../../../design-system/tailoring/CoverLetterWorkspace'
 import { VideoScriptWorkspace } from '../../../design-system/tailoring/VideoScriptWorkspace'
 import { type TailoringEditorHandle } from '../../../design-system/tailoring/TailoringEditorPanel'
 import { mapATSReportToPanel, buildSuggestionsList, buildEditorKeywords } from '../../../domain/cv/tailoringHelpers'
+import { downloadMarkdownText, downloadMarkdownAsPdf } from '../../../domain/cv/helpers'
 import { useTailoringWorkspace } from '../../../domain/cv/hooks/useTailoringWorkspace'
 import type { WorkspaceSetupResult } from '../../../domain/cv/hooks/useTailoringWorkspace'
 import type { Job } from '../../../domain/jobs/types'
@@ -23,6 +27,8 @@ import { buildToneOptions } from '../../../domain/cv/tailoringUIHelpers'
 import type { WorkspaceTab } from '../../../domain/cv/types/tailoringUI'
 import type { ToneKey } from '../../../design-system/ats/ToneChips/ToneChips.types'
 import { getJobById } from '../../../infrastructure/repositories/jobsRepository'
+import { getCV } from '../../../infrastructure/repositories/cvRepository'
+import type { CV } from '../../../domain/cv/types'
 import * as styles from './CVTailoringPage.styles'
 
 
@@ -35,7 +41,9 @@ export default function CVTailoringPage() {
   const isManualMode = !jobId
 
   const [job, setJob] = useState<Job | null>(null)
+  const [cv, setCv] = useState<CV | null>(null)
   const [loadingJob, setLoadingJob] = useState(!isManualMode)
+  const [loadingCv, setLoadingCv] = useState(true)
   const [activeTab, setActiveTab] = useState<WorkspaceTab>('ats')
   const [tone, setTone] = useState<ToneKey>('direct')
   const [currentSuggestion, setCurrentSuggestion] = useState(1)
@@ -48,6 +56,7 @@ export default function CVTailoringPage() {
   const [setupLocales, setSetupLocales] = useState<('en' | 'pt-BR')[]>([])
   const [setupLocale, setSetupLocale] = useState<'en' | 'pt-BR'>('pt-BR')
   const [setupJobDesc, setSetupJobDesc] = useState('')
+  const [drawerVisible, setDrawerVisible] = useState(false)
 
   const cvId = localStorage.getItem('cvId') ?? ''
 
@@ -92,6 +101,18 @@ export default function CVTailoringPage() {
     ...opt,
     label: t(`tailoring.tone${opt.label.charAt(0).toUpperCase() + opt.label.slice(1)}`)
   }))
+
+  // Fetch CV data
+  useEffect(() => {
+    if (!cvId) {
+      setLoadingCv(false)
+      return
+    }
+    getCV(cvId)
+      .then(setCv)
+      .catch(() => message.error(t('tailoring.loadCVError')))
+      .finally(() => setLoadingCv(false))
+  }, [cvId, message, t])
 
   // Fetch job only when we have a jobId
   useEffect(() => {
@@ -146,7 +167,7 @@ export default function CVTailoringPage() {
     />
   )
 
-  if (loadingJob) {
+  if (loadingJob || loadingCv) {
     return (
       <>
         {setupModal}
@@ -184,30 +205,89 @@ export default function CVTailoringPage() {
   )
 
   const atsWorkspace = (
-    <ATSWorkspace
-      atsLoading={workspace.atsLoading}
-      panelData={panelData}
-      scoreDelta={scoreDelta}
-      allSuggestions={allSuggestions}
-      currentSuggestion={currentSuggestion}
-      suggestionsCount={suggestionsCount}
-      editorKeywords={editorKeywords}
-      tailoring={workspace.tailoring}
-      tailoredContent={workspace.tailoredContent}
-      chosenLocale={workspace.chosenLocale ?? undefined}
-      onTailoredContentChange={workspace.setTailoredContent}
-      job={job}
-      currentScore={currentScore}
-      projectedScore={projectedScore}
-      onSuggestionChange={setCurrentSuggestion}
-      onReanalyze={workspace.handleReanalyze}
-      onInsertKeyword={handleInsertKeyword}
-      onReplaceKeyword={handleReplaceKeyword}
-      onDownloadPDF={() => message.info(t('tailoring.downloadPDF'))}
-      onDownloadDOCX={() => message.info(t('tailoring.downloadDOCX'))}
-      onExportMarkdown={() => message.info(t('tailoring.exportMarkdown'))}
-      onSaveAsVersion={() => message.info(t('tailoring.saveAsVersion'))}
-    />
+    <>
+      <ATSWorkspace
+        atsLoading={workspace.atsLoading}
+        panelData={panelData}
+        scoreDelta={scoreDelta}
+        allSuggestions={allSuggestions}
+        currentSuggestion={currentSuggestion}
+        suggestionsCount={suggestionsCount}
+        editorKeywords={editorKeywords}
+        tailoring={workspace.tailoring}
+        tailoredContent={workspace.tailoredContent}
+        chosenLocale={workspace.chosenLocale ?? undefined}
+        onTailoredContentChange={workspace.setTailoredContent}
+        job={job}
+        currentScore={currentScore}
+        projectedScore={projectedScore}
+        onSuggestionChange={setCurrentSuggestion}
+        onReanalyze={workspace.handleReanalyze}
+        onInsertKeyword={handleInsertKeyword}
+        onReplaceKeyword={handleReplaceKeyword}
+        onDownloadPDF={async () => {
+          if (workspace.tailoredContent && cv) {
+            try {
+              message.loading(t('tailoring.generatingPDF'), 0)
+              const fullName = cv.fullName
+              const locale = workspace.chosenLocale || setupLocale || 'pt-BR'
+              const jobTitle = job?.title || manualDescription.split('\n')[0]?.substring(0, 50) || 'untitled'
+              await downloadMarkdownAsPdf(workspace.tailoredContent, cv, locale, jobTitle)
+              message.destroy()
+              message.success(t('tailoring.downloadPDFSuccess'))
+            } catch (error) {
+              message.destroy()
+              console.error('PDF generation error:', error)
+              message.error(t('tailoring.downloadPDFError'))
+            }
+          } else {
+            message.warning(t('tailoring.noContentToExport'))
+          }
+        }}
+        onExportMarkdown={() => {
+          if (workspace.tailoredContent) {
+            downloadMarkdownText(workspace.tailoredContent, 'cv-otimizado')
+            message.success(t('tailoring.exportMarkdownSuccess'))
+          } else {
+            message.warning(t('tailoring.noContentToExport'))
+          }
+        }}
+        onSaveAsVersion={() => message.info(t('tailoring.saveAsVersion') + ' (feature em desenvolvimento)')}
+      />
+      <Drawer
+        title={t('tailoring.ats.title')}
+        open={drawerVisible}
+        onClose={() => setDrawerVisible(false)}
+        width={400}
+      >
+        <div className={styles.atsLeft}>
+          {panelData && (
+            <>
+              <ATSPanel
+                score={panelData.score ?? 0}
+                categories={panelData.categories ?? []}
+                keywords={panelData.keywords ?? []}
+              />
+              {panelData && (
+                <div className={styles.atsScoreBadge}>
+                  {t('tailoring.improvementBadge', { delta: scoreDelta })}
+                </div>
+              )}
+              <div className={styles.reanalyzeWrapper}>
+                <Button
+                  type="default"
+                  size="small"
+                  onClick={workspace.handleReanalyze}
+                  loading={workspace.atsLoading}
+                >
+                  {t('tailoring.reanalyze')}
+                </Button>
+              </div>
+            </>
+          )}
+        </div>
+      </Drawer>
+    </>
   )
 
   const coverTab = (

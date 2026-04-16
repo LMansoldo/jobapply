@@ -9,6 +9,7 @@ import { TailoringPreviewPanel } from '../../../design-system/tailoring/Tailorin
 import { TailoringEditorPanel, type TailoringEditorHandle } from '../../../design-system/tailoring/TailoringEditorPanel'
 import { KeywordsPanel } from '../../../design-system/tailoring/KeywordsPanel'
 import { Colors } from '../../../styles/theme/colors'
+import { Spacing } from '../../../styles/theme/spacing'
 import type { ATSWorkspaceProps } from './ATSWorkspace.types'
 import * as S from './ATSWorkspace.styles'
 
@@ -32,7 +33,6 @@ export function ATSWorkspace({
   onReplaceKeyword,
   onReanalyze,
   onDownloadPDF,
-  onDownloadDOCX,
   onExportMarkdown,
   onSaveAsVersion,
 }: ATSWorkspaceProps) {
@@ -100,7 +100,7 @@ export function ATSWorkspace({
   const keywordsPanel = editorKeywords && (editorKeywords.toAdd.length > 0 || editorKeywords.toRephrase.length > 0) && (
     <>
       {suggestionsCount > 0 && (
-        <div style={{ padding: '0 1.6rem 0.8rem', display: 'flex', justifyContent: 'center' }}>
+        <div className={S.suggestionsButtonWrapper}>
           <Button
             type="primary"
             size="small"
@@ -124,28 +124,6 @@ export function ATSWorkspace({
         <div className={S.atsLeft}>{atsLeftPanel}</div>
 
         <div className={S.atsCenter}>
-          {suggestionsCount > 0 && (
-            <>
-              {/* Desktop SuggestionBanner - hidden on medium/small screens */}
-              <div className={`${S.suggestionBannerPad} ${S.desktopOnly}`}>
-                <SuggestionBanner
-                  count={allSuggestions.length}
-                  current={currentSuggestion}
-                  onPrev={() => onSuggestionChange(Math.max(1, currentSuggestion - 1))}
-                  onNext={() => onSuggestionChange(Math.min(allSuggestions.length, currentSuggestion + 1))}
-                  onAcceptAll={() => {}}
-                />
-              </div>
-              {currentSuggestionText && (
-                <div className={`${S.suggestionCard} ${S.desktopOnly}`}>
-                  <span className={S.suggestionCardIcon}>✦</span>
-                  <span className={S.suggestionCardText}>{currentSuggestionText}</span>
-                </div>
-              )}
-            </>
-          )}
-
-          {keywordsPanel}
 
           {tailoring ? (
             <div className={S.tailoringSpinWrapper}><Spin size="large" /></div>
@@ -155,6 +133,11 @@ export function ATSWorkspace({
               value={tailoredContent}
               onChange={onTailoredContentChange}
               locale={(chosenLocale ?? 'pt-BR') as 'en' | 'pt-BR'}
+              editorKeywords={editorKeywords}
+              onInsertKeyword={handleInsertKeyword}
+              onReplaceKeyword={handleReplaceKeyword}
+              hasAnalysisNotification={atsLoading || !!panelData}
+              jobTitle={job?.title}
             />
           )}
         </div>
@@ -166,7 +149,6 @@ export function ATSWorkspace({
           projectedScore={projectedScore}
           scoreDelta={scoreDelta}
           onDownloadPDF={onDownloadPDF}
-          onDownloadDOCX={onDownloadDOCX}
           onExportMarkdown={onExportMarkdown}
           onSaveAsVersion={onSaveAsVersion}
         />
@@ -180,12 +162,12 @@ export function ATSWorkspace({
         styles={{
           body: {
             background: Colors.surfaceEditor,
-            padding: '1.6rem',
-            borderRadius: '8px',
+            padding: Spacing.lg,
+            borderRadius: '0.8rem',
           },
           content: {
             background: Colors.surfaceEditor,
-          }
+          },
         }}
       >
         <div className={S.modalContent}>
