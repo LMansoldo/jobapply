@@ -1,8 +1,8 @@
-import type { Job } from '../../../domain/jobs/types'
+import type { ATSCategory } from '../../ats/ATSPanel/ATSPanel.types'
 
-export interface TailoringPreviewPanelProps {
-  markdownContent?: string
-  job: Job | null
+export interface ExportPanelProps {
+  atsScore: number
+  atsCategories?: ATSCategory[]
   currentScore: number
   projectedScore: number
   scoreDelta: number

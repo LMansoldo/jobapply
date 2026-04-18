@@ -5,35 +5,6 @@ import { BorderRadius } from '../../../../styles/theme/radius'
 import type { CSSProperties } from 'react'
 
 export const styles: Record<string, CSSProperties> = {
-  bar: {
-    background: Colors.white,
-    borderBottom: `1px solid ${Colors.surfaceBorder}`,
-    padding: `${Spacing.xs} ${Spacing.lg}`,
-    display: 'flex',
-    alignItems: 'center',
-    gap: Spacing.md,
-    flexShrink: 0,
-  },
-  backBtn: {
-    background: 'none',
-    border: 'none',
-    color: Colors.primaryDark,
-    cursor: 'pointer',
-    fontSize: FontSize.sm,
-    fontFamily: FontFamily.body,
-    fontWeight: FontWeight.semibold,
-    display: 'flex',
-    alignItems: 'center',
-    gap: Spacing.xs,
-    padding: `${Spacing.xs} ${Spacing.sm}`,
-    borderRadius: BorderRadius.sm,
-    transition: 'background .15s',
-  },
-  sep: {
-    width: '1px',
-    height: '2rem',
-    background: Colors.surfaceBorder,
-  },
   jobInfo: {
     display: 'flex',
     alignItems: 'center',
@@ -70,11 +41,5 @@ export const styles: Record<string, CSSProperties> = {
     fontSize: FontSize.xs,
     fontWeight: FontWeight.bold,
     marginLeft: Spacing.xs,
-  },
-  actions: {
-    marginLeft: 'auto',
-    display: 'flex',
-    alignItems: 'center',
-    gap: Spacing.sm,
   },
 }

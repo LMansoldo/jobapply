@@ -1,6 +1,13 @@
+import type { KeywordPhrase, ATSTip, RemoveSuggestion } from '../../../domain/cv/types'
+export type { KeywordPhrase, ATSTip, RemoveSuggestion }
+
 export interface EditorKeywords {
   toAdd: string[]
   toRephrase: Array<{ from: string; to: string }>
+  keywordPhrases?: KeywordPhrase[]
+  semanticGaps?: string[]
+  tips?: ATSTip[]
+  removeSuggestions?: RemoveSuggestion[]
 }
 
 export interface TailoringEditorPanelProps {
@@ -14,6 +21,13 @@ export interface TailoringEditorPanelProps {
   hasAnalysisNotification?: boolean
   /** Job title for adding objective section */
   jobTitle?: string
+  /** Trigger a new ATS analysis run */
+  onReanalyze?: () => void
+  /** True while an ATS analysis is in progress — disables the reanalyze menu item */
+  reanalyzeLoading?: boolean
+  onDownloadPDF?: () => void | Promise<void>
+  onExportMarkdown?: () => void
+  onSaveAsVersion?: () => void
 }
 
 export interface TailoringEditorHandle {

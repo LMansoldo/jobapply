@@ -1,2 +1,2 @@
-export { TailoringPreviewPanel } from './TailoringPreviewPanel'
-export type { TailoringPreviewPanelProps } from './TailoringPreviewPanel.types'
+export { ExportPanel } from './ExportPanel'
+export type { ExportPanelProps } from './ExportPanel.types'

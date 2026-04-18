@@ -19,6 +19,7 @@ import { MonacoEditorPanel } from '../../../domain/cv/components/MonacoEditorPan
 import { EN_TEMPLATE, PT_BR_TEMPLATE } from '../../../domain/cv/constants'
 import { localeVersionToMarkdown, parseMarkdownToLocale } from '../../../domain/cv/helpers'
 import type { CV, CVCreatePayload } from '../../../domain/cv/types'
+import type { CVBaseFormValues } from '../../../domain/cv/components/CVBaseForm/CVBaseForm.types'
 import {
   createCV,
   deleteCV,
@@ -33,8 +34,8 @@ const { useBreakpoint } = Grid
 
 const PREVIEW_CSS = `
   .markdown-preview h1 { font-size: 2.2rem; font-weight: 700; margin: 0 0 0.8rem; border-bottom: 2px solid #7c3aed; padding-bottom: 0.6rem; }
-  .markdown-preview h2 { font-size: 1.5rem; font-weight: 600; margin: 1.8rem 0 0.6rem; color: #6b7280; }
-  .markdown-preview h3 { font-size: 1.3rem; font-weight: 600; margin: 1.0rem 0 0.4rem; }
+  .markdown-preview h2 { font-size: 1.5rem; font-weight: 700; margin: 1.8rem 0 0.6rem; color: #7c3aed; border-bottom: 2px solid #7c3aed; padding-bottom: 0.4rem; text-transform: uppercase; letter-spacing: 0.1rem; }
+  .markdown-preview h3 { font-size: 1.3rem; font-weight: 600; margin: 1.0rem 0 0.4rem; color: #374151; }
   .markdown-preview p { margin: 0.4rem 0; font-size: 1.3rem; line-height: 1.6; }
   .markdown-preview ul { margin: 0.4rem 0; padding-left: 2.0rem; }
   .markdown-preview li { font-size: 1.3rem; line-height: 1.6; margin: 0.2rem 0; }
@@ -57,7 +58,7 @@ export default function CVPage() {
   const [currentStep, setCurrentStep] = useState(0)
   const [editMode, setEditMode] = useState(false)
 
-  const [baseForm] = Form.useForm<CVCreatePayload>()
+  const [baseForm] = Form.useForm<CVBaseFormValues>()
 
   const [ptBrMarkdown, setPtBrMarkdown] = useState(PT_BR_TEMPLATE)
   const [ptBrErrors, setPtBrErrors] = useState<string[]>([])
@@ -71,17 +72,14 @@ export default function CVPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  useEffect(() => {
-    if (cv?._id) localStorage.setItem(`cv_md_ptbr_${cv._id}`, ptBrMarkdown)
-  }, [ptBrMarkdown, cv?._id])
-
-  useEffect(() => {
-    if (cv?._id) localStorage.setItem(`cv_md_en_${cv._id}`, enMarkdown)
-  }, [enMarkdown, cv?._id])
 
   function applyCV(data: CV) {
     setCv(data)
     setCvId(data._id)
+    // Backend stores languages as embedded objects {language, level}; extract names for the Select
+    const languageNames = (data.languages ?? []).map((l) =>
+      typeof l === 'string' ? l : (l as { language: string }).language
+    )
     baseForm.setFieldsValue({
       fullName: data.fullName,
       email: data.email,
@@ -90,6 +88,7 @@ export default function CVPage() {
       linkedin: data.linkedin,
       github: data.github,
       portfolio: data.portfolio,
+      languages: languageNames,
     })
 
     const ptBrVersion = data.localeVersions?.find((v) => v.locale === 'pt-BR')
@@ -97,11 +96,11 @@ export default function CVPage() {
 
     setPtBrMarkdown(ptBrVersion
       ? localeVersionToMarkdown(ptBrVersion, data.languages)
-      : (localStorage.getItem(`cv_md_ptbr_${data._id}`) ?? PT_BR_TEMPLATE))
+      : PT_BR_TEMPLATE)
 
     setEnMarkdown(enVersion
       ? localeVersionToMarkdown(enVersion, data.languages)
-      : (localStorage.getItem(`cv_md_en_${data._id}`) ?? EN_TEMPLATE))
+      : EN_TEMPLATE)
 
     setEditMode(false)
     setCurrentStep(0)
@@ -112,7 +111,12 @@ export default function CVPage() {
       const values = await baseForm.validateFields()
       setSaving(true)
       try {
-        const updated = cv ? await updateCV(cv._id, values) : await createCV(values)
+        // Transform language name strings to embedded objects that the backend expects
+        const payload: CVCreatePayload = {
+          ...values,
+          languages: (values.languages ?? []).map((l) => ({ language: l, level: '' })),
+        }
+        const updated = cv ? await updateCV(cv._id, payload) : await createCV(payload)
         applyCV(updated)
         setCurrentStep(1)
         setEditMode(true)
@@ -135,9 +139,7 @@ export default function CVPage() {
     if (!cv) { message.error(t('cv.saveFirst')); setCurrentStep(0); return }
     setSaving(true)
     try {
-      const saves: Promise<unknown>[] = [updateCVLocale(cv._id, 'pt-BR', result.data!)]
-      if (result.languages?.length) saves.push(updateCV(cv._id, { fullName: cv.fullName, email: cv.email, languages: result.languages }))
-      await Promise.all(saves)
+      await updateCVLocale(cv._id, 'pt-BR', result.data!)
       message.success(t('cv.savePtBrSuccess'))
       setCurrentStep(2)
     } catch (err: unknown) {
@@ -156,9 +158,7 @@ export default function CVPage() {
     if (!cv) return
     setSaving(true)
     try {
-      const saves: Promise<unknown>[] = [updateCVLocale(cv._id, 'en', result.data!)]
-      if (result.languages?.length) saves.push(updateCV(cv._id, { fullName: cv.fullName, email: cv.email, languages: result.languages }))
-      await Promise.all(saves)
+      await updateCVLocale(cv._id, 'en', result.data!)
       message.success(t('cv.saveEnSuccess'))
       setEditMode(false)
     } catch (err: unknown) {

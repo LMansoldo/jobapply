@@ -9,6 +9,7 @@ import type {
   CVLocaleVersion,
   CVLocalePayload,
   ATSReport,
+  InterviewPrep,
 } from '../../domain/cv/types'
 
 // In-memory CV store for mock mode (null = not created yet)
@@ -133,7 +134,7 @@ export async function publishCV(id: string, payload?: PublishCVPayload): Promise
         skills: payload?.skills ?? [],
         experience: payload?.experience ?? [],
         education: payload?.education ?? [],
-        languages: mockCV.languages,
+        languages: mockCV.languages.map((l) => l.language),
         published_at: new Date().toISOString(),
       },
     }
@@ -182,9 +183,14 @@ export async function analyzeCV(
       ],
       optimalTemplate: {
         keywordsToAdd: ['Docker', 'AWS', 'CI/CD'],
+        keywordPhrases: [],
         keywordsToRephrase: [{ from: 'desenvolvedor', to: 'engenheiro de software' }],
         formatFixes: ['Use bullet points instead of paragraphs in experience section'],
       },
+      semanticGaps: [
+        'Familiaridade prática com Material UI (MUI): O CV indica que o candidato substituiu o Material-UI em um projeto, o que mostra conhecimento sobre a ferramenta, mas não experiência em seu uso.',
+        'Contexto da indústria laboratorial: A JD busca experiência em uma aplicação laboratorial global, enquanto o histórico do candidato é predominantemente em finanças e e-commerce.',
+      ],
     }
     return { report, locale }
   }
@@ -240,6 +246,43 @@ export async function generateVideoScript(
   if (jobId) body.jobId = jobId
   const { data } = await api.post<GenerateVideoScriptResponse>(
     `/cv/${cvId}/video-script`,
+    body,
+  )
+  return data
+}
+
+export interface GenerateInterviewPrepResponse {
+  interviewPrep: InterviewPrep
+  locale: 'en' | 'pt-BR'
+}
+
+export async function generateInterviewPrep(
+  cvId: string,
+  jobId: string | undefined,
+  locale: 'en' | 'pt-BR',
+  jobDescription?: string,
+): Promise<GenerateInterviewPrepResponse> {
+  if (USE_MOCK) {
+    await delay(2000)
+    return {
+      interviewPrep: {
+        stories: [
+          {
+            jdRequirement: 'Liderança técnica de equipes ágeis',
+            story: 'Na minha última posição, assumi a liderança técnica de um squad de 5 engenheiros durante um momento crítico de reordenação organizacional. A missão era entregar um novo módulo de pagamentos em 10 semanas sem atrasar o roadmap existente. Implementei cerimônias ágeis adaptadas ao contexto remoto e criei um board compartilhado para visibilidade de bloqueios. Entregamos no prazo com zero incidentes P1 nos primeiros 30 dias e o NPS interno do time subiu de 62 para 78.',
+          },
+        ],
+        overallPositioning: 'Posicione-se como um engenheiro sênior com histórico comprovado de entrega em ambientes de alta pressão. Lidere com seus projetos de maior impacto e conecte-os diretamente aos desafios descritos na vaga.',
+      },
+      locale,
+    }
+  }
+
+  const body: Record<string, string> = { locale }
+  if (jobId) body.jobId = jobId
+  if (jobDescription) body.jobDescription = jobDescription
+  const { data } = await api.post<GenerateInterviewPrepResponse>(
+    `/cv/${cvId}/interview-prep`,
     body,
   )
   return data

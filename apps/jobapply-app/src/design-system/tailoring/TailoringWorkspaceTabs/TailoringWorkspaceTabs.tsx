@@ -1,7 +1,8 @@
 import { useTranslation } from 'react-i18next'
-import { BarChartOutlined, MailOutlined, VideoCameraOutlined } from '@ant-design/icons'
+import { BarChartOutlined, DownOutlined, MailOutlined, VideoCameraOutlined, CommentOutlined } from '@ant-design/icons'
+import { Dropdown } from '../../../components/Dropdown'
 import { Colors } from '../../../styles/theme/colors'
-import type { TailoringWorkspaceTabsProps } from './TailoringWorkspaceTabs.types'
+import type { WorkspaceTab, TailoringWorkspaceTabsProps } from './TailoringWorkspaceTabs.types'
 import * as S from './TailoringWorkspaceTabs.styles'
 
 export function TailoringWorkspaceTabs({
@@ -11,38 +12,82 @@ export function TailoringWorkspaceTabs({
 }: TailoringWorkspaceTabsProps) {
   const { t } = useTranslation()
 
+  const tabs = [
+    {
+      key: 'ats' as WorkspaceTab,
+      icon: <BarChartOutlined />,
+      label: t('tailoring.ats'),
+      badgeBg: Colors.primaryLight,
+      badgeColor: Colors.primaryDark,
+      badgeText: String(suggestionsCount),
+    },
+    {
+      key: 'cover' as WorkspaceTab,
+      icon: <MailOutlined />,
+      label: t('tailoring.coverLetter'),
+      badgeBg: Colors.successBg,
+      badgeColor: Colors.success,
+      badgeText: t('tailoring.badgeNew'),
+    },
+    {
+      key: 'video' as WorkspaceTab,
+      icon: <VideoCameraOutlined />,
+      label: t('tailoring.videoScript'),
+      badgeBg: Colors.orangeBg,
+      badgeColor: Colors.orange,
+      badgeText: t('tailoring.badgeBeta'),
+    },
+    {
+      key: 'interview' as WorkspaceTab,
+      icon: <CommentOutlined />,
+      label: t('tailoring.interviewTraining'),
+      badgeBg: Colors.blueBg,
+      badgeColor: Colors.blue,
+      badgeText: t('tailoring.badgeNew'),
+    },
+  ]
+
+  const activeTabDef = tabs.find((tab) => tab.key === activeTab)!
+
+  const dropdownMenu = {
+    items: tabs.map((tab) => ({
+      key: tab.key,
+      label: (
+        <div className={S.dropdownItemContent(tab.key === activeTab)}>
+          {tab.icon} {tab.label}
+          <span className={S.tabBadge(tab.badgeBg, tab.badgeColor)}>{tab.badgeText}</span>
+        </div>
+      ),
+    })),
+    onClick: ({ key }: { key: string }) => onTabChange(key as WorkspaceTab),
+  }
+
   return (
-    <div className={S.workspaceTabs}>
-      <button
-        type="button"
-        className={S.tabBtn(activeTab === 'ats')}
-        onClick={() => onTabChange('ats')}
-      >
-        <BarChartOutlined /> {t('tailoring.ats')}
-        <span className={S.tabBadge(Colors.primaryLight, Colors.primaryDark)}>
-          {suggestionsCount}
-        </span>
-      </button>
-      <button
-        type="button"
-        className={S.tabBtn(activeTab === 'cover')}
-        onClick={() => onTabChange('cover')}
-      >
-        <MailOutlined /> {t('tailoring.coverLetter')}
-        <span className={S.tabBadge(Colors.successBg, Colors.success)}>
-          {t('tailoring.badgeNew')}
-        </span>
-      </button>
-      <button
-        type="button"
-        className={S.tabBtn(activeTab === 'video')}
-        onClick={() => onTabChange('video')}
-      >
-        <VideoCameraOutlined /> {t('tailoring.videoScript')}
-        <span className={S.tabBadge(Colors.orangeBg, Colors.orange)}>
-          {t('tailoring.badgeBeta')}
-        </span>
-      </button>
-    </div>
+    <>
+      <div className={S.workspaceTabs}>
+        {tabs.map((tab) => (
+          <button
+            key={tab.key}
+            type="button"
+            className={S.tabBtn(activeTab === tab.key)}
+            onClick={() => onTabChange(tab.key)}
+          >
+            {tab.icon} {tab.label}
+            <span className={S.tabBadge(tab.badgeBg, tab.badgeColor)}>{tab.badgeText}</span>
+          </button>
+        ))}
+      </div>
+      <div className={S.mobileDropdownWrapper}>
+        <Dropdown menu={dropdownMenu} trigger={['click']}>
+          <button type="button" className={S.mobileDropdownTrigger}>
+            {activeTabDef.icon} {activeTabDef.label}
+            <span className={S.tabBadge(activeTabDef.badgeBg, activeTabDef.badgeColor)}>
+              {activeTabDef.badgeText}
+            </span>
+            <DownOutlined />
+          </button>
+        </Dropdown>
+      </div>
+    </>
   )
 }

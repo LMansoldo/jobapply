@@ -7,13 +7,15 @@
  */
 import { useState, useEffect, useCallback, useRef } from 'react'
 import type { Job } from '../../jobs/types'
-import type { ATSReport } from '../types'
+import type { ATSReport, InterviewPrep } from '../types'
 import { localeVersionToMarkdown } from '../helpers'
+import { prependObjectiveSection } from '../tailoringHelpers'
 import {
   getCV,
   analyzeCV,
   generateCoverLetter,
   generateVideoScript,
+  generateInterviewPrep,
 } from '../../../infrastructure/repositories/cvRepository'
 
 export interface TailoringWorkspaceState {
@@ -29,9 +31,12 @@ export interface TailoringWorkspaceState {
   videoContent: string
   setVideoContent: (value: string) => void
   videoLoading: boolean
+  interviewPrep: InterviewPrep | null
+  interviewPrepLoading: boolean
   handleReanalyze: () => Promise<void>
   handleGenerateCoverLetter: () => Promise<void>
   handleGenerateVideoScript: () => Promise<void>
+  handleGenerateInterviewPrep: () => Promise<void>
 }
 
 export interface WorkspaceSetupResult {
@@ -71,6 +76,8 @@ export function useTailoringWorkspace({
   const [coverLoading, setCoverLoading] = useState(false)
   const [videoContent, setVideoContent] = useState('')
   const [videoLoading, setVideoLoading] = useState(false)
+  const [interviewPrep, setInterviewPrep] = useState<InterviewPrep | null>(null)
+  const [interviewPrepLoading, setInterviewPrepLoading] = useState(false)
 
   // Prevents setup from running twice if job or cvId re-renders before resolution
   const setupInitiatedRef = useRef(false)
@@ -92,7 +99,10 @@ export function useTailoringWorkspace({
         const { locale, jobDescription } = await onNeedSetupRef.current(locales, initialDesc)
 
         const version = versions.find((v) => v.locale === locale)
-        if (version) setTailoredContent(localeVersionToMarkdown(version, cv.languages))
+        if (version) {
+          const raw = localeVersionToMarkdown(version, cv.languages)
+          setTailoredContent(prependObjectiveSection(raw, locale, job?.title ?? ''))
+        }
         setChosenLocale(locale)
         setEditedJobDescription(jobDescription)
       })
@@ -157,6 +167,25 @@ export function useTailoringWorkspace({
     }
   }, [job, cvId, detectedLocale])
 
+  const handleGenerateInterviewPrep = useCallback(async () => {
+    if (!cvId || (!job && !manualMode)) return
+    setInterviewPrepLoading(true)
+    try {
+      const result = await generateInterviewPrep(
+        cvId,
+        job?._id,
+        detectedLocale,
+        editedJobDescription ?? undefined,
+      )
+      setInterviewPrep(result.interviewPrep)
+    } catch {
+      onErrorRef.current('tailoring.interviewError')
+    } finally {
+      setInterviewPrepLoading(false)
+    }
+  }, [job, manualMode, cvId, detectedLocale, editedJobDescription])
+
+
   return {
     tailoredContent,
     setTailoredContent,
@@ -170,8 +199,11 @@ export function useTailoringWorkspace({
     videoContent,
     setVideoContent,
     videoLoading,
+    interviewPrep,
+    interviewPrepLoading,
     handleReanalyze,
     handleGenerateCoverLetter,
     handleGenerateVideoScript,
+    handleGenerateInterviewPrep,
   }
 }

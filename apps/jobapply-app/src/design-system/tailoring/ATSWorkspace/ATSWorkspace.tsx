@@ -1,15 +1,12 @@
 import { useTranslation } from 'react-i18next'
 import { useRef, useState, useEffect } from 'react'
 import { Spin } from '../../../components/Spin'
-import { Modal } from '../../../components/Modal'
 import { Button } from '../../../components/Button'
-import { ATSPanel } from '../../../design-system/ats/ATSPanel'
-import { SuggestionBanner } from '../../../design-system/tailoring/SuggestionBanner'
-import { TailoringPreviewPanel } from '../../../design-system/tailoring/TailoringPreviewPanel'
+import { ExportPanel } from '../../../design-system/tailoring/TailoringPreviewPanel'
 import { TailoringEditorPanel, type TailoringEditorHandle } from '../../../design-system/tailoring/TailoringEditorPanel'
 import { KeywordsPanel } from '../../../design-system/tailoring/KeywordsPanel'
-import { Colors } from '../../../styles/theme/colors'
-import { Spacing } from '../../../styles/theme/spacing'
+import { KeywordPhrasesPanel } from '../../../design-system/tailoring/KeywordPhrasesPanel'
+import { RemoveSuggestionsPanel } from '../../../design-system/tailoring/RemoveSuggestionsPanel'
 import type { ATSWorkspaceProps } from './ATSWorkspace.types'
 import * as S from './ATSWorkspace.styles'
 
@@ -35,6 +32,9 @@ export function ATSWorkspace({
   onDownloadPDF,
   onExportMarkdown,
   onSaveAsVersion,
+  keywordPhrases = [],
+  removeSuggestions = [],
+  onCopyPhrase,
 }: ATSWorkspaceProps) {
   const { t } = useTranslation()
   const editorRef = useRef<TailoringEditorHandle>(null)
@@ -49,33 +49,6 @@ export function ATSWorkspace({
       }
     }
   }, [suggestionsCount, tailoring])
-
-  const atsLeftPanel = atsLoading
-    ? <div className={S.tailoringSpinWrapper}><Spin size="large" /></div>
-    : (
-      <>
-        <ATSPanel
-          score={panelData?.score ?? 0}
-          categories={panelData?.categories ?? []}
-          keywords={panelData?.keywords ?? []}
-        />
-        {panelData && (
-          <div className={S.atsScoreBadge}>
-            {t('tailoring.improvementBadge', { delta: scoreDelta })}
-          </div>
-        )}
-        <div className={S.reanalyzeWrapper}>
-          <Button
-            type="default"
-            size="small"
-            onClick={onReanalyze}
-            loading={atsLoading}
-          >
-            {t('tailoring.reanalyze')}
-          </Button>
-        </div>
-      </>
-    )
 
   const currentSuggestionText = allSuggestions[currentSuggestion - 1] ?? ''
 
@@ -97,7 +70,11 @@ export function ATSWorkspace({
     }
   }
 
-  const keywordsPanel = editorKeywords && (editorKeywords.toAdd.length > 0 || editorKeywords.toRephrase.length > 0) && (
+  const hasKeywords = editorKeywords && (editorKeywords.toAdd.length > 0 || editorKeywords.toRephrase.length > 0)
+  const hasPhrases = keywordPhrases.length > 0
+  const hasRemove = removeSuggestions.length > 0
+
+  const keywordsPanel = (hasKeywords || hasPhrases || hasRemove) && (
     <>
       {suggestionsCount > 0 && (
         <div className={S.suggestionsButtonWrapper}>
@@ -110,19 +87,28 @@ export function ATSWorkspace({
           </Button>
         </div>
       )}
-      <KeywordsPanel
-        editorKeywords={editorKeywords}
-        onInsertKeyword={handleInsertKeyword}
-        onReplaceKeyword={handleReplaceKeyword}
-      />
+      {hasKeywords && (
+        <KeywordsPanel
+          editorKeywords={editorKeywords!}
+          onInsertKeyword={handleInsertKeyword}
+          onReplaceKeyword={handleReplaceKeyword}
+        />
+      )}
+      {hasPhrases && (
+        <KeywordPhrasesPanel
+          phrases={keywordPhrases}
+          onCopyPhrase={onCopyPhrase ?? (() => {})}
+        />
+      )}
+      {hasRemove && (
+        <RemoveSuggestionsPanel suggestions={removeSuggestions} />
+      )}
     </>
   )
 
   return (
     <>
       <div className={S.atsGrid}>
-        <div className={S.atsLeft}>{atsLeftPanel}</div>
-
         <div className={S.atsCenter}>
 
           {tailoring ? (
@@ -136,15 +122,20 @@ export function ATSWorkspace({
               editorKeywords={editorKeywords}
               onInsertKeyword={handleInsertKeyword}
               onReplaceKeyword={handleReplaceKeyword}
-              hasAnalysisNotification={atsLoading || !!panelData}
+              hasAnalysisNotification={!!panelData}
               jobTitle={job?.title}
+              onReanalyze={onReanalyze}
+              reanalyzeLoading={atsLoading}
+              onDownloadPDF={onDownloadPDF}
+              onExportMarkdown={onExportMarkdown}
+              onSaveAsVersion={onSaveAsVersion}
             />
           )}
         </div>
 
-        <TailoringPreviewPanel
-          markdownContent={tailoredContent}
-          job={job}
+        <ExportPanel
+          atsScore={panelData?.score ?? 0}
+          atsCategories={panelData?.categories ?? []}
           currentScore={currentScore}
           projectedScore={projectedScore}
           scoreDelta={scoreDelta}
@@ -153,39 +144,6 @@ export function ATSWorkspace({
           onSaveAsVersion={onSaveAsVersion}
         />
       </div>
-
-      {/* Suggestions Modal for medium/small screens */}
-      <Modal
-        open={showSuggestionsModal}
-        onCancel={() => setShowSuggestionsModal(false)}
-        footer={null}
-        styles={{
-          body: {
-            background: Colors.surfaceEditor,
-            padding: Spacing.lg,
-            borderRadius: '0.8rem',
-          },
-          content: {
-            background: Colors.surfaceEditor,
-          },
-        }}
-      >
-        <div className={S.modalContent}>
-          <SuggestionBanner
-            count={allSuggestions.length}
-            current={currentSuggestion}
-            onPrev={() => onSuggestionChange(Math.max(1, currentSuggestion - 1))}
-            onNext={() => onSuggestionChange(Math.min(allSuggestions.length, currentSuggestion + 1))}
-            onAcceptAll={() => {}}
-          />
-          {currentSuggestionText && (
-            <div className={S.suggestionCardModal}>
-              <span className={S.suggestionCardIcon}>✦</span>
-              <span className={S.suggestionCardText}>{currentSuggestionText}</span>
-            </div>
-          )}
-        </div>
-      </Modal>
     </>
   )
 }

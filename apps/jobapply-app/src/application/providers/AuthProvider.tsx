@@ -4,9 +4,11 @@ import type { User } from '../../domain/auth/types'
 interface AuthContextValue {
   user: User | null
   token: string | null
+  /** Derived from user.cv — always in sync with the API response, never a separate key. */
   cvId: string | null
   login: (token: string, user: User) => void
   logout: () => void
+  /** Update the CV reference on the in-memory (and persisted) user object. */
   setCvId: (id: string | null) => void
 }
 
@@ -21,56 +23,46 @@ function loadFromStorage<T>(key: string): T | null {
   }
 }
 
+function extractCvId(user: User | null): string | null {
+  if (!user?.cv) return null
+  if (typeof user.cv === 'string') return user.cv
+  const obj = user.cv as { _id?: string; $oid?: string }
+  return obj.$oid ?? obj._id ?? null
+}
+
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(() => loadFromStorage<User>('user'))
   const [token, setToken] = useState<string | null>(() => localStorage.getItem('token'))
-  const [cvId, setCvIdState] = useState<string | null>(() => {
-    const stored = localStorage.getItem('cvId')
-    if (stored) return stored
-    // Fallback: derive from user object already in localStorage (existing sessions)
-    try {
-      const raw = localStorage.getItem('user')
-      if (raw) {
-        const u = JSON.parse(raw) as { cv?: string | { _id?: string; $oid?: string } | null }
-        if (typeof u.cv === 'string') return u.cv
-        if (u.cv && typeof u.cv === 'object') return u.cv.$oid ?? u.cv._id ?? null
-      }
-    } catch {}
-    return null
-  })
+
+  // cvId is always derived from user.cv — no separate localStorage key.
+  const cvId = extractCvId(user)
 
   const login = useCallback((newToken: string, newUser: User) => {
     localStorage.setItem('token', newToken)
     localStorage.setItem('user', JSON.stringify(newUser))
     setToken(newToken)
     setUser(newUser)
-    const cvId = typeof newUser.cv === 'string'
-      ? newUser.cv
-      : (newUser.cv as { _id?: string; $oid?: string } | null)?.$oid
-        ?? (newUser.cv as { _id?: string; $oid?: string } | null)?._id
-        ?? null
-    if (cvId) {
-      localStorage.setItem('cvId', cvId)
-      setCvIdState(cvId)
-    }
   }, [])
 
   const logout = useCallback(() => {
     localStorage.removeItem('token')
     localStorage.removeItem('user')
-    localStorage.removeItem('cvId')
     setToken(null)
     setUser(null)
-    setCvIdState(null)
   }, [])
 
+  /**
+   * Called by CVPage when a CV is created for the first time or fetched.
+   * Updates user.cv in state and in the persisted user object so the derived
+   * cvId stays consistent without a separate localStorage key.
+   */
   const setCvId = useCallback((id: string | null) => {
-    if (id) {
-      localStorage.setItem('cvId', id)
-    } else {
-      localStorage.removeItem('cvId')
-    }
-    setCvIdState(id)
+    setUser((prev) => {
+      if (!prev) return prev
+      const updated: User = { ...prev, cv: id ?? undefined }
+      localStorage.setItem('user', JSON.stringify(updated))
+      return updated
+    })
   }, [])
 
   return (

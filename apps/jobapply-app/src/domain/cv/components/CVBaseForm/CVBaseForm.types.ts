@@ -5,10 +5,13 @@
 import type { FormInstance } from 'antd'
 import type { CVCreatePayload } from '../../types'
 
+/** Form values type: same as CVCreatePayload but with languages as string[] (Select returns names, not objects) */
+export type CVBaseFormValues = Omit<CVCreatePayload, 'languages'> & { languages?: string[] }
+
 /** Props for the CVBaseForm component */
 export interface CVBaseFormProps {
   /** The form instance to use */
-  form: FormInstance<CVCreatePayload>
+  form: FormInstance<CVBaseFormValues>
   /** Whether the viewport is in mobile mode */
   isMobile: boolean
   /** Whether a CV already exists (enables the back button) */

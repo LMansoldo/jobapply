@@ -8,13 +8,31 @@ import { mediaQueries } from '../../../styles/theme/breakpoints'
 export const pageRoot = css({
   display: 'flex',
   flexDirection: 'column',
-  height: 'calc(100vh - 5.6rem)',
+  // 6.4rem = height of AppHeader (Ant Design Layout.Header default = 64px)
+  height: 'calc(100vh - 6.4rem)',
   overflow: 'hidden',
 
   [mediaQueries.tabletDown]: {
     height: 'auto',
     minHeight: 'calc(100vh - 11.2rem)',
     overflow: 'visible',
+  },
+})
+
+export const workspaceContainer = css({
+  maxWidth: '128rem',
+  margin: '0 auto',
+  width: '100%',
+  flex: 1,
+  minHeight: 0,
+  overflow: 'hidden',
+  display: 'flex',
+  flexDirection: 'column',
+
+  [mediaQueries.tabletDown]: {
+    overflow: 'visible',
+    flex: 'none',
+    height: 'auto',
   },
 })
 

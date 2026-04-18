@@ -2,7 +2,7 @@
  * @file tailoringHelpers.ts
  * @description Pure functions for mapping ATSReport → ATSPanel display props and editor data.
  */
-import type { ATSReport, RephraseEntry } from './types'
+import type { ATSReport, ATSTip, RephraseEntry, KeywordPhrase, RemoveSuggestion } from './types'
 import type { ATSCategory, ATSKeyword } from '../../design-system/ats/ATSPanel/ATSPanel.types'
 
 export interface ATSPanelData {
@@ -17,6 +17,10 @@ export interface ATSPanelData {
 export interface EditorKeywords {
   toAdd: string[]
   toRephrase: RephraseEntry[]
+  keywordPhrases: KeywordPhrase[]
+  semanticGaps: string[]
+  tips: ATSTip[]
+  removeSuggestions: RemoveSuggestion[]
 }
 
 const SCORE_GAIN_PER_SUGGESTION = 1.5
@@ -55,7 +59,8 @@ function countSuggestions(report: ATSReport): number {
   const fixes = report.optimalTemplate?.formatFixes ?? []
   const tips = report.tips ?? []
   const rephrase = report.optimalTemplate?.keywordsToRephrase ?? []
-  return fixes.length + tips.length + rephrase.length
+  const remove = report.removeSuggestions ?? []
+  return fixes.length + tips.length + rephrase.length + remove.length
 }
 
 function computeProjectedScore(universalScore: number, suggestionsCount: number): number {
@@ -75,6 +80,10 @@ export function buildEditorKeywords(report: ATSReport): EditorKeywords {
   return {
     toAdd: report.optimalTemplate?.keywordsToAdd ?? [],
     toRephrase: report.optimalTemplate?.keywordsToRephrase ?? [],
+    keywordPhrases: report.optimalTemplate?.keywordPhrases ?? [],
+    semanticGaps: report.semanticGaps ?? [],
+    tips: report.tips ?? [],
+    removeSuggestions: report.removeSuggestions ?? [],
   }
 }
 
@@ -95,4 +104,30 @@ export function mapATSReportToPanel(report: ATSReport, jobTags: string[]): ATSPa
     projectedScore,
     scoreDelta,
   }
+}
+
+/**
+ * Prepend an Objective/Objetivo section to a markdown CV string if one doesn't exist.
+ * Inserts it immediately before ## Resumo / ## Summary, or at the very top if neither exists.
+ */
+export function prependObjectiveSection(
+  markdown: string,
+  locale: 'en' | 'pt-BR',
+  jobTitle: string,
+): string {
+  const objectiveRe = /^#{1,2}\s+(Objetivo|Objective)\s*$/im
+  if (objectiveRe.test(markdown)) return markdown
+
+  const heading = locale === 'pt-BR' ? '## Objetivo' : '## Objective'
+  const content = jobTitle || (locale === 'pt-BR' ? 'Posição desejada' : 'Desired position')
+
+  const summaryRe = /^#{1,2}\s+(Resumo|Summary)\s*$/im
+  const summaryMatch = summaryRe.exec(markdown)
+
+  if (summaryMatch) {
+    const insertAt = summaryMatch.index
+    return `${markdown.slice(0, insertAt)}${heading}\n\n${content}\n\n${markdown.slice(insertAt)}`
+  }
+
+  return `${heading}\n\n${content}\n\n${markdown}`
 }

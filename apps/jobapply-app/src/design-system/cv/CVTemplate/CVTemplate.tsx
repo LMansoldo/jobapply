@@ -68,20 +68,34 @@ export function CVTemplate({ cv, locale }: CVTemplateProps) {
         </div>
       </div>
 
+      {/* Objective — full-width between header and grid */}
+      {locale.summary && (
+        <div style={{
+          padding: `${Spacing.lg} ${Spacing.xxl}`,
+          borderBottom: `1px solid ${Colors.surfaceBorder}`,
+          background: `rgba(124,58,237,0.03)`,
+          borderLeft: `4px solid ${Colors.primary}`,
+        }}>
+          <div style={{
+            fontSize: FontSize.xxs,
+            fontWeight: FontWeight.bold,
+            color: Colors.primaryDark,
+            textTransform: 'uppercase' as const,
+            letterSpacing: '1.2px',
+            marginBottom: Spacing.sm,
+          }}>
+            {locale.locale === 'pt-BR' ? 'Objetivo' : 'Objective'}
+          </div>
+          <p style={{ fontSize: FontSize.sm, lineHeight: 1.7, color: Colors.textMain, margin: 0 }}>
+            {locale.summary}
+          </p>
+        </div>
+      )}
+
       {/* 2-column body */}
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 38%', gap: 0 }}>
         {/* LEFT column */}
         <div style={{ padding: `${Spacing.lg} ${Spacing.xl}`, borderRight: `1px solid ${Colors.surfaceBorder}` }}>
-          {/* Summary */}
-          {locale.summary && (
-            <>
-              <SectionHeading>Summary</SectionHeading>
-              <p style={{ fontSize: FontSize.sm, lineHeight: 1.7, color: Colors.textMain, margin: 0 }}>
-                {locale.summary}
-              </p>
-            </>
-          )}
-
           {/* Experience */}
           {jobExperience.length > 0 && (
             <>

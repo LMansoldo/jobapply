@@ -22,14 +22,14 @@ export function ScoreRing({ value, size = 120, label, sublabel }: ScoreRingProps
             cx={size / 2}
             cy={size / 2}
             r={radius}
-            strokeWidth={8}
+            strokeWidth={6}
             style={styles.track}
           />
           <circle
             cx={size / 2}
             cy={size / 2}
             r={radius}
-            strokeWidth={8}
+            strokeWidth={6}
             fill="none"
             stroke={`url(#${gradientId})`}
             strokeLinecap="round"
@@ -40,7 +40,7 @@ export function ScoreRing({ value, size = 120, label, sublabel }: ScoreRingProps
           />
         </svg>
         <div style={styles.textGroup}>
-          <span style={{ ...styles.value, fontSize: size > 100 ? '2.4rem' : '1.8rem' }}>
+          <span style={{ ...styles.value, fontSize: size > 100 ? '2.4rem' : '1.0rem' }}>
             {clamped}
           </span>
           {sublabel && <span style={styles.sublabel}>{sublabel}</span>}

@@ -1,9 +1,11 @@
 import type { Job } from '../../../domain/jobs/types'
 import type { ATSPanelData } from '../../../domain/cv/tailoringHelpers'
+import type { KeywordPhrase, RemoveSuggestion } from '../../../domain/cv/types'
 
 export interface EditorKeywords {
   toAdd: string[]
   toRephrase: Array<{ from: string; to: string }>
+  keywordPhrases?: KeywordPhrase[]
 }
 
 export interface ATSWorkspaceProps {
@@ -49,4 +51,10 @@ export interface ATSWorkspaceProps {
   onExportMarkdown: () => void
   /** Callback to save as version */
   onSaveAsVersion: () => void
+  /** Keyword phrases suggestions (10 ready-to-use bullets) */
+  keywordPhrases?: KeywordPhrase[]
+  /** Suggestions for CV items to remove */
+  removeSuggestions?: RemoveSuggestion[]
+  /** Callback when user copies a keyword phrase */
+  onCopyPhrase?: (phrase: string) => void
 }

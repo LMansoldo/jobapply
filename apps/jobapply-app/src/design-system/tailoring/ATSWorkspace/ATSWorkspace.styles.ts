@@ -6,94 +6,21 @@ import { BorderRadius } from '../../../styles/theme/radius'
 
 export const atsGrid = css({
   display: 'grid',
-  gridTemplateColumns: '25vw 1fr 25vw',
-  gridTemplateRows: 'auto',
+  gridTemplateColumns: '1fr 25vw',
+  // '1fr' gives the single row a definite height equal to the grid's height,
+  // so that height:100% on child cells (Editor, ExportPanel) works correctly.
+  gridTemplateRows: '1fr',
   flex: 1,
   minHeight: 0,
   overflow: 'hidden',
 
-  // Responsivo: quebra para 2 linhas
   '@media (max-width: 768px)': {
-    display: 'grid',
-    gridTemplateColumns: '30vw 1fr', // duas colunas iguais na primeira linha
-    gridTemplateRows: '100vh',   // duas linhas automáticas                    // espaçamento entre células
-    overflow: 'scroll',
-    minHeight: 'auto',
-
-    // Primeiro elemento: coluna 1 da linha 1
-    '> :first-child': {
-      gridColumn: '1 / 2',
-      gridRow: '1',
-    },
-
-    // Segundo elemento: coluna 2 da linha 1
-    '> :nth-child(2)': {
-      gridColumn: '2 / 3',
-      gridRow: '1',
-    },
-
-    // Terceiro elemento: ocupa as duas colunas da linha 2
-    '> :nth-child(3)': {
-      gridColumn: '1 / 3',
-      gridRow: '2',
-    },
-  },
-
-  '@media (max-width: 475px)': {
     display: 'flex',
     flexDirection: 'column',
     overflow: 'visible',
     minHeight: 'auto',
     height: 'auto',
-    gap: '0',
-
-    '> :first-child': {
-      order: 3,
-      height: '40vh',
-      overflow: 'auto',
-      flexShrink: 0,
-    },
-
-    '> :nth-child(2)': {
-      order: 1,
-      height: 'auto',
-      minHeight: '50vh',
-      maxHeight: '70vh',
-      overflow: 'visible',
-      flexShrink: 0,
-    },
-
-    '> :nth-child(3)': {
-      order: 2,
-      height: '50vh',
-      overflow: 'auto',
-      flexShrink: 0,
-    },
   },
-})
-
-export const atsLeft = css({
-  background: Colors.white,
-  borderRight: `1px solid ${Colors.surfaceBorder}`,
-  overflowY: 'auto',
-  padding: Spacing.lg,
-})
-
-export const atsScoreBadge = css({
-  background: Colors.successBg,
-  color: Colors.success,
-  borderRadius: BorderRadius.base,
-  padding: `${Spacing.sm} ${Spacing.md}`,
-  textAlign: 'center',
-  fontSize: FontSize.sm,
-  fontWeight: FontWeight.semibold,
-  marginTop: Spacing.md,
-})
-
-export const reanalyzeWrapper = css({
-  display: 'flex',
-  justifyContent: 'center',
-  marginTop: Spacing.md,
 })
 
 export const atsCenter = css({
@@ -103,7 +30,9 @@ export const atsCenter = css({
   overflow: 'hidden',
   minHeight: 0,
 
-  '@media (max-width: 475px)': {
+  // On narrow tablets (476-768px) the grid becomes flex-column, so the editor
+  // should scroll naturally rather than being clipped.
+  '@media (max-width: 768px)': {
     overflow: 'visible',
     minHeight: 'auto',
     height: 'auto',

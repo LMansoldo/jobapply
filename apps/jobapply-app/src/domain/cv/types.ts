@@ -47,10 +47,33 @@ export interface ATSPlatformScore {
 export interface ATSTip {
   tip: string
   priority: string
+  applicableTo?: string[]
+}
+
+export interface KeywordPhrase {
+  keyword: string
+  phrase: string
+}
+
+export interface RemoveSuggestion {
+  section: string
+  item: string
+  reason: string
+}
+
+export interface InterviewStory {
+  jdRequirement: string
+  story: string
+}
+
+export interface InterviewPrep {
+  stories: InterviewStory[]
+  overallPositioning: string
 }
 
 export interface ATSOptimalTemplate {
   keywordsToAdd: string[]
+  keywordPhrases: KeywordPhrase[]
   keywordsToRephrase: RephraseEntry[]
   formatFixes: string[]
 }
@@ -60,6 +83,8 @@ export interface ATSReport {
   platforms: ATSPlatformScore[]
   tips: ATSTip[]
   optimalTemplate: ATSOptimalTemplate
+  removeSuggestions?: RemoveSuggestion[]
+  semanticGaps?: string[]
 }
 
 // ─── New locale version structure ─────────────────────────────────────────────
@@ -127,7 +152,7 @@ export interface CV {
   github?: string
   website?: string
   portfolio?: string
-  languages: string[]
+  languages: Language[]
   tailoredVersions: TailoredVersion[]
   localeVersions: CVLocaleVersion[]
   updatedAt: string
@@ -143,7 +168,7 @@ export interface CVCreatePayload {
   github?: string
   website?: string
   portfolio?: string
-  languages?: string[]
+  languages?: Language[]
 }
 
 // ─── Published CV ──────────────────────────────────────────────────────────────

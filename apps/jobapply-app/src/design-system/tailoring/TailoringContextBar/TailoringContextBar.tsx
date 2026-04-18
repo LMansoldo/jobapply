@@ -1,5 +1,8 @@
+import { ArrowLeftOutlined } from '@ant-design/icons'
 import { useTranslation } from 'react-i18next'
 import { JobContextBar } from '../../../domain/jobs/components/JobContextBar'
+import { ManualModeInfo } from './ManualModeInfo'
+import { ATSScoreBadge } from './ATSScoreBadge'
 import type { TailoringContextBarProps } from './TailoringContextBar.types'
 import * as S from './TailoringContextBar.styles'
 
@@ -9,6 +12,7 @@ export function TailoringContextBar({
   isAnalysisRunning,
   onBack,
   lang = 'pt-BR',
+  currentScore = 0,
 }: TailoringContextBarProps) {
   const { t } = useTranslation()
 
@@ -22,20 +26,18 @@ export function TailoringContextBar({
 
   return (
     <div className={S.contextBar}>
-      {job ? (
-        <JobContextBar job={job} lang={lang} onBack={onBack} />
-      ) : (
-        <div className={S.manualModeInfo}>
-          <span className={S.manualModeTitle}>{t('tailoring.manualModeTitle')}</span>
-          {manualDescription && (
-            <span className={S.manualModeDesc}>
-              {manualDescription.length > 80
-                ? `${manualDescription.slice(0, 80)}…`
-                : manualDescription}
-            </span>
-          )}
-        </div>
-      )}
+      <button type="button" className={S.backBtn} onClick={onBack}>
+        <ArrowLeftOutlined />
+        {t('common.back')}
+      </button>
+      <div className={S.jobRow}>
+        {job ? (
+          <JobContextBar job={job} lang={lang} />
+        ) : (
+          <ManualModeInfo manualDescription={manualDescription} />
+        )}
+        {currentScore > 0 && <ATSScoreBadge score={currentScore} />}
+      </div>
       <div className={S.analysisStatus}>
         <span className={dotClass} />
         <span className={labelClass}>{statusLabel}</span>

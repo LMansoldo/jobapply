@@ -111,7 +111,7 @@ export const MOCK_CV: CV = {
   title: 'Senior Frontend Engineer',
   github: 'github.com/lucasg',
   website: 'lucasmansoldo.dev',
-  languages: ['Português', 'Inglês', 'Espanhol'],
+  languages: [{ language: 'Português', level: 'Nativo' }, { language: 'Inglês', level: 'Avançado' }, { language: 'Espanhol', level: 'Intermediário' }],
   tailoredVersions: [],
   localeVersions: [
     {

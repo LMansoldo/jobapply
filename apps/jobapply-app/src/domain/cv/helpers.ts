@@ -10,6 +10,7 @@
  *   ## Certifications  — bullet list: Name — Org — Date
  *   ## Languages       — bullet list: Language: Level
  */
+import { Colors } from '../../styles/theme/colors'
 import type { CV, CVLocalePayload, CVLocaleVersion } from './types'
 
 // ─── Parse Result ────────────────────────────────────────────────────────────
@@ -234,7 +235,7 @@ export function parseMarkdownToLocale(md: string, locale: 'en' | 'pt-BR'): Parse
 
 // ─── Serializer (API data → markdown) ────────────────────────────────────────
 
-export function localeVersionToMarkdown(v: CVLocaleVersion, _languages?: string[]): string {
+export function localeVersionToMarkdown(v: CVLocaleVersion, _languages?: Array<{ language: string; level: string } | string>): string {
   const pt = v.locale === 'pt-BR'
   const lines: string[] = []
 
@@ -437,7 +438,7 @@ export function exportPDF(cv: CV): void {
     * { box-sizing: border-box; }
     body { font-family: 'Segoe UI', Arial, sans-serif; font-size: 11pt; color: #1a1a1a; max-width: 170mm; margin: 0 auto; line-height: 1.55; }
     h1 { font-size: 22pt; margin: 0 0 4px; }
-    h2 { font-size: 12pt; font-weight: 700; border-bottom: 1.5px solid #1677ff; padding-bottom: 3px; margin: 18px 0 8px; color: #111; text-transform: uppercase; letter-spacing: .5px; }
+    h2 { font-size: 12pt; font-weight: 700; border-bottom: 1.5px solid #7c3aed; padding-bottom: 3px; margin: 18px 0 8px; color: #111; text-transform: uppercase; letter-spacing: .5px; }
     h3 { font-size: 11pt; font-weight: 600; margin: 10px 0 2px; }
     p { margin: 3px 0; }
     ul { margin: 4px 0; padding-left: 18px; }
@@ -510,54 +511,46 @@ export async function downloadMarkdownAsPdf(
     // Convert markdown to pdfMake content with CV contact info
     const content = convertMarkdownToPdfMake(markdownContent, cv, jobTitle)
 
-    // PDF document definition with Arial/Helvetica 12pt
     const docDefinition: any = {
       pageSize: 'A4' as const,
-      pageMargins: [25, 20, 25, 20] as [number, number, number, number], // left, top, right, bottom in mm
+      pageMargins: [36, 28, 36, 28] as [number, number, number, number],
       defaultStyle: {
-        fontSize: 12,
-        lineHeight: 1.5,
+        fontSize: 10,
+        lineHeight: 1.25,
+        color: '#1a1a1a',
       },
       styles: {
         header: {
-          fontSize: 24,
-          fontWeight: 600,
-          marginBottom: 10,
+          fontSize: 22,
+          bold: true,
+          margin: [0, 0, 0, 3],
         },
         subheader: {
-          fontSize: 14,
-          fontWeight: 600,
-          marginBottom: 5,
-          color: '#333',
+          fontSize: 12,
+          bold: true,
+          color: '#222',
+          margin: [0, 4, 0, 1],
         },
         sectionTitle: {
-          fontSize: 16,
-          fontWeight: 600,
-          marginTop: 15,
-          marginBottom: 8,
-          borderBottom: [1, 'solid', '#1677ff'],
+          fontSize: 14,
+          bold: true,
+          color: Colors.primaryDeeper,
+          margin: [0, 6, 0, 1],
         },
         jobTitle: {
-          fontSize: 14,
-          fontWeight: 600,
-          marginBottom: 15,
+          fontSize: 11,
           color: '#555',
+          margin: [0, 0, 0, 4],
         },
         normal: {
-          fontSize: 12,
-          marginBottom: 6,
-        },
-        bold: {
-          fontWeight: 600,
-        },
-        italic: {
-          italics: true,
+          fontSize: 10,
+          margin: [0, 0, 0, 0],
         },
         list: {
-          marginBottom: 6,
+          margin: [0, 0, 0, 2],
         },
         listItem: {
-          marginBottom: 4,
+          fontSize: 10,
         },
       },
       content: content,
@@ -578,6 +571,35 @@ export async function downloadMarkdownAsPdf(
   }
 }
 
+// SVG paths for contact icons (Material Design, 24×24 viewBox)
+const ICON_LOCATION = 'M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z'
+const ICON_EMAIL    = 'M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z'
+const ICON_PHONE    = 'M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z'
+const ICON_LINKEDIN = 'M19 3a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h14m-.5 15.5v-5.3a3.26 3.26 0 0 0-3.26-3.26c-.85 0-1.84.52-2.32 1.3v-1.11h-2.79v8.37h2.79v-4.93c0-.77.62-1.4 1.39-1.4a1.4 1.4 0 0 1 1.4 1.4v4.93h2.79M6.88 8.56a1.68 1.68 0 0 0 1.68-1.68c0-.93-.75-1.69-1.68-1.69a1.69 1.69 0 0 0-1.69 1.69c0 .93.76 1.68 1.69 1.68m1.39 9.94v-8.37H5.5v8.37h2.77z'
+const ICON_GITHUB   = 'M12 2A10 10 0 0 0 2 12c0 4.42 2.87 8.17 6.84 9.5.5.08.66-.23.66-.5v-1.69c-2.77.6-3.36-1.34-3.36-1.34-.46-1.16-1.11-1.47-1.11-1.47-.91-.62.07-.6.07-.6 1 .07 1.53 1.03 1.53 1.03.87 1.52 2.34 1.07 2.91.83.09-.65.35-1.09.63-1.34-2.22-.25-4.55-1.11-4.55-4.92 0-1.11.38-2 1.03-2.71-.1-.25-.45-1.29.1-2.64 0 0 .84-.27 2.75 1.02.79-.22 1.65-.33 2.5-.33.85 0 1.71.11 2.5.33 1.91-1.29 2.75-1.02 2.75-1.02.55 1.35.2 2.39.1 2.64.65.71 1.03 1.6 1.03 2.71 0 3.82-2.34 4.66-4.57 4.91.36.31.69.92.69 1.85V21c0 .27.16.59.67.5C19.14 20.16 22 16.42 22 12A10 10 0 0 0 12 2z'
+const ICON_GLOBE    = 'M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z'
+
+function makeContactItem(iconPath: string, label: string, link?: string): any {
+  const color = link ? Colors.primaryDeeper : '#444'
+  return {
+    columns: [
+      {
+        svg: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="${Colors.primaryDeeper}"><path d="${iconPath}"/></svg>`,
+        width: 9,
+        height: 9,
+        margin: [0, 1.5, 3, 0],
+      },
+      { text: label, link: link ?? undefined, color, fontSize: 9, width: 'auto', decoration: link ? 'underline' : undefined },
+    ],
+    columnGap: 0,
+    width: 'auto',
+  }
+}
+
+function ensureHttps(url: string): string {
+  return /^https?:\/\//.test(url) ? url : `https://${url}`
+}
+
 /**
  * Convert markdown to pdfMake content array
  */
@@ -588,26 +610,30 @@ function convertMarkdownToPdfMake(
 ): any[] {
   const content: any[] = []
 
-  // Add header with contact info (same format as downloadMarkdown function)
-  const contactLine1 = [cv.location, cv.email, cv.phone].filter(Boolean).join(' | ')
-  const contactLine2 = [cv.linkedin, cv.github, cv.portfolio ?? cv.website].filter(Boolean).join(' | ')
+  // ── Header ────────────────────────────────────────────────────────────────
+  content.push({ text: cv.fullName, style: 'header' })
+  if (jobTitle) content.push({ text: jobTitle, style: 'jobTitle' })
 
-  content.push(
-    { text: cv.fullName, style: 'header' },
-    { text: jobTitle, style: 'jobTitle' }
-  )
+  // ── Contact row 1: location · email · phone ───────────────────────────────
+  const row1: any[] = []
+  if (cv.location) row1.push(makeContactItem(ICON_LOCATION, cv.location))
+  if (cv.email)    row1.push(makeContactItem(ICON_EMAIL, cv.email, `mailto:${cv.email}`))
+  if (cv.phone)    row1.push(makeContactItem(ICON_PHONE, cv.phone))
+  if (row1.length) content.push({ columns: row1, columnGap: 14, margin: [0, 3, 0, 2] })
 
-  if (contactLine1) {
-    content.push({ text: contactLine1, style: 'normal', marginBottom: 4 })
-  }
+  // ── Contact row 2: linkedin · github · portfolio ──────────────────────────
+  const row2: any[] = []
+  if (cv.linkedin) row2.push(makeContactItem(ICON_LINKEDIN, cv.linkedin.replace(/^https?:\/\//, ''), ensureHttps(cv.linkedin)))
+  if (cv.github)   row2.push(makeContactItem(ICON_GITHUB, cv.github.replace(/^https?:\/\//, ''), ensureHttps(cv.github)))
+  const site = cv.portfolio ?? cv.website
+  if (site) row2.push(makeContactItem(ICON_GLOBE, site.replace(/^https?:\/\//, ''), ensureHttps(site)))
+  if (row2.length) content.push({ columns: row2, columnGap: 14, margin: [0, 0, 0, 4] })
 
-  if (contactLine2) {
-    content.push({ text: contactLine2, style: 'normal', marginBottom: 15 })
-  }
-
-  content.push(
-    { canvas: [{ type: 'line', x1: 0, y1: 0, x2: 515, y2: 0, lineWidth: 1, lineColor: '#ccc' }], marginBottom: 15 }
-  )
+  // ── Divider ───────────────────────────────────────────────────────────────
+  content.push({
+    canvas: [{ type: 'line', x1: 0, y1: 0, x2: 523, y2: 0, lineWidth: 1.5, lineColor: Colors.primaryDark }],
+    margin: [0, 2, 0, 8],
+  })
 
   // Parse markdown lines
   const lines = markdownContent.split('\n')
@@ -627,7 +653,7 @@ function convertMarkdownToPdfMake(
         listItems = []
         inList = false
       }
-      content.push({ text: '', marginBottom: 6 })
+      content.push({ text: '', margin: [0, 0, 0, 0] })
       continue
     }
 
@@ -636,17 +662,18 @@ function convertMarkdownToPdfMake(
       // H1 - already handled in header
       continue
     } else if (trimmed.startsWith('## ')) {
-      // H2 - section title
+      // H2 - section title with underline
       if (inList && listItems.length > 0) {
-        content.push({
-          ul: listItems,
-          style: 'list',
-        })
+        content.push({ ul: listItems, style: 'list' })
         listItems = []
         inList = false
       }
       const title = trimmed.substring(3).trim()
       content.push({ text: title, style: 'sectionTitle' })
+      content.push({
+        canvas: [{ type: 'line', x1: 0, y1: 0, x2: 523, y2: 0, lineWidth: 1.5, lineColor: Colors.primaryDeeper }],
+        margin: [0, 1, 0, 3],
+      })
     } else if (trimmed.startsWith('### ')) {
       // H3 - subsection
       if (inList && listItems.length > 0) {
@@ -880,7 +907,7 @@ async function downloadMarkdownAsPdfFallback(
     * { box-sizing: border-box; }
     body { font-family: Verdana, Arial, sans-serif; font-size: 12pt; color: #1a1a1a; max-width: 170mm; margin: 0 auto; line-height: 1.55; }
     h1 { font-size: 22pt; margin: 0 0 4px; }
-    h2 { font-size: 14pt; font-weight: 700; border-bottom: 1.5px solid #1677ff; padding-bottom: 3px; margin: 18px 0 8px; color: #111; text-transform: uppercase; letter-spacing: .5px; }
+    h2 { font-size: 14pt; font-weight: 700; border-bottom: 1.5px solid #7c3aed; padding-bottom: 3px; margin: 18px 0 8px; color: #111; text-transform: uppercase; letter-spacing: .5px; }
     h3 { font-size: 13pt; font-weight: 600; margin: 10px 0 2px; }
     p, div { margin: 3px 0; }
     ul { margin: 4px 0; padding-left: 18px; }

@@ -11,4 +11,6 @@ export interface TailoringContextBarProps {
   onBack: () => void
   /** Language for job context display */
   lang?: 'pt-BR' | 'en'
+  /** ATS score to display as a compact badge on mobile (0 = hidden) */
+  currentScore?: number
 }
