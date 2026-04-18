@@ -14,6 +14,7 @@ export interface IPublishedCV extends Document {
   linkedin?: string;
   github?: string;
   portfolio?: string;
+  objective?: string;
   summary?: string;
   skills: ISkillGroup[];
   experience: IExperience[];
@@ -54,6 +55,7 @@ const publishedCVSchema = new Schema<IPublishedCV>({
   linkedin: { type: String, trim: true },
   github: { type: String, trim: true },
   portfolio: { type: String, trim: true },
+  objective: String,
   summary: String,
   skills: { type: [skillGroupSchema], default: [] },
   experience: { type: [experienceSchema], default: [] },

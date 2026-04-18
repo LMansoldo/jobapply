@@ -54,9 +54,11 @@ export type CVLocale = 'en' | 'pt-BR';
 
 export interface ICVLocaleVersion {
   locale: CVLocale;
+  objective?: string;
   summary?: string;
   skills?: ISkillGroup[];
   experience?: IExperience[];
+  education?: IEducation[];
 }
 
 export interface ICV extends Document {
@@ -68,6 +70,7 @@ export interface ICV extends Document {
   linkedin?: string;
   github?: string;
   portfolio?: string;
+  objective?: string;
   summary?: string;
   skills: ISkillGroup[];
   experience: IExperience[];
@@ -136,9 +139,11 @@ const tailoredVersionSchema = new Schema<ITailoredVersion>(
 const localeVersionSchema = new Schema<ICVLocaleVersion>(
   {
     locale: { type: String, enum: ['en', 'pt-BR'], required: true },
+    objective: String,
     summary: String,
     skills: { type: [skillGroupSchema], default: [] },
     experience: { type: [experienceSchema], default: [] },
+    education: { type: [educationSchema], default: [] },
   },
   { _id: false }
 );
@@ -152,6 +157,7 @@ const cvSchema = new Schema<ICV>({
   linkedin: { type: String, trim: true },
   github: { type: String, trim: true },
   portfolio: { type: String, trim: true },
+  objective: String,
   summary: String,
   skills: { type: [skillGroupSchema], default: [] },
   experience: { type: [experienceSchema], default: [] },

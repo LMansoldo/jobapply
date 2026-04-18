@@ -42,9 +42,11 @@ export async function getCV(req: AuthRequest, res: Response, next: NextFunction)
       res.json({
         cv: {
           ...cvObj,
+          ...(version.objective !== undefined && { objective: version.objective }),
           ...(version.summary !== undefined && { summary: version.summary }),
           ...(version.skills?.length && { skills: version.skills }),
           ...(version.experience?.length && { experience: version.experience }),
+          ...(version.education?.length && { education: version.education }),
           locale,
         },
       });
@@ -112,6 +114,7 @@ export async function publishCV(req: AuthRequest, res: Response, next: NextFunct
         linkedin: body.linkedin ?? cv.linkedin,
         github: body.github ?? cv.github,
         portfolio: body.portfolio ?? cv.portfolio,
+        objective: body.objective ?? cv.objective,
         summary: body.summary ?? cv.summary,
         skills: body.skills ?? cv.skills,
         experience: body.experience ?? cv.experience,
@@ -180,13 +183,15 @@ function stripInternalFields(cv: object): Record<string, unknown> {
 }
 
 function applyLocale(cv: ReturnType<typeof CV.prototype.toObject>, locale: string) {
-  const version = (cv as { localeVersions?: Array<{ locale: string; summary?: string; skills?: unknown[]; experience?: unknown[] }> }).localeVersions?.find(v => v.locale === locale);
+  const version = (cv as { localeVersions?: Array<{ locale: string; objective?: string; summary?: string; skills?: unknown[]; experience?: unknown[]; education?: unknown[] }> }).localeVersions?.find(v => v.locale === locale);
   if (!version) return cv;
   return {
     ...cv,
+    ...(version.objective !== undefined && { objective: version.objective }),
     ...(version.summary !== undefined && { summary: version.summary }),
     ...(version.skills?.length && { skills: version.skills }),
     ...(version.experience?.length && { experience: version.experience }),
+    ...(version.education?.length && { education: version.education }),
   };
 }
 
@@ -318,13 +323,15 @@ export async function upsertCVLocaleVersion(req: AuthRequest, res: Response, nex
     if (!cv) { res.status(404).json({ message: 'CV not found' }); return; }
     if (cv.user.toString() !== req.user.id) { res.status(403).json({ message: 'Access denied' }); return; }
 
-    const { summary, skills, experience } = req.body;
+    const { objective, summary, skills, experience, education } = req.body;
 
     const versionData = {
       locale,
+      ...(objective !== undefined && { objective }),
       ...(summary !== undefined && { summary }),
       ...(skills !== undefined && { skills }),
       ...(experience !== undefined && { experience }),
+      ...(education !== undefined && { education }),
     };
 
     const idx = cv.localeVersions.findIndex(v => v.locale === locale);

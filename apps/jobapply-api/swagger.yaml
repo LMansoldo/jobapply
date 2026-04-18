@@ -179,6 +179,8 @@ components:
         locale:
           type: string
           enum: [en, pt-BR]
+        objective:
+          type: string
         summary:
           type: string
         skills:
@@ -189,6 +191,10 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Experience'
+        education:
+          type: array
+          items:
+            $ref: '#/components/schemas/Education'
 
     CV:
       type: object
@@ -210,6 +216,8 @@ components:
         github:
           type: string
         portfolio:
+          type: string
+        objective:
           type: string
         summary:
           type: string
@@ -296,6 +304,8 @@ components:
         github:
           type: string
         portfolio:
+          type: string
+        objective:
           type: string
         summary:
           type: string
@@ -1132,6 +1142,8 @@ paths:
             schema:
               type: object
               properties:
+                objective:
+                  type: string
                 summary:
                   type: string
                 skills:
@@ -1142,6 +1154,10 @@ paths:
                   type: array
                   items:
                     $ref: '#/components/schemas/Experience'
+                education:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/Education'
       responses:
         '200':
           description: Locale version saved
