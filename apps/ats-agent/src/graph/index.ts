@@ -1,5 +1,5 @@
 import { StateGraph, Annotation } from '@langchain/langgraph'
-import type { AgentInput, MappedCV, PlatformScore, ATSReport } from '../types'
+import type { AgentInput, MappedCV, PlatformScore, ATSReport, KeywordPhrase, RemoveSuggestion } from '../types'
 import { mapperNode } from './nodes/mapper'
 import { ruleScorerNode } from './nodes/ruleScorer'
 import { semanticAnalyzerNode } from './nodes/semanticAnalyzer'
@@ -19,6 +19,18 @@ const GraphAnnotation = Annotation.Root({
     default: () => undefined,
   }),
   semanticGaps: Annotation<string[] | undefined>({
+    reducer: (_, update) => update,
+    default: () => undefined,
+  }),
+  rephraseSuggestions: Annotation<Array<{ from: string; to: string }> | undefined>({
+    reducer: (_, update) => update,
+    default: () => undefined,
+  }),
+  keywordPhrases: Annotation<KeywordPhrase[] | undefined>({
+    reducer: (_, update) => update,
+    default: () => undefined,
+  }),
+  removeSuggestions: Annotation<RemoveSuggestion[] | undefined>({
     reducer: (_, update) => update,
     default: () => undefined,
   }),

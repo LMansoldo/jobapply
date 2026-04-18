@@ -1,5 +1,50 @@
 import type { MappedCV } from '../types'
 
+// ── Job description parser ────────────────────────────────────────────────────
+
+// Headers that signal job-relevant content (requirements, responsibilities, etc.)
+const CONTENT_HEADER_RE = /^(responsabilidades?(\s+e\s+atribuições?)?|requisitos?(\s+e\s+qualificações?)?|qualifications?(\s+(and\s+job\s+)?requirements?)?|requirements?|diferencial|nice\s+to\s+have|missão\s+do\s+cargo|job\s+summary|responsibilities|é\s+um\s+diferencial|o\s+que\s+(buscamos|esperamos|precis\w*)|competências?|habilidades?|skills?\s+required|gestão\s+(técnica|da\s+entrega|de\s+impedimentos)|interface\s+com\s+produto|para\s+participar)/i
+
+// Headers that signal noise: company info, culture, benefits
+const NOISE_HEADER_RE = /^(informações\s+adicionais|benefícios?|benefits?|what\s+we\s+offer|why\s+(you'?ll|work|us)|por\s+que\s+(trabalhar|se\s+juntar|ama)|sobre\s+(a?\s*)?(empresa|nós|nos)|about\s+\w|quem\s+somos|who\s+we\s+are|e\s+aí,?\s+curti|apply\s+now)/i
+
+// Inline benefit markers: lines that are clearly perks/benefits (no tech keywords)
+const BENEFIT_LINE_RE = /^(vale\s+(refeição|alimentação|transporte)|plano\s+(de\s+)?(saúde|odontológico)|gympass|wellhub|totalpass|auxílio\s+(home|creche|posto)|seguro\s+de\s+vida|day\s+off|folga\s+de\s+aniversário|semana\s+relax|participação\s+nos\s+lucros|great\s+place\s+to\s+work)/i
+
+export function parseJobDescription(jd: string): string {
+  const lines = jd.split('\n')
+  const contentLines: string[] = []
+
+  // 'before' = before first content header (skip intro/presentation)
+  // 'content' = inside a content section (collect)
+  // 'noise'   = inside a noise section (skip)
+  let state: 'before' | 'content' | 'noise' = 'before'
+  let hasContentHeaders = false
+
+  for (const line of lines) {
+    const trimmed = line.trim()
+
+    if (CONTENT_HEADER_RE.test(trimmed)) {
+      state = 'content'
+      hasContentHeaders = true
+      contentLines.push(line)
+      continue
+    }
+
+    if (NOISE_HEADER_RE.test(trimmed)) {
+      state = 'noise'
+      continue
+    }
+
+    if (state === 'content' && !BENEFIT_LINE_RE.test(trimmed)) {
+      contentLines.push(line)
+    }
+  }
+
+  // If no recognizable content headers were found, return original JD unchanged
+  return hasContentHeaders && contentLines.length > 0 ? contentLines.join('\n') : jd
+}
+
 // ── Stop words ────────────────────────────────────────────────────────────────
 
 const STOP_WORDS = new Set([
@@ -21,7 +66,8 @@ const STOP_WORDS = new Set([
 // ── Keyword extraction ────────────────────────────────────────────────────────
 
 export function extractJDKeywords(jd: string): string[] {
-  const tokens = jd
+  const cleaned = parseJobDescription(jd)
+  const tokens = cleaned
     .toLowerCase()
     .split(/[\s,;.:!()\[\]{}"'\/\\@#$%^&*+=<>|?]+/)
     .filter(t => t.length >= 3 && !STOP_WORDS.has(t) && !/^\d+$/.test(t))
@@ -33,9 +79,7 @@ export function extractJDKeywords(jd: string): string[] {
 const SECTION_WEIGHTS: Record<string, number> = {
   experience: 1.5,
   skills: 1.4,
-  expertise: 0.9,
   summary: 0.8,
-  objective: 0.6,
   education: 0.7,
   languages: 0.3,
   contact: 0.1,

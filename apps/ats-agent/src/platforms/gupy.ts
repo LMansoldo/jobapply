@@ -41,8 +41,8 @@ export function scoreGupy(cv: MappedCV, jd: string): PlatformScore {
 
   // Check for generic language in highlights
   const allHighlights = (cv.raw.experience ?? []).flatMap(e => e.highlights ?? [])
-  const genericHighlights = allHighlights.filter(h => hasGenericLanguage(h.text))
-  const metricsHighlights = allHighlights.filter(h => hasMetrics(h.text))
+  const genericHighlights = allHighlights.filter(h => hasGenericLanguage(h))
+  const metricsHighlights = allHighlights.filter(h => hasMetrics(h))
 
   if (genericHighlights.length > 0) {
     flags.push(

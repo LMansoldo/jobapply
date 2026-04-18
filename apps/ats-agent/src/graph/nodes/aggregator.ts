@@ -63,6 +63,9 @@ function buildTips(platforms: PlatformScore[], semanticGaps: string[]): ATSRepor
 export function aggregatorNode(state: {
   platformScores?: PlatformScore[]
   semanticGaps?: string[]
+  rephraseSuggestions?: Array<{ from: string; to: string }>
+  keywordPhrases?: ATSReport['optimalTemplate']['keywordPhrases']
+  removeSuggestions?: ATSReport['removeSuggestions']
 }): { report: ATSReport } {
   const platforms = state.platformScores ?? []
   const semanticGaps = state.semanticGaps ?? []
@@ -80,16 +83,9 @@ export function aggregatorNode(state: {
     ...platforms.flatMap(p => p.missingPreferred),
   ])].slice(0, 20)
 
-  // Rephrase suggestions come from semantic gaps that contain " → " or "instead of"
-  const keywordsToRephrase: Array<{ from: string; to: string }> = []
+  const keywordsToRephrase = state.rephraseSuggestions ?? []
 
-  // Format fixes: collect flags that are format-related
-  const FORMAT_SIGNALS = ['format', 'column', 'bom', 'date', 'malformat', 'period']
-  const formatFixes = [...new Set(
-    platforms.flatMap(p => p.flags).filter(f =>
-      FORMAT_SIGNALS.some(s => f.toLowerCase().includes(s))
-    )
-  )]
+  const formatFixes: string[] = []
 
   const report: ATSReport = {
     universalScore,
@@ -98,10 +94,12 @@ export function aggregatorNode(state: {
     optimalTemplate: {
       sectionsOrder: SECTIONS_ORDER,
       keywordsToAdd,
+      keywordPhrases: state.keywordPhrases ?? [],
       keywordsToRephrase,
       formatFixes,
     },
     tips: buildTips(platforms, semanticGaps),
+    removeSuggestions: state.removeSuggestions ?? [],
   }
 
   return { report }

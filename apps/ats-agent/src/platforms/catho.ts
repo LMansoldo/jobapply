@@ -34,8 +34,7 @@ export function scoreCatho(cv: MappedCV, jd: string): PlatformScore {
 
   // Declared experience years
   const declaredYears =
-    extractDeclaredYears(cv.sections.summary) ??
-    extractDeclaredYears(cv.sections.expertise)
+    extractDeclaredYears(cv.sections.summary)
   const estimatedYears = estimateYearsFromPeriods(cv.entities.experiencePeriods)
 
   if (declaredYears !== null) {

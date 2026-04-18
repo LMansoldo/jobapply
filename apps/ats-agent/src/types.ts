@@ -1,54 +1,52 @@
-// ── CV sub-types (from jobapply-api swagger) ─────────────────────────────────
-
-export interface Highlight {
-  text: string
-  category?: string
-}
-
-export interface Experience {
-  company?: string
-  role?: string
-  location?: string
-  period?: string   // "Jan 2022 - Dec 2024" or "Jan 2022 - Present"
-  highlights?: Highlight[]
-}
-
-export interface Education {
-  institution?: string
-  degree?: string
-  graduation?: string   // "Dec 2022"
-}
-
-export interface Summary {
-  headline?: string
-  focus_areas?: string[]
-  tagline?: string
-}
+// ── CV sub-types ─────────────────────────────────────────────────────────────
 
 export interface SkillGroup {
   label: string
   items: string[]
 }
 
-export interface Skills {
-  tech?: SkillGroup[]
-  competencies?: SkillGroup[]
-  soft_skills?: string[]
+export interface Experience {
+  role?: string
+  company?: string
+  location?: string
+  period?: string   // "MM/YYYY - MM/YYYY" or "MM/YYYY - Present"
+  context?: string
+  highlights?: string[]
 }
 
-export interface Objective {
-  role?: string
-  main_stack?: string[]
+export interface Education {
+  degree?: string
+  field?: string
+  institution?: string
+  location?: string
+  period?: string
+  notes?: string
+}
+
+export interface Language {
+  language: string
+  level: string
+  score?: string
+}
+
+export interface Certification {
+  name: string
+  organization: string
+  date?: string
+}
+
+export interface Project {
+  name: string
+  url?: string
+  description?: string
+  highlights?: string[]
 }
 
 export interface CVLocaleVersion {
   locale: 'en' | 'pt-BR'
-  objective?: Objective
-  summary?: Summary
-  skills?: Skills
-  expertise?: string[]
+  summary?: string
+  skills?: SkillGroup[]
   experience?: Experience[]
-  education?: Education
 }
 
 export interface CV {
@@ -59,13 +57,15 @@ export interface CV {
   phone?: string
   location?: string
   linkedin?: string
-  objective?: Objective
-  summary?: Summary
-  skills?: Skills
-  expertise?: string[]
+  github?: string
+  portfolio?: string
+  summary?: string
+  skills?: SkillGroup[]
   experience?: Experience[]
-  education?: Education
-  languages?: string[]
+  education?: Education[]
+  languages?: Language[]
+  certifications?: Certification[]
+  projects?: Project[]
   localeVersions?: CVLocaleVersion[]
   updatedAt?: string
 }
@@ -81,10 +81,8 @@ export interface AgentInput {
 export interface MappedCV {
   sections: {
     contact: string
-    objective: string
     summary: string
     skills: string
-    expertise: string
     experience: string
     education: string
     languages: string
@@ -113,6 +111,27 @@ export interface PlatformScore {
   notes: string[]
 }
 
+export interface KeywordPhrase {
+  keyword: string
+  phrase: string
+}
+
+export interface RemoveSuggestion {
+  section: string
+  item: string
+  reason: string
+}
+
+export interface InterviewStory {
+  jdRequirement: string
+  story: string
+}
+
+export interface InterviewPrep {
+  stories: InterviewStory[]
+  overallPositioning: string
+}
+
 export interface ATSReport {
   universalScore: number
   platforms: PlatformScore[]
@@ -120,6 +139,7 @@ export interface ATSReport {
   optimalTemplate: {
     sectionsOrder: string[]
     keywordsToAdd: string[]
+    keywordPhrases: KeywordPhrase[]
     keywordsToRephrase: { from: string; to: string }[]
     formatFixes: string[]
   }
@@ -128,6 +148,7 @@ export interface ATSReport {
     tip: string
     applicableTo: string[]
   }[]
+  removeSuggestions: RemoveSuggestion[]
 }
 
 export interface GraphState {
@@ -135,5 +156,8 @@ export interface GraphState {
   mapped?: MappedCV
   platformScores?: PlatformScore[]
   semanticGaps?: string[]
+  rephraseSuggestions?: Array<{ from: string; to: string }>
+  keywordPhrases?: KeywordPhrase[]
+  removeSuggestions?: RemoveSuggestion[]
   report?: ATSReport
 }

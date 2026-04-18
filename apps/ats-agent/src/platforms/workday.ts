@@ -1,5 +1,5 @@
 import type { MappedCV, PlatformScore } from '../types'
-import { scoreKeywords, extractJDKeywords, isValidPeriodFormat } from './utils'
+import { scoreKeywords, extractJDKeywords } from './utils'
 
 const JOB_FAMILIES: Record<string, string[]> = {
   frontend: ['react', 'vue', 'angular', 'svelte', 'html', 'css', 'sass', 'tailwind', 'next', 'nuxt', 'javascript', 'typescript', 'webpack', 'vite'],
@@ -31,12 +31,6 @@ export function scoreWorkday(cv: MappedCV, jd: string): PlatformScore {
   const flags: string[] = []
   const notes: string[] = []
 
-  // Strict date format check
-  const malformattedPeriods = cv.entities.dates.filter(d => d && !isValidPeriodFormat(d))
-  if (malformattedPeriods.length > 0) {
-    flags.push(`Malformatted period(s): ${malformattedPeriods.join(', ')} — expected "MMM YYYY - MMM YYYY"`)
-  }
-
   // Job family matching
   const dominantFamily = detectDominantFamily(jd)
   const familyTerms = JOB_FAMILIES[dominantFamily] ?? []
@@ -45,17 +39,12 @@ export function scoreWorkday(cv: MappedCV, jd: string): PlatformScore {
   const familyMatchPct = familyTerms.length > 0 ? (familyMatches.length / familyTerms.length) * 100 : 0
   notes.push(`Dominant job family: ${dominantFamily} (${Math.round(familyMatchPct)}% stack match)`)
 
-  let score = baseScore
-  if (malformattedPeriods.length > 0) {
-    score = Math.min(score, 70)
-    notes.push('Score capped at 70 due to malformatted period dates')
-  }
-  score = Math.round(Math.min(100, score))
+  const score = Math.round(Math.min(100, baseScore))
 
   return {
     platform: 'Workday',
     score,
-    passed: score >= 70 && malformattedPeriods.length === 0,
+    passed: score >= 70,
     missingRequired: [],
     missingPreferred: missingKeywords.slice(0, 10),
     flags,
