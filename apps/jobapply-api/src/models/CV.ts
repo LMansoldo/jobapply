@@ -2,45 +2,46 @@ import mongoose, { Schema, Document } from 'mongoose';
 
 // ─── Sub-types ────────────────────────────────────────────────────────────────
 
-export interface IHighlight {
-  text: string;
-  category?: string;
-}
-
-export interface IExperience {
-  company?: string;
-  role?: string;
-  location?: string;
-  period?: string;
-  highlights: IHighlight[];
-}
-
-export interface IEducation {
-  institution?: string;
-  degree?: string;
-  graduation?: string;
-}
-
-export interface ISummary {
-  headline?: string;
-  focus_areas?: string[];
-  tagline?: string;
-}
-
 export interface ISkillGroup {
   label: string;
   items: string[];
 }
 
-export interface ISkills {
-  tech?: ISkillGroup[];
-  competencies?: ISkillGroup[];
-  soft_skills?: string[];
+export interface IExperience {
+  role?: string;
+  company?: string;
+  location?: string;
+  period?: string;
+  context?: string;
+  highlights: string[];
 }
 
-export interface IObjective {
-  role?: string;
-  main_stack?: string[];
+export interface IEducation {
+  degree?: string;
+  field?: string;
+  institution?: string;
+  location?: string;
+  period?: string;
+  notes?: string;
+}
+
+export interface ILanguage {
+  language: string;
+  level: string;
+  score?: string;
+}
+
+export interface ICertification {
+  name: string;
+  organization: string;
+  date?: string;
+}
+
+export interface IProject {
+  name: string;
+  url?: string;
+  description?: string;
+  highlights: string[];
 }
 
 export interface ITailoredVersion {
@@ -53,12 +54,9 @@ export type CVLocale = 'en' | 'pt-BR';
 
 export interface ICVLocaleVersion {
   locale: CVLocale;
-  objective?: IObjective;
-  summary?: ISummary;
-  skills?: ISkills;
-  expertise?: string[];
+  summary?: string;
+  skills?: ISkillGroup[];
   experience?: IExperience[];
-  education?: IEducation;
 }
 
 export interface ICV extends Document {
@@ -68,13 +66,15 @@ export interface ICV extends Document {
   phone?: string;
   location?: string;
   linkedin?: string;
-  objective?: IObjective;
-  summary?: ISummary;
-  skills?: ISkills;
-  expertise?: string[];
+  github?: string;
+  portfolio?: string;
+  summary?: string;
+  skills: ISkillGroup[];
   experience: IExperience[];
-  education?: IEducation;
-  languages: string[];
+  education: IEducation[];
+  languages: ILanguage[];
+  certifications: ICertification[];
+  projects: IProject[];
   tailoredVersions: ITailoredVersion[];
   localeVersions: ICVLocaleVersion[];
   updatedAt: Date;
@@ -82,48 +82,45 @@ export interface ICV extends Document {
 
 // ─── Schemas ──────────────────────────────────────────────────────────────────
 
-const highlightSchema = new Schema<IHighlight>(
-  { text: { type: String, required: true }, category: String },
+export const skillGroupSchema = new Schema<ISkillGroup>(
+  { label: { type: String, required: true }, items: { type: [String], default: [] } },
   { _id: false }
 );
 
 export const experienceSchema = new Schema<IExperience>(
   {
-    company: String,
     role: String,
+    company: String,
     location: String,
     period: String,
-    highlights: { type: [highlightSchema], default: [] },
+    context: String,
+    highlights: { type: [String], default: [] },
   },
   { _id: false }
 );
 
 export const educationSchema = new Schema<IEducation>(
-  { institution: String, degree: String, graduation: String },
+  { degree: String, field: String, institution: String, location: String, period: String, notes: String },
   { _id: false }
 );
 
-const summarySchema = new Schema<ISummary>(
-  { headline: String, focus_areas: { type: [String], default: [] }, tagline: String },
+const languageSchema = new Schema<ILanguage>(
+  { language: { type: String, required: true }, level: { type: String, required: true }, score: String },
   { _id: false }
 );
 
-const skillGroupSchema = new Schema<ISkillGroup>(
-  { label: { type: String, required: true }, items: { type: [String], default: [] } },
+const certificationSchema = new Schema<ICertification>(
+  { name: { type: String, required: true }, organization: { type: String, required: true }, date: String },
   { _id: false }
 );
 
-const skillsSchema = new Schema<ISkills>(
+const projectSchema = new Schema<IProject>(
   {
-    tech: { type: [skillGroupSchema], default: [] },
-    competencies: { type: [skillGroupSchema], default: [] },
-    soft_skills: { type: [String], default: [] },
+    name: { type: String, required: true },
+    url: String,
+    description: String,
+    highlights: { type: [String], default: [] },
   },
-  { _id: false }
-);
-
-const objectiveSchema = new Schema<IObjective>(
-  { role: String, main_stack: { type: [String], default: [] } },
   { _id: false }
 );
 
@@ -139,12 +136,9 @@ const tailoredVersionSchema = new Schema<ITailoredVersion>(
 const localeVersionSchema = new Schema<ICVLocaleVersion>(
   {
     locale: { type: String, enum: ['en', 'pt-BR'], required: true },
-    objective: objectiveSchema,
-    summary: summarySchema,
-    skills: skillsSchema,
-    expertise: { type: [String], default: [] },
+    summary: String,
+    skills: { type: [skillGroupSchema], default: [] },
     experience: { type: [experienceSchema], default: [] },
-    education: educationSchema,
   },
   { _id: false }
 );
@@ -156,13 +150,15 @@ const cvSchema = new Schema<ICV>({
   phone: { type: String, trim: true },
   location: { type: String, trim: true },
   linkedin: { type: String, trim: true },
-  objective: objectiveSchema,
-  summary: summarySchema,
-  skills: skillsSchema,
-  expertise: { type: [String], default: [] },
+  github: { type: String, trim: true },
+  portfolio: { type: String, trim: true },
+  summary: String,
+  skills: { type: [skillGroupSchema], default: [] },
   experience: { type: [experienceSchema], default: [] },
-  education: educationSchema,
-  languages: { type: [String], default: [] },
+  education: { type: [educationSchema], default: [] },
+  languages: { type: [languageSchema], default: [] },
+  certifications: { type: [certificationSchema], default: [] },
+  projects: { type: [projectSchema], default: [] },
   tailoredVersions: { type: [tailoredVersionSchema], default: [] },
   localeVersions: { type: [localeVersionSchema], default: [] },
   updatedAt: { type: Date, default: Date.now },

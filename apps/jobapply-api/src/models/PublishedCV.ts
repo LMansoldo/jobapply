@@ -1,7 +1,7 @@
 import mongoose, { Schema, Document } from 'mongoose';
 import {
-  IExperience, IEducation, ISummary, ISkills, IObjective,
-  experienceSchema, educationSchema,
+  ISkillGroup, IExperience, IEducation, ILanguage, ICertification, IProject,
+  skillGroupSchema, experienceSchema, educationSchema,
 } from './CV';
 
 export interface IPublishedCV extends Document {
@@ -12,37 +12,35 @@ export interface IPublishedCV extends Document {
   phone?: string;
   location?: string;
   linkedin?: string;
-  objective?: IObjective;
-  summary?: ISummary;
-  skills?: ISkills;
-  expertise?: string[];
+  github?: string;
+  portfolio?: string;
+  summary?: string;
+  skills: ISkillGroup[];
   experience: IExperience[];
-  education?: IEducation;
-  languages: string[];
+  education: IEducation[];
+  languages: ILanguage[];
+  certifications: ICertification[];
+  projects: IProject[];
   published_at: Date;
 }
 
-const skillGroupSchema = new Schema(
-  { label: { type: String, required: true }, items: { type: [String], default: [] } },
+const languageSchema = new Schema(
+  { language: { type: String, required: true }, level: { type: String, required: true }, score: String },
   { _id: false }
 );
 
-const skillsSchema = new Schema(
+const certificationSchema = new Schema(
+  { name: { type: String, required: true }, organization: { type: String, required: true }, date: String },
+  { _id: false }
+);
+
+const projectSchema = new Schema(
   {
-    tech: { type: [skillGroupSchema], default: [] },
-    competencies: { type: [skillGroupSchema], default: [] },
-    soft_skills: { type: [String], default: [] },
+    name: { type: String, required: true },
+    url: String,
+    description: String,
+    highlights: { type: [String], default: [] },
   },
-  { _id: false }
-);
-
-const summarySchema = new Schema(
-  { headline: String, focus_areas: { type: [String], default: [] }, tagline: String },
-  { _id: false }
-);
-
-const objectiveSchema = new Schema(
-  { role: String, main_stack: { type: [String], default: [] } },
   { _id: false }
 );
 
@@ -54,13 +52,15 @@ const publishedCVSchema = new Schema<IPublishedCV>({
   phone: { type: String, trim: true },
   location: { type: String, trim: true },
   linkedin: { type: String, trim: true },
-  objective: objectiveSchema,
-  summary: summarySchema,
-  skills: skillsSchema,
-  expertise: { type: [String], default: [] },
+  github: { type: String, trim: true },
+  portfolio: { type: String, trim: true },
+  summary: String,
+  skills: { type: [skillGroupSchema], default: [] },
   experience: { type: [experienceSchema], default: [] },
-  education: educationSchema,
-  languages: { type: [String], default: [] },
+  education: { type: [educationSchema], default: [] },
+  languages: { type: [languageSchema], default: [] },
+  certifications: { type: [certificationSchema], default: [] },
+  projects: { type: [projectSchema], default: [] },
   published_at: { type: Date, default: Date.now },
 });
 

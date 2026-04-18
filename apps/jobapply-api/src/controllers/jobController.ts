@@ -23,6 +23,17 @@ export async function bulkCreate(req: AuthRequest, res: Response, next: NextFunc
   }
 }
 
+export async function getJob(req: AuthRequest, res: Response, next: NextFunction): Promise<void> {
+  try {
+    const job = await Job.findById(req.params.id);
+    if (!job) { res.status(404).json({ message: 'Job not found' }); return; }
+    res.json({ job });
+  } catch (err: unknown) {
+    if ((err as { name?: string }).name === 'CastError') { res.status(404).json({ message: 'Job not found' }); return; }
+    next(err);
+  }
+}
+
 export async function deleteJob(req: AuthRequest, res: Response, next: NextFunction): Promise<void> {
   try {
     const job = await Job.findByIdAndDelete(req.params.id);
@@ -36,7 +47,7 @@ export async function deleteJob(req: AuthRequest, res: Response, next: NextFunct
 
 export async function listJobs(req: AuthRequest, res: Response, next: NextFunction): Promise<void> {
   try {
-    const { title, company, location, status, tags, page = '1', limit = '20' } = req.query as Record<string, string>;
+    const { title, company, location, status, tags, page = '1', limit = '20', sort = 'newest' } = req.query as Record<string, string>;
     const filter: Record<string, unknown> = {};
 
     if (title) filter.title = { $regex: title, $options: 'i' };
@@ -45,9 +56,10 @@ export async function listJobs(req: AuthRequest, res: Response, next: NextFuncti
     if (status) filter.status = status;
     if (tags) filter.tags = { $in: tags.split(',').map(t => t.trim()) };
 
+    const sortOrder = sort === 'oldest' ? 1 : -1;
     const skip = (Number(page) - 1) * Number(limit);
     const [jobs, total] = await Promise.all([
-      Job.find(filter).skip(skip).limit(Number(limit)),
+      Job.find(filter).sort({ createdAt: sortOrder }).skip(skip).limit(Number(limit)),
       Job.countDocuments(filter),
     ]);
 

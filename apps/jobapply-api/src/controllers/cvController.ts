@@ -6,7 +6,8 @@ import Job from '../models/Job';
 import User from '../models/User';
 import PublishedCV from '../models/PublishedCV';
 import { tailorCV as tailorCVService, generateCoverLetter as generateCoverLetterLLM, generateVideoScript as generateVideoScriptLLM } from '../services/llmService';
-import { analyzeWithATS } from '../services/atsService';
+import { analyzeWithATS } from '../services/atsService'
+import { generateInterviewPrep } from '../services/interviewPrepService';
 
 const VALID_LOCALES: CVLocale[] = ['en', 'pt-BR'];
 
@@ -41,12 +42,9 @@ export async function getCV(req: AuthRequest, res: Response, next: NextFunction)
       res.json({
         cv: {
           ...cvObj,
-          objective: version.objective ?? cvObj.objective,
-          summary: version.summary ?? cvObj.summary,
-          skills: version.skills ?? cvObj.skills,
-          expertise: version.expertise?.length ? version.expertise : cvObj.expertise,
-          experience: version.experience?.length ? version.experience : cvObj.experience,
-          education: version.education ?? cvObj.education,
+          ...(version.summary !== undefined && { summary: version.summary }),
+          ...(version.skills?.length && { skills: version.skills }),
+          ...(version.experience?.length && { experience: version.experience }),
           locale,
         },
       });
@@ -112,13 +110,15 @@ export async function publishCV(req: AuthRequest, res: Response, next: NextFunct
         phone: body.phone ?? cv.phone,
         location: body.location ?? cv.location,
         linkedin: body.linkedin ?? cv.linkedin,
-        objective: body.objective ?? cv.objective,
+        github: body.github ?? cv.github,
+        portfolio: body.portfolio ?? cv.portfolio,
         summary: body.summary ?? cv.summary,
         skills: body.skills ?? cv.skills,
-        expertise: body.expertise ?? cv.expertise,
         experience: body.experience ?? cv.experience,
         education: body.education ?? cv.education,
         languages: body.languages ?? cv.languages,
+        certifications: body.certifications ?? cv.certifications,
+        projects: body.projects ?? cv.projects,
         published_at: new Date(),
       },
       { upsert: true, new: true }
@@ -143,7 +143,7 @@ export async function tailorCV(req: AuthRequest, res: Response, next: NextFuncti
     const job = await Job.findById(jobId);
     if (!job) { res.status(404).json({ message: 'Job not found' }); return; }
 
-    const tailoredContent = await tailorCVService(cv.toObject(), job.description);
+    const tailoredContent = await tailorCVService(stripInternalFields(cv.toObject()), job.description);
     cv.tailoredVersions.push({
       jobId: new mongoose.Types.ObjectId(jobId),
       tailoredContent,
@@ -160,17 +160,33 @@ export async function tailorCV(req: AuthRequest, res: Response, next: NextFuncti
   }
 }
 
+const PT_BR_SIGNALS = [
+  'você', 'empresa', 'vaga', 'cargo', 'equipe', 'nosso', 'nossa', 'será',
+  'requisitos', 'experiência', 'habilidades', 'conhecimentos', 'responsabilidades',
+  'profissional', 'oportunidade', 'candidato', 'benefícios', 'remuneração',
+  'inglês', 'português', 'área', 'atuação', 'regime', 'contratação',
+];
+
+function detectLocale(text: string): 'pt-BR' | 'en' {
+  const lower = text.toLowerCase();
+  const ptMatches = PT_BR_SIGNALS.filter(w => lower.includes(w)).length;
+  const hasAccents = /[ãçêáéíóúàâêîôûõ]/i.test(text);
+  return (ptMatches >= 3 || (ptMatches >= 1 && hasAccents)) ? 'pt-BR' : 'en';
+}
+
+function stripInternalFields(cv: object): Record<string, unknown> {
+  const { localeVersions: _lv, tailoredVersions: _tv, user: _u, __v: _v, ...clean } = cv as Record<string, unknown>;
+  return clean;
+}
+
 function applyLocale(cv: ReturnType<typeof CV.prototype.toObject>, locale: string) {
-  const version = (cv as { localeVersions?: Array<{ locale: string; objective?: unknown; summary?: unknown; skills?: unknown; expertise?: string[]; experience?: unknown[]; education?: unknown }> }).localeVersions?.find(v => v.locale === locale);
+  const version = (cv as { localeVersions?: Array<{ locale: string; summary?: string; skills?: unknown[]; experience?: unknown[] }> }).localeVersions?.find(v => v.locale === locale);
   if (!version) return cv;
   return {
     ...cv,
-    ...(version.objective !== undefined && { objective: version.objective }),
     ...(version.summary !== undefined && { summary: version.summary }),
-    ...(version.skills !== undefined && { skills: version.skills }),
-    ...(version.expertise?.length && { expertise: version.expertise }),
+    ...(version.skills?.length && { skills: version.skills }),
     ...(version.experience?.length && { experience: version.experience }),
-    ...(version.education !== undefined && { education: version.education }),
   };
 }
 
@@ -180,16 +196,21 @@ export async function analyzeCVWithATS(req: AuthRequest, res: Response, next: Ne
     if (!cv) { res.status(404).json({ message: 'CV not found' }); return; }
     if (cv.user.toString() !== req.user.id) { res.status(403).json({ message: 'Access denied' }); return; }
 
-    const { jobId, locale } = req.body as { jobId?: string; locale?: string };
-    if (!jobId) { res.status(400).json({ message: 'jobId is required' }); return; }
+    const { jobId, jobDescription, locale } = req.body as { jobId?: string; jobDescription?: string; locale?: string };
+    if (!jobId && !jobDescription) { res.status(400).json({ message: 'jobId or jobDescription is required' }); return; }
 
-    const job = await Job.findById(jobId);
-    if (!job) { res.status(404).json({ message: 'Job not found' }); return; }
+    let description = jobDescription;
+    if (!description) {
+      const job = await Job.findById(jobId);
+      if (!job) { res.status(404).json({ message: 'Job not found' }); return; }
+      description = job.description;
+    }
 
-    const cvData = locale ? applyLocale(cv.toObject(), locale) : cv.toObject();
-    const report = await analyzeWithATS(cvData, job.description, locale);
+    const resolvedLocale = locale ?? detectLocale(description);
+    const cvData = stripInternalFields(applyLocale(cv.toObject(), resolvedLocale));
+    const report = await analyzeWithATS(cvData, description, resolvedLocale);
 
-    res.json({ report });
+    res.json({ report, locale: resolvedLocale });
   } catch (err: unknown) {
     const e = err as { name?: string; status?: number; message?: string };
     if (e.name === 'CastError') { res.status(404).json({ message: 'Resource not found' }); return; }
@@ -204,16 +225,21 @@ export async function coverLetterCV(req: AuthRequest, res: Response, next: NextF
     if (!cv) { res.status(404).json({ message: 'CV not found' }); return; }
     if (cv.user.toString() !== req.user.id) { res.status(403).json({ message: 'Access denied' }); return; }
 
-    const { jobId, locale } = req.body as { jobId?: string; locale?: string };
-    if (!jobId) { res.status(400).json({ message: 'jobId is required' }); return; }
+    const { jobId, jobDescription, locale } = req.body as { jobId?: string; jobDescription?: string; locale?: string };
+    if (!jobId && !jobDescription) { res.status(400).json({ message: 'jobId or jobDescription is required' }); return; }
 
-    const job = await Job.findById(jobId);
-    if (!job) { res.status(404).json({ message: 'Job not found' }); return; }
+    let description = jobDescription;
+    if (!description) {
+      const job = await Job.findById(jobId);
+      if (!job) { res.status(404).json({ message: 'Job not found' }); return; }
+      description = job.description;
+    }
 
-    const cvData = locale ? applyLocale(cv.toObject(), locale) : cv.toObject();
-    const coverLetter = await generateCoverLetterLLM(cvData, job.description);
+    const resolvedLocale = locale ?? detectLocale(description);
+    const cvData = stripInternalFields(applyLocale(cv.toObject(), resolvedLocale));
+    const coverLetter = await generateCoverLetterLLM(cvData, description);
 
-    res.json({ coverLetter });
+    res.json({ coverLetter, locale: resolvedLocale });
   } catch (err: unknown) {
     const e = err as { name?: string; status?: number; message?: string };
     if (e.name === 'CastError') { res.status(404).json({ message: 'Resource not found' }); return; }
@@ -228,20 +254,54 @@ export async function videoScriptCV(req: AuthRequest, res: Response, next: NextF
     if (!cv) { res.status(404).json({ message: 'CV not found' }); return; }
     if (cv.user.toString() !== req.user.id) { res.status(403).json({ message: 'Access denied' }); return; }
 
-    const { jobId, locale } = req.body as { jobId?: string; locale?: string };
-    if (!jobId) { res.status(400).json({ message: 'jobId is required' }); return; }
+    const { jobId, jobDescription, locale } = req.body as { jobId?: string; jobDescription?: string; locale?: string };
+    if (!jobId && !jobDescription) { res.status(400).json({ message: 'jobId or jobDescription is required' }); return; }
 
-    const job = await Job.findById(jobId);
-    if (!job) { res.status(404).json({ message: 'Job not found' }); return; }
+    let description = jobDescription;
+    if (!description) {
+      const job = await Job.findById(jobId);
+      if (!job) { res.status(404).json({ message: 'Job not found' }); return; }
+      description = job.description;
+    }
 
-    const cvData = locale ? applyLocale(cv.toObject(), locale) : cv.toObject();
-    const script = await generateVideoScriptLLM(cvData, job.description);
+    const resolvedLocale = locale ?? detectLocale(description);
+    const cvData = stripInternalFields(applyLocale(cv.toObject(), resolvedLocale));
+    const script = await generateVideoScriptLLM(cvData, description);
 
-    res.json({ script });
+    res.json({ script, locale: resolvedLocale });
   } catch (err: unknown) {
     const e = err as { name?: string; status?: number; message?: string };
     if (e.name === 'CastError') { res.status(404).json({ message: 'Resource not found' }); return; }
     if (e.status) { res.status(502).json({ message: 'LLM service error', detail: e.message }); return; }
+    next(err);
+  }
+}
+
+export async function interviewPrepCV(req: AuthRequest, res: Response, next: NextFunction): Promise<void> {
+  try {
+    const cv = await CV.findById(req.params.id);
+    if (!cv) { res.status(404).json({ message: 'CV not found' }); return; }
+    if (cv.user.toString() !== req.user.id) { res.status(403).json({ message: 'Access denied' }); return; }
+
+    const { jobId, jobDescription, locale } = req.body as { jobId?: string; jobDescription?: string; locale?: string };
+    if (!jobId && !jobDescription) { res.status(400).json({ message: 'jobId or jobDescription is required' }); return; }
+
+    let description = jobDescription;
+    if (!description) {
+      const job = await Job.findById(jobId);
+      if (!job) { res.status(404).json({ message: 'Job not found' }); return; }
+      description = job.description;
+    }
+
+    const resolvedLocale = locale ?? detectLocale(description);
+    const cvData = stripInternalFields(applyLocale(cv.toObject(), resolvedLocale));
+    const interviewPrep = await generateInterviewPrep(cvData, description, resolvedLocale);
+
+    res.json({ interviewPrep, locale: resolvedLocale });
+  } catch (err: unknown) {
+    const e = err as { name?: string; status?: number; message?: string };
+    if (e.name === 'CastError') { res.status(404).json({ message: 'Resource not found' }); return; }
+    if (e.status) { res.status(502).json({ message: 'ATS agent error', detail: e.message }); return; }
     next(err);
   }
 }
@@ -258,16 +318,13 @@ export async function upsertCVLocaleVersion(req: AuthRequest, res: Response, nex
     if (!cv) { res.status(404).json({ message: 'CV not found' }); return; }
     if (cv.user.toString() !== req.user.id) { res.status(403).json({ message: 'Access denied' }); return; }
 
-    const { objective, summary, skills, expertise, experience, education } = req.body;
+    const { summary, skills, experience } = req.body;
 
     const versionData = {
       locale,
-      ...(objective !== undefined && { objective }),
       ...(summary !== undefined && { summary }),
       ...(skills !== undefined && { skills }),
-      ...(expertise !== undefined && { expertise }),
       ...(experience !== undefined && { experience }),
-      ...(education !== undefined && { education }),
     };
 
     const idx = cv.localeVersions.findIndex(v => v.locale === locale);
