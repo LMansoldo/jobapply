@@ -27,7 +27,7 @@ export interface TailoringEditorPanelProps {
   reanalyzeLoading?: boolean
   onDownloadPDF?: () => void | Promise<void>
   onExportMarkdown?: () => void
-  onSaveAsVersion?: () => void
+  onSaveAsVersion?: () => void | Promise<void>
 }
 
 export interface TailoringEditorHandle {

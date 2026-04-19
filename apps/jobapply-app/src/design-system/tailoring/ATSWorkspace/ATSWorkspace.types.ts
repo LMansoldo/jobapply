@@ -50,7 +50,7 @@ export interface ATSWorkspaceProps {
   /** Callback for markdown export */
   onExportMarkdown: () => void
   /** Callback to save as version */
-  onSaveAsVersion: () => void
+  onSaveAsVersion: () => Promise<void>
   /** Keyword phrases suggestions (10 ready-to-use bullets) */
   keywordPhrases?: KeywordPhrase[]
   /** Suggestions for CV items to remove */

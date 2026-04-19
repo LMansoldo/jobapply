@@ -5,11 +5,17 @@ import { Spacing } from '../../../../styles/theme/spacing'
 import { BorderRadius } from '../../../../styles/theme/radius'
 import { Shadows } from '../../../../styles/theme/shadows'
 
+const MOBILE = '@media (max-width: 767px)'
+
 export const cardRoot = css({
   background: Colors.white,
   borderRadius: BorderRadius.base,
   boxShadow: Shadows.sm,
   overflow: 'hidden',
+  [MOBILE]: {
+    borderRadius: 0,
+    boxShadow: 'none',
+  },
 })
 
 export const cardHeader = css({
@@ -18,6 +24,9 @@ export const cardHeader = css({
   display: 'flex',
   alignItems: 'center',
   gap: Spacing.md,
+  [MOBILE]: {
+    padding: `${Spacing.md} ${Spacing.md}`,
+  },
 })
 
 export const headerIcon = css({
@@ -49,6 +58,9 @@ export const headerSubtitle = css({
 
 export const cardBody = css({
   padding: `${Spacing.lg} ${Spacing.xl}`,
+  [MOBILE]: {
+    padding: `${Spacing.md} ${Spacing.md}`,
+  },
 })
 
 export const avatarZone = css({
@@ -61,6 +73,12 @@ export const avatarZone = css({
   marginBottom: Spacing.lg,
   background: Colors.surfacePage,
   cursor: 'pointer',
+  [MOBILE]: {
+    flexDirection: 'column',
+    alignItems: 'flex-start',
+    gap: Spacing.md,
+    padding: Spacing.md,
+  },
 })
 
 export const avatarLeft = css({
@@ -116,6 +134,9 @@ export const cardFooter = css({
   alignItems: 'center',
   justifyContent: 'space-between',
   background: Colors.surfacePage,
+  [MOBILE]: {
+    padding: `${Spacing.md} ${Spacing.md}`,
+  },
 })
 
 export const stepLabelText = css({

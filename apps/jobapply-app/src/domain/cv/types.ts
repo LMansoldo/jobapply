@@ -1,4 +1,5 @@
 // ─── Legacy interfaces kept for PublishedCV compatibility ──────────────────────
+// DEPRECATED: Use CVLocaleExperience instead for new code
 export interface Experience {
   company: string
   role: string
@@ -7,6 +8,7 @@ export interface Experience {
   description?: string
 }
 
+// DEPRECATED: Use CVLocaleEducation instead for new code
 export interface Education {
   institution: string
   degree: string
@@ -22,7 +24,7 @@ export interface Education {
 export interface Language {
   language: string
   level: string
-  score?: string
+  score?: string  // Optional: validated score from backend
 }
 
 export interface Certification {
@@ -148,10 +150,9 @@ export interface CV {
   phone?: string
   location?: string
   linkedin?: string
-  title?: string
+  objective?: string       // Renamed from title
   github?: string
-  website?: string
-  portfolio?: string
+  portfolio?: string      // Renamed from website
   languages: Language[]
   tailoredVersions: TailoredVersion[]
   localeVersions: CVLocaleVersion[]
@@ -164,10 +165,9 @@ export interface CVCreatePayload {
   phone?: string
   location?: string
   linkedin?: string
-  title?: string
+  objective?: string       // Renamed from title
   github?: string
-  website?: string
-  portfolio?: string
+  portfolio?: string      // Renamed from website
   languages?: Language[]
 }
 

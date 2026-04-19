@@ -23,6 +23,8 @@ export function CVViewerSidebar({
   onLocaleChange,
   onEdit,
   onExportPDF,
+  onExportMarkdown,
+  onDelete,
   onShare,
   onDeleteVersion,
   score,
@@ -76,6 +78,9 @@ export function CVViewerSidebar({
           <DSButton variant="ghost" onClick={onExportPDF} style={{ width: '100%', justifyContent: 'center' }}>
             <DownloadOutlined /> {t('cv.exportPDF')}
           </DSButton>
+          <DSButton variant="ghost" onClick={onExportMarkdown} style={{ width: '100%', justifyContent: 'center' }}>
+            <DownloadOutlined /> {t('cv.exportMarkdown')}
+          </DSButton>
           {onShare && (
             <DSButton variant="ghost" onClick={onShare} style={{ width: '100%', justifyContent: 'center' }}>
               <ShareAltOutlined /> {t('cv.shareLink')}
@@ -90,6 +95,13 @@ export function CVViewerSidebar({
               <DeleteOutlined /> {t('cv.deleteVersion')}
             </DSButton>
           )}
+          <DSButton
+            variant="ghost"
+            onClick={onDelete}
+            style={{ width: '100%', justifyContent: 'center', color: Colors.danger, borderColor: Colors.danger }}
+          >
+            <DeleteOutlined /> {t('cv.deleteCV')}
+          </DSButton>
         </div>
       </DSCard>
 

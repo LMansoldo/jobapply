@@ -6,7 +6,7 @@ import { Spacing } from '../../../styles/theme/spacing';
 // ============================================================
 // Constants (no magic numbers) – all values in rem (1rem = 10px)
 // ============================================================
-const CARD_BORDER_RADIUS = '0.8rem';        // 8px
+const CARD_BORDER_RADIUS = '0';             // square corners
 const CARD_BOX_SHADOW = '0 0.2rem 2rem rgba(0,0,0,0.08)'; // 0 2px 20px
 const HEADER_TITLE_SIZE = '2.8rem';         // 28px
 const HEADER_CONTACT_GAP = `${Spacing.xs} ${Spacing.lg}`;

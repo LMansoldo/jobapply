@@ -3,6 +3,7 @@ import { Colors } from '../../../styles/theme/colors'
 import { FontFamily, FontWeight, FontSize } from '../../../styles/theme/typography'
 import { Spacing } from '../../../styles/theme/spacing'
 import { BorderRadius } from '../../../styles/theme/radius'
+import { mediaQueries } from '../../../styles/theme/breakpoints'
 
 export const leftPanelRoot = css({
   display: 'flex',
@@ -36,6 +37,7 @@ export const rightPanelRoot = css({
   display: 'flex',
   flexDirection: 'column',
   gap: Spacing.md,
+  width: '100%',
 })
 
 export const rightHeadingRow = css({
@@ -44,10 +46,14 @@ export const rightHeadingRow = css({
 
 export const rightTitle = css({
   fontFamily: FontFamily.heading,
-  fontSize: FontSize.xxl,
+  fontSize: FontSize.xl,
   color: Colors.textMain,
   margin: `0 0 ${Spacing.xs}`,
   fontWeight: FontWeight.bold,
+
+  [mediaQueries.md]: {
+    fontSize: FontSize.xxl,
+  },
 })
 
 export const rightSubtitle = css({

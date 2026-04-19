@@ -20,13 +20,15 @@ export const viewerTopBar = css({
   marginBottom: Spacing.md,
 })
 
+const MOBILE = '@media (max-width: 767px)'
+
 export const wizardRoot = css({
   maxWidth: '96rem',
   margin: '0 auto',
 })
 
 export const stepContent = (isMobile: boolean) => css({
-  paddingBottom: isMobile ? Spacing.mobileNavPad : 0,
+  paddingBottom: isMobile ? Spacing.mobileNavHeight : 0,
 })
 
 export const editorFooter = css({
@@ -67,4 +69,16 @@ export const mobileNavBtn = css({
   fontSize: FontSize.sm,
   fontWeight: FontWeight.bold,
   fontFamily: FontFamily.body,
+})
+
+export const mobileSkipBtn = css({
+  flex: 1,
+  border: 'none',
+  background: Colors.surfacePage,
+  cursor: 'pointer',
+  color: Colors.textMain,
+  fontSize: FontSize.sm,
+  fontWeight: FontWeight.medium,
+  fontFamily: FontFamily.body,
+  borderRight: `1px solid ${Colors.surfaceBorder}`,
 })

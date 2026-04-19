@@ -1,6 +1,6 @@
 /**
  * @file MonacoEditorPanel.tsx
- * @description Monaco Editor panel — redesigned with rich toolbar, section chips, status bar, empty state overlay.
+ * @description Monaco Editor panel — dark theme matching TailoringEditorPanel style.
  */
 import { useState, useRef, useCallback, useMemo } from 'react'
 import Editor, { type OnMount } from '@monaco-editor/react'
@@ -16,17 +16,13 @@ import {
   UndoOutlined,
   RedoOutlined,
   LinkOutlined,
-  AlignLeftOutlined,
-  AlignCenterOutlined,
-  AlignRightOutlined,
 } from '@ant-design/icons'
 import { useTranslation } from 'react-i18next'
 import type { MonacoEditorPanelProps } from './MonacoEditorPanel.types'
 import { Alert } from '../../../../components/Alert'
-import { EditorToolbar } from '../../../../design-system/cv/EditorToolbar'
-import { PreviewTabs } from '../../../../design-system/cv/PreviewTabs'
 import { Spacing } from '../../../../styles/theme/spacing'
 import * as styles from './MonacoEditorPanel.styles'
+import React from 'react'
 
 const { useBreakpoint } = Grid
 
@@ -35,6 +31,26 @@ type EditorInstance = Parameters<OnMount>[0]
 function countWords(text: string): number {
   return text.trim() ? text.trim().split(/\s+/).length : 0
 }
+
+const EDITOR_OPTIONS = {
+  minimap: { enabled: false },
+  wordWrap: 'on' as const,
+  lineNumbers: 'off' as const,
+  folding: false,
+  renderLineHighlight: 'none' as const,
+  scrollBeyondLastLine: false,
+  fontSize: 13,
+  lineDecorationsWidth: 8,
+  padding: { top: 12, bottom: 12 },
+  automaticLayout: true,
+  smoothScrolling: true,
+  scrollbar: {
+    vertical: 'auto' as const,
+    horizontal: 'hidden' as const,
+  },
+}
+
+const GROUPS = ['format', 'heading', 'list', 'insert', 'history'] as const
 
 export function MonacoEditorPanel({
   value,
@@ -51,13 +67,11 @@ export function MonacoEditorPanel({
   const screens = useBreakpoint()
   const isMobile = !screens.md
   const [mobileTab, setMobileTab] = useState<'editor' | 'preview'>('editor')
-  const [previewTab, setPreviewTab] = useState<'preview' | 'html'>('preview')
   const [lineCol, setLineCol] = useState({ line: 1, col: 1 })
   const [emptyOverlayDismissed, setEmptyOverlayDismissed] = useState(false)
   const editorRef = useRef<EditorInstance | null>(null)
 
   const wordCount = useMemo(() => countWords(value), [value])
-
   const showEmptyOverlay = isEmpty && !emptyOverlayDismissed && locale === 'en' && !value.trim()
 
   const handleMount: OnMount = useCallback((editor) => {
@@ -108,12 +122,10 @@ export function MonacoEditorPanel({
     ed.focus()
   }
 
-  const handleToolbarAction = (key: string) => {
+  const handleAction = (key: string) => {
     switch (key) {
       case 'bold': insertWrap('**', '**'); break
       case 'italic': insertWrap('*', '*'); break
-      case 'underline': insertWrap('<u>', '</u>'); break
-      case 'strike': insertWrap('~~', '~~'); break
       case 'h1': toggleLinePrefix('# '); break
       case 'h2': toggleLinePrefix('## '); break
       case 'h3': toggleLinePrefix('### '); break
@@ -126,101 +138,78 @@ export function MonacoEditorPanel({
     }
   }
 
-  const toolbarItems = [
-    { key: 'bold', icon: <BoldOutlined />, label: t('cv.editor.toolbar.bold'), group: 'format' },
-    { key: 'italic', icon: <ItalicOutlined />, label: t('cv.editor.toolbar.italic'), group: 'format' },
-    { key: 'h1', icon: null, label: 'H1', wide: true, group: 'heading' },
-    { key: 'h2', icon: null, label: 'H2', wide: true, group: 'heading' },
-    { key: 'h3', icon: null, label: 'H3', wide: true, group: 'heading' },
-    { key: 'ul', icon: <UnorderedListOutlined />, label: t('cv.editor.toolbar.bulletList'), group: 'list' },
-    { key: 'ol', icon: <OrderedListOutlined />, label: t('cv.editor.toolbar.numberedList'), group: 'list' },
-    { key: 'link', icon: <LinkOutlined />, label: 'Link', group: 'insert' },
-    { key: 'divider', icon: <MinusOutlined />, label: t('cv.editor.toolbar.divider'), group: 'insert' },
-    { key: 'undo', icon: <UndoOutlined />, label: 'Undo', group: 'history' },
-    { key: 'redo', icon: <RedoOutlined />, label: 'Redo', group: 'history' },
-  ]
-
-  const row2Items = [
-    { key: 'alignLeft', icon: <AlignLeftOutlined />, label: 'Alinhar esquerda', group: 'align' },
-    { key: 'alignCenter', icon: <AlignCenterOutlined />, label: 'Centralizar', group: 'align' },
-    { key: 'alignRight', icon: <AlignRightOutlined />, label: 'Alinhar direita', group: 'align' },
+  const TOOLBAR_ITEMS = [
+    { group: 'format', key: 'bold',    icon: <BoldOutlined />,          label: 'Bold',    wide: false },
+    { group: 'format', key: 'italic',  icon: <ItalicOutlined />,         label: 'Italic',  wide: false },
+    { group: 'heading', key: 'h1',     icon: null, label: 'H1',  wide: true  },
+    { group: 'heading', key: 'h2',     icon: null, label: 'H2',  wide: true  },
+    { group: 'heading', key: 'h3',     icon: null, label: 'H3',  wide: true  },
+    { group: 'list', key: 'ul',        icon: <UnorderedListOutlined />,  label: 'List',    wide: false },
+    { group: 'list', key: 'ol',        icon: <OrderedListOutlined />,    label: 'OL',      wide: false },
+    { group: 'insert', key: 'link',    icon: <LinkOutlined />,           label: 'Link',    wide: false },
+    { group: 'insert', key: 'divider', icon: <MinusOutlined />,          label: '---',     wide: false },
+    { group: 'history', key: 'undo',   icon: <UndoOutlined />,           label: 'Undo',    wide: false },
+    { group: 'history', key: 'redo',   icon: <RedoOutlined />,           label: 'Redo',    wide: false },
   ]
 
   const isPtBr = locale === 'pt-BR'
-  const sectionChips = isPtBr
-    ? [t('cv.sectionResume'), t('cv.sectionExperience'), t('cv.sectionEducation'), t('cv.sectionSkills'), t('cv.sectionLanguages'), t('cv.sectionCerts'), t('cv.sectionProjects'), t('cv.sectionVoluntary'), t('cv.addSection')]
-    : ['Summary', 'Experience', 'Education', 'Skills', 'Languages', 'Certifications', 'Projects', t('cv.addSection')]
-
-  const localeTitle = isPtBr ? `🇧🇷 Currículo em Português` : `🇺🇸 CV em Inglês`
   const localeBadge = isPtBr ? 'PT-BR' : 'EN'
-
-  const editorOptions = {
-    minimap: { enabled: false },
-    wordWrap: 'on' as const,
-    lineNumbers: 'off' as const,
-    folding: false,
-    renderLineHighlight: 'none' as const,
-    scrollBeyondLastLine: false,
-    fontSize: 13,
-    lineDecorationsWidth: 8,
-    padding: { top: 12, bottom: 12 },
-  }
+  const localeTitle = isPtBr ? '🇧🇷 Português' : '🇺🇸 English'
 
   return (
     <div className={styles.root}>
-      {/* Card header */}
-      <div className={styles.cardHeader}>
-        <div className={styles.headerLeft}>
-          <span className={styles.headerTitle}>{localeTitle}</span>
-          {isOptional && (
-            <span className={styles.optionalBadge}>
-              {t('common.optional')}
-            </span>
-          )}
-          <span className={styles.localeBadge}>
-            {localeBadge}
-          </span>
+      {/* Toolbar */}
+      <div className={styles.toolbar}>
+        {/* Row 1: locale info + word count */}
+        <div className={styles.toolbarHeaderRow}>
+          <div className={styles.toolbarHeaderLeft}>
+            <span style={{ color: 'rgba(255,255,255,0.7)', fontSize: '1.3rem' }}>{localeTitle}</span>
+            <span className={styles.localeBadge}>{localeBadge}</span>
+            {isOptional && <span className={styles.optionalBadge}>{t('common.optional')}</span>}
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '1.2rem' }}>
+            {isMobile && (
+              <div className={styles.mobileTabRow}>
+                <button type="button" className={styles.mobileTabBtn(mobileTab === 'editor')} onClick={() => setMobileTab('editor')}>
+                  {t('cv.editor.editorTab') || 'Editor'}
+                </button>
+                <button type="button" className={styles.mobileTabBtn(mobileTab === 'preview')} onClick={() => setMobileTab('preview')}>
+                  {t('cv.editor.previewTab')}
+                </button>
+              </div>
+            )}
+            <span className={styles.wordCountLabel}>{t('cv.wordCount', { count: wordCount })}</span>
+          </div>
         </div>
-        <span className={styles.wordCountLabel}>
-          {t('cv.wordCount', { count: wordCount })}
-        </span>
-      </div>
 
-      {/* Section navigation chips */}
-      <div className={styles.chipsBar}>
-        <span className={styles.chipsGoToLabel}>
-          {t('cv.editor.goTo')}
-        </span>
-        {sectionChips.map((chip, i) => (
-          <button key={i} type="button" className={styles.sectionChip}>
-            {chip}
-          </button>
-        ))}
-        {locale === 'en' && onTranslateFromPtBr && (
-          <button type="button" onClick={onTranslateFromPtBr} className={styles.translateBtn}>
-            {t('cv.translateFromPtBr')}
-          </button>
-        )}
-      </div>
-
-      {/* Toolbar row 1 */}
-      <div className={styles.toolbarRow}>
-        <EditorToolbar items={toolbarItems} onAction={handleToolbarAction} />
-        <div className={styles.toolbarRowRight}>
-          {isMobile && <PreviewTabs activeTab={mobileTab} onChange={setMobileTab} />}
+        {/* Row 2: formatting buttons */}
+        <div className={styles.toolsRow}>
+          {GROUPS.map((group, gi) => {
+            const items = TOOLBAR_ITEMS.filter((item) => item.group === group)
+            return (
+              <React.Fragment key={group}>
+                {items.map((item) => (
+                  <button
+                    key={item.key}
+                    type="button"
+                    className={styles.toolbarBtn(false, item.wide)}
+                    onClick={() => handleAction(item.key)}
+                  >
+                    {item.icon ?? item.label}
+                  </button>
+                ))}
+                {gi < GROUPS.length - 1 && <div className={styles.toolbarDivider} />}
+              </React.Fragment>
+            )
+          })}
         </div>
-      </div>
-
-      {/* Toolbar row 2 */}
-      <div className={styles.toolbarRow2}>
-        <EditorToolbar items={row2Items} onAction={handleToolbarAction} />
       </div>
 
       {/* Validation errors */}
       {errors.length > 0 && (
         <Alert
           type="error"
-          style={{ borderRadius: 0, borderLeft: 'none', borderRight: 'none', borderBottom: 'none' }}
+          className={styles.errorBanner}
           message={t('cv.editor.validationErrors')}
           description={
             <ul style={{ margin: `${Spacing.xs} 0 0`, paddingLeft: Spacing.lg0 }}>
@@ -233,45 +222,31 @@ export function MonacoEditorPanel({
       {/* Editor area */}
       <div className={styles.editorAreaRelative}>
         {isMobile ? (
-          <div className={styles.mobileBorder}>
-            <div className={styles.mobileEditorHeight}>
-              {mobileTab === 'editor' ? (
-                <Editor height="100%" defaultLanguage="markdown" value={value} onChange={(v) => onChange(v ?? '')} onMount={handleMount} options={editorOptions} />
-              ) : (
-                <div className={styles.mobilePreviewPane}>
-                  <div className="markdown-preview"><ReactMarkdown remarkPlugins={[remarkGfm]}>{value}</ReactMarkdown></div>
-                </div>
-              )}
-            </div>
-          </div>
-        ) : (
-          <div>
-            {/* Preview / HTML tabs */}
-            <div className={styles.desktopTabsBar}>
-              {(['preview', 'html'] as const).map((tab) => (
-                <button
-                  key={tab}
-                  type="button"
-                  onClick={() => setPreviewTab(tab)}
-                  className={styles.previewTabBtn(previewTab === tab)}
-                >
-                  {tab === 'preview' ? `📄 ${t('cv.editor.previewTab')}` : `</> ${t('cv.editor.htmlTab')}`}
-                </button>
-              ))}
-            </div>
-
-            <div className={styles.splitPane(height)}>
-              <div className={styles.editorHalf}>
-                <Editor height="100%" defaultLanguage="markdown" value={value} onChange={(v) => onChange(v ?? '')} onMount={handleMount} options={editorOptions} />
+          <>
+            {mobileTab === 'editor' ? (
+              <div className={styles.mobileEditorHeight}>
+                <Editor height="100%" defaultLanguage="markdown" theme="vs-dark"
+                  value={value} onChange={(v) => onChange(v ?? '')}
+                  onMount={handleMount} options={EDITOR_OPTIONS} />
               </div>
-              <div className={styles.previewHalf}>
-                {previewTab === 'preview' ? (
-                  <div className="markdown-preview"><ReactMarkdown remarkPlugins={[remarkGfm]}>{value}</ReactMarkdown></div>
-                ) : (
-                  <pre className={styles.htmlPre}>
-                    {value}
-                  </pre>
-                )}
+            ) : (
+              <div className={styles.mobilePreviewPane}>
+                <div className="markdown-preview">
+                  <ReactMarkdown remarkPlugins={[remarkGfm]}>{value}</ReactMarkdown>
+                </div>
+              </div>
+            )}
+          </>
+        ) : (
+          <div className={styles.splitPane(height)}>
+            <div className={styles.editorHalf}>
+              <Editor height="100%" defaultLanguage="markdown" theme="vs-dark"
+                value={value} onChange={(v) => onChange(v ?? '')}
+                onMount={handleMount} options={EDITOR_OPTIONS} />
+            </div>
+            <div className={styles.previewHalf}>
+              <div className="markdown-preview">
+                <ReactMarkdown remarkPlugins={[remarkGfm]}>{value}</ReactMarkdown>
               </div>
             </div>
           </div>
@@ -281,25 +256,15 @@ export function MonacoEditorPanel({
         {showEmptyOverlay && (
           <div className={styles.emptyOverlay}>
             <span style={{ fontSize: '4rem' }}>🌐</span>
-            <p className={styles.overlayTitle}>
-              {t('cv.noEnVersion')}
-            </p>
-            <p className={styles.overlaySubtitle}>
-              {t('cv.noEnVersionSub')}
-            </p>
+            <p className={styles.overlayTitle}>{t('cv.noEnVersion')}</p>
+            <p className={styles.overlaySubtitle}>{t('cv.noEnVersionSub')}</p>
             <div className={styles.overlayBtns}>
-              <button
-                type="button"
-                onClick={() => { setEmptyOverlayDismissed(true); onStartFromScratch?.() }}
-                className={styles.overlayPrimaryBtn}
-              >
+              <button type="button" className={styles.overlayPrimaryBtn}
+                onClick={() => { setEmptyOverlayDismissed(true); onStartFromScratch?.() }}>
                 ✏️ {t('cv.startFromScratch')}
               </button>
-              <button
-                type="button"
-                onClick={() => { setEmptyOverlayDismissed(true); onTranslateFromPtBr?.() }}
-                className={styles.overlayGhostBtn}
-              >
+              <button type="button" className={styles.overlayGhostBtn}
+                onClick={() => { setEmptyOverlayDismissed(true); onTranslateFromPtBr?.() }}>
                 🌐 {t('cv.translateFromPtBr')}
               </button>
             </div>
@@ -312,7 +277,7 @@ export function MonacoEditorPanel({
         <span>Markdown</span>
         <span>Ln {lineCol.line}, Col {lineCol.col}</span>
         <span>UTF-8</span>
-        <span>{t('cv.wordCount', { count: wordCount })}</span>
+        <span className={styles.statusRight}>{localeBadge}</span>
       </div>
     </div>
   )

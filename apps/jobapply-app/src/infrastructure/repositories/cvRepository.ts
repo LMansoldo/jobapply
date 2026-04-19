@@ -11,6 +11,10 @@ import type {
   ATSReport,
   InterviewPrep,
 } from '../../domain/cv/types'
+import {
+  createCVFromPersonalDataAndLocale,
+  createInitialPTBRContent,
+} from '../../domain/cv/helpers'
 
 // In-memory CV store for mock mode (null = not created yet)
 let mockCV: CV | null = null
@@ -42,15 +46,16 @@ export async function createCV(payload: CVCreatePayload): Promise<CV> {
     await delay(700)
     if (mockCV) throw { response: { data: { message: 'Usuário já possui um CV' }, status: 409 } }
     mockCVInitialized = true
-    mockCV = {
-      _id: `cv-${Date.now()}`,
-      user: 'user-001',
-      ...payload,
-      languages: payload.languages ?? [],
-      tailoredVersions: [],
-      localeVersions: [],
-      updatedAt: new Date().toISOString(),
-    }
+
+    // Create initial CV with mock PT-BR content for new users
+    const initialPTBRContent = createInitialPTBRContent()
+    mockCV = createCVFromPersonalDataAndLocale(
+      payload,
+      initialPTBRContent,
+      `cv-${Date.now()}`,
+      'user-001'
+    )
+
     return { ...mockCV }
   }
 
@@ -62,7 +67,17 @@ export async function updateCV(id: string, payload: CVCreatePayload): Promise<CV
   if (USE_MOCK) {
     await delay(600)
     if (!mockCV) throw { response: { data: { message: 'CV não encontrado' }, status: 404 } }
-    mockCV = { ...mockCV, ...payload, _id: id, updatedAt: new Date().toISOString() }
+
+    // Update personal data while preserving locale content
+    mockCV = {
+      ...mockCV,
+      ...payload,
+      _id: id,
+      updatedAt: new Date().toISOString(),
+      // Preserve existing localeVersions
+      localeVersions: mockCV.localeVersions,
+      tailoredVersions: mockCV.tailoredVersions,
+    }
     return { ...mockCV }
   }
 

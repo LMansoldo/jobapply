@@ -4,179 +4,136 @@ import { FontSize, FontWeight, FontFamily } from '../../../../styles/theme/typog
 import { Spacing } from '../../../../styles/theme/spacing'
 import { BorderRadius } from '../../../../styles/theme/radius'
 
+const BTN_SIZE = '2.6rem'
+const STATUS_HEIGHT = '2.4rem'
+
+const MOBILE = '@media (max-width: 767px)'
+const SMALL_MOBILE = '@media (max-width: 767px) and (max-height: 680px)'
+
 export const root = css({
   display: 'flex',
   flexDirection: 'column',
-  gap: 0,
+  background: Colors.surfaceEditor,
+  borderRadius: BorderRadius.base,
+  overflow: 'hidden',
+  [MOBILE]: {
+    borderRadius: 0,
+  },
 })
 
-export const cardHeader = css({
-  background: Colors.white,
-  border: `1px solid ${Colors.surfaceBorder}`,
-  borderBottom: 'none',
-  borderRadius: `${BorderRadius.base} ${BorderRadius.base} 0 0`,
-  padding: `${Spacing.md} ${Spacing.lg}`,
+export const toolbar = css({
+  background: Colors.surfaceDarker,
+  borderBottom: `1px solid ${Colors.surfaceEditorBorder}`,
   display: 'flex',
+  flexDirection: 'column',
+  alignItems: 'flex-start',
+  justifyContent: 'center',
+  padding: `${Spacing.sm} ${Spacing.md}`,
+  gap: Spacing.xs,
+  flexShrink: 0,
+})
+
+export const toolbarHeaderRow = css({
+  display: 'flex',
+  flexDirection: 'row',
   alignItems: 'center',
   justifyContent: 'space-between',
+  width: '100%',
 })
 
-export const headerLeft = css({
+export const toolbarHeaderLeft = css({
   display: 'flex',
   alignItems: 'center',
   gap: Spacing.sm,
-})
-
-export const headerTitle = css({
-  fontWeight: FontWeight.semibold,
-  fontSize: FontSize.base,
-  color: Colors.textMain,
-})
-
-export const optionalBadge = css({
-  fontSize: FontSize.xxs,
-  fontWeight: FontWeight.semibold,
-  background: Colors.infoBg,
-  color: Colors.info,
-  padding: `1px ${Spacing.sm}`,
-  borderRadius: '10px',
 })
 
 export const localeBadge = css({
   fontSize: FontSize.xxs,
   fontWeight: FontWeight.bold,
-  background: Colors.primaryLight,
-  color: Colors.primaryDark,
+  background: 'rgba(124,58,237,0.25)',
+  color: Colors.primary,
+  padding: `1px ${Spacing.sm}`,
+  borderRadius: '10px',
+})
+
+export const optionalBadge = css({
+  fontSize: FontSize.xxs,
+  fontWeight: FontWeight.semibold,
+  background: 'rgba(96,165,250,0.15)',
+  color: Colors.blue,
   padding: `1px ${Spacing.sm}`,
   borderRadius: '10px',
 })
 
 export const wordCountLabel = css({
-  fontSize: FontSize.sm,
-  color: Colors.textSub,
+  fontSize: FontSize.xxs,
+  color: Colors.white,
+  fontFamily: FontFamily.mono,
 })
 
-export const chipsBar = css({
-  background: Colors.surfaceLight,
-  border: `1px solid ${Colors.surfaceBorder}`,
-  borderBottom: 'none',
-  padding: `${Spacing.sm} ${Spacing.lg}`,
+export const toolsRow = css({
   display: 'flex',
+  flexDirection: 'row',
   alignItems: 'center',
-  gap: Spacing.sm,
-  overflowX: 'auto',
 })
 
-export const chipsGoToLabel = css({
-  fontSize: FontSize.xxs,
-  color: Colors.textSub,
-  whiteSpace: 'nowrap',
-  fontWeight: FontWeight.medium,
-})
-
-export const sectionChip = css({
-  background: Colors.white,
-  border: `1px solid ${Colors.surfaceBorder}`,
-  borderRadius: '12px',
-  padding: `2px ${Spacing.sm}`,
-  fontSize: FontSize.xxs,
-  fontWeight: FontWeight.medium,
-  color: Colors.textSub,
-  cursor: 'pointer',
-  whiteSpace: 'nowrap',
-  fontFamily: FontFamily.body,
-  transition: 'border-color 0.15s, color 0.15s',
-})
-
-export const translateBtn = css({
-  marginLeft: 'auto',
-  background: Colors.primaryLight,
+export const toolbarBtn = (active = false, wide = false) => css({
+  display: 'inline-flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  gap: Spacing.xxs,
+  minWidth: BTN_SIZE,
+  height: BTN_SIZE,
+  padding: `0 ${wide ? Spacing.sm : Spacing.xs}`,
   border: 'none',
-  borderRadius: '12px',
-  padding: `2px ${Spacing.md}`,
-  fontSize: FontSize.xxs,
-  fontWeight: FontWeight.semibold,
-  color: Colors.primaryDark,
-  cursor: 'pointer',
-  whiteSpace: 'nowrap',
+  background: active ? 'rgba(124,58,237,0.25)' : 'transparent',
+  color: active ? Colors.primary : 'rgba(255,255,255,0.65)',
+  fontSize: FontSize.md0,
+  fontWeight: wide ? FontWeight.semibold : FontWeight.regular,
   fontFamily: FontFamily.body,
+  cursor: 'pointer',
+  transition: 'background 0.12s, color 0.12s',
+  ':hover': {
+    background: 'rgba(255,255,255,0.08)',
+    color: 'rgba(255,255,255,0.9)',
+  },
 })
 
-export const toolbarRow = css({
-  background: Colors.white,
-  border: `1px solid ${Colors.surfaceBorder}`,
-  borderBottom: 'none',
-  padding: 0,
+export const toolbarDivider = css({
+  width: '1px',
+  height: '1.6rem',
+  background: 'rgba(255,255,255,0.12)',
+  margin: `0 ${Spacing.xxs}`,
+  flexShrink: 0,
+})
+
+export const mobileTabRow = css({
   display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'space-between',
+  gap: '2px',
 })
 
-export const toolbarRowRight = css({
-  display: 'flex',
-  alignItems: 'center',
-  gap: Spacing.sm,
-  paddingRight: Spacing.md,
-})
-
-export const toolbarRow2 = css({
-  background: Colors.white,
-  border: `1px solid ${Colors.surfaceBorder}`,
-  borderBottom: 'none',
-  padding: 0,
-})
-
-export const editorAreaRelative = css({
-  position: 'relative',
-})
-
-export const mobileBorder = css({
-  border: `1px solid ${Colors.surfaceBorder}`,
-  overflow: 'hidden',
-})
-
-export const mobileEditorHeight = css({
-  height: Spacing.editorHeightMobile,
-})
-
-export const mobilePreviewPane = css({
-  height: '100%',
-  overflowY: 'auto',
-  padding: `${Spacing.md2} ${Spacing.md}`,
-  background: Colors.white,
-})
-
-export const desktopTabsBar = css({
-  background: Colors.white,
-  border: `1px solid ${Colors.surfaceBorder}`,
-  borderBottom: 'none',
-  display: 'flex',
-  alignItems: 'center',
-  gap: 0,
-})
-
-export const previewTabBtn = (active: boolean) => css({
-  padding: `${Spacing.sm} ${Spacing.md}`,
-  border: 'none',
-  background: 'none',
+export const mobileTabBtn = (active: boolean) => css({
+  padding: `${Spacing.xs} ${Spacing.md}`,
+  border: `1px solid ${active ? Colors.primary : 'rgba(255,255,255,0.15)'}`,
+  background: active ? 'rgba(124,58,237,0.25)' : 'transparent',
+  color: active ? Colors.primary : 'rgba(255,255,255,0.5)',
   fontSize: FontSize.sm,
-  fontWeight: active ? FontWeight.semibold : FontWeight.regular,
-  color: active ? Colors.primaryDark : Colors.textSub,
-  borderBottom: `2px solid ${active ? Colors.primaryDark : 'transparent'}`,
-  cursor: 'pointer',
+  fontWeight: FontWeight.medium,
   fontFamily: FontFamily.body,
+  cursor: 'pointer',
+  borderRadius: BorderRadius.xs,
 })
 
 export const splitPane = (height: number) => css({
   display: 'flex',
   height,
-  border: `1px solid ${Colors.surfaceBorder}`,
   overflow: 'hidden',
 })
 
 export const editorHalf = css({
   width: '50%',
-  borderRight: `1px solid ${Colors.surfaceBorder}`,
+  borderRight: `1px solid ${Colors.surfaceEditorBorder}`,
+  overflow: 'hidden',
 })
 
 export const previewHalf = css({
@@ -186,12 +143,54 @@ export const previewHalf = css({
   background: Colors.white,
 })
 
-export const htmlPre = css({
+const MOBILE_EDITOR_HEIGHT = '52rem'
+const SMALL_MOBILE_EDITOR_HEIGHT = '32rem'
+
+export const mobileEditorHeight = css({
+  height: MOBILE_EDITOR_HEIGHT,
+  overflow: 'hidden',
+  [SMALL_MOBILE]: {
+    height: SMALL_MOBILE_EDITOR_HEIGHT,
+  },
+})
+
+export const mobilePreviewPane = css({
+  height: MOBILE_EDITOR_HEIGHT,
+  [SMALL_MOBILE]: {
+    height: SMALL_MOBILE_EDITOR_HEIGHT,
+  },
+  overflowY: 'auto',
+  padding: `${Spacing.md2} ${Spacing.md}`,
+  background: Colors.white,
+})
+
+export const errorBanner = css({
+  borderLeft: 'none',
+  borderRight: 'none',
+  borderBottom: 'none',
+  borderRadius: 0,
+})
+
+export const statusBar = css({
+  height: STATUS_HEIGHT,
+  background: Colors.surfaceDarker,
+  borderTop: `1px solid ${Colors.surfaceEditorBorder}`,
+  display: 'flex',
+  alignItems: 'center',
+  gap: Spacing.lg,
+  padding: `0 ${Spacing.lg}`,
   fontFamily: FontFamily.mono,
   fontSize: FontSize.xxs,
-  color: Colors.textMain,
-  whiteSpace: 'pre-wrap',
-  margin: 0,
+  color: 'rgba(255,255,255,0.4)',
+  flexShrink: 0,
+})
+
+export const statusRight = css({
+  marginLeft: 'auto',
+})
+
+export const editorAreaRelative = css({
+  position: 'relative',
 })
 
 export const emptyOverlay = css({
@@ -251,18 +250,4 @@ export const overlayGhostBtn = css({
   fontWeight: FontWeight.semibold,
   fontSize: FontSize.sm,
   cursor: 'pointer',
-})
-
-export const statusBar = css({
-  background: Colors.surfaceEditor,
-  borderRadius: `0 0 ${BorderRadius.base} ${BorderRadius.base}`,
-  padding: `${Spacing.xs} ${Spacing.lg}`,
-  display: 'flex',
-  alignItems: 'center',
-  gap: Spacing.lg,
-  fontSize: FontSize.xxs,
-  color: 'rgba(255,255,255,0.5)',
-  fontFamily: FontFamily.mono,
-  border: `1px solid ${Colors.surfaceEditorBorder}`,
-  borderTop: 'none',
 })

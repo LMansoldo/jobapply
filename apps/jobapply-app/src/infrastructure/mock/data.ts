@@ -108,9 +108,9 @@ export const MOCK_CV: CV = {
   phone: '+55 61 99999-9999',
   location: 'Brasília, Brasil',
   linkedin: 'linkedin.com/in/lucasmansoldo',
-  title: 'Senior Frontend Engineer',
+  objective: 'Senior Frontend Engineer',  // Renamed from title
   github: 'github.com/lucasg',
-  website: 'lucasmansoldo.dev',
+  portfolio: 'lucasmansoldo.dev',  // Renamed from website
   languages: [{ language: 'Português', level: 'Nativo' }, { language: 'Inglês', level: 'Avançado' }, { language: 'Espanhol', level: 'Intermediário' }],
   tailoredVersions: [],
   localeVersions: [
@@ -145,17 +145,8 @@ export const MOCK_CV: CV = {
           ],
         },
       ],
-      skillPercentages: [
-        { name: 'React', percent: 95 },
-        { name: 'TypeScript', percent: 90 },
-        { name: 'Node.js', percent: 75 },
-        { name: 'GraphQL', percent: 80 },
-        { name: 'Docker', percent: 65 },
-      ],
-      languageLevels: [
-        { name: 'Português', level: 'Nativo' },
-        { name: 'Inglês', level: 'Avançado' },
-      ],
+      // Removed skillPercentages (not in API)
+      // Removed languageLevels (not in API)
       education: [
         {
           degree: 'Bacharel em Ciência da Computação',

@@ -11,6 +11,8 @@ export interface CVViewerSidebarProps {
   onLocaleChange: (locale: 'pt-BR' | 'en') => void
   onEdit: () => void
   onExportPDF: () => void
+  onExportMarkdown: () => void
+  onDelete: () => void
   onShare?: () => void
   onDeleteVersion?: () => void
   score: number

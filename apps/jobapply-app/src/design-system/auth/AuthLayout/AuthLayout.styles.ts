@@ -1,37 +1,59 @@
+import { css } from '@emotion/css'
 import { Colors } from '../../../styles/theme/colors'
 import { Shadows } from '../../../styles/theme/shadows'
 import { Spacing } from '../../../styles/theme/spacing'
+import { mediaQueries } from '../../../styles/theme/breakpoints'
 
-export const styles = {
-  page: {
-    display: 'flex',
-    minHeight: '100vh',
-    background: Colors.pageBg,
+export const page = css({
+  display: 'flex',
+  flexDirection: 'column',
+  minHeight: '100vh',
+  background: Colors.pageBg,
+
+  [mediaQueries.md]: {
+    flexDirection: 'row',
   },
-  leftPanel: {
+})
+
+export const leftPanel = css({
+  display: 'none',
+
+  [mediaQueries.md]: {
+    display: 'flex',
     flex: '0 0 45%',
     background: Colors.gradientHeroDark,
     padding: Spacing.xxl,
-    display: 'flex',
-    flexDirection: 'column' as const,
+    flexDirection: 'column',
     justifyContent: 'center',
     boxShadow: Shadows.auth,
     overflow: 'hidden',
-    position: 'relative' as const,
+    position: 'relative',
   },
-  rightPanel: {
-    flex: 1,
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
+})
+
+export const rightPanel = css({
+  flex: 1,
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  padding: `${Spacing.xl} ${Spacing.md}`,
+  minHeight: '100vh',
+
+  [mediaQueries.md]: {
+    padding: Spacing.xxl,
+    minHeight: 'auto',
+  },
+})
+
+export const formCard = css({
+  background: Colors.white,
+  borderRadius: '1.6rem',
+  boxShadow: Shadows.lg,
+  padding: `${Spacing.xl} ${Spacing.lg}`,
+  width: '100%',
+  maxWidth: '42rem',
+
+  [mediaQueries.md]: {
     padding: Spacing.xxl,
   },
-  formCard: {
-    background: Colors.white,
-    borderRadius: '1.6rem',
-    boxShadow: Shadows.lg,
-    padding: Spacing.xxl,
-    width: '100%',
-    maxWidth: '42rem',
-  },
-}
+})

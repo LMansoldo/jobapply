@@ -18,8 +18,6 @@ export interface CVBaseFormProps {
   hasCv: boolean
   /** Whether a save operation is in progress */
   saving: boolean
-  /** Current step label e.g. "Passo 1 de 3" */
-  stepLabel?: string
   /** Callback to proceed to the next step */
   onNext: () => void
   /** Callback to go back to the viewer */

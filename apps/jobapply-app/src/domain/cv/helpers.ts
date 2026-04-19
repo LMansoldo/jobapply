@@ -11,7 +11,7 @@
  *   ## Languages       — bullet list: Language: Level
  */
 import { Colors } from '../../styles/theme/colors'
-import type { CV, CVLocalePayload, CVLocaleVersion } from './types'
+import type { CV, CVCreatePayload, CVLocalePayload, CVLocaleVersion } from './types'
 
 // ─── Parse Result ────────────────────────────────────────────────────────────
 
@@ -327,7 +327,7 @@ export function downloadMarkdown(cv: CV): void {
   const parts: string[] = []
 
   // Header with personal info
-  const header = `# ${cv.fullName}\n\n${[cv.location, cv.email, cv.phone].filter(Boolean).join(' | ')}\n${[cv.linkedin, cv.github, cv.portfolio ?? cv.website].filter(Boolean).join(' | ')}\n`
+  const header = `# ${cv.fullName}\n\n${[cv.location, cv.email, cv.phone].filter(Boolean).join(' | ')}\n${[cv.linkedin, cv.github, cv.portfolio].filter(Boolean).join(' | ')}\n`
   parts.push(header)
 
   if (ptBrVersion) parts.push(`<!-- PT-BR -->\n${localeVersionToMarkdown(ptBrVersion)}`)
@@ -415,7 +415,7 @@ export function exportPDF(cv: CV): void {
   const header = `
     <h1>${cv.fullName}</h1>
     <p>${[cv.location, cv.email, cv.phone].filter(Boolean).join(' | ')}</p>
-    <p>${[cv.linkedin, cv.github, cv.portfolio ?? cv.website].filter(Boolean).join(' | ')}</p>
+    <p>${[cv.linkedin, cv.github, cv.portfolio].filter(Boolean).join(' | ')}</p>
     <hr/>
   `
 
@@ -625,7 +625,7 @@ function convertMarkdownToPdfMake(
   const row2: any[] = []
   if (cv.linkedin) row2.push(makeContactItem(ICON_LINKEDIN, cv.linkedin.replace(/^https?:\/\//, ''), ensureHttps(cv.linkedin)))
   if (cv.github)   row2.push(makeContactItem(ICON_GITHUB, cv.github.replace(/^https?:\/\//, ''), ensureHttps(cv.github)))
-  const site = cv.portfolio ?? cv.website
+  const site = cv.portfolio
   if (site) row2.push(makeContactItem(ICON_GLOBE, site.replace(/^https?:\/\//, ''), ensureHttps(site)))
   if (row2.length) content.push({ columns: row2, columnGap: 14, margin: [0, 0, 0, 4] })
 
@@ -895,7 +895,7 @@ async function downloadMarkdownAsPdfFallback(
 
       // Add contact info (same format as downloadMarkdown function)
       const contactLine1 = [cv.location, cv.email, cv.phone].filter(Boolean).join(' | ')
-      const contactLine2 = [cv.linkedin, cv.github, cv.portfolio ?? cv.website].filter(Boolean).join(' | ')
+      const contactLine2 = [cv.linkedin, cv.github, cv.portfolio].filter(Boolean).join(' | ')
 
       const htmlDoc = `<!DOCTYPE html>
 <html lang="${locale}">
@@ -963,6 +963,158 @@ async function downloadMarkdownAsPdfFallback(
       reject(error)
     }
   })
+}
+
+// ─── Transformation functions for frontend-API data mapping ──────────────────
+
+/**
+ * Creates a complete CV structure from personal data and locale content.
+ * Used when submitting to API which expects complete CV with localeVersions.
+ */
+export function createCVFromPersonalDataAndLocale(
+  personalData: CVCreatePayload,
+  localePTBRContent: CVLocalePayload,
+  cvId?: string,
+  userId?: string
+): CV {
+  const now = new Date().toISOString()
+
+  return {
+    _id: cvId || `cv-${Date.now()}`,
+    user: userId || 'unknown',
+    fullName: personalData.fullName,
+    email: personalData.email,
+    phone: personalData.phone,
+    location: personalData.location,
+    linkedin: personalData.linkedin,
+    objective: personalData.objective,
+    github: personalData.github,
+    portfolio: personalData.portfolio,
+    languages: personalData.languages || [],
+    tailoredVersions: [],
+    localeVersions: [
+      {
+        locale: 'pt-BR',
+        ...localePTBRContent
+      }
+    ],
+    updatedAt: now
+  }
+}
+
+/**
+ * Extracts personal data from a complete CV structure.
+ * Used when loading existing CV to populate personal info form.
+ */
+export function extractPersonalDataFromCV(cv: CV): CVCreatePayload {
+  return {
+    fullName: cv.fullName,
+    email: cv.email,
+    phone: cv.phone,
+    location: cv.location,
+    linkedin: cv.linkedin,
+    objective: cv.objective,
+    github: cv.github,
+    portfolio: cv.portfolio,
+    languages: cv.languages
+  }
+}
+
+/**
+ * Extracts locale content from a complete CV structure.
+ * Used when loading existing CV to populate locale-specific content.
+ */
+export function extractLocaleContentFromCV(cv: CV, locale: 'en' | 'pt-BR'): CVLocalePayload | null {
+  const localeVersion = cv.localeVersions.find(v => v.locale === locale)
+  if (!localeVersion) return null
+
+  // Return all fields except locale
+  const { locale: _, ...content } = localeVersion
+  return content
+}
+
+/**
+ * Updates a CV with new locale content.
+ * Used when submitting updates to locale-specific content.
+ */
+export function updateCVWithLocaleContent(
+  cv: CV,
+  locale: 'en' | 'pt-BR',
+  localeContent: CVLocalePayload
+): CV {
+  const updatedAt = new Date().toISOString()
+  const localeIndex = cv.localeVersions.findIndex(v => v.locale === locale)
+
+  const updatedLocaleVersion = {
+    locale,
+    ...localeContent
+  }
+
+  const updatedLocaleVersions = [...cv.localeVersions]
+
+  if (localeIndex >= 0) {
+    // Update existing locale version
+    updatedLocaleVersions[localeIndex] = updatedLocaleVersion
+  } else {
+    // Add new locale version
+    updatedLocaleVersions.push(updatedLocaleVersion)
+  }
+
+  return {
+    ...cv,
+    localeVersions: updatedLocaleVersions,
+    updatedAt
+  }
+}
+
+/**
+ * Creates initial PT-BR locale content from mock data.
+ * Used when new user registers and needs initial CV content to edit.
+ */
+export function createInitialPTBRContent(): CVLocalePayload {
+  return {
+    summary: 'Engenheiro Front-End Sênior com 5+ anos construindo aplicações web escaláveis. Especializado em React e TypeScript — código limpo e orientado a resultado.',
+    skills: [
+      { label: 'Frontend', items: ['React', 'TypeScript', 'Ant Design', 'Next.js'] },
+      { label: 'Backend', items: ['Node.js', 'MongoDB', 'REST APIs'] },
+      { label: 'Processos', items: ['Git', 'Code Review', 'CI/CD'] },
+    ],
+    experience: [
+      {
+        role: 'Senior Frontend Developer',
+        company: 'Tech Corp',
+        location: 'Brasília, Brasil',
+        period: 'Mar 2021 - Presente',
+        context: 'Liderança técnica do produto SaaS principal.',
+        highlights: [
+          'Liderou o desenvolvimento frontend do produto SaaS principal com React e Ant Design.',
+          'Mentorou desenvolvedores júnior em boas práticas de React e TypeScript.',
+        ],
+      },
+      {
+        role: 'Full Stack Developer',
+        company: 'Startup XYZ',
+        location: 'Remoto',
+        period: 'Jun 2019 - Fev 2021',
+        highlights: [
+          'Desenvolveu features full-stack com React e Node.js consumidas por clientes web e mobile.',
+          'Implementou APIs RESTful com Node.js e MongoDB.',
+        ],
+      },
+    ],
+    education: [
+      {
+        degree: 'Bacharel em Ciência da Computação',
+        institution: 'Universidade Federal de Minas Gerais',
+        location: 'Belo Horizonte, Brasil',
+        period: '2015 – 2019',
+      },
+    ],
+    certifications: [
+      { name: 'AWS Cloud Practitioner', org: 'Amazon Web Services', date: '2023' },
+      { name: 'Meta Front-End Developer', org: 'Meta', date: '2022' },
+    ],
+  }
 }
 
 // ─── Legacy compat aliases ───────────────────────────────────────────────────

@@ -2,15 +2,14 @@
  * @file CVPage.tsx
  * @description CV management page — horizontal stepper, viewer mode with CVTemplate, wizard with rich editor.
  */
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { Grid } from '../../../components/Grid'
-import { CheckOutlined, DeleteOutlined } from '@ant-design/icons'
+import { CheckOutlined } from '@ant-design/icons'
 import { useTranslation } from 'react-i18next'
 import { useAuth } from '../../../application/providers/AuthProvider'
 import { useAntApp } from '../../../components/AntApp'
 import { Button } from '../../../components/Button'
 import { Form } from '../../../components/Form'
-import { Popconfirm } from '../../../components/Popconfirm'
 import { Space } from '../../../components/Space'
 import { Spin } from '../../../components/Spin'
 import { CVViewer } from '../../../domain/cv/components/CVViewer'
@@ -47,7 +46,7 @@ const PREVIEW_CSS = `
 
 export default function CVPage() {
   const { cvId, setCvId } = useAuth()
-  const { message } = useAntApp()
+  const { message, modal } = useAntApp()
   const { t } = useTranslation()
   const screens = useBreakpoint()
   const isMobile = !screens.md
@@ -57,6 +56,7 @@ export default function CVPage() {
   const [saving, setSaving] = useState(false)
   const [currentStep, setCurrentStep] = useState(0)
   const [editMode, setEditMode] = useState(false)
+  const skipLoadEffect = useRef(false)
 
   const [baseForm] = Form.useForm<CVBaseFormValues>()
 
@@ -68,18 +68,16 @@ export default function CVPage() {
 
   useEffect(() => {
     if (!cvId) { setLoading(false); return }
-    getCV(cvId).then(applyCV).catch(() => setLoading(false))
+    if (skipLoadEffect.current) { skipLoadEffect.current = false; return }
+    getCV(cvId).then((data) => applyCV(data, false)).catch(() => setLoading(false))
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
+  }, [cvId])
 
 
-  function applyCV(data: CV) {
+  function applyCV(data: CV, isNewOrEditing = false) {
+    if (isNewOrEditing) skipLoadEffect.current = true
     setCv(data)
     setCvId(data._id)
-    // Backend stores languages as embedded objects {language, level}; extract names for the Select
-    const languageNames = (data.languages ?? []).map((l) =>
-      typeof l === 'string' ? l : (l as { language: string }).language
-    )
     baseForm.setFieldsValue({
       fullName: data.fullName,
       email: data.email,
@@ -88,7 +86,7 @@ export default function CVPage() {
       linkedin: data.linkedin,
       github: data.github,
       portfolio: data.portfolio,
-      languages: languageNames,
+      objective: data.objective,
     })
 
     const ptBrVersion = data.localeVersions?.find((v) => v.locale === 'pt-BR')
@@ -102,25 +100,23 @@ export default function CVPage() {
       ? localeVersionToMarkdown(enVersion, data.languages)
       : EN_TEMPLATE)
 
-    setEditMode(false)
-    setCurrentStep(0)
+    setEditMode(isNewOrEditing)
+    setCurrentStep(isNewOrEditing ? 1 : 0) // Se é novo ou editando, vai para step 1 (PT-BR)
     setLoading(false)
   }
   async function handleStep1Next() {
+    console.log('handleStep1Next called, current editMode:', editMode)
     try {
       const values = await baseForm.validateFields()
       setSaving(true)
       try {
-        // Transform language name strings to embedded objects that the backend expects
         const payload: CVCreatePayload = {
           ...values,
-          languages: (values.languages ?? []).map((l) => ({ language: l, level: '' })),
         }
         const updated = cv ? await updateCV(cv._id, payload) : await createCV(payload)
-        applyCV(updated)
-        setCurrentStep(1)
-        setEditMode(true)
-        message.success(t('cv.savePersonalInfo'))
+        console.log('applyCV called with isNewOrEditing=true')
+        applyCV(updated, true)
+        // Não mostra mensagem de success aqui, só no final
       } catch (err: unknown) {
         const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message ?? t('cv.savePersonalError')
         message.error(msg)
@@ -151,7 +147,7 @@ export default function CVPage() {
   }
 
   async function handleStep3Finish() {
-    if (enMarkdown.trim() === EN_TEMPLATE.trim()) { message.success(t('cv.registerSuccess')); setEditMode(false); return }
+    // Allow submission even if content is unchanged (per user requirement)
     const result = parseMarkdownToLocale(enMarkdown, 'en')
     if (result.errors.length > 0) { setEnErrors(result.errors); return }
     setEnErrors([])
@@ -160,7 +156,8 @@ export default function CVPage() {
     try {
       await updateCVLocale(cv._id, 'en', result.data!)
       message.success(t('cv.saveEnSuccess'))
-      setEditMode(false)
+      const refreshed = await getCV(cv._id)
+      applyCV(refreshed, false)
     } catch (err: unknown) {
       const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message ?? t('cv.saveEnError')
       message.error(msg)
@@ -169,10 +166,36 @@ export default function CVPage() {
     }
   }
 
-  function handleSkipEn() {
+  async function handleSkipEn() {
     setEnErrors([])
-    message.success(t('cv.skipEnSuccess'))
-    setEditMode(false)
+    if (!cv) {
+      message.error(t('cv.saveFirst'))
+      return
+    }
+
+    // Se chegou no step 2, o PT-BR já foi salvo pelo handleStep2Next
+    // Mas verificar se há erros no PT-BR atual
+    const ptBrResult = parseMarkdownToLocale(ptBrMarkdown, 'pt-BR')
+    if (ptBrResult.errors.length > 0) {
+      setPtBrErrors(ptBrResult.errors)
+      setCurrentStep(1) // Voltar para step 1 para corrigir PT-BR
+      return
+    }
+
+    setSaving(true)
+    try {
+      // Se o PT-BR atual é diferente do salvo, atualizar
+      // (o usuário pode ter editado depois de salvar)
+      await updateCVLocale(cv._id, 'pt-BR', ptBrResult.data!)
+      message.success(t('cv.skipEnSuccess'))
+      const refreshed = await getCV(cv._id)
+      applyCV(refreshed, false)
+    } catch (err: unknown) {
+      const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message ?? t('cv.savePtBrError')
+      message.error(msg)
+    } finally {
+      setSaving(false)
+    }
   }
 
   async function handleDelete() {
@@ -196,6 +219,17 @@ export default function CVPage() {
     }
   }
 
+  function handleDeleteRequest() {
+    modal.confirm({
+      title: t('cv.deleteCVTitle'),
+      content: t('cv.deleteCVConfirm'),
+      okText: t('common.delete'),
+      okButtonProps: { danger: true },
+      cancelText: t('common.cancel'),
+      onOk: handleDelete,
+    })
+  }
+
   if (loading) {
     return (
       <div className={styles.spinWrapper}>
@@ -211,21 +245,12 @@ export default function CVPage() {
     return (
       <>
         <div className={styles.viewerRoot}>
-          <div className={styles.viewerTopBar}>
-            <Popconfirm
-              title={t('cv.deleteCVTitle')}
-              description={t('cv.deleteCVConfirm')}
-              onConfirm={handleDelete}
-              okText={t('common.delete')}
-              okButtonProps={{ danger: true }}
-              cancelText={t('common.cancel')}
-            >
-              <Button danger icon={<DeleteOutlined />} loading={saving}>
-                {t('cv.deleteCV')}
-              </Button>
-            </Popconfirm>
-          </div>
-          <CVViewer cv={cv} onEdit={() => { setCurrentStep(0); setEditMode(true) }} isMobile={isMobile} />
+          <CVViewer
+            cv={cv}
+            onEdit={() => { setCurrentStep(0); setEditMode(true) }}
+            onDelete={handleDeleteRequest}
+            isMobile={isMobile}
+          />
         </div>
         {previewCssTag}
       </>
@@ -239,11 +264,18 @@ export default function CVPage() {
     { label: t('cv.steps.en'), sublabel: t('cv.steps.enDescription') },
   ]
 
-  const stepLabel = t('cv.stepCounter', { current: currentStep + 1, total: WIZARD_STEPS.length })
-
   // ── Mobile bottom nav bar ─────────────────────────────────────────────────
   const mobileBottomNav = isMobile && (
     <div className={styles.mobileBottomNav}>
+      {currentStep === 2 && (
+        <button
+          onClick={handleSkipEn}
+          disabled={saving}
+          className={styles.mobileSkipBtn}
+        >
+          {t('cv.editor.skipStep')}
+        </button>
+      )}
       <button
         onClick={currentStep === 0 ? handleStep1Next : currentStep === 1 ? handleStep2Next : handleStep3Finish}
         disabled={saving}
@@ -271,7 +303,6 @@ export default function CVPage() {
               isMobile={isMobile}
               hasCv={!!cv}
               saving={saving}
-              stepLabel={stepLabel}
               onNext={handleStep1Next}
               onBack={() => setEditMode(false)}
             />
@@ -288,10 +319,7 @@ export default function CVPage() {
               {!isMobile && (
                 <div className={styles.editorFooter}>
                   <Button onClick={() => setCurrentStep(0)}>{t('common.back')}</Button>
-                  <Space>
-                    <span className={styles.footerStepLabel}>{stepLabel}</span>
-                    <Button type="primary" onClick={handleStep2Next} loading={saving}>{t('cv.editor.validateAndContinue')}</Button>
-                  </Space>
+                  <Button type="primary" onClick={handleStep2Next} loading={saving}>{t('cv.editor.validateAndContinue')}</Button>
                 </div>
               )}
             </div>
@@ -315,7 +343,6 @@ export default function CVPage() {
                 <div className={styles.editorFooter}>
                   <Button onClick={() => setCurrentStep(1)}>{t('common.back')}</Button>
                   <Space>
-                    <span className={styles.footerStepLabel}>{stepLabel}</span>
                     <Button onClick={handleSkipEn}>{t('cv.editor.skipStep')}</Button>
                     <Button type="primary" onClick={handleStep3Finish} loading={saving} icon={<CheckOutlined />}>
                       {t('cv.editor.validateAndFinish')}

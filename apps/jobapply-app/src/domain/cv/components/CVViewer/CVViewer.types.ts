@@ -10,6 +10,8 @@ export interface CVViewerProps {
   cv: CV
   /** Callback to switch to edit mode */
   onEdit: () => void
+  /** Callback to delete the CV (with confirmation handled upstream) */
+  onDelete: () => void
   /** Whether the viewport is in mobile mode */
   isMobile: boolean
 }

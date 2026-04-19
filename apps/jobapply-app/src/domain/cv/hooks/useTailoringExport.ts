@@ -4,7 +4,8 @@
  * Encapsulates file download logic and user feedback messaging.
  */
 import { useCallback, useRef, useEffect } from 'react'
-import { downloadMarkdownText, downloadMarkdownAsPdf } from '../helpers'
+import { downloadMarkdownText, downloadMarkdownAsPdf, parseMarkdownToLocale } from '../helpers'
+import { updateCVLocale } from '../../../infrastructure/repositories/cvRepository'
 import type { CV } from '../types'
 import type { Job } from '../../jobs/types'
 
@@ -31,7 +32,7 @@ interface UseTailoringExportParams {
 export interface UseTailoringExportReturn {
   handleDownloadPDF: () => Promise<void>
   handleExportMarkdown: () => void
-  handleSaveAsVersion: () => void
+  handleSaveAsVersion: () => Promise<void>
 }
 
 export function useTailoringExport({
@@ -77,9 +78,28 @@ export function useTailoringExport({
     messageRef.current.success(tRef.current('tailoring.exportMarkdownSuccess'))
   }, [tailoredContent])
 
-  const handleSaveAsVersion = useCallback(() => {
-    messageRef.current.info(tRef.current('tailoring.saveAsVersion') + ' (feature em desenvolvimento)')
-  }, [])
+  const handleSaveAsVersion = useCallback(async () => {
+    if (!tailoredContent || !cv) {
+      messageRef.current.warning(tRef.current('tailoring.noContentToExport'))
+      return
+    }
+    const locale = chosenLocale ?? setupLocale
+    const { data, errors } = parseMarkdownToLocale(tailoredContent, locale)
+    if (errors.length > 0 || !data) {
+      messageRef.current.error(tRef.current('tailoring.saveVersionParseError'))
+      return
+    }
+    try {
+      messageRef.current.loading(tRef.current('tailoring.savingVersion'), 0)
+      await updateCVLocale(cv._id, locale, data)
+      messageRef.current.destroy()
+      messageRef.current.success(tRef.current('tailoring.saveVersionSuccess'))
+    } catch (error) {
+      messageRef.current.destroy()
+      console.error('Save version error:', error)
+      messageRef.current.error(tRef.current('tailoring.saveVersionError'))
+    }
+  }, [tailoredContent, cv, chosenLocale, setupLocale])
 
   return { handleDownloadPDF, handleExportMarkdown, handleSaveAsVersion }
 }

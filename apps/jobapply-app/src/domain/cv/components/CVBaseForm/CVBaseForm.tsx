@@ -17,16 +17,13 @@ import { useTranslation } from 'react-i18next'
 import type { CVBaseFormProps } from './CVBaseForm.types'
 import { Form, FormItem } from '../../../../components/Form'
 import { Input } from '../../../../components/Input'
-import { Select } from '../../../../components/Select'
 import { DSButton } from '../../../../design-system/primitives/DSButton'
-import { TipBox } from '../../../../design-system/primitives/TipBox'
 import { Row } from '../../../../components/Row'
 import { Col } from '../../../../components/Col'
-import { LANGUAGE_OPTIONS } from '../../constants'
 import { Colors } from '../../../../styles/theme/colors'
 import * as styles from './CVBaseForm.styles'
 
-export function CVBaseForm({ form, saving, hasCv, stepLabel, onNext, onBack }: CVBaseFormProps) {
+export function CVBaseForm({ form, saving, hasCv, isMobile, onNext, onBack }: CVBaseFormProps) {
   const { t } = useTranslation()
 
   return (
@@ -47,26 +44,6 @@ export function CVBaseForm({ form, saving, hasCv, stepLabel, onNext, onBack }: C
       </div>
 
       <div className={styles.cardBody}>
-        {/* Avatar Upload Zone */}
-        <div className={styles.avatarZone}>
-          <div className={styles.avatarLeft}>
-            <div className={styles.avatarCircle}>
-              📷
-            </div>
-            <div>
-              <p className={styles.avatarLabel}>
-                {t('cv.base.addPhoto')}
-              </p>
-              <p className={styles.avatarHint}>
-                {t('cv.base.avatarDragHint')}
-              </p>
-            </div>
-          </div>
-          <button type="button" className={styles.choosePhotoBtn}>
-            {t('cv.base.choosePhoto')}
-          </button>
-        </div>
-
         {/* Form Fields */}
         <Form form={form} layout="vertical" requiredMark="optional">
           <Row gutter={[16, 0]}>
@@ -79,7 +56,7 @@ export function CVBaseForm({ form, saving, hasCv, stepLabel, onNext, onBack }: C
 
             {/* Row: Cargo | Cidade */}
             <Col xs={24} sm={12}>
-              <FormItem name="title" label={t('cv.titleField')}>
+              <FormItem name="objective" label={t('cv.titleField')}>
                 <Input prefix={<ToolOutlined style={{ color: Colors.textSub }} />} placeholder={t('cv.titlePlaceholder')} />
               </FormItem>
             </Col>
@@ -97,7 +74,33 @@ export function CVBaseForm({ form, saving, hasCv, stepLabel, onNext, onBack }: C
             </Col>
             <Col xs={24} sm={12}>
               <FormItem name="phone" label={t('cv.base.phone')}>
-                <Input prefix={<PhoneOutlined style={{ color: Colors.textSub }} />} placeholder={t('cv.base.phonePlaceholder')} />
+                <Input
+                  prefix={<PhoneOutlined style={{ color: Colors.textSub }} />}
+                  placeholder={t('cv.base.phonePlaceholder')}
+                  onChange={(e) => {
+                    const rawValue = e.target.value.replace(/\D/g, '')
+                    // Limit to 13 digits (2 country + 2 area + 9 number)
+                    const limitedValue = rawValue.substring(0, 13)
+
+                    if (limitedValue.length === 0) {
+                      form.setFieldValue('phone', '')
+                      return
+                    }
+
+                    let formatted = `+${limitedValue.substring(0, 2)}`
+                    if (limitedValue.length > 2) {
+                      formatted += ` ${limitedValue.substring(2, 4)}`
+                    }
+                    if (limitedValue.length > 4) {
+                      formatted += ` ${limitedValue.substring(4, 9)}`
+                    }
+                    if (limitedValue.length > 9) {
+                      formatted += `-${limitedValue.substring(9, 13)}`
+                    }
+
+                    form.setFieldValue('phone', formatted)
+                  }}
+                />
               </FormItem>
             </Col>
 
@@ -113,24 +116,16 @@ export function CVBaseForm({ form, saving, hasCv, stepLabel, onNext, onBack }: C
               </FormItem>
             </Col>
 
-            {/* Row: Website */}
+            {/* Row: Portfolio */}
             <Col xs={24} sm={12}>
-              <FormItem name="website" label={t('cv.website')}>
-                <Input prefix={<GlobalOutlined style={{ color: Colors.textSub }} />} placeholder={t('cv.websitePlaceholder')} />
+              <FormItem name="portfolio" label={t('cv.portfolio')}>
+                <Input prefix={<GlobalOutlined style={{ color: Colors.textSub }} />} placeholder={t('cv.portfolioPlaceholder')} />
               </FormItem>
             </Col>
 
-            {/* Idiomas */}
-            <Col xs={24} sm={12}>
-              <FormItem name="languages" label={t('cv.base.languages')}>
-                <Select mode="multiple" options={LANGUAGE_OPTIONS} placeholder={t('cv.base.languagesPlaceholder')} />
-              </FormItem>
-            </Col>
           </Row>
         </Form>
 
-        {/* Tip box */}
-        <TipBox message={`💡 ${t('cv.base.avatarHint')}`} />
       </div>
 
       {/* Footer */}
@@ -141,15 +136,11 @@ export function CVBaseForm({ form, saving, hasCv, stepLabel, onNext, onBack }: C
           </DSButton>
         ) : <span />}
 
-        {stepLabel && (
-          <span className={styles.stepLabelText}>
-            {stepLabel}
-          </span>
+        {!isMobile && (
+          <DSButton variant="primary" onClick={onNext} loading={saving}>
+            {t('cv.base.saveAndContinue')} <ArrowRightOutlined />
+          </DSButton>
         )}
-
-        <DSButton variant="primary" onClick={onNext} loading={saving}>
-          {t('cv.base.saveAndContinue')} <ArrowRightOutlined />
-        </DSButton>
       </div>
     </div>
   )
