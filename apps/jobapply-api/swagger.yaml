@@ -449,12 +449,6 @@ components:
         optimalTemplate:
           type: object
           properties:
-            sectionsOrder:
-              type: array
-              description: Recommended CV section order
-              items:
-                type: string
-              example: [contact, objective, summary, skills, expertise, experience, education, languages]
             keywordsToAdd:
               type: array
               description: Keywords missing from the CV that should be added
@@ -1276,12 +1270,22 @@ paths:
                   type: string
                 phone:
                   type: string
+                location:
+                  type: string
+                linkedin:
+                  type: string
+                github:
+                  type: string
+                portfolio:
+                  type: string
+                objective:
+                  type: string
                 summary:
                   type: string
                 skills:
                   type: array
                   items:
-                    type: string
+                    $ref: '#/components/schemas/SkillGroup'
                 experience:
                   type: array
                   items:
@@ -1293,7 +1297,15 @@ paths:
                 languages:
                   type: array
                   items:
-                    type: string
+                    $ref: '#/components/schemas/Language'
+                certifications:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/Certification'
+                projects:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/Project'
       responses:
         '200':
           description: CV published successfully
