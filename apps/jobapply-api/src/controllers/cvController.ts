@@ -100,29 +100,34 @@ export async function publishCV(req: AuthRequest, res: Response, next: NextFunct
     const user = await User.findById(req.user.id);
     if (!user) { res.status(404).json({ message: 'User not found' }); return; }
 
-    const body = req.body as Partial<typeof cv>;
+    const { locale, ...overrides } = req.body as Record<string, unknown> & { locale?: string };
+
+    const resolved = locale ? applyLocale(cv.toObject(), locale) : cv.toObject();
 
     const published = await PublishedCV.findOneAndUpdate(
       { user: req.user.id },
       {
-        user: req.user.id,
-        public_id: user.public_id,
-        fullName: body.fullName ?? cv.fullName,
-        email: body.email ?? cv.email,
-        phone: body.phone ?? cv.phone,
-        location: body.location ?? cv.location,
-        linkedin: body.linkedin ?? cv.linkedin,
-        github: body.github ?? cv.github,
-        portfolio: body.portfolio ?? cv.portfolio,
-        objective: body.objective ?? cv.objective,
-        summary: body.summary ?? cv.summary,
-        skills: body.skills ?? cv.skills,
-        experience: body.experience ?? cv.experience,
-        education: body.education ?? cv.education,
-        languages: body.languages ?? cv.languages,
-        certifications: body.certifications ?? cv.certifications,
-        projects: body.projects ?? cv.projects,
-        published_at: new Date(),
+        $set: {
+          user: req.user.id,
+          public_id: user.public_id,
+          fullName: (overrides.fullName ?? resolved.fullName) as string,
+          email: (overrides.email ?? resolved.email) as string,
+          phone: overrides.phone ?? resolved.phone,
+          location: overrides.location ?? resolved.location,
+          linkedin: overrides.linkedin ?? resolved.linkedin,
+          github: overrides.github ?? resolved.github,
+          portfolio: overrides.portfolio ?? resolved.portfolio,
+          objective: overrides.objective ?? resolved.objective,
+          summary: overrides.summary ?? resolved.summary,
+          skills: overrides.skills ?? resolved.skills,
+          experience: overrides.experience ?? resolved.experience,
+          education: overrides.education ?? resolved.education,
+          languages: overrides.languages ?? resolved.languages,
+          certifications: overrides.certifications ?? resolved.certifications,
+          projects: overrides.projects ?? resolved.projects,
+          published_at: new Date(),
+        },
+        $unset: { expertise: '', tailoredVersions: '', localeVersions: '' },
       },
       { upsert: true, new: true }
     );

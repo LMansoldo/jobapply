@@ -1264,8 +1264,12 @@ paths:
           application/json:
             schema:
               type: object
-              description: Optional fields to override CV data in the published version
+              description: Optional locale and field overrides for the published version
               properties:
+                locale:
+                  type: string
+                  enum: [en, pt-BR]
+                  description: Locale version to use as base content. If omitted, uses root CV fields.
                 fullName:
                   type: string
                 email:
