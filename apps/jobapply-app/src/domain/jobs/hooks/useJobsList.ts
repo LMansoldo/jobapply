@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
+import { useQuery } from '@tanstack/react-query'
 import type { Job, JobFilters } from '../types'
 import { fetchJobs } from '../../../infrastructure/repositories/jobsRepository'
 import type { SortOption } from '../../../design-system/jobs/SortDropdown'
@@ -27,6 +28,7 @@ export interface UseJobsListReturn {
  * String-type filter changes are debounced — UI state updates immediately but
  * the API call fires only after 400 ms of inactivity.
  * Page changes update the page without resetting back to 1.
+ * Uses TanStack Query for caching — navback to Jobs returns 0ms from cache.
  */
 export function useJobsList(onError: () => void): UseJobsListReturn {
   // ── Committed filters — changing this triggers a fetch ────────────────────
@@ -37,32 +39,20 @@ export function useJobsList(onError: () => void): UseJobsListReturn {
   const [sort, setSort] = useState<SortOption>('newest')
   const [dismissed, setDismissed] = useState<Set<string>>(new Set())
 
-  // ── Fetch state ───────────────────────────────────────────────────────────
-  const [jobs, setJobs] = useState<Job[]>([])
-  const [total, setTotal] = useState(0)
-  const [loading, setLoading] = useState(false)
-
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const onErrorRef = useRef(onError)
+  useEffect(() => { onErrorRef.current = onError })
 
-  // ── Fetch whenever committed filters change ───────────────────────────────
+  // ── Query — cached, staleTime 5min (nav back = 0ms) ──────────────────────
+  const { data, isLoading, isError } = useQuery({
+    queryKey: ['jobs', filters],
+    queryFn: () => fetchJobs(filters),
+    placeholderData: (prev) => prev,
+  })
+
   useEffect(() => {
-    let cancelled = false
-    setLoading(true)
-    fetchJobs(filters)
-      .then((res) => {
-        if (cancelled) return
-        setJobs(res.jobs)
-        setTotal(res.total)
-      })
-      .catch(() => {
-        if (!cancelled) onError()
-      })
-      .finally(() => {
-        if (!cancelled) setLoading(false)
-      })
-    return () => { cancelled = true }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [filters])
+    if (isError) onErrorRef.current()
+  }, [isError])
 
   // ── Commit helpers ────────────────────────────────────────────────────────
   function commit(partial: Partial<JobFilters>) {
@@ -76,7 +66,6 @@ export function useJobsList(onError: () => void): UseJobsListReturn {
   // ── Public handlers ───────────────────────────────────────────────────────
   function handleFilterChange(key: keyof JobFilters, value: string | string[] | number | undefined) {
     if (typeof value === 'string') {
-      // UI state is managed by the specific handler (handleSearchChange etc.)
       if (debounceRef.current) clearTimeout(debounceRef.current)
       debounceRef.current = setTimeout(() => commitWithReset({ [key]: value }), 400)
     } else {
@@ -90,14 +79,13 @@ export function useJobsList(onError: () => void): UseJobsListReturn {
     debounceRef.current = setTimeout(() => commitWithReset({ title: value }), 400)
   }
 
-
   function handleSortChange(newSort: SortOption) {
     setSort(newSort)
     commitWithReset({ sort: newSort })
   }
 
   function handlePageChange(page: number) {
-    setFilters((f) => ({ ...f, page }))
+    commit({ page })
   }
 
   function handleDismiss(id: string) {
@@ -112,9 +100,9 @@ export function useJobsList(onError: () => void): UseJobsListReturn {
   }
 
   return {
-    jobs,
-    total,
-    loading,
+    jobs: data?.jobs ?? [],
+    total: data?.total ?? 0,
+    loading: isLoading,
     filters,
     sort,
     search,

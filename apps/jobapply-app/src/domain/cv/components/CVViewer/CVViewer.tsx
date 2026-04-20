@@ -24,7 +24,7 @@ const COMPLETION_ITEMS = [
   { label: 'CV em inglês', done: false, color: '#60a5fa' },
 ]
 
-export function CVViewer({ cv, onEdit, onDelete, isMobile }: CVViewerProps) {
+export function CVViewer({ cv, onEdit, onDelete, isMobile, onPublish, publishLoading }: CVViewerProps) {
   const { t } = useTranslation()
   const { message } = useAntApp()
   const ptBrVersion = cv.localeVersions?.find((v) => v.locale === 'pt-BR')
@@ -86,6 +86,8 @@ export function CVViewer({ cv, onEdit, onDelete, isMobile }: CVViewerProps) {
     onExportPDF: handleExportPDF,
     onExportMarkdown: handleExportMarkdown,
     onDelete,
+    onPublish,
+    publishLoading,
     score,
     completionItems: COMPLETION_ITEMS,
     visibility: { views: 142, searches: 38, saved: 7 },

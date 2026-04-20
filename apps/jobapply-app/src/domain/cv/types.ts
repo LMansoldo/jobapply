@@ -122,6 +122,7 @@ export interface CVLocaleProject {
 
 export interface CVLocaleVersion {
   locale: 'en' | 'pt-BR'
+  objective?: string
   summary: string
   skills: CVLocaleSkillGroup[]
   experience: CVLocaleExperience[]
@@ -180,23 +181,38 @@ export interface PublishedCV {
   fullName: string
   email: string
   phone?: string
+  location?: string
+  linkedin?: string
+  github?: string
+  portfolio?: string
+  objective?: string
   summary?: string
-  skills: string[]
-  experience: Experience[]
-  education: Education[]
-  languages: string[]
+  skills: CVLocaleSkillGroup[]
+  experience: CVLocaleExperience[]
+  education: CVLocaleEducation[]
+  languages: Language[]
+  certifications?: Certification[]
+  projects?: CVLocaleProject[]
   published_at: string
 }
 
 export interface PublishCVPayload {
+  locale?: 'en' | 'pt-BR'
   fullName?: string
   email?: string
   phone?: string
+  location?: string
+  linkedin?: string
+  github?: string
+  portfolio?: string
+  objective?: string
   summary?: string
-  skills?: string[]
-  experience?: Experience[]
-  education?: Education[]
-  languages?: string[]
+  skills?: CVLocaleSkillGroup[]
+  experience?: CVLocaleExperience[]
+  education?: CVLocaleEducation[]
+  languages?: Language[]
+  certifications?: Certification[]
+  projects?: CVLocaleProject[]
 }
 
 export interface PublishCVResponse {

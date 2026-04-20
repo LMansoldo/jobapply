@@ -15,6 +15,8 @@ export interface CVViewerSidebarProps {
   onDelete: () => void
   onShare?: () => void
   onDeleteVersion?: () => void
+  onPublish?: () => void
+  publishLoading?: boolean
   score: number
   completionItems: CompletionItem[]
   visibility: { views: number; searches: number; saved: number }

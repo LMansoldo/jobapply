@@ -13,7 +13,14 @@
     "stylelint": "stylelint \"src/**/*.css\"",
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build",
-    "prepare": "husky"
+    "prepare": "husky",
+    "postbuild": "react-snap"
+  },
+  "reactSnap": {
+    "include": ["/public/"],
+    "exclude": ["/", "/cv", "/tailoring", "/login", "/register"],
+    "puppeteerArgs": ["--no-sandbox", "--disable-setuid-sandbox"],
+    "inlineCss": true
   },
   "dependencies": {
     "@ant-design/icons": "^5.3.7",
@@ -21,6 +28,11 @@
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.0",
     "@monaco-editor/react": "^4.7.0",
+    "@tanstack/react-query": "^5.99.1",
+    "@tanstack/react-query-devtools": "^5.99.1",
+    "@tanstack/react-router": "^1.168.23",
+    "@tanstack/router-devtools": "^1.166.13",
+    "@tanstack/router-plugin": "^1.167.22",
     "@xionkq/md-to-pdf": "^0.1.2",
     "antd": "^5.17.0",
     "axios": "^1.7.2",
@@ -30,7 +42,6 @@
     "react-dom": "^18.3.1",
     "react-i18next": "^17.0.2",
     "react-markdown": "^10.1.0",
-    "react-router-dom": "^6.23.1",
     "remark-gfm": "^4.0.1"
   },
   "lint-staged": {
@@ -56,6 +67,7 @@
     "husky": "^9.1.7",
     "lint-staged": "^16.4.0",
     "prettier": "^3.8.1",
+    "react-snap": "^1.23.0",
     "storybook": "^8.6.18",
     "stylelint": "^17.6.0",
     "stylelint-config-standard": "^40.0.0",

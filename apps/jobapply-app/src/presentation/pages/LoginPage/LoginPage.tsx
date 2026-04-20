@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { MailOutlined, LockOutlined, RocketOutlined, FileTextOutlined, ThunderboltOutlined } from '@ant-design/icons'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, useNavigate } from '@tanstack/react-router'
 import { useTranslation } from 'react-i18next'
 import { useAntApp } from '../../../components/AntApp'
 import { Form, FormItem } from '../../../components/Form'
@@ -33,7 +33,7 @@ export default function LoginPage() {
       const { token, user } = await loginService(values.email, values.password)
       login(token, user)
       message.success(t('auth.loginSuccess', { name: user.name }))
-      navigate('/')
+      navigate({ to: '/' })
     } catch (err: unknown) {
       const msg =
         (err as { response?: { data?: { message?: string } } })?.response?.data?.message ??

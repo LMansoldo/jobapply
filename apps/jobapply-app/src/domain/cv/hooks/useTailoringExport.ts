@@ -2,8 +2,10 @@
  * @file useTailoringExport.ts
  * @description Provides export handlers (PDF, Markdown, version save) for the tailoring workspace.
  * Encapsulates file download logic and user feedback messaging.
+ * handleSaveAsVersion uses useMutation for automatic loading/error state.
  */
 import { useCallback, useRef, useEffect } from 'react'
+import { useMutation } from '@tanstack/react-query'
 import { downloadMarkdownText, downloadMarkdownAsPdf, parseMarkdownToLocale } from '../helpers'
 import { updateCVLocale } from '../../../infrastructure/repositories/cvRepository'
 import type { CV } from '../types'
@@ -50,6 +52,33 @@ export function useTailoringExport({
   useEffect(() => { messageRef.current = message })
   useEffect(() => { tRef.current = t })
 
+  const saveVersionMutation = useMutation({
+    mutationFn: async () => {
+      if (!tailoredContent || !cv) {
+        throw new Error('no-content')
+      }
+      const locale = chosenLocale ?? setupLocale
+      const { data, errors } = parseMarkdownToLocale(tailoredContent, locale)
+      if (errors.length > 0 || !data) throw new Error('parse-error')
+      messageRef.current.loading(tRef.current('tailoring.savingVersion'), 0)
+      await updateCVLocale(cv._id, locale, data)
+    },
+    onSuccess: () => {
+      messageRef.current.destroy()
+      messageRef.current.success(tRef.current('tailoring.saveVersionSuccess'))
+    },
+    onError: (error: Error) => {
+      messageRef.current.destroy()
+      if (error.message === 'no-content') {
+        messageRef.current.warning(tRef.current('tailoring.noContentToExport'))
+      } else if (error.message === 'parse-error') {
+        messageRef.current.error(tRef.current('tailoring.saveVersionParseError'))
+      } else {
+        messageRef.current.error(tRef.current('tailoring.saveVersionError'))
+      }
+    },
+  })
+
   const handleDownloadPDF = useCallback(async () => {
     if (!tailoredContent || !cv) {
       messageRef.current.warning(tRef.current('tailoring.noContentToExport'))
@@ -79,27 +108,8 @@ export function useTailoringExport({
   }, [tailoredContent])
 
   const handleSaveAsVersion = useCallback(async () => {
-    if (!tailoredContent || !cv) {
-      messageRef.current.warning(tRef.current('tailoring.noContentToExport'))
-      return
-    }
-    const locale = chosenLocale ?? setupLocale
-    const { data, errors } = parseMarkdownToLocale(tailoredContent, locale)
-    if (errors.length > 0 || !data) {
-      messageRef.current.error(tRef.current('tailoring.saveVersionParseError'))
-      return
-    }
-    try {
-      messageRef.current.loading(tRef.current('tailoring.savingVersion'), 0)
-      await updateCVLocale(cv._id, locale, data)
-      messageRef.current.destroy()
-      messageRef.current.success(tRef.current('tailoring.saveVersionSuccess'))
-    } catch (error) {
-      messageRef.current.destroy()
-      console.error('Save version error:', error)
-      messageRef.current.error(tRef.current('tailoring.saveVersionError'))
-    }
-  }, [tailoredContent, cv, chosenLocale, setupLocale])
+    await saveVersionMutation.mutateAsync()
+  }, [saveVersionMutation])
 
   return { handleDownloadPDF, handleExportMarkdown, handleSaveAsVersion }
 }

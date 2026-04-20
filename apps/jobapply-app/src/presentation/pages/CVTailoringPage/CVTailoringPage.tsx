@@ -4,7 +4,7 @@
  * Supports both job-based mode (with jobId) and manual mode (user enters job description).
  */
 import { useCallback, useRef } from 'react'
-import { useParams, useNavigate } from 'react-router-dom'
+import { useParams, useNavigate } from '@tanstack/react-router'
 import { useTranslation } from 'react-i18next'
 import { useAntApp } from '../../../components/AntApp'
 import { useAuth } from '../../../application/providers/AuthProvider'
@@ -29,7 +29,7 @@ import { buildToneOptions, calculateScoreMetrics } from '../../../domain/cv/tail
 import * as styles from './CVTailoringPage.styles'
 
 export default function CVTailoringPage() {
-  const { jobId } = useParams<{ jobId: string }>()
+  const { jobId } = useParams({ strict: false })
   const navigate = useNavigate()
   const { message } = useAntApp()
   const { t } = useTranslation()
@@ -42,14 +42,14 @@ export default function CVTailoringPage() {
 
   const { setupModalProps, onNeedSetup, setupLocale, manualDescription } = useSetupFlow({
     isManualMode,
-    onCancelManual: () => navigate('/'),
+    onCancelManual: () => navigate({ to: '/' }),
   })
 
   const { job, cv, loadingJob, loadingCv } = useTailoringPageData({
     cvId,
     jobId,
     onError: handleError,
-    onJobNotFound: () => navigate('/'),
+    onJobNotFound: () => navigate({ to: '/' }),
   })
 
   const workspace = useTailoringWorkspace({
@@ -111,7 +111,7 @@ export default function CVTailoringPage() {
           job={job}
           manualDescription={isManualMode ? manualDescription : undefined}
           isAnalysisRunning={workspace.atsLoading}
-          onBack={() => navigate('/')}
+          onBack={() => navigate({ to: '/' })}
           lang="pt-BR"
           currentScore={currentScore}
         />

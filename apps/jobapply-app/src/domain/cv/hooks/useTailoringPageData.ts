@@ -1,9 +1,10 @@
 /**
  * @file useTailoringPageData.ts
  * @description Fetches job and CV data required by the tailoring workspace.
- * Manages loading states and delegates error handling to the caller.
+ * Uses parallel TanStack Query calls for zero-latency cache hits on revisit.
  */
-import { useState, useEffect, useRef } from 'react'
+import { useEffect, useRef } from 'react'
+import { useQuery } from '@tanstack/react-query'
 import { getJobById } from '../../../infrastructure/repositories/jobsRepository'
 import { getCV } from '../../../infrastructure/repositories/cvRepository'
 import type { Job } from '../../jobs/types'
@@ -29,37 +30,41 @@ export function useTailoringPageData({
   onError,
   onJobNotFound,
 }: UseTailoringPageDataParams): UseTailoringPageDataReturn {
-  const [job, setJob] = useState<Job | null>(null)
-  const [cv, setCv] = useState<CV | null>(null)
-  const [loadingJob, setLoadingJob] = useState(!!jobId)
-  const [loadingCv, setLoadingCv] = useState(true)
-
   const onErrorRef = useRef(onError)
   const onJobNotFoundRef = useRef(onJobNotFound)
   useEffect(() => { onErrorRef.current = onError })
   useEffect(() => { onJobNotFoundRef.current = onJobNotFound })
 
+  const cvQuery = useQuery({
+    queryKey: ['cv', cvId],
+    queryFn: () => getCV(cvId),
+    enabled: !!cvId,
+    staleTime: 5 * 60 * 1000,
+  })
+
+  const jobQuery = useQuery({
+    queryKey: ['job', jobId],
+    queryFn: () => getJobById(jobId!),
+    enabled: !!jobId,
+    staleTime: 5 * 60 * 1000,
+    retry: false,
+  })
+
   useEffect(() => {
-    if (!cvId) {
-      setLoadingCv(false)
-      return
+    if (cvQuery.isError) onErrorRef.current('tailoring.loadCVError')
+  }, [cvQuery.isError])
+
+  useEffect(() => {
+    if (jobQuery.isError) {
+      onErrorRef.current('tailoring.jobNotFound')
+      onJobNotFoundRef.current()
     }
-    getCV(cvId)
-      .then(setCv)
-      .catch(() => onErrorRef.current('tailoring.loadCVError'))
-      .finally(() => setLoadingCv(false))
-  }, [cvId])
+  }, [jobQuery.isError])
 
-  useEffect(() => {
-    if (!jobId) return
-    getJobById(jobId)
-      .then(setJob)
-      .catch(() => {
-        onErrorRef.current('tailoring.jobNotFound')
-        onJobNotFoundRef.current()
-      })
-      .finally(() => setLoadingJob(false))
-  }, [jobId])
-
-  return { job, cv, loadingJob, loadingCv }
+  return {
+    cv: cvQuery.data ?? null,
+    job: jobQuery.data ?? null,
+    loadingCv: cvQuery.isLoading,
+    loadingJob: !!jobId && jobQuery.isLoading,
+  }
 }

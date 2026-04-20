@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { UserOutlined, MailOutlined, LockOutlined, RocketOutlined, FileTextOutlined, ThunderboltOutlined } from '@ant-design/icons'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, useNavigate } from '@tanstack/react-router'
 import { useTranslation } from 'react-i18next'
 import { useAntApp } from '../../../components/AntApp'
 import { Form, FormItem } from '../../../components/Form'
@@ -44,7 +44,7 @@ export default function RegisterPage() {
     try {
       await registerService(values.name, values.email, values.password)
       message.success(t('auth.registerSuccess'))
-      navigate('/login')
+      navigate({ to: '/login' })
     } catch (err: unknown) {
       const msg =
         (err as { response?: { data?: { message?: string } } })?.response?.data?.message ??

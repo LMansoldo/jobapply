@@ -5,6 +5,7 @@ import {
   DeleteOutlined,
   CheckCircleFilled,
   PlusCircleFilled,
+  GlobalOutlined,
 } from '@ant-design/icons'
 import { useTranslation } from 'react-i18next'
 import type { CVViewerSidebarProps } from './CVViewerSidebar.types'
@@ -27,6 +28,8 @@ export function CVViewerSidebar({
   onDelete,
   onShare,
   onDeleteVersion,
+  onPublish,
+  publishLoading,
   score,
   completionItems,
   visibility,
@@ -81,6 +84,16 @@ export function CVViewerSidebar({
           <DSButton variant="ghost" onClick={onExportMarkdown} style={{ width: '100%', justifyContent: 'center' }}>
             <DownloadOutlined /> {t('cv.exportMarkdown')}
           </DSButton>
+          {onPublish && (
+            <DSButton
+              variant="ghost"
+              onClick={onPublish}
+              loading={publishLoading}
+              style={{ width: '100%', justifyContent: 'center' }}
+            >
+              <GlobalOutlined /> {t('cv.publishCV')}
+            </DSButton>
+          )}
           {onShare && (
             <DSButton variant="ghost" onClick={onShare} style={{ width: '100%', justifyContent: 'center' }}>
               <ShareAltOutlined /> {t('cv.shareLink')}

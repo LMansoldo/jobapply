@@ -4,8 +4,12 @@
  * Loads the CV directly (no tailor endpoint), supports locale selection dialog,
  * and owns ATS analysis, cover letter and video script loading states.
  * Supports both job-based and manual job description modes.
+ *
+ * ATS analysis uses TanStack Query (staleTime 30min — no re-dispatch without locale/desc change).
+ * Cover letter, video script, interview prep and re-analyze use useMutation (on-demand).
  */
 import { useState, useEffect, useCallback, useRef } from 'react'
+import { useQuery, useMutation } from '@tanstack/react-query'
 import type { Job } from '../../jobs/types'
 import type { ATSReport, InterviewPrep } from '../types'
 import { localeVersionToMarkdown } from '../helpers'
@@ -67,17 +71,12 @@ export function useTailoringWorkspace({
 
   const [tailoredContent, setTailoredContent] = useState('')
   const [tailoring, setTailoring] = useState(false)
-  const [atsReport, setAtsReport] = useState<ATSReport | null>(null)
-  const [atsLoading, setAtsLoading] = useState(false)
   const [chosenLocale, setChosenLocale] = useState<'en' | 'pt-BR' | null>(null)
   const [editedJobDescription, setEditedJobDescription] = useState<string | null>(null)
   const [detectedLocale, setDetectedLocale] = useState<'en' | 'pt-BR'>('pt-BR')
   const [coverContent, setCoverContent] = useState('')
-  const [coverLoading, setCoverLoading] = useState(false)
   const [videoContent, setVideoContent] = useState('')
-  const [videoLoading, setVideoLoading] = useState(false)
-  const [interviewPrep, setInterviewPrep] = useState<InterviewPrep | null>(null)
-  const [interviewPrepLoading, setInterviewPrepLoading] = useState(false)
+  const [interviewPrepData, setInterviewPrepData] = useState<InterviewPrep | null>(null)
 
   // Prevents setup from running twice if job or cvId re-renders before resolution
   const setupInitiatedRef = useRef(false)
@@ -110,97 +109,91 @@ export function useTailoringWorkspace({
       .finally(() => setTailoring(false))
   }, [cvId, job, shouldInit])
 
-  // ATS analysis — runs with job (jobId) or in manual mode (jobDescription only)
+  // ── ATS analysis — useQuery: auto re-runs when locale/description change ─
+  const atsEnabled = !!(
+    cvId &&
+    chosenLocale &&
+    editedJobDescription !== null &&
+    editedJobDescription.trim() &&
+    (job || manualMode)
+  )
+
+  const atsQuery = useQuery({
+    queryKey: ['atsReport', cvId, chosenLocale, editedJobDescription, job?._id ?? null],
+    queryFn: () => analyzeCV(cvId, job?._id, chosenLocale!, editedJobDescription!),
+    enabled: atsEnabled,
+    staleTime: 30 * 60 * 1000,
+  })
+
   useEffect(() => {
-    if (!cvId || !chosenLocale || editedJobDescription === null) return
-    if (!job && !manualMode) return
-    if (!editedJobDescription.trim()) return
-    setAtsLoading(true)
-    analyzeCV(cvId, job?._id, chosenLocale, editedJobDescription)
-      .then((result) => {
-        setAtsReport(result.report)
-        setDetectedLocale(result.locale)
-      })
-      .catch(() => onErrorRef.current('tailoring.analysisError'))
-      .finally(() => setAtsLoading(false))
-  }, [job, manualMode, cvId, chosenLocale, editedJobDescription])
+    if (atsQuery.isError) onErrorRef.current('tailoring.analysisError')
+  }, [atsQuery.isError])
+
+  useEffect(() => {
+    if (atsQuery.data) setDetectedLocale(atsQuery.data.locale)
+  }, [atsQuery.data])
+
+  // ── On-demand mutations ──────────────────────────────────────────────────
+  const reanalyzeMutation = useMutation({
+    mutationFn: () => analyzeCV(cvId, job?._id, chosenLocale!, editedJobDescription!),
+    onSuccess: (result) => setDetectedLocale(result.locale),
+    onError: () => onErrorRef.current('tailoring.analysisError'),
+  })
+
+  const coverMutation = useMutation({
+    mutationFn: () => generateCoverLetter(cvId, job?._id, detectedLocale),
+    onSuccess: (result) => setCoverContent(result.coverLetter),
+    onError: () => onErrorRef.current('tailoring.coverError'),
+  })
+
+  const videoMutation = useMutation({
+    mutationFn: () => generateVideoScript(cvId, job?._id, detectedLocale),
+    onSuccess: (result) => setVideoContent(result.script),
+    onError: () => onErrorRef.current('tailoring.videoError'),
+  })
+
+  const interviewMutation = useMutation({
+    mutationFn: () =>
+      generateInterviewPrep(cvId, job?._id, detectedLocale, editedJobDescription ?? undefined),
+    onSuccess: (result) => setInterviewPrepData(result.interviewPrep),
+    onError: () => onErrorRef.current('tailoring.interviewError'),
+  })
 
   const handleReanalyze = useCallback(async () => {
-    if (!cvId || !chosenLocale || editedJobDescription === null) return
-    if (!job && !manualMode) return
-    if (!editedJobDescription.trim()) return
-    setAtsLoading(true)
-    try {
-      const result = await analyzeCV(cvId, job?._id, chosenLocale, editedJobDescription)
-      setAtsReport(result.report)
-      setDetectedLocale(result.locale)
-    } catch {
-      onErrorRef.current('tailoring.analysisError')
-    } finally {
-      setAtsLoading(false)
-    }
-  }, [job, manualMode, cvId, chosenLocale, editedJobDescription])
+    if (!atsEnabled) return
+    await reanalyzeMutation.mutateAsync()
+  }, [atsEnabled, reanalyzeMutation])
 
   const handleGenerateCoverLetter = useCallback(async () => {
     if (!cvId || (!job && !manualMode)) return
-    setCoverLoading(true)
-    try {
-      const result = await generateCoverLetter(cvId, job?._id, detectedLocale)
-      setCoverContent(result.coverLetter)
-    } catch {
-      onErrorRef.current('tailoring.coverError')
-    } finally {
-      setCoverLoading(false)
-    }
-  }, [job, manualMode, cvId, detectedLocale])
+    await coverMutation.mutateAsync()
+  }, [cvId, job, manualMode, coverMutation])
 
   const handleGenerateVideoScript = useCallback(async () => {
     if (!cvId || (!job && !manualMode)) return
-    setVideoLoading(true)
-    try {
-      const result = await generateVideoScript(cvId, job?._id, detectedLocale)
-      setVideoContent(result.script)
-    } catch {
-      onErrorRef.current('tailoring.videoError')
-    } finally {
-      setVideoLoading(false)
-    }
-  }, [job, cvId, detectedLocale])
+    await videoMutation.mutateAsync()
+  }, [cvId, job, manualMode, videoMutation])
 
   const handleGenerateInterviewPrep = useCallback(async () => {
     if (!cvId || (!job && !manualMode)) return
-    setInterviewPrepLoading(true)
-    try {
-      const result = await generateInterviewPrep(
-        cvId,
-        job?._id,
-        detectedLocale,
-        editedJobDescription ?? undefined,
-      )
-      setInterviewPrep(result.interviewPrep)
-    } catch {
-      onErrorRef.current('tailoring.interviewError')
-    } finally {
-      setInterviewPrepLoading(false)
-    }
-  }, [job, manualMode, cvId, detectedLocale, editedJobDescription])
-
+    await interviewMutation.mutateAsync()
+  }, [cvId, job, manualMode, interviewMutation])
 
   return {
     tailoredContent,
     setTailoredContent,
     tailoring,
     chosenLocale,
-    atsReport,
-    atsLoading,
+    atsReport: atsQuery.data?.report ?? reanalyzeMutation.data?.report ?? null,
+    atsLoading: atsQuery.isFetching || reanalyzeMutation.isPending,
     coverContent,
     setCoverContent,
-    coverLoading,
+    coverLoading: coverMutation.isPending,
     videoContent,
     setVideoContent,
-    videoLoading,
-    interviewPrep,
-    interviewPrepLoading,
+    videoLoading: videoMutation.isPending,
+    interviewPrep: interviewPrepData,
+    interviewPrepLoading: interviewMutation.isPending,
     handleReanalyze,
     handleGenerateCoverLetter,
     handleGenerateVideoScript,

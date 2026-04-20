@@ -1,5 +1,7 @@
 import api, { USE_MOCK } from '../http/client'
 import type { Voucher, CreateVoucherPayload, RedeemVoucherResponse } from '../../domain/voucher/types'
+import type { PublishedCV } from '../../domain/cv/types'
+import { getMockPublishedCV } from './cvRepository'
 
 let mockVouchers: Voucher[] = []
 
@@ -66,7 +68,13 @@ export async function redeemVoucher(code: string): Promise<RedeemVoucherResponse
   return data
 }
 
-export async function getPublicCV(publicId: string) {
-  const { data } = await api.get(`/public/${publicId}`)
+export async function getPublicCV(publicId: string): Promise<PublishedCV> {
+  if (USE_MOCK) {
+    await delay(400)
+    const cv = getMockPublishedCV(publicId)
+    if (!cv) throw { response: { data: { message: 'CV público não encontrado' }, status: 404 } }
+    return cv
+  }
+  const { data } = await api.get<{ cv: PublishedCV }>(`/public/${publicId}`)
   return data.cv
 }

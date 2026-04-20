@@ -14,4 +14,8 @@ export interface CVViewerProps {
   onDelete: () => void
   /** Whether the viewport is in mobile mode */
   isMobile: boolean
+  /** Callback to publish the CV and get a public link */
+  onPublish?: () => void
+  /** Whether a publish operation is in progress */
+  publishLoading?: boolean
 }

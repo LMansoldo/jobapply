@@ -6,6 +6,7 @@ import type {
   TailorCVResponse,
   PublishCVPayload,
   PublishCVResponse,
+  PublishedCV,
   CVLocaleVersion,
   CVLocalePayload,
   ATSReport,
@@ -19,6 +20,14 @@ import {
 // In-memory CV store for mock mode (null = not created yet)
 let mockCV: CV | null = null
 let mockCVInitialized = false
+
+// Stores published CV snapshots keyed by public_id (mock only)
+const mockPublishedCVs = new Map<string, PublishedCV>()
+
+/** Returns the published CV snapshot for a given public_id (mock only). */
+export function getMockPublishedCV(publicId: string): PublishedCV | null {
+  return mockPublishedCVs.get(publicId) ?? null
+}
 
 function delay(ms = 500) {
   return new Promise((r) => setTimeout(r, ms))
@@ -137,22 +146,32 @@ export async function publishCV(id: string, payload?: PublishCVPayload): Promise
     await delay(600)
     if (!mockCV) throw { response: { data: { message: 'CV não encontrado' }, status: 404 } }
     const publicId = `pub-${Date.now()}`
-    return {
+    const localeKey = payload?.locale ?? 'pt-BR'
+    const localeVersion = mockCV.localeVersions?.find((v) => v.locale === localeKey)
+      ?? mockCV.localeVersions?.[0]
+    const published: PublishedCV = {
+      _id: `published-${id}`,
+      user: mockCV.user,
       public_id: publicId,
-      published: {
-        _id: `published-${id}`,
-        user: mockCV.user,
-        public_id: publicId,
-        fullName: payload?.fullName ?? mockCV.fullName,
-        email: payload?.email ?? mockCV.email,
-        phone: payload?.phone ?? mockCV.phone,
-        skills: payload?.skills ?? [],
-        experience: payload?.experience ?? [],
-        education: payload?.education ?? [],
-        languages: mockCV.languages.map((l) => l.language),
-        published_at: new Date().toISOString(),
-      },
+      fullName: payload?.fullName ?? mockCV.fullName,
+      email: payload?.email ?? mockCV.email,
+      phone: payload?.phone ?? mockCV.phone,
+      location: payload?.location ?? mockCV.location,
+      linkedin: payload?.linkedin ?? mockCV.linkedin,
+      github: payload?.github ?? mockCV.github,
+      portfolio: payload?.portfolio ?? mockCV.portfolio,
+      objective: payload?.objective ?? mockCV.objective,
+      summary: payload?.summary ?? localeVersion?.summary ?? '',
+      skills: payload?.skills ?? localeVersion?.skills ?? [],
+      experience: payload?.experience ?? localeVersion?.experience ?? [],
+      education: payload?.education ?? localeVersion?.education ?? [],
+      languages: payload?.languages ?? mockCV.languages,
+      certifications: payload?.certifications,
+      projects: payload?.projects ?? localeVersion?.projects,
+      published_at: new Date().toISOString(),
     }
+    mockPublishedCVs.set(publicId, published)
+    return { public_id: publicId, published }
   }
 
   const { data } = await api.post<PublishCVResponse>(`/cv/${id}/publish`, payload ?? {})

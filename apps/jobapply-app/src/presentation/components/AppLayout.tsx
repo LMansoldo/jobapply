@@ -8,7 +8,7 @@ import {
   UserOutlined,
   LogoutOutlined,
 } from '@ant-design/icons'
-import { useNavigate, useLocation, Outlet } from 'react-router-dom'
+import { useNavigate, useRouterState, Outlet } from '@tanstack/react-router'
 import { useTranslation } from 'react-i18next'
 import { Avatar } from '../../components/Avatar'
 import { Dropdown } from '../../components/Dropdown'
@@ -23,14 +23,15 @@ const { useBreakpoint } = Grid
 export default function AppLayout() {
   const { user, logout } = useAuth()
   const navigate = useNavigate()
-  const { pathname } = useLocation()
+  const { location } = useRouterState()
+  const { pathname } = location
   const screens = useBreakpoint()
   const isMobile = !screens.md
   const { t } = useTranslation()
 
   function handleLogout() {
     logout()
-    navigate('/login')
+    navigate({ to: '/login' })
   }
 
   const userMenuItems = [

@@ -3,6 +3,7 @@
  * @description CV management page — horizontal stepper, viewer mode with CVTemplate, wizard with rich editor.
  */
 import { useState, useEffect, useRef } from 'react'
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { Grid } from '../../../components/Grid'
 import { CheckOutlined } from '@ant-design/icons'
 import { useTranslation } from 'react-i18next'
@@ -25,6 +26,7 @@ import {
   getCV,
   updateCV,
   updateCVLocale,
+  publishCV,
 } from '../../../infrastructure/repositories/cvRepository'
 import { HorizontalStepper } from '../../../design-system/cv/HorizontalStepper'
 import * as styles from './CVPage.styles'
@@ -50,13 +52,12 @@ export default function CVPage() {
   const { t } = useTranslation()
   const screens = useBreakpoint()
   const isMobile = !screens.md
+  const queryClient = useQueryClient()
 
   const [cv, setCv] = useState<CV | null>(null)
-  const [loading, setLoading] = useState(true)
-  const [saving, setSaving] = useState(false)
   const [currentStep, setCurrentStep] = useState(0)
   const [editMode, setEditMode] = useState(false)
-  const skipLoadEffect = useRef(false)
+  const skipApplyRef = useRef(false)
 
   const [baseForm] = Form.useForm<CVBaseFormValues>()
 
@@ -66,16 +67,24 @@ export default function CVPage() {
   const [enMarkdown, setEnMarkdown] = useState(EN_TEMPLATE)
   const [enErrors, setEnErrors] = useState<string[]>([])
 
-  useEffect(() => {
-    if (!cvId) { setLoading(false); return }
-    if (skipLoadEffect.current) { skipLoadEffect.current = false; return }
-    getCV(cvId).then((data) => applyCV(data, false)).catch(() => setLoading(false))
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [cvId])
+  // ── Initial CV fetch ──────────────────────────────────────────────────────
+  const cvQuery = useQuery({
+    queryKey: ['cv', cvId],
+    queryFn: () => getCV(cvId!),
+    enabled: !!cvId,
+    staleTime: 5 * 60 * 1000,
+  })
 
+  useEffect(() => {
+    if (!cvQuery.data || skipApplyRef.current) {
+      skipApplyRef.current = false
+      return
+    }
+    applyCV(cvQuery.data, false)
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [cvQuery.data])
 
   function applyCV(data: CV, isNewOrEditing = false) {
-    if (isNewOrEditing) skipLoadEffect.current = true
     setCv(data)
     setCvId(data._id)
     baseForm.setFieldsValue({
@@ -101,108 +110,99 @@ export default function CVPage() {
       : EN_TEMPLATE)
 
     setEditMode(isNewOrEditing)
-    setCurrentStep(isNewOrEditing ? 1 : 0) // Se é novo ou editando, vai para step 1 (PT-BR)
-    setLoading(false)
-  }
-  async function handleStep1Next() {
-    console.log('handleStep1Next called, current editMode:', editMode)
-    try {
-      const values = await baseForm.validateFields()
-      setSaving(true)
-      try {
-        const payload: CVCreatePayload = {
-          ...values,
-        }
-        const updated = cv ? await updateCV(cv._id, payload) : await createCV(payload)
-        console.log('applyCV called with isNewOrEditing=true')
-        applyCV(updated, true)
-        // Não mostra mensagem de success aqui, só no final
-      } catch (err: unknown) {
-        const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message ?? t('cv.savePersonalError')
-        message.error(msg)
-      } finally {
-        setSaving(false)
-      }
-    } catch {
-      // AntD Form shows inline validation errors automatically
-    }
+    setCurrentStep(isNewOrEditing ? 1 : 0)
   }
 
-  async function handleStep2Next() {
-    const result = parseMarkdownToLocale(ptBrMarkdown, 'pt-BR')
-    if (result.errors.length > 0) { setPtBrErrors(result.errors); return }
-    setPtBrErrors([])
-    if (!cv) { message.error(t('cv.saveFirst')); setCurrentStep(0); return }
-    setSaving(true)
-    try {
+  // ── Mutations ─────────────────────────────────────────────────────────────
+  const saveBaseMutation = useMutation({
+    mutationFn: async (values: CVBaseFormValues) => {
+      const { languages: _langs, ...rest } = values
+      const payload: CVCreatePayload = rest
+      return cv ? updateCV(cv._id, payload) : createCV(payload)
+    },
+    onSuccess: (updated) => {
+      skipApplyRef.current = true
+      queryClient.setQueryData(['cv', updated._id], updated)
+      applyCV(updated, true)
+    },
+    onError: (err: unknown) => {
+      const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message ?? t('cv.savePersonalError')
+      message.error(msg)
+    },
+  })
+
+  const savePtBrMutation = useMutation({
+    mutationFn: async () => {
+      const result = parseMarkdownToLocale(ptBrMarkdown, 'pt-BR')
+      if (result.errors.length > 0) throw Object.assign(new Error('validation'), { errors: result.errors })
+      if (!cv) throw new Error('no-cv')
       await updateCVLocale(cv._id, 'pt-BR', result.data!)
+    },
+    onSuccess: () => {
       message.success(t('cv.savePtBrSuccess'))
       setCurrentStep(2)
-    } catch (err: unknown) {
-      const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message ?? t('cv.savePtBrError')
+    },
+    onError: (err: unknown) => {
+      const typed = err as { errors?: string[]; message?: string; response?: { data?: { message?: string } } }
+      if (typed.errors?.length) { setPtBrErrors(typed.errors); return }
+      if (typed.message === 'no-cv') { message.error(t('cv.saveFirst')); setCurrentStep(0); return }
+      const msg = typed.response?.data?.message ?? t('cv.savePtBrError')
       message.error(msg)
-    } finally {
-      setSaving(false)
-    }
-  }
+    },
+  })
 
-  async function handleStep3Finish() {
-    // Allow submission even if content is unchanged (per user requirement)
-    const result = parseMarkdownToLocale(enMarkdown, 'en')
-    if (result.errors.length > 0) { setEnErrors(result.errors); return }
-    setEnErrors([])
-    if (!cv) return
-    setSaving(true)
-    try {
+  const saveEnMutation = useMutation({
+    mutationFn: async () => {
+      const result = parseMarkdownToLocale(enMarkdown, 'en')
+      if (result.errors.length > 0) throw Object.assign(new Error('validation'), { errors: result.errors })
+      if (!cv) throw new Error('no-cv')
       await updateCVLocale(cv._id, 'en', result.data!)
+      const refreshed = await getCV(cv._id)
+      return refreshed
+    },
+    onSuccess: (refreshed) => {
       message.success(t('cv.saveEnSuccess'))
-      const refreshed = await getCV(cv._id)
+      skipApplyRef.current = true
+      queryClient.setQueryData(['cv', refreshed._id], refreshed)
       applyCV(refreshed, false)
-    } catch (err: unknown) {
-      const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message ?? t('cv.saveEnError')
+    },
+    onError: (err: unknown) => {
+      const typed = err as { errors?: string[]; message?: string; response?: { data?: { message?: string } } }
+      if (typed.errors?.length) { setEnErrors(typed.errors); return }
+      const msg = typed.response?.data?.message ?? t('cv.saveEnError')
       message.error(msg)
-    } finally {
-      setSaving(false)
-    }
-  }
+    },
+  })
 
-  async function handleSkipEn() {
-    setEnErrors([])
-    if (!cv) {
-      message.error(t('cv.saveFirst'))
-      return
-    }
-
-    // Se chegou no step 2, o PT-BR já foi salvo pelo handleStep2Next
-    // Mas verificar se há erros no PT-BR atual
-    const ptBrResult = parseMarkdownToLocale(ptBrMarkdown, 'pt-BR')
-    if (ptBrResult.errors.length > 0) {
-      setPtBrErrors(ptBrResult.errors)
-      setCurrentStep(1) // Voltar para step 1 para corrigir PT-BR
-      return
-    }
-
-    setSaving(true)
-    try {
-      // Se o PT-BR atual é diferente do salvo, atualizar
-      // (o usuário pode ter editado depois de salvar)
+  const skipEnMutation = useMutation({
+    mutationFn: async () => {
+      if (!cv) throw new Error('no-cv')
+      const ptBrResult = parseMarkdownToLocale(ptBrMarkdown, 'pt-BR')
+      if (ptBrResult.errors.length > 0) throw Object.assign(new Error('pt-br-validation'), { errors: ptBrResult.errors })
       await updateCVLocale(cv._id, 'pt-BR', ptBrResult.data!)
-      message.success(t('cv.skipEnSuccess'))
       const refreshed = await getCV(cv._id)
+      return refreshed
+    },
+    onSuccess: (refreshed) => {
+      setEnErrors([])
+      message.success(t('cv.skipEnSuccess'))
+      skipApplyRef.current = true
+      queryClient.setQueryData(['cv', refreshed._id], refreshed)
       applyCV(refreshed, false)
-    } catch (err: unknown) {
-      const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message ?? t('cv.savePtBrError')
+    },
+    onError: (err: unknown) => {
+      const typed = err as { errors?: string[]; message?: string; response?: { data?: { message?: string } } }
+      if (typed.message === 'no-cv') { message.error(t('cv.saveFirst')); return }
+      if (typed.message === 'pt-br-validation') { setPtBrErrors(typed.errors ?? []); setCurrentStep(1); return }
+      const msg = typed.response?.data?.message ?? t('cv.savePtBrError')
       message.error(msg)
-    } finally {
-      setSaving(false)
-    }
-  }
+    },
+  })
 
-  async function handleDelete() {
-    if (!cv) return
-    setSaving(true)
-    try {
-      await deleteCV(cv._id)
+  const deleteMutation = useMutation({
+    mutationFn: () => deleteCV(cv!._id),
+    onSuccess: () => {
+      queryClient.removeQueries({ queryKey: ['cv', cv?._id] })
       setCv(null)
       setCvId(null)
       baseForm.resetFields()
@@ -212,11 +212,60 @@ export default function CVPage() {
       setEnErrors([])
       setCurrentStep(0)
       message.success(t('cv.deleteSuccess'))
+    },
+    onError: () => message.error(t('cv.deleteError')),
+  })
+
+  const publishMutation = useMutation({
+    mutationFn: () => {
+      const ptBr = cv!.localeVersions?.find((v) => v.locale === 'pt-BR')
+      const en = cv!.localeVersions?.find((v) => v.locale === 'en')
+      const locale = ptBr ? 'pt-BR' : en ? 'en' : undefined
+      return publishCV(cv!._id, locale ? { locale } : undefined)
+    },
+    onSuccess: (response) => {
+      const publicUrl = `${window.location.origin}/public/${response.public_id}`
+      modal.info({
+        title: t('cv.publishLinkTitle'),
+        content: (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '1.2rem', marginTop: '1.2rem' }}>
+            <span style={{ fontFamily: 'monospace', fontSize: '1.3rem', wordBreak: 'break-all', background: '#f5f5f5', padding: '0.8rem', borderRadius: '0.4rem' }}>
+              {publicUrl}
+            </span>
+          </div>
+        ),
+        okText: t('cv.copyLink'),
+        onOk: () => {
+          navigator.clipboard.writeText(publicUrl)
+          message.success(t('cv.publishSuccess'))
+        },
+      })
+    },
+    onError: () => message.error(t('cv.publishError')),
+  })
+
+  async function handleStep1Next() {
+    try {
+      const values = await baseForm.validateFields()
+      saveBaseMutation.mutate(values)
     } catch {
-      message.error(t('cv.deleteError'))
-    } finally {
-      setSaving(false)
+      // AntD Form shows inline validation errors automatically
     }
+  }
+
+  function handleStep2Next() {
+    setPtBrErrors([])
+    savePtBrMutation.mutate()
+  }
+
+  function handleStep3Finish() {
+    setEnErrors([])
+    saveEnMutation.mutate()
+  }
+
+  function handleSkipEn() {
+    setEnErrors([])
+    skipEnMutation.mutate()
   }
 
   function handleDeleteRequest() {
@@ -226,11 +275,19 @@ export default function CVPage() {
       okText: t('common.delete'),
       okButtonProps: { danger: true },
       cancelText: t('common.cancel'),
-      onOk: handleDelete,
+      onOk: () => deleteMutation.mutate(),
     })
   }
 
-  if (loading) {
+  const saving =
+    saveBaseMutation.isPending ||
+    savePtBrMutation.isPending ||
+    saveEnMutation.isPending ||
+    skipEnMutation.isPending ||
+    deleteMutation.isPending ||
+    publishMutation.isPending
+
+  if (cvQuery.isLoading) {
     return (
       <div className={styles.spinWrapper}>
         <Spin size="large" tip={t('cv.loadingCV')} />
@@ -249,6 +306,8 @@ export default function CVPage() {
             cv={cv}
             onEdit={() => { setCurrentStep(0); setEditMode(true) }}
             onDelete={handleDeleteRequest}
+            onPublish={() => publishMutation.mutate()}
+            publishLoading={publishMutation.isPending}
             isMobile={isMobile}
           />
         </div>

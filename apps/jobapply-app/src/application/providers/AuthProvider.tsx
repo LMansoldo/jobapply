@@ -1,7 +1,7 @@
 import { createContext, useContext, useState, useCallback, type ReactNode } from 'react'
 import type { User } from '../../domain/auth/types'
 
-interface AuthContextValue {
+export interface AuthContextValue {
   user: User | null
   token: string | null
   /** Derived from user.cv — always in sync with the API response, never a separate key. */

@@ -177,9 +177,9 @@ export function CVTemplate({ cv, locale, isMobile }: CVTemplateProps) {
                         {exp.context}
                       </p>
                     )}
-                    {exp.highlights.length > 0 && (
+                    {(exp.highlights ?? []).length > 0 && (
                       <ul style={{ margin: 0, paddingLeft: Spacing.lg, display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                        {exp.highlights.map((h, j) => (
+                        {(exp.highlights ?? []).map((h, j) => (
                           <li key={j} style={{ fontSize: FontSize.xxs, lineHeight: 1.6, color: Colors.textMain }}>
                             {h}
                           </li>

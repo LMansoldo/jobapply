@@ -9,7 +9,7 @@ import { useState, useEffect } from 'react'
 import { Grid } from '../../../components/Grid'
 import { ArrowLeftOutlined, FileSearchOutlined } from '@ant-design/icons'
 import { useTranslation } from 'react-i18next'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate } from '@tanstack/react-router'
 import { useAntApp } from '../../../components/AntApp'
 import { Button } from '../../../components/Button'
 import { Empty } from '../../../components/Empty'
@@ -88,7 +88,7 @@ export default function JobsPage() {
   }
 
   function handleTailor(job: Job) {
-    navigate(`/tailoring/${job._id}`)
+    navigate({ to: '/tailoring/$jobId', params: { jobId: job._id } })
   }
 
   const visibleJobs = jobs.filter((j) => !dismissed.has(j._id))
