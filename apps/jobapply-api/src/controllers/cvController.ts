@@ -7,6 +7,7 @@ import User from '../models/User';
 import PublishedCV from '../models/PublishedCV';
 import { tailorCV as tailorCVService, generateCoverLetter as generateCoverLetterLLM, generateVideoScript as generateVideoScriptLLM } from '../services/llmService';
 import { analyzeWithATS, generateCVWithATS, analyzeLinkedInWithATS } from '../services/atsService'
+import { sanitizeUserInput } from '../utils/sanitize'
 import { generateInterviewPrep } from '../services/interviewPrepService';
 
 const VALID_LOCALES: CVLocale[] = ['en', 'pt-BR'];
@@ -206,8 +207,15 @@ export async function analyzeCVWithATS(req: AuthRequest, res: Response, next: Ne
     if (!cv) { res.status(404).json({ message: 'CV not found' }); return; }
     if (cv.user.toString() !== req.user.id) { res.status(403).json({ message: 'Access denied' }); return; }
 
-    const { jobId, jobDescription, locale } = req.body as { jobId?: string; jobDescription?: string; locale?: string };
+    const { jobId, jobDescription, cvMarkdown, locale } = req.body as {
+      jobId?: string;
+      jobDescription?: string;
+      cvMarkdown?: string;
+      locale?: string;
+    };
+
     if (!jobId && !jobDescription) { res.status(400).json({ message: 'jobId or jobDescription is required' }); return; }
+    if (!cvMarkdown) { res.status(400).json({ message: 'cvMarkdown is required' }); return; }
 
     let description = jobDescription;
     if (!description) {
@@ -216,9 +224,11 @@ export async function analyzeCVWithATS(req: AuthRequest, res: Response, next: Ne
       description = job.description;
     }
 
+    const sanitizedJD = sanitizeUserInput(description);
+    const sanitizedMarkdown = sanitizeUserInput(cvMarkdown);
+
     const resolvedLocale = locale ?? detectLocale(description);
-    const cvData = stripInternalFields(applyLocale(cv.toObject(), resolvedLocale));
-    const report = await analyzeWithATS(cvData, description, resolvedLocale);
+    const report = await analyzeWithATS(sanitizedMarkdown, sanitizedJD, resolvedLocale);
 
     res.json({ report, locale: resolvedLocale });
   } catch (err: unknown) {

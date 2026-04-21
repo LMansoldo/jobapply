@@ -1,11 +1,11 @@
 const ATS_AGENT_URL = process.env.ATS_AGENT_URL;
 if (!ATS_AGENT_URL) throw new Error('ATS_AGENT_URL environment variable is not set');
 
-export async function analyzeWithATS(cv: object, jobDescription: string, locale?: string): Promise<unknown> {
+export async function analyzeWithATS(cvMarkdown: string, jobDescription: string, locale?: string): Promise<unknown> {
   const response = await fetch(`${ATS_AGENT_URL}/analyze`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ cv, jobDescription, ...(locale && { locale }) }),
+    body: JSON.stringify({ cvMarkdown, jobDescription, ...(locale && { locale }) }),
   });
 
   if (!response.ok) {
