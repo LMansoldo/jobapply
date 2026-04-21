@@ -12,6 +12,7 @@ import { useState, useEffect, useCallback, useRef } from 'react'
 import { useQuery, useMutation } from '@tanstack/react-query'
 import type { Job } from '../../jobs/types'
 import type { ATSReport, InterviewPrep } from '../types'
+import type { VoiceAnswers } from '../../linkedin/types'
 import { localeVersionToMarkdown } from '../helpers'
 import { prependObjectiveSection } from '../tailoringHelpers'
 import {
@@ -38,7 +39,7 @@ export interface TailoringWorkspaceState {
   interviewPrep: InterviewPrep | null
   interviewPrepLoading: boolean
   handleReanalyze: () => Promise<void>
-  handleGenerateCoverLetter: () => Promise<void>
+  handleGenerateCoverLetter: (voiceAnswers?: VoiceAnswers) => Promise<void>
   handleGenerateVideoScript: () => Promise<void>
   handleGenerateInterviewPrep: () => Promise<void>
 }
@@ -120,7 +121,7 @@ export function useTailoringWorkspace({
 
   const atsQuery = useQuery({
     queryKey: ['atsReport', cvId, chosenLocale, editedJobDescription, job?._id ?? null],
-    queryFn: () => analyzeCV(cvId, job?._id, chosenLocale!, editedJobDescription!),
+    queryFn: () => analyzeCV(cvId, job?._id, chosenLocale!, editedJobDescription!, tailoredContent),
     enabled: atsEnabled,
     staleTime: 30 * 60 * 1000,
   })
@@ -135,13 +136,14 @@ export function useTailoringWorkspace({
 
   // ── On-demand mutations ──────────────────────────────────────────────────
   const reanalyzeMutation = useMutation({
-    mutationFn: () => analyzeCV(cvId, job?._id, chosenLocale!, editedJobDescription!),
+    mutationFn: () => analyzeCV(cvId, job?._id, chosenLocale!, editedJobDescription!, tailoredContent),
     onSuccess: (result) => setDetectedLocale(result.locale),
     onError: () => onErrorRef.current('tailoring.analysisError'),
   })
 
   const coverMutation = useMutation({
-    mutationFn: () => generateCoverLetter(cvId, job?._id, detectedLocale),
+    mutationFn: (voiceAnswers?: VoiceAnswers) =>
+      generateCoverLetter(cvId, job?._id, detectedLocale, voiceAnswers, editedJobDescription ?? undefined),
     onSuccess: (result) => setCoverContent(result.coverLetter),
     onError: () => onErrorRef.current('tailoring.coverError'),
   })
@@ -164,9 +166,9 @@ export function useTailoringWorkspace({
     await reanalyzeMutation.mutateAsync()
   }, [atsEnabled, reanalyzeMutation])
 
-  const handleGenerateCoverLetter = useCallback(async () => {
+  const handleGenerateCoverLetter = useCallback(async (voiceAnswers?: VoiceAnswers) => {
     if (!cvId || (!job && !manualMode)) return
-    await coverMutation.mutateAsync()
+    await coverMutation.mutateAsync(voiceAnswers)
   }, [cvId, job, manualMode, coverMutation])
 
   const handleGenerateVideoScript = useCallback(async () => {

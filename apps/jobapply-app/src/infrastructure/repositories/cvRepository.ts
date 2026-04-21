@@ -202,6 +202,7 @@ export async function analyzeCV(
   jobId: string | undefined,
   locale: 'en' | 'pt-BR',
   jobDescription: string,
+  cvMarkdown: string,
 ): Promise<AnalyzeCVResponse> {
   if (USE_MOCK) {
     await delay(1200)
@@ -217,7 +218,10 @@ export async function analyzeCV(
       ],
       optimalTemplate: {
         keywordsToAdd: ['Docker', 'AWS', 'CI/CD'],
-        keywordPhrases: [],
+        keywordPhrases: [
+          { keyword: 'Docker', phrases: ['Containerizei microsserviços com Docker, reduzindo tempo de deploy em 40%', 'Mantive ambientes de desenvolvimento consistentes via Docker Compose'] },
+          { keyword: 'CI/CD', phrases: ['Implementei pipeline CI/CD com GitHub Actions, automatizando testes e deploys', 'Reduzi falhas em produção em 60% com pipeline de integração contínua'] },
+        ],
         keywordsToRephrase: [{ from: 'desenvolvedor', to: 'engenheiro de software' }],
         formatFixes: ['Use bullet points instead of paragraphs in experience section'],
       },
@@ -229,7 +233,7 @@ export async function analyzeCV(
     return { report, locale }
   }
 
-  const body: Record<string, string> = { locale, jobDescription }
+  const body: Record<string, string> = { locale, jobDescription, cvMarkdown }
   if (jobId) body.jobId = jobId
   const { data } = await api.post<AnalyzeCVResponse>(`/cv/${cvId}/analyze`, body)
   return data
@@ -243,6 +247,8 @@ export async function generateCoverLetter(
   cvId: string,
   jobId: string | undefined,
   locale: 'en' | 'pt-BR',
+  voiceAnswers?: import('../../domain/linkedin/types').VoiceAnswers,
+  jobDescription?: string,
 ): Promise<GenerateCoverLetterResponse> {
   if (USE_MOCK) {
     await delay(2000)
@@ -251,8 +257,10 @@ export async function generateCoverLetter(
     }
   }
 
-  const body: Record<string, string> = { locale }
+  const body: Record<string, unknown> = { locale }
   if (jobId) body.jobId = jobId
+  else if (jobDescription) body.jobDescription = jobDescription
+  if (voiceAnswers?.length) body.voiceAnswers = voiceAnswers
   const { data } = await api.post<GenerateCoverLetterResponse>(
     `/cv/${cvId}/cover-letter`,
     body,

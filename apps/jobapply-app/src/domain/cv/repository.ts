@@ -37,7 +37,7 @@ export interface ICVRepository {
   deleteCVLocale(id: string, locale: 'en' | 'pt-BR'): Promise<void>
   publishCV(id: string, payload?: PublishCVPayload): Promise<PublishCVResponse>
   tailorCV(cvId: string, jobId: string): Promise<TailorCVResponse>
-  analyzeCV(cvId: string, jobId: string | undefined, locale: 'en' | 'pt-BR', jobDescription: string): Promise<AnalyzeCVResponse>
+  analyzeCV(cvId: string, jobId: string | undefined, locale: 'en' | 'pt-BR', jobDescription: string, cvMarkdown: string): Promise<AnalyzeCVResponse>
   generateCoverLetter(cvId: string, jobId: string | undefined, locale: 'en' | 'pt-BR'): Promise<GenerateCoverLetterResponse>
   generateVideoScript(cvId: string, jobId: string | undefined, locale: 'en' | 'pt-BR'): Promise<GenerateVideoScriptResponse>
   generateInterviewPrep(cvId: string, jobId: string | undefined, locale: 'en' | 'pt-BR', jobDescription?: string): Promise<GenerateInterviewPrepResponse>
