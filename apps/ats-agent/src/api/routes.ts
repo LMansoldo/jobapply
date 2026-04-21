@@ -76,20 +76,12 @@ const CVSchema = z.object({
   updatedAt: z.string().optional(),
 })
 
-const AnalyzeBodySchema = z.union([
-  z.object({
-    cv: CVSchema,
-    cvMarkdown: z.undefined(),
-    jobDescription: z.string().min(1, 'jobDescription must not be empty'),
-    locale: z.enum(['en', 'pt-BR']).optional(),
-  }),
-  z.object({
-    cv: z.undefined(),
-    cvMarkdown: z.string().min(1, 'cvMarkdown must not be empty'),
-    jobDescription: z.string().min(1, 'jobDescription must not be empty'),
-    locale: z.enum(['en', 'pt-BR']).optional(),
-  }),
-])
+const AnalyzeBodySchema = z.object({
+  cv: CVSchema.optional(),
+  cvMarkdown: z.string().optional(),
+  jobDescription: z.string().min(1, 'jobDescription must not be empty'),
+  locale: z.enum(['en', 'pt-BR']).optional(),
+})
 
 const VoiceAnswerSchema = z.object({
   label: z.string(),
@@ -117,6 +109,10 @@ export async function registerRoutes(app: FastifyInstance): Promise<void> {
     const parse = AnalyzeBodySchema.safeParse(request.body)
     if (!parse.success) {
       return reply.status(400).send({ message: parse.error.errors[0]?.message ?? 'Invalid request body' })
+    }
+
+    if (!parse.data.cv && !parse.data.cvMarkdown) {
+      return reply.status(400).send({ message: 'cv or cvMarkdown is required' })
     }
 
     const input: AgentInput = parse.data
