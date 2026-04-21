@@ -18,6 +18,8 @@ import { AppHeader as DSAppHeader } from '../../design-system/layout/AppHeader'
 import { useAuth } from '../../application/providers/AuthProvider'
 import * as styles from './AppLayout.styles'
 
+const MOBILE_NAV_KEYS = ['jobs', 'tailoring', 'profile']
+
 const { useBreakpoint } = Grid
 
 export default function AppLayout() {
@@ -100,6 +102,8 @@ export default function AppLayout() {
     </Dropdown>
   )
 
+  const mobileNavItems = navItems.filter((item) => MOBILE_NAV_KEYS.includes(item.key))
+
   return (
     <div className={styles.pageRoot}>
       <DSAppHeader
@@ -109,6 +113,29 @@ export default function AppLayout() {
       <styles.AppContentStyled isMobile={isMobile}>
         <Outlet />
       </styles.AppContentStyled>
+      {isMobile && (
+        <styles.BottomNav>
+          {mobileNavItems.map((item) => (
+            <styles.BottomNavItem
+              key={item.key}
+              active={item.active}
+              type="button"
+              onClick={() => item.href && item.href !== '#' && navigate({ to: item.href as '/' })}
+            >
+              {item.icon}
+              <span>{item.label}</span>
+            </styles.BottomNavItem>
+          ))}
+          <styles.BottomNavItem
+            active={false}
+            type="button"
+            onClick={handleLogout}
+          >
+            <LogoutOutlined />
+            <span>{t('auth.logout')}</span>
+          </styles.BottomNavItem>
+        </styles.BottomNav>
+      )}
     </div>
   )
 }
