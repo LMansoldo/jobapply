@@ -400,19 +400,19 @@ export async function deleteCVLocaleVersion(req: AuthRequest, res: Response, nex
 
 export async function analyzeCVDirect(req: AuthRequest, res: Response, next: NextFunction): Promise<void> {
   try {
-    const { cv, jobDescription, locale } = req.body as {
-      cv: object;
+    const { cvMarkdown, jobDescription, locale } = req.body as {
+      cvMarkdown: string;
       jobDescription: string;
       locale?: 'en' | 'pt-BR';
     };
 
-    if (!cv || !jobDescription) {
-      res.status(400).json({ message: 'cv and jobDescription are required' });
+    if (!cvMarkdown || !jobDescription) {
+      res.status(400).json({ message: 'cvMarkdown and jobDescription are required' });
       return;
     }
 
     const resolvedLocale = locale ?? detectLocale(jobDescription);
-    const report = await analyzeWithATS(cv, jobDescription, resolvedLocale);
+    const report = await analyzeWithATS(cvMarkdown, jobDescription, resolvedLocale);
 
     res.json({ report, locale: resolvedLocale });
   } catch (err: unknown) {
