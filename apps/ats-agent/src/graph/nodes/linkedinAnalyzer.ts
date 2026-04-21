@@ -1,6 +1,5 @@
-import { GoogleGenerativeAI } from '@google/generative-ai'
+import { genAI } from '../../lib/gemini'
 
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY ?? '')
 const model = genAI.getGenerativeModel({ model: 'gemini-flash-lite-latest' })
 
 interface LinkedInProfile {
