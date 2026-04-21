@@ -4,7 +4,7 @@
  */
 
 /** Workspace tab types */
-export type WorkspaceTab = 'ats' | 'cover' | 'video' | 'interview'
+export type WorkspaceTab = 'ats' | 'cover' | 'video' | 'interview' | 'linkedin'
 
 /** Setup modal result */
 export interface WorkspaceSetupResult {

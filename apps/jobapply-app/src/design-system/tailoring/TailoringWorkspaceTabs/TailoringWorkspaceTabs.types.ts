@@ -1,4 +1,4 @@
-export type WorkspaceTab = 'ats' | 'cover' | 'video' | 'interview'
+export type WorkspaceTab = 'ats' | 'cover' | 'video' | 'interview' | 'linkedin'
 
 export interface TailoringWorkspaceTabsProps {
   /** Currently active tab */

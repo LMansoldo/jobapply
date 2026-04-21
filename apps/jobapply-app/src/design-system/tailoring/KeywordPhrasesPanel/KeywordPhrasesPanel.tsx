@@ -20,24 +20,26 @@ export function KeywordPhrasesPanel({ phrases, onCopyPhrase }: KeywordPhrasesPan
     <div className={S.container}>
       <p className={S.sectionLabel}>✦ {t('tailoring.keywordPhrases')}</p>
       <div className={S.list}>
-        {phrases.map((item) => {
-          const itemKey = item.keyword + item.phrase
-          const copied = copiedKey === itemKey
-          return (
-            <div key={itemKey} className={S.phraseRow}>
-              <span className={S.keywordTag}>{item.keyword}</span>
-              <p className={S.phraseText}>{item.phrase}</p>
-              <button
-                type="button"
-                className={S.copyBtn}
-                onClick={() => handleCopy(item.phrase, itemKey)}
-              >
-                {copied ? <CheckOutlined /> : <CopyOutlined />}
-                {copied ? t('tailoring.phraseCopied') : t('tailoring.copyPhrase')}
-              </button>
-            </div>
-          )
-        })}
+        {phrases.map((item) =>
+          item.phrases.map((phrase, i) => {
+            const itemKey = `${item.keyword}-${i}`
+            const copied = copiedKey === itemKey
+            return (
+              <div key={itemKey} className={S.phraseRow}>
+                <span className={S.keywordTag}>{item.keyword}</span>
+                <p className={S.phraseText}>{phrase}</p>
+                <button
+                  type="button"
+                  className={S.copyBtn}
+                  onClick={() => handleCopy(phrase, itemKey)}
+                >
+                  {copied ? <CheckOutlined /> : <CopyOutlined />}
+                  {copied ? t('tailoring.phraseCopied') : t('tailoring.copyPhrase')}
+                </button>
+              </div>
+            )
+          })
+        )}
       </div>
     </div>
   )

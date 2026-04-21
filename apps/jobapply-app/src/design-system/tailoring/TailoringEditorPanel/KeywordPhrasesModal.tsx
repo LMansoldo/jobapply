@@ -46,23 +46,28 @@ export function KeywordPhrasesModal({ open, onClose, phrases = [] }: KeywordPhra
 
         <S.PhraseList>
           {phrases.length > 0 ? (
-            phrases.map((entry, index) => (
-              <S.KPhraseItem key={index}>
-                <S.KPhraseKeyword>{entry.keyword}</S.KPhraseKeyword>
-                <S.KPhraseRow>
-                  <S.KPhraseContent>
-                    <S.KPhraseText>{entry.phrase}</S.KPhraseText>
-                  </S.KPhraseContent>
-                  <S.CopyBtn
-                    type="button"
-                    onClick={() => handleCopy(entry.phrase, index)}
-                  >
-                    {copiedIndex === index ? <CheckOutlined /> : <CopyOutlined />}
-                    {copiedIndex === index ? t('tailoring.phraseCopied') : t('tailoring.copyPhrase')}
-                  </S.CopyBtn>
-                </S.KPhraseRow>
-              </S.KPhraseItem>
-            ))
+            phrases.map((entry) =>
+              entry.phrases.map((phrase, i) => {
+                const flatIndex = phrases.indexOf(entry) * 100 + i
+                return (
+                  <S.KPhraseItem key={`${entry.keyword}-${i}`}>
+                    <S.KPhraseKeyword>{entry.keyword}</S.KPhraseKeyword>
+                    <S.KPhraseRow>
+                      <S.KPhraseContent>
+                        <S.KPhraseText>{phrase}</S.KPhraseText>
+                      </S.KPhraseContent>
+                      <S.CopyBtn
+                        type="button"
+                        onClick={() => handleCopy(phrase, flatIndex)}
+                      >
+                        {copiedIndex === flatIndex ? <CheckOutlined /> : <CopyOutlined />}
+                        {copiedIndex === flatIndex ? t('tailoring.phraseCopied') : t('tailoring.copyPhrase')}
+                      </S.CopyBtn>
+                    </S.KPhraseRow>
+                  </S.KPhraseItem>
+                )
+              })
+            )
           ) : (
             <S.EmptyStateDiv>{t('tailoring.noPhrasesToChange')}</S.EmptyStateDiv>
           )}

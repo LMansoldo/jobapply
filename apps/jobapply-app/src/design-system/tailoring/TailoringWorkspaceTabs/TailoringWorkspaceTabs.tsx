@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next'
-import { BarChartOutlined, DownOutlined, MailOutlined, VideoCameraOutlined, CommentOutlined } from '@ant-design/icons'
+import { BarChartOutlined, DownOutlined, MailOutlined, VideoCameraOutlined, CommentOutlined, LinkedinOutlined } from '@ant-design/icons'
 import { Dropdown } from '../../../components/Dropdown'
 import { Colors } from '../../../styles/theme/colors'
 import type { WorkspaceTab, TailoringWorkspaceTabsProps } from './TailoringWorkspaceTabs.types'
@@ -43,6 +43,14 @@ export function TailoringWorkspaceTabs({
       label: t('tailoring.interviewTraining'),
       badgeBg: Colors.blueBg,
       badgeColor: Colors.blue,
+      badgeText: t('tailoring.badgeNew'),
+    },
+    {
+      key: 'linkedin' as WorkspaceTab,
+      icon: <LinkedinOutlined />,
+      label: t('tailoring.linkedinAnalysis'),
+      badgeBg: '#e8f4fb',
+      badgeColor: '#0077B5',
       badgeText: t('tailoring.badgeNew'),
     },
   ]

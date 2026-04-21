@@ -3,7 +3,7 @@
  * @description CV tailoring workspace — 3-column layout: ATS left, dark editor center, preview+export right.
  * Supports both job-based mode (with jobId) and manual mode (user enters job description).
  */
-import { useCallback, useRef } from 'react'
+import { useCallback, useRef, useState } from 'react'
 import { useParams, useNavigate } from '@tanstack/react-router'
 import { useTranslation } from 'react-i18next'
 import { useAntApp } from '../../../components/AntApp'
@@ -16,8 +16,12 @@ import { TailoringWorkspaceTabs } from '../../../design-system/tailoring/Tailori
 import { ATSWorkspace } from '../../../design-system/tailoring/ATSWorkspace'
 import { ATSPanel } from '../../../design-system/ats/ATSPanel'
 import { CoverLetterWorkspace } from '../../../design-system/tailoring/CoverLetterWorkspace'
+import { CoverLetterOnboardingFlow } from '../../../design-system/tailoring/CoverLetterWorkspace/CoverLetterOnboardingFlow'
+import type { VoiceAnswers } from '../../../domain/linkedin/types'
 import { VideoScriptWorkspace } from '../../../design-system/tailoring/VideoScriptWorkspace'
 import { InterviewWorkspace } from '../../../design-system/tailoring/InterviewWorkspace'
+import { LinkedInWorkspace } from '../../../design-system/tailoring/LinkedInWorkspace'
+import { useLinkedInAnalysis } from '../../../domain/linkedin/hooks/useLinkedInAnalysis'
 import { type TailoringEditorHandle } from '../../../design-system/tailoring/TailoringEditorPanel'
 import { mapATSReportToPanel, buildSuggestionsList, buildEditorKeywords } from '../../../domain/cv/tailoringHelpers'
 import { useTailoringWorkspace } from '../../../domain/cv/hooks/useTailoringWorkspace'
@@ -61,6 +65,8 @@ export default function CVTailoringPage() {
   })
 
   const ui = useTailoringPageUI({ atsReport: workspace.atsReport })
+  const linkedin = useLinkedInAnalysis({ onError: handleError })
+  const [coverVoiceAnswers, setCoverVoiceAnswers] = useState<VoiceAnswers | null>(null)
 
   const { handleDownloadPDF, handleExportMarkdown, handleSaveAsVersion } = useTailoringExport({
     cv,
@@ -175,15 +181,17 @@ export default function CVTailoringPage() {
           </div>
         )}
         {ui.activeTab === 'cover' && (
-          <CoverLetterWorkspace
-            coverContent={workspace.coverContent}
-            coverLoading={workspace.coverLoading}
-            tone={ui.tone}
-            toneOptions={toneOptions}
-            onCoverContentChange={workspace.setCoverContent}
-            onToneChange={ui.setTone}
-            onGenerateCoverLetter={workspace.handleGenerateCoverLetter}
-          />
+          coverVoiceAnswers === null
+            ? <CoverLetterOnboardingFlow onComplete={setCoverVoiceAnswers} />
+            : <CoverLetterWorkspace
+                coverContent={workspace.coverContent}
+                coverLoading={workspace.coverLoading}
+                tone={ui.tone}
+                toneOptions={toneOptions}
+                onCoverContentChange={workspace.setCoverContent}
+                onToneChange={ui.setTone}
+                onGenerateCoverLetter={() => workspace.handleGenerateCoverLetter(coverVoiceAnswers)}
+              />
         )}
         {ui.activeTab === 'video' && (
           <VideoScriptWorkspace
@@ -198,6 +206,15 @@ export default function CVTailoringPage() {
             interviewPrep={workspace.interviewPrep}
             loading={workspace.interviewPrepLoading}
             onGenerate={workspace.handleGenerateInterviewPrep}
+          />
+        )}
+        {ui.activeTab === 'linkedin' && (
+          <LinkedInWorkspace
+            view={linkedin.view}
+            analysis={linkedin.analysis}
+            loading={linkedin.loading}
+            onAnalyzePDF={linkedin.handleAnalyzePDF}
+            onReset={linkedin.handleReset}
           />
         )}
       </div>

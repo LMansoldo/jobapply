@@ -54,7 +54,7 @@ export interface ATSTip {
 
 export interface KeywordPhrase {
   keyword: string
-  phrase: string
+  phrases: string[]
 }
 
 export interface RemoveSuggestion {
