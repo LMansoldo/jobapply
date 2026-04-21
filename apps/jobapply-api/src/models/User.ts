@@ -8,7 +8,8 @@ export type AccessType = 'free' | 'premium' | 'ultimate';
 export interface IUser extends Document {
   name: string;
   email: string;
-  password: string;
+  password?: string;
+  linkedinId?: string;
   createdAt: Date;
   public_id: string;
   cv?: mongoose.Types.ObjectId;
@@ -21,7 +22,8 @@ export interface IUser extends Document {
 const userSchema = new Schema<IUser>({
   name: { type: String, required: true, trim: true },
   email: { type: String, required: true, unique: true, lowercase: true, trim: true },
-  password: { type: String, required: true, minlength: 8, select: false },
+  password: { type: String, required: false, minlength: 8, select: false },
+  linkedinId: { type: String, sparse: true, unique: true },
   createdAt: { type: Date, default: Date.now },
   public_id: { type: String, unique: true, default: () => randomUUID() },
   cv: { type: Schema.Types.ObjectId, ref: 'CV', default: null },
@@ -35,11 +37,13 @@ const userSchema = new Schema<IUser>({
 
 userSchema.pre('save', async function (next) {
   if (!this.isModified('password')) return next();
+  if (!this.password) return next();
   this.password = await bcrypt.hash(this.password, 10);
   next();
 });
 
 userSchema.methods.comparePassword = function (candidate: string): Promise<boolean> {
+  if (!this.password) return Promise.resolve(false);
   return bcrypt.compare(candidate, this.password);
 };
 

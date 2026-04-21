@@ -5,6 +5,7 @@ import jobRoutes from './routes/jobRoutes';
 import cvRoutes from './routes/cvRoutes';
 import voucherRoutes from './routes/voucherRoutes';
 import publicRoutes from './routes/publicRoutes';
+import authRoutes from './routes/authRoutes';
 
 const app = express();
 
@@ -24,6 +25,7 @@ app.use('/jobs', jobRoutes);
 app.use('/cv', cvRoutes);
 app.use('/vouchers', voucherRoutes);
 app.use('/public', publicRoutes);
+app.use('/auth', authRoutes);
 
 app.use((_req: Request, res: Response) => {
   res.status(404).json({ message: 'Route not found' });

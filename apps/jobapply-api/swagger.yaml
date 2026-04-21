@@ -9,6 +9,8 @@ servers:
     description: Production
   - url: http://localhost:3000
     description: Local
+  - url: http://192.168.0.114:3030
+    description: Local Network
 
 components:
   securitySchemes:
@@ -430,6 +432,51 @@ components:
           description: Coaching statement on how to pitch yourself for this role
           example: "Position yourself as a senior full-stack engineer who has already shipped at scale in fintech, not just a generalist. Lead with your payments work at Acme and your track record of owning reliability — those map directly to what this JD is asking for."
 
+    LinkedInProfile:
+      type: object
+      required: [headline, about, experience, skills, education]
+      properties:
+        headline:
+          type: string
+          example: "Senior Software Engineer | React, Node.js, TypeScript"
+        about:
+          type: string
+          example: "Passionate software engineer with 5+ years of experience..."
+        experience:
+          type: string
+          example: "Senior Software Engineer at TechCorp (2021-Present)..."
+        skills:
+          type: string
+          example: "React, Node.js, TypeScript, AWS, Docker"
+        education:
+          type: string
+          example: "Bachelor's in Computer Science, University of XYZ"
+        certifications:
+          type: string
+          example: "AWS Certified Solutions Architect, Google Cloud Professional"
+
+    LinkedInAnalysis:
+      type: object
+      properties:
+        report:
+          $ref: '#/components/schemas/ATSReport'
+        adaptedProfile:
+          $ref: '#/components/schemas/LinkedInProfile'
+        locale:
+          type: string
+          enum: [en, pt-BR]
+
+    CVGenerationResult:
+      type: object
+      properties:
+        report:
+          $ref: '#/components/schemas/ATSReport'
+        adaptedCV:
+          $ref: '#/components/schemas/CV'
+        locale:
+          type: string
+          enum: [en, pt-BR]
+
     ATSReport:
       type: object
       properties:
@@ -491,6 +538,25 @@ components:
           items:
             $ref: '#/components/schemas/RemoveSuggestion'
 
+    LinkedInOAuthProfile:
+      type: object
+      description: Raw user info returned by LinkedIn OpenID Connect userinfo endpoint
+      properties:
+        sub:
+          type: string
+          description: LinkedIn user ID (stable unique identifier)
+        name:
+          type: string
+        given_name:
+          type: string
+        family_name:
+          type: string
+        email:
+          type: string
+        picture:
+          type: string
+          nullable: true
+
     Error:
       type: object
       properties:
@@ -498,6 +564,108 @@ components:
           type: string
 
 paths:
+
+  # ─── AUTH ─────────────────────────────────────────────────────────────────
+
+  /auth/linkedin:
+    get:
+      tags: [Auth]
+      summary: Initiate LinkedIn OAuth flow
+      description: >
+        Builds the LinkedIn authorization URL and issues a 302 redirect.
+        The browser should follow this redirect directly.
+      parameters:
+        - in: query
+          name: redirect_uri
+          required: true
+          schema:
+            type: string
+          description: OAuth redirect URI registered in your LinkedIn app
+          example: https://yourapp.com/auth/linkedin/callback
+        - in: query
+          name: state
+          required: false
+          schema:
+            type: string
+          description: Opaque value for CSRF protection; returned unchanged by LinkedIn
+          example: "randomCsrfToken123"
+      responses:
+        '302':
+          description: Redirect to LinkedIn authorization page
+          headers:
+            Location:
+              schema:
+                type: string
+        '400':
+          description: Missing redirect_uri
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /auth/linkedin/callback:
+    post:
+      tags: [Auth]
+      summary: Handle LinkedIn OAuth callback
+      description: >
+        Exchanges the authorization code for an access token, fetches the user's
+        LinkedIn profile, then either returns the raw profile (action=analyze)
+        or finds/creates a user account and issues a JWT (action=login).
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [code, redirect_uri]
+              properties:
+                code:
+                  type: string
+                  description: Authorization code received from LinkedIn
+                state:
+                  type: string
+                  description: State value from the original redirect
+                redirect_uri:
+                  type: string
+                  description: Must exactly match the redirect_uri used in the initial request
+                action:
+                  type: string
+                  enum: [login, analyze]
+                  default: login
+                  description: >
+                    `login` — find or create user account, return JWT.
+                    `analyze` — return raw LinkedIn profile without touching user records.
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - description: login action
+                    type: object
+                    properties:
+                      token:
+                        type: string
+                      user:
+                        $ref: '#/components/schemas/User'
+                  - description: analyze action
+                    type: object
+                    properties:
+                      profile:
+                        $ref: '#/components/schemas/LinkedInOAuthProfile'
+        '400':
+          description: Missing required fields
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '502':
+          description: LinkedIn API error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
 
   # ─── USERS ────────────────────────────────────────────────────────────────
 
@@ -1690,6 +1858,160 @@ paths:
                 $ref: '#/components/schemas/Error'
         '404':
           description: CV or job not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '502':
+          description: ATS agent error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /cv/analyze:
+    post:
+      tags: [CV]
+      summary: Analyze CV directly (without saving to DB) via ATS agent
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [cv, jobDescription]
+              properties:
+                cv:
+                  $ref: '#/components/schemas/CV'
+                jobDescription:
+                  type: string
+                  description: Raw job description text
+                locale:
+                  type: string
+                  enum: [en, pt-BR]
+                  description: Override locale. If omitted, detected automatically from the job description language.
+      responses:
+        '200':
+          description: ATS analysis report
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  report:
+                    $ref: '#/components/schemas/ATSReport'
+                  locale:
+                    type: string
+                    enum: [en, pt-BR]
+                    description: Locale used for the analysis (auto-detected or from request)
+        '400':
+          description: cv and jobDescription are required
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Invalid token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '502':
+          description: ATS agent error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /cv/generate:
+    post:
+      tags: [CV]
+      summary: Generate adapted CV directly (without saving to DB) via ATS agent
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [cv, jobDescription]
+              properties:
+                cv:
+                  $ref: '#/components/schemas/CV'
+                jobDescription:
+                  type: string
+                  description: Raw job description text
+                locale:
+                  type: string
+                  enum: [en, pt-BR]
+                  description: Override locale. If omitted, detected automatically from the job description language.
+      responses:
+        '200':
+          description: ATS analysis report with adapted CV
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CVGenerationResult'
+        '400':
+          description: cv and jobDescription are required
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Invalid token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '502':
+          description: ATS agent error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /cv/linkedin/analyze:
+    post:
+      tags: [CV]
+      summary: Analyze LinkedIn profile against a target role via ATS agent
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [profile, targetRole]
+              properties:
+                profile:
+                  $ref: '#/components/schemas/LinkedInProfile'
+                targetRole:
+                  type: string
+                  description: Target role or job description
+                locale:
+                  type: string
+                  enum: [en, pt-BR]
+                  description: Override locale. If omitted, detected automatically from the targetRole language.
+      responses:
+        '200':
+          description: LinkedIn profile analysis
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LinkedInAnalysis'
+        '400':
+          description: profile and targetRole are required
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Invalid token
           content:
             application/json:
               schema:
