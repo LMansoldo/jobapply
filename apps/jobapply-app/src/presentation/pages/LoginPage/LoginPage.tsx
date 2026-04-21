@@ -8,6 +8,7 @@ import { InputPassword } from '../../../components/Input'
 import { Divider } from '../../../components/Divider'
 import { useAuth } from '../../../application/providers/AuthProvider'
 import { login as loginService } from '../../../infrastructure/repositories/authRepository'
+import { redirectToLinkedIn } from '../../../domain/linkedin/linkedinOAuth'
 import { AuthLayout } from '../../../design-system/auth/AuthLayout'
 import { FeatureCard } from '../../../design-system/auth/FeatureCard'
 import { SocialLoginBtn } from '../../../design-system/auth/SocialLoginBtn'
@@ -33,7 +34,7 @@ export default function LoginPage() {
       const { token, user } = await loginService(values.email, values.password)
       login(token, user)
       message.success(t('auth.loginSuccess', { name: user.name }))
-      navigate({ to: '/' })
+      navigate({ to: user.cv ? '/' : '/cv' })
     } catch (err: unknown) {
       const msg =
         (err as { response?: { data?: { message?: string } } })?.response?.data?.message ??
@@ -72,7 +73,7 @@ export default function LoginPage() {
 
       <div className={styles.socialBtns}>
         <SocialLoginBtn provider="google" onClick={() => {}} />
-        <SocialLoginBtn provider="linkedin" onClick={() => {}} />
+        <SocialLoginBtn provider="linkedin" onClick={() => redirectToLinkedIn('login')} />
       </div>
 
       <Divider plain className={styles.dividerOr}>{t('auth.orWithEmail')}</Divider>

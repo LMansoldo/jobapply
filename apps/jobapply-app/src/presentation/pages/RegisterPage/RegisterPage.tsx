@@ -6,10 +6,13 @@ import { useAntApp } from '../../../components/AntApp'
 import { Form, FormItem } from '../../../components/Form'
 import { InputPassword } from '../../../components/Input'
 import { register as registerService } from '../../../infrastructure/repositories/authRepository'
+import { redirectToLinkedIn } from '../../../domain/linkedin/linkedinOAuth'
 import { AuthLayout } from '../../../design-system/auth/AuthLayout'
 import { FeatureCard } from '../../../design-system/auth/FeatureCard'
 import { RoleCards } from '../../../design-system/auth/RoleCards'
 import { PasswordStrength } from '../../../design-system/auth/PasswordStrength'
+import { SocialLoginBtn } from '../../../design-system/auth/SocialLoginBtn'
+import { Divider } from '../../../components/Divider'
 import { DSButton } from '../../../design-system/primitives/DSButton'
 import { DSInput } from '../../../design-system/primitives/DSInput'
 import * as styles from './RegisterPage.styles'
@@ -89,6 +92,12 @@ export default function RegisterPage() {
         value={role}
         onChange={setRole}
       />
+
+      <div className={styles.socialBtns}>
+        <SocialLoginBtn provider="linkedin" onClick={() => redirectToLinkedIn('login')} />
+      </div>
+
+      <Divider plain className={styles.dividerOr}>{t('auth.orWithEmail')}</Divider>
 
       <Form layout="vertical" onFinish={handleSubmit} autoComplete="off">
         <FormItem

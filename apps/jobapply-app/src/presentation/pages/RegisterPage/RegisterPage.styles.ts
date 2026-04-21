@@ -79,3 +79,16 @@ export const loginLink = css({
   color: Colors.primaryDark,
   fontWeight: FontWeight.semibold,
 })
+
+export const socialBtns = css({
+  display: 'flex',
+  flexDirection: 'column',
+  gap: Spacing.sm,
+})
+
+export const dividerOr = css({
+  '& .ant-divider-inner-text': {
+    color: Colors.textSub,
+    fontSize: FontSize.sm,
+  },
+})

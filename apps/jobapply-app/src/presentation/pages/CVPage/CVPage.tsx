@@ -47,7 +47,7 @@ const PREVIEW_CSS = `
 `
 
 export default function CVPage() {
-  const { cvId, setCvId } = useAuth()
+  const { cvId, setCvId, user } = useAuth()
   const { message, modal } = useAntApp()
   const { t } = useTranslation()
   const screens = useBreakpoint()
@@ -83,6 +83,21 @@ export default function CVPage() {
     applyCV(cvQuery.data, false)
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [cvQuery.data])
+
+  // Pre-fill base form with auth user data when creating a new CV
+  useEffect(() => {
+    if (cvId || !user) return
+    const fromLinkedIn = sessionStorage.getItem('cv_prefill_from_linkedin') === 'true'
+    sessionStorage.removeItem('cv_prefill_from_linkedin')
+    baseForm.setFieldsValue({
+      fullName: user.name,
+      email: user.email,
+    })
+    if (fromLinkedIn) {
+      message.info(t('cv.prefillFromLinkedIn'))
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   function applyCV(data: CV, isNewOrEditing = false) {
     setCv(data)
