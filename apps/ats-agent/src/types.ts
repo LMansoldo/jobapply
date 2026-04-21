@@ -73,7 +73,8 @@ export interface CV {
 // ── Agent types ───────────────────────────────────────────────────────────────
 
 export interface AgentInput {
-  cv: CV
+  cv?: CV
+  cvMarkdown?: string
   jobDescription: string
   locale?: 'en' | 'pt-BR'
 }

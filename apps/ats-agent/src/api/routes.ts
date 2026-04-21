@@ -76,11 +76,20 @@ const CVSchema = z.object({
   updatedAt: z.string().optional(),
 })
 
-const AnalyzeBodySchema = z.object({
-  cv: CVSchema,
-  jobDescription: z.string().min(1, 'jobDescription must not be empty'),
-  locale: z.enum(['en', 'pt-BR']).optional(),
-})
+const AnalyzeBodySchema = z.union([
+  z.object({
+    cv: CVSchema,
+    cvMarkdown: z.undefined(),
+    jobDescription: z.string().min(1, 'jobDescription must not be empty'),
+    locale: z.enum(['en', 'pt-BR']).optional(),
+  }),
+  z.object({
+    cv: z.undefined(),
+    cvMarkdown: z.string().min(1, 'cvMarkdown must not be empty'),
+    jobDescription: z.string().min(1, 'jobDescription must not be empty'),
+    locale: z.enum(['en', 'pt-BR']).optional(),
+  }),
+])
 
 const VoiceAnswerSchema = z.object({
   label: z.string(),

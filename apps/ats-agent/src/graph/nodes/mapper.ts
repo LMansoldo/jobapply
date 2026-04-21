@@ -2,6 +2,109 @@ import type { AgentInput, CV, CVLocaleVersion, MappedCV, SkillGroup } from '../.
 
 const URL_PATTERN = /https?:\/\/[^\s"'<>]+/g
 
+// ── Markdown → MappedCV ───────────────────────────────────────────────────────
+
+const SECTION_ALIASES: Record<keyof MappedCV['sections'], string[]> = {
+  contact: ['contact', 'contato'],
+  summary: ['summary', 'resumo', 'about', 'sobre'],
+  skills: ['skills', 'habilidades', 'competências', 'competencias'],
+  experience: ['professional experience', 'experiência profissional', 'experiencia profissional', 'experience', 'experiência', 'experiencia'],
+  education: ['education', 'educação', 'educacao', 'formação', 'formacao', 'formação acadêmica'],
+  languages: ['languages', 'idiomas'],
+}
+
+function extractMarkdownSections(md: string): Record<string, string> {
+  const result: Record<string, string> = {}
+  const parts = md.split(/\n(?=## )/g)
+  for (const part of parts) {
+    const firstNewline = part.indexOf('\n')
+    if (firstNewline === -1) continue
+    const heading = part.slice(0, firstNewline).replace(/^##\s*/, '').trim().toLowerCase()
+    result[heading] = part.slice(firstNewline + 1).trim()
+  }
+  return result
+}
+
+function resolveSection(sections: Record<string, string>, aliases: string[]): string {
+  for (const alias of aliases) {
+    if (sections[alias]) return sections[alias]
+  }
+  return ''
+}
+
+export function mapFromMarkdown(cvMarkdown: string): MappedCV {
+  const sections = extractMarkdownSections(cvMarkdown)
+
+  const contact = resolveSection(sections, SECTION_ALIASES.contact)
+  const summary = resolveSection(sections, SECTION_ALIASES.summary)
+  const skillsRaw = resolveSection(sections, SECTION_ALIASES.skills)
+  const experienceRaw = resolveSection(sections, SECTION_ALIASES.experience)
+  const educationRaw = resolveSection(sections, SECTION_ALIASES.education)
+  const languages = resolveSection(sections, SECTION_ALIASES.languages)
+
+  // Extract skills text (strip bold labels)
+  const skillsText = skillsRaw.replace(/\*\*[^*]+:\*\*/g, '').replace(/\n/g, ' ').trim()
+
+  // Extract experience entities from markdown structure
+  const jobTitles: string[] = []
+  const companies: string[] = []
+  const dates: string[] = []
+  const experiencePeriods: Array<{ role: string; company: string; period: string }> = []
+
+  for (const line of experienceRaw.split('\n')) {
+    const roleMatch = line.match(/^###\s+(.+)/)
+    if (roleMatch) {
+      const parts = roleMatch[1].split('|').map(s => s.trim())
+      if (parts[0]) jobTitles.push(parts[0])
+      if (parts[1]) companies.push(parts[1])
+    }
+    const periodMatch = line.match(/^\*\*([^*]+)\*\*$/)
+    if (periodMatch) {
+      dates.push(periodMatch[1])
+      const lastRole = jobTitles[jobTitles.length - 1] ?? ''
+      const lastCompany = companies[companies.length - 1] ?? ''
+      experiencePeriods.push({ role: lastRole, company: lastCompany, period: periodMatch[1] })
+    }
+  }
+
+  const degrees: string[] = []
+  for (const line of educationRaw.split('\n')) {
+    const degMatch = line.match(/^###\s+(.+)/)
+    if (degMatch) degrees.push(degMatch[1])
+  }
+
+  const urls = (cvMarkdown.match(URL_PATTERN) ?? [])
+
+  // Flatten experience text: remove markdown structure markers
+  const experienceText = experienceRaw
+    .split('\n')
+    .filter(l => !l.startsWith('###') && !l.match(/^\*\*[^*]+\*\*$/))
+    .join(' ')
+    .trim()
+
+  const educationText = educationRaw
+    .split('\n')
+    .filter(l => !l.startsWith('###'))
+    .join(' ')
+    .trim()
+
+  return {
+    sections: { contact, summary, skills: skillsText, experience: experienceText, education: educationText, languages },
+    entities: {
+      jobTitles,
+      companies,
+      skills: [],
+      techStack: [],
+      softSkills: [],
+      dates,
+      degrees,
+      urls: [...new Set(urls)],
+      experiencePeriods,
+    },
+    raw: {} as CV,
+  }
+}
+
 const SOFT_SKILL_LABELS = ['soft', 'interpersonal', 'communication', 'leadership', 'behavior']
 
 function mergeLocaleVersion(base: CV, locale: CVLocaleVersion): CV {
@@ -41,7 +144,12 @@ function extractUrlsFromExperience(experience: CV['experience']): string[] {
 }
 
 export function mapperNode(state: { input: AgentInput }): { mapped: MappedCV } {
+  if (state.input.cvMarkdown) {
+    return { mapped: mapFromMarkdown(state.input.cvMarkdown) }
+  }
+
   const { cv, locale } = state.input
+  if (!cv) throw new Error('mapperNode: cv or cvMarkdown is required')
 
   let merged = cv
   if (locale) {
