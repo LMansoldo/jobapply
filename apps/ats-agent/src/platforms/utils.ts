@@ -48,6 +48,7 @@ export function parseJobDescription(jd: string): string {
 // ── Stop words ────────────────────────────────────────────────────────────────
 
 const STOP_WORDS = new Set([
+  // English function words
   'a', 'an', 'the', 'and', 'or', 'but', 'in', 'on', 'at', 'to', 'for', 'of',
   'with', 'by', 'from', 'is', 'are', 'was', 'were', 'be', 'been', 'being',
   'have', 'has', 'had', 'do', 'does', 'did', 'will', 'would', 'could', 'should',
@@ -57,10 +58,25 @@ const STOP_WORDS = new Set([
   'able', 'about', 'after', 'all', 'any', 'both', 'each', 'few', 'more', 'most',
   'other', 'some', 'such', 'only', 'same', 'too', 'very', 'just', 'must', 'work',
   'working', 'new', 'using', 'use', 'used', 'within', 'across', 'well', 'strong',
-  // Portuguese stop words
-  'e', 'o', 'os', 'as', 'um', 'uma', 'de', 'da', 'do', 'das', 'dos', 'em', 'na',
-  'no', 'nas', 'nos', 'para', 'por', 'com', 'se', 'que', 'uma', 'ser', 'ter',
-  'seu', 'sua', 'seus', 'suas', 'esta', 'este', 'estes', 'estas', 'isso', 'aqui',
+  // English JD filler
+  'skills', 'experience', 'requirements', 'knowledge', 'ability', 'level',
+  'minimum', 'preferred', 'required', 'including', 'related', 'similar',
+  'good', 'great', 'nice', 'plus', 'bonus', 'role', 'team', 'company',
+  'candidate', 'candidates', 'looking', 'position', 'opportunity', 'responsibilities',
+  // Portuguese function words
+  'e', 'o', 'a', 'os', 'as', 'um', 'uma', 'de', 'da', 'do', 'das', 'dos',
+  'em', 'na', 'no', 'nas', 'nos', 'para', 'por', 'com', 'se', 'que', 'ao',
+  'aos', 'ser', 'ter', 'seu', 'sua', 'seus', 'suas', 'esta', 'este', 'estes',
+  'estas', 'isso', 'aqui', 'mais', 'mas', 'são', 'foi', 'era', 'vai',
+  'como', 'bem', 'seu', 'sua', 'nós', 'eles', 'elas', 'quem', 'onde',
+  // Portuguese JD filler
+  'requisitos', 'experiência', 'conhecimento', 'habilidades', 'competências',
+  'nível', 'mínimo', 'obrigatório', 'desejável', 'diferencial', 'incluindo',
+  'relacionado', 'similar', 'similares', 'cargo', 'vaga', 'empresa', 'equipe',
+  'time', 'candidato', 'candidatos', 'buscamos', 'procuramos', 'oferecemos',
+  'técnicas', 'técnico', 'técnicos', 'profissional', 'área', 'anos',
+  'entendimento', 'compreensão', 'sólido', 'sólida', 'avançado', 'avançada',
+  'profundo', 'profunda', 'proficiência', 'domínio', 'básico', 'intermediário',
 ])
 
 // ── Keyword extraction ────────────────────────────────────────────────────────
@@ -91,8 +107,8 @@ export interface ScoringResult {
   missingKeywords: string[]
 }
 
-export function scoreKeywords(cv: MappedCV, jd: string, synonymMap?: Record<string, string[]>): ScoringResult {
-  const keywords = extractJDKeywords(jd)
+export function scoreKeywords(cv: MappedCV, jd: string, synonymMap?: Record<string, string[]>, preExtractedKeywords?: string[]): ScoringResult {
+  const keywords = preExtractedKeywords?.length ? preExtractedKeywords : extractJDKeywords(jd)
   if (keywords.length === 0) return { baseScore: 0, matchedKeywords: [], missingKeywords: [] }
 
   const matched = new Set<string>()

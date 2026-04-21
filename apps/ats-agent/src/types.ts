@@ -113,7 +113,7 @@ export interface PlatformScore {
 
 export interface KeywordPhrase {
   keyword: string
-  phrase: string
+  phrases: string[]
 }
 
 export interface RemoveSuggestion {
@@ -160,4 +160,5 @@ export interface GraphState {
   keywordPhrases?: KeywordPhrase[]
   removeSuggestions?: RemoveSuggestion[]
   report?: ATSReport
+  adaptedCV?: CV
 }

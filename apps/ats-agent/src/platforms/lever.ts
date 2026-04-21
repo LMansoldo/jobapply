@@ -34,8 +34,8 @@ const SYNONYMS: Record<string, string[]> = {
   linux: ['unix', 'bash', 'shell scripting'],
 }
 
-export function scoreLever(cv: MappedCV, jd: string): PlatformScore {
-  const { baseScore, matchedKeywords, missingKeywords } = scoreKeywords(cv, jd, SYNONYMS)
+export function scoreLever(cv: MappedCV, jd: string, jdKeywords?: string[]): PlatformScore {
+  const { baseScore, matchedKeywords, missingKeywords } = scoreKeywords(cv, jd, SYNONYMS, jdKeywords)
 
   const flags: string[] = []
   const notes: string[] = [

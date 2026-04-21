@@ -37,8 +37,8 @@ function extractCitiesFromJD(jd: string): string[] {
   return [...new Set(cities)]
 }
 
-export function scoreICIMS(cv: MappedCV, jd: string): PlatformScore {
-  const { baseScore, matchedKeywords, missingKeywords } = scoreKeywords(cv, jd)
+export function scoreICIMS(cv: MappedCV, jd: string, jdKeywords?: string[]): PlatformScore {
+  const { baseScore, matchedKeywords, missingKeywords } = scoreKeywords(cv, jd, undefined, jdKeywords)
 
   const flags: string[] = []
   const notes: string[] = []

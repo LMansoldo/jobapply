@@ -20,8 +20,8 @@ function estimateYearsFromPeriods(periods: Array<{ role: string; company: string
   return Math.round((Date.now() - earliest.getTime()) / (1000 * 60 * 60 * 24 * 365))
 }
 
-export function scoreCatho(cv: MappedCV, jd: string): PlatformScore {
-  const { baseScore, matchedKeywords, missingKeywords } = scoreKeywords(cv, jd)
+export function scoreCatho(cv: MappedCV, jd: string, jdKeywords?: string[]): PlatformScore {
+  const { baseScore, matchedKeywords, missingKeywords } = scoreKeywords(cv, jd, undefined, jdKeywords)
 
   const flags: string[] = []
   const notes: string[] = []

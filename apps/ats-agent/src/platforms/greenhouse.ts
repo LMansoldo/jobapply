@@ -37,13 +37,13 @@ function splitJDBlocks(jd: string): { required: string; preferred: string; full:
   return { required: required || jd, preferred, full: jd }
 }
 
-export function scoreGreenhouse(cv: MappedCV, jd: string): PlatformScore {
+export function scoreGreenhouse(cv: MappedCV, jd: string, jdKeywords?: string[]): PlatformScore {
   const { required, preferred } = splitJDBlocks(jd)
 
   const requiredKeywords = extractJDKeywords(required)
   const preferredKeywords = extractJDKeywords(preferred)
 
-  const { baseScore, matchedKeywords } = scoreKeywords(cv, jd)
+  const { baseScore, matchedKeywords } = scoreKeywords(cv, jd, undefined, jdKeywords)
 
   const allSections = Object.values(cv.sections).join(' ').toLowerCase()
 

@@ -16,9 +16,9 @@ function titleMatches(cvTitle: string, jdTitle: string): boolean {
   return cvWords.some(w => jdLower.includes(w))
 }
 
-export function scoreVagas(cv: MappedCV, jd: string): PlatformScore {
+export function scoreVagas(cv: MappedCV, jd: string, jdKeywords?: string[]): PlatformScore {
   // Vagas.com: strict keyword matching, no synonym tolerance
-  const { baseScore, matchedKeywords, missingKeywords } = scoreKeywords(cv, jd)
+  const { baseScore, matchedKeywords, missingKeywords } = scoreKeywords(cv, jd, undefined, jdKeywords)
 
   const flags: string[] = []
   const notes: string[] = [

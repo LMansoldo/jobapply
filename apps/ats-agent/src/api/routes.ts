@@ -3,6 +3,7 @@ import { z } from 'zod'
 import { graph } from '../graph'
 import { mapperNode } from '../graph/nodes/mapper'
 import { interviewPrepAnalyzerNode } from '../graph/nodes/interviewPrepAnalyzer'
+import { linkedinAnalyzerNode } from '../graph/nodes/linkedinAnalyzer'
 import type { AgentInput } from '../types'
 
 const SkillGroupSchema = z.object({
@@ -81,6 +82,25 @@ const AnalyzeBodySchema = z.object({
   locale: z.enum(['en', 'pt-BR']).optional(),
 })
 
+const VoiceAnswerSchema = z.object({
+  label: z.string(),
+  answer: z.string(),
+})
+
+const LinkedInAnalyzeBodySchema = z.object({
+  profile: z.object({
+    headline: z.string(),
+    about: z.string(),
+    experience: z.string(),
+    skills: z.string(),
+    education: z.string(),
+    certifications: z.string().optional(),
+  }),
+  targetRole: z.string().optional(),
+  locale: z.enum(['en', 'pt-BR']).optional(),
+  voiceAnswers: z.array(VoiceAnswerSchema).optional(),
+})
+
 export async function registerRoutes(app: FastifyInstance): Promise<void> {
   app.get('/health', async () => ({ status: 'ok' }))
 
@@ -120,6 +140,56 @@ export async function registerRoutes(app: FastifyInstance): Promise<void> {
         locale: input.locale,
       })
       return reply.send(interviewPrep)
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Internal error'
+      return reply.status(502).send({ message })
+    }
+  })
+
+  app.post('/linkedin-analyze', async (request, reply) => {
+    const parse = LinkedInAnalyzeBodySchema.safeParse(request.body)
+    if (!parse.success) {
+      return reply.status(400).send({ message: parse.error.errors[0]?.message ?? 'Invalid request body' })
+    }
+
+    const { profile, targetRole, locale, voiceAnswers } = parse.data
+
+    try {
+      const linkedinAnalysis = await linkedinAnalyzerNode({
+        input: {
+          profile,
+          targetRole,
+          locale,
+          voiceAnswers,
+        },
+      })
+      return reply.send(linkedinAnalysis)
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Internal error'
+      return reply.status(502).send({ message })
+    }
+  })
+
+  app.post('/generate-cv', async (request, reply) => {
+    const parse = AnalyzeBodySchema.safeParse(request.body)
+    if (!parse.success) {
+      return reply.status(400).send({ message: parse.error.errors[0]?.message ?? 'Invalid request body' })
+    }
+
+    const input: AgentInput = parse.data
+
+    try {
+      const result = await graph.invoke({ input })
+      if (!result.report) {
+        return reply.status(500).send({ message: 'Graph completed without producing a report' })
+      }
+      if (!result.adaptedCV) {
+        return reply.status(500).send({ message: 'Graph completed without producing an adapted CV' })
+      }
+      return reply.send({
+        report: result.report,
+        adaptedCV: result.adaptedCV,
+      })
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Internal error'
       return reply.status(502).send({ message })

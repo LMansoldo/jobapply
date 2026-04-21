@@ -25,8 +25,8 @@ function detectDominantFamily(jd: string): string {
   return bestFamily
 }
 
-export function scoreWorkday(cv: MappedCV, jd: string): PlatformScore {
-  const { baseScore, matchedKeywords, missingKeywords } = scoreKeywords(cv, jd)
+export function scoreWorkday(cv: MappedCV, jd: string, jdKeywords?: string[]): PlatformScore {
+  const { baseScore, matchedKeywords, missingKeywords } = scoreKeywords(cv, jd, undefined, jdKeywords)
 
   const flags: string[] = []
   const notes: string[] = []

@@ -26,8 +26,8 @@ function scoreGupySection(sectionText: string, keywords: string[], weight: numbe
   return (matched / keywords.length) * 100 * weight
 }
 
-export function scoreGupy(cv: MappedCV, jd: string): PlatformScore {
-  const keywords = extractJDKeywords(jd)
+export function scoreGupy(cv: MappedCV, jd: string, jdKeywords?: string[]): PlatformScore {
+  const keywords = jdKeywords?.length ? jdKeywords : extractJDKeywords(jd)
   const flags: string[] = []
   const notes: string[] = [
     'Gupy (Gaia) scores based on form fields — only experience and skills sections are used for ranking',

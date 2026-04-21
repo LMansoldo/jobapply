@@ -23,8 +23,8 @@ function isTechRole(jd: string): boolean {
   return techSignals.some(s => lower.includes(s))
 }
 
-export function scoreInhire(cv: MappedCV, jd: string): PlatformScore {
-  const { baseScore, matchedKeywords, missingKeywords } = scoreKeywords(cv, jd)
+export function scoreInhire(cv: MappedCV, jd: string, jdKeywords?: string[]): PlatformScore {
+  const { baseScore, matchedKeywords, missingKeywords } = scoreKeywords(cv, jd, undefined, jdKeywords)
 
   const flags: string[] = []
   const notes: string[] = [
