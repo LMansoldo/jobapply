@@ -60,7 +60,43 @@ function buildTips(platforms: PlatformScore[], semanticGaps: string[]): ATSRepor
   return tips.sort((a, b) => priority[a.priority] - priority[b.priority])
 }
 
+// Platform weights by target market
+const WEIGHTS_BR: Record<string, number> = {
+  Gupy: 3.0,
+  Catho: 1.5,
+  Vagas: 1.5,
+  Inhire: 1.5,
+  Workday: 0.8,
+  Greenhouse: 0.8,
+  Lever: 0.8,
+  iCIMS: 0.8,
+}
+
+const WEIGHTS_GLOBAL: Record<string, number> = {
+  Workday: 3.0,
+  Greenhouse: 2.5,
+  Lever: 1.5,
+  iCIMS: 1.5,
+  Gupy: 0.5,
+  Catho: 0.3,
+  Vagas: 0.3,
+  Inhire: 0.5,
+}
+
+function weightedScore(platforms: PlatformScore[], locale?: string): number {
+  const weights = locale === 'pt-BR' ? WEIGHTS_BR : WEIGHTS_GLOBAL
+  let totalWeight = 0
+  let weightedSum = 0
+  for (const p of platforms) {
+    const w = weights[p.platform] ?? 1.0
+    weightedSum += p.score * w
+    totalWeight += w
+  }
+  return totalWeight > 0 ? Math.round(weightedSum / totalWeight) : 0
+}
+
 export function aggregatorNode(state: {
+  input?: { locale?: string }
   platformScores?: PlatformScore[]
   semanticGaps?: string[]
   rephraseSuggestions?: Array<{ from: string; to: string }>
@@ -72,10 +108,7 @@ export function aggregatorNode(state: {
 
   if (platforms.length === 0) throw new Error('aggregatorNode: no platform scores in state')
 
-  // Universal score: simple average
-  const universalScore = Math.round(
-    platforms.reduce((sum, p) => sum + p.score, 0) / platforms.length
-  )
+  const universalScore = weightedScore(platforms, state.input?.locale)
 
   // Keywords to add: union of missingRequired + missingPreferred across all platforms
   const keywordsToAdd = [...new Set([

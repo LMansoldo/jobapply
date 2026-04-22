@@ -107,6 +107,21 @@ export interface ScoringResult {
   missingKeywords: string[]
 }
 
+function termMatches(cvText: string, keyword: string): boolean {
+  // Exact substring match
+  if (cvText.includes(keyword)) return true
+
+  // Plural/singular tolerance
+  if (keyword.endsWith('s') && cvText.includes(keyword.slice(0, -1))) return true
+  if (!keyword.endsWith('s') && cvText.includes(keyword + 's')) return true
+
+  // Compound term: all words individually present (e.g. "design system" → "design" + "system")
+  const words = keyword.split(' ')
+  if (words.length > 1 && words.every(w => w.length > 2 && cvText.includes(w))) return true
+
+  return false
+}
+
 export function scoreKeywords(cv: MappedCV, jd: string, synonymMap?: Record<string, string[]>, preExtractedKeywords?: string[]): ScoringResult {
   const keywords = preExtractedKeywords?.length ? preExtractedKeywords : extractJDKeywords(jd)
   if (keywords.length === 0) return { baseScore: 0, matchedKeywords: [], missingKeywords: [] }
@@ -131,7 +146,7 @@ export function scoreKeywords(cv: MappedCV, jd: string, synonymMap?: Record<stri
     for (const [section, weight] of Object.entries(SECTION_WEIGHTS)) {
       const text = cv.sections[section as keyof typeof cv.sections] ?? ''
       const lower = text.toLowerCase()
-      if (allTerms.some(term => lower.includes(term))) {
+      if (allTerms.some(term => termMatches(lower, term))) {
         bestWeight = Math.max(bestWeight, weight)
       }
     }
