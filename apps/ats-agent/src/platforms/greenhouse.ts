@@ -48,10 +48,11 @@ export function scoreGreenhouse(cv: MappedCV, jd: string, jdKeywords?: string[])
 
   const { baseScore, matchedKeywords } = scoreKeywords(cv, jd, undefined, jdKeywords)
 
-  const allSections = Object.values(cv.sections).join(' ').toLowerCase()
+  const UNICODE_DASH_RE = /[\u00AD\u2010\u2011\u2012\u2013\u2014\u2015\u2212\uFE58\uFE63\uFF0D]/g
+  const allSections = Object.values(cv.sections).join(' ').toLowerCase().replace(UNICODE_DASH_RE, '-')
 
-  const missingRequired = requiredKeywords.filter(k => !allSections.includes(k))
-  const missingPreferred = preferredKeywords.filter(k => !allSections.includes(k))
+  const missingRequired = requiredKeywords.filter(k => !allSections.includes(k.replace(UNICODE_DASH_RE, '-')))
+  const missingPreferred = preferredKeywords.filter(k => !allSections.includes(k.replace(UNICODE_DASH_RE, '-')))
 
   const flags: string[] = []
   const notes: string[] = []

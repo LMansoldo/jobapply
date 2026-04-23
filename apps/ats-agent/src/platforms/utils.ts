@@ -58,11 +58,24 @@ const STOP_WORDS = new Set([
   'able', 'about', 'after', 'all', 'any', 'both', 'each', 'few', 'more', 'most',
   'other', 'some', 'such', 'only', 'same', 'too', 'very', 'just', 'must', 'work',
   'working', 'new', 'using', 'use', 'used', 'within', 'across', 'well', 'strong',
-  // English JD filler
+  // English JD filler — nouns and adjectives
   'skills', 'experience', 'requirements', 'knowledge', 'ability', 'level',
   'minimum', 'preferred', 'required', 'including', 'related', 'similar',
   'good', 'great', 'nice', 'plus', 'bonus', 'role', 'team', 'company',
   'candidate', 'candidates', 'looking', 'position', 'opportunity', 'responsibilities',
+  'mandatory', 'mindset', 'fully', 'relevant', 'interactive', 'strategic',
+  'scalable', 'proven', 'thousands', 'budgets', 'budget', 'soft', 'high',
+  'deep', 'broad', 'latest', 'modern', 'best', 'practices', 'practice',
+  'solutions', 'patterns', 'pattern', 'modules', 'features', 'tasks', 'activities',
+  'specifications', 'spec', 'environment', 'environments', 'tools', 'track', 'record',
+  // English JD filler — action verbs (JD uses them, CV uses past tense — they never match anyway)
+  'build', 'builds', 'building', 'implement', 'implementing', 'develop', 'developing',
+  'maintain', 'maintaining', 'manage', 'managing', 'create', 'creating',
+  'ensure', 'ensuring', 'enforce', 'enforcing', 'integrate', 'integrating',
+  'mentor', 'mentoring', 'support', 'supporting', 'deliver', 'delivering',
+  'drive', 'driving', 'reduce', 'reducing', 'boost', 'boosting', 'increase',
+  'increasing', 'accelerate', 'accelerating', 'achieve', 'achieving',
+  'lead', 'leading', 'define', 'defining', 'cutting', 'feed',
   // Portuguese function words
   'e', 'o', 'a', 'os', 'as', 'um', 'uma', 'de', 'da', 'do', 'das', 'dos',
   'em', 'na', 'no', 'nas', 'nos', 'para', 'por', 'com', 'se', 'que', 'ao',
@@ -77,12 +90,19 @@ const STOP_WORDS = new Set([
   'técnicas', 'técnico', 'técnicos', 'profissional', 'área', 'anos',
   'entendimento', 'compreensão', 'sólido', 'sólida', 'avançado', 'avançada',
   'profundo', 'profunda', 'proficiência', 'domínio', 'básico', 'intermediário',
+  'implementar', 'desenvolver', 'garantir', 'gerenciar', 'criar', 'manter',
+  'otimizar', 'liderar', 'definir', 'entregar', 'forte', 'específico', 'específicos',
 ])
 
 // ── Keyword extraction ────────────────────────────────────────────────────────
 
+// Normalize typographic dash variants to regular hyphen-minus (U+002D)
+// Non-breaking hyphen (U+2011), en/em dashes, etc. are commonly used in JD copy
+// and will fail substring matching against CVs that use standard hyphens.
+const UNICODE_DASH_RE = /[\u00AD\u2010\u2011\u2012\u2013\u2014\u2015\u2212\uFE58\uFE63\uFF0D]/g
+
 export function extractJDKeywords(jd: string): string[] {
-  const cleaned = parseJobDescription(jd)
+  const cleaned = parseJobDescription(jd).replace(UNICODE_DASH_RE, '-')
   const tokens = cleaned
     .toLowerCase()
     .split(/[\s,;.:!()\[\]{}"'\/\\@#$%^&*+=<>|?]+/)
@@ -108,16 +128,20 @@ export interface ScoringResult {
 }
 
 function termMatches(cvText: string, keyword: string): boolean {
+  // Normalize typographic dashes in both sides before any comparison
+  const normCv = cvText.replace(UNICODE_DASH_RE, '-')
+  const normKw = keyword.replace(UNICODE_DASH_RE, '-')
+
   // Exact substring match
-  if (cvText.includes(keyword)) return true
+  if (normCv.includes(normKw)) return true
 
   // Plural/singular tolerance
-  if (keyword.endsWith('s') && cvText.includes(keyword.slice(0, -1))) return true
-  if (!keyword.endsWith('s') && cvText.includes(keyword + 's')) return true
+  if (normKw.endsWith('s') && normCv.includes(normKw.slice(0, -1))) return true
+  if (!normKw.endsWith('s') && normCv.includes(normKw + 's')) return true
 
   // Compound term: all words individually present (e.g. "design system" → "design" + "system")
-  const words = keyword.split(' ')
-  if (words.length > 1 && words.every(w => w.length > 2 && cvText.includes(w))) return true
+  const words = normKw.split(' ')
+  if (words.length > 1 && words.every(w => w.length > 2 && normCv.includes(w))) return true
 
   return false
 }
