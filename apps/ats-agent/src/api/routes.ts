@@ -123,14 +123,18 @@ export async function registerRoutes(app: FastifyInstance): Promise<void> {
     const input: AgentInput = parse.data
 
     try {
+      request.log.info({ hasCv: !!input.cv, hasMd: !!input.cvMarkdown, jdLen: input.jobDescription.length }, 'analyze: starting graph.invoke')
       const result = await graph.invoke({ input })
+      request.log.info({ hasReport: !!result.report, hasAdaptedCV: !!result.adaptedCV, hasResume: !!result.resume }, 'analyze: graph.invoke completed')
       if (!result.report) {
         return reply.status(500).send({ message: 'Graph completed without producing a report' })
       }
       return reply.send(result.report)
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Internal error'
-      return reply.status(502).send({ message })
+      const stack = err instanceof Error ? err.stack : undefined
+      request.log.error({ err, stack }, 'analyze: graph.invoke failed')
+      return reply.status(502).send({ message, ...(process.env.NODE_ENV !== 'production' ? { stack } : {}) })
     }
   })
 
@@ -246,5 +250,33 @@ export async function registerRoutes(app: FastifyInstance): Promise<void> {
       const message = err instanceof Error ? err.message : 'Internal error'
       return reply.status(502).send({ message })
     }
+  })
+
+  app.post('/debug/test-nodes', async (request, reply) => {
+    const parse = AnalyzeBodySchema.safeParse(request.body)
+    if (!parse.success) {
+      return reply.status(400).send({ message: parse.error.errors[0]?.message ?? 'Invalid request body' })
+    }
+
+    const input: AgentInput = parse.data
+    const results: Record<string, unknown> = {}
+
+    try {
+      request.log.info('debug: testing mapperNode')
+      const { mapped } = mapperNode({ input })
+      results.mapper = { ok: true, sections: Object.keys(mapped.sections), entityCounts: Object.fromEntries(Object.entries(mapped.entities).map(([k, v]) => [k, Array.isArray(v) ? v.length : (v as any[])?.length ?? 0])) }
+    } catch (err) {
+      results.mapper = { ok: false, error: err instanceof Error ? err.message : String(err) }
+    }
+
+    try {
+      request.log.info('debug: testing jdKeywordExtractorNode')
+      const { jdKeywords } = await jdKeywordExtractorNode({ input })
+      results.jdKeywordExtractor = { ok: true, count: jdKeywords.length, sample: jdKeywords.slice(0, 10) }
+    } catch (err) {
+      results.jdKeywordExtractor = { ok: false, error: err instanceof Error ? err.message : String(err) }
+    }
+
+    return reply.send(results)
   })
 }
