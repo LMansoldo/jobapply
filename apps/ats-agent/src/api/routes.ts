@@ -1,3 +1,4 @@
+import { randomUUID } from 'node:crypto'
 import type { FastifyInstance } from 'fastify'
 import { z } from 'zod'
 import { graph } from '../graph'
@@ -7,7 +8,7 @@ import { semanticAnalyzerNode } from '../graph/nodes/semanticAnalyzer'
 import { resumeGeneratorNode } from '../graph/nodes/resumeGenerator'
 import { interviewPrepAnalyzerNode } from '../graph/nodes/interviewPrepAnalyzer'
 import { linkedinAnalyzerNode } from '../graph/nodes/linkedinAnalyzer'
-import type { AgentInput } from '../types'
+import type { AgentInput, ATSReport, CV } from '../types'
 
 const SkillGroupSchema = z.object({
   label: z.string(),
@@ -107,8 +108,37 @@ const LinkedInAnalyzeBodySchema = z.object({
   voiceAnswers: z.array(VoiceAnswerSchema).optional(),
 })
 
+// ── Background job store ─────────────────────────────────────────────────────
+
+interface JobResult {
+  status: 'pending' | 'running' | 'done' | 'error'
+  report?: ATSReport
+  adaptedCV?: CV
+  resume?: string
+  error?: string
+  createdAt: number
+  completedAt?: number
+}
+
+const jobs = new Map<string, JobResult>()
+
+// Clean up old jobs every 10 minutes
+setInterval(() => {
+  const cutoff = Date.now() - 1000 * 60 * 30 // 30 min TTL
+  for (const [id, job] of jobs) {
+    if (job.completedAt && job.completedAt < cutoff) jobs.delete(id)
+  }
+}, 1000 * 60 * 10)
+
 export async function registerRoutes(app: FastifyInstance): Promise<void> {
   app.get('/health', async () => ({ status: 'ok' }))
+
+  app.get('/result/:requestId', async (request, reply) => {
+    const { requestId } = request.params as { requestId: string }
+    const job = jobs.get(requestId)
+    if (!job) return reply.status(404).send({ message: 'Request not found' })
+    return reply.send(job)
+  })
 
   app.post('/analyze', async (request, reply) => {
     const parse = AnalyzeBodySchema.safeParse(request.body)
@@ -121,20 +151,35 @@ export async function registerRoutes(app: FastifyInstance): Promise<void> {
     }
 
     const input: AgentInput = parse.data
+    const requestId = randomUUID()
 
+    // Register pending job and reply immediately
+    const job: JobResult = { status: 'pending', createdAt: Date.now() }
+    jobs.set(requestId, job)
+    reply.send({ requestId, status: 'pending' })
+
+    // Process in background
+    job.status = 'running'
     try {
-      request.log.info({ hasCv: !!input.cv, hasMd: !!input.cvMarkdown, jdLen: input.jobDescription.length }, 'analyze: starting graph.invoke')
+      request.log.info({ requestId, hasCv: !!input.cv, hasMd: !!input.cvMarkdown, jdLen: input.jobDescription.length }, 'analyze: starting graph.invoke')
       const result = await graph.invoke({ input })
-      request.log.info({ hasReport: !!result.report, hasAdaptedCV: !!result.adaptedCV, hasResume: !!result.resume }, 'analyze: graph.invoke completed')
+      request.log.info({ requestId, hasReport: !!result.report, hasAdaptedCV: !!result.adaptedCV, hasResume: !!result.resume }, 'analyze: graph.invoke completed')
       if (!result.report) {
-        return reply.status(500).send({ message: 'Graph completed without producing a report' })
+        job.status = 'error'
+        job.error = 'Graph completed without producing a report'
+      } else {
+        job.status = 'done'
+        job.report = result.report
+        job.adaptedCV = result.adaptedCV
+        job.resume = result.resume
       }
-      return reply.send(result.report)
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Internal error'
-      const stack = err instanceof Error ? err.stack : undefined
-      request.log.error({ err, stack }, 'analyze: graph.invoke failed')
-      return reply.status(502).send({ message, ...(process.env.NODE_ENV !== 'production' ? { stack } : {}) })
+      request.log.error({ err, requestId }, 'analyze: graph.invoke failed')
+      job.status = 'error'
+      job.error = message
+    } finally {
+      job.completedAt = Date.now()
     }
   })
 
