@@ -18,7 +18,6 @@ import { Spin } from '../../../components/Spin'
 import { JobListItem } from '../../../design-system/jobs/JobListItem'
 import { JobDetailPanel } from '../../../design-system/jobs/JobDetailPanel'
 import { JobsHero } from '../../../design-system/jobs/JobsHero'
-import { JobFilterBar } from '../../../domain/jobs/components/JobFilterBar'
 import type { Job } from '../../../domain/jobs/types'
 import { PageLayout } from '../../../design-system/layout/PageLayout'
 import { DSPagination } from '../../../design-system/navigation/DSPagination'
@@ -46,7 +45,6 @@ export default function JobsPage() {
     filters,
     search,
     dismissed,
-    handleFilterChange,
     handleSearchChange,
     handlePageChange,
     handleDismiss: dismissFromHook,
@@ -163,18 +161,6 @@ export default function JobsPage() {
     </styles.CenterPanel>
   )
 
-  // ── Right panel ─────────────────────────────────────────────────────────
-  const rightPanel = (
-    <JobFilterBar
-      filters={filters}
-      onFilterChange={handleFilterChange}
-      onReload={() => {
-        // Trigger a refetch by resetting to page 1
-        handlePageChange(1)
-      }}
-    />
-  )
-
   // ── Mobile ──────────────────────────────────────────────────────────────
   if (isMobile) {
     return (
@@ -229,7 +215,6 @@ export default function JobsPage() {
         variant="linkedin"
         left={leftPanel}
         center={centerPanel}
-        right={rightPanel}
       />
     </div>
   )

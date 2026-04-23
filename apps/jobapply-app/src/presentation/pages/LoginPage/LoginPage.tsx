@@ -108,9 +108,6 @@ export default function LoginPage() {
         </FormItem>
       </Form>
 
-      <div className={styles.demoBox}>
-        <span className={styles.demoText}>{t('auth.demoCredentials')}</span>
-      </div>
     </div>
   )
 

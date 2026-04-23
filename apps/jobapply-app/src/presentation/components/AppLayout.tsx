@@ -1,9 +1,6 @@
 import { Grid } from 'antd'
 import {
   ToolOutlined,
-  BankOutlined,
-  LineChartOutlined,
-  BellOutlined,
   FileSearchOutlined,
   UserOutlined,
   LogoutOutlined,
@@ -55,32 +52,11 @@ export default function AppLayout() {
       active: pathname === '/',
     },
     {
-      key: 'companies',
-      label: t('nav.companies'),
-      icon: <BankOutlined />,
-      href: '#',
-      active: false,
-    },
-    {
-      key: 'salaries',
-      label: t('nav.salaries'),
-      icon: <LineChartOutlined />,
-      href: '#',
-      active: false,
-    },
-    {
       key: 'tailoring',
       label: t('nav.tailoring'),
       icon: <FileSearchOutlined />,
       href: '/tailoring',
       active: pathname === '/tailoring',
-    },
-    {
-      key: 'alerts',
-      label: t('nav.alerts'),
-      icon: <BellOutlined />,
-      href: '#',
-      active: false,
     },
     {
       key: 'profile',
