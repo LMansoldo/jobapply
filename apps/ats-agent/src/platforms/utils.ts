@@ -183,8 +183,13 @@ export function scoreKeywords(cv: MappedCV, jd: string, synonymMap?: Record<stri
     }
   }
 
-  // Normalize against max possible (all keywords matching in highest-weight section)
-  const maxScore = keywords.length * 1.5
+  // Normalize against a softer baseline (1.3 instead of max weight 1.5).
+  // Using the theoretical max (1.5) as divisor is too punishing — a handful of
+  // minor JD-specific terms (version suffixes like "html5", synonyms, etc.) that
+  // the CV legitimately covers under a different name would crater an otherwise
+  // strong match. 1.3 lets a CV that matches ~85%+ of keywords in the right
+  // sections still reach 90%+, while keeping a weak match (≤50%) clearly below 60%.
+  const maxScore = keywords.length * 1.3
   const baseScore = Math.min(100, (totalWeightedScore / maxScore) * 100)
 
   return {
