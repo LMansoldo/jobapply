@@ -45,6 +45,14 @@ export interface ATSWorkspaceProps {
   onReplaceKeyword: (from: string, to: string) => void
   /** Callback to re-run ATS analysis */
   onReanalyze: () => void
+  /** Callback to rewrite the CV via tailorCV endpoint (only available in job mode) */
+  onRewriteCV?: () => void
+  /** True while CV rewrite is running */
+  rewriteLoading?: boolean
+  /** Callback to generate a 1-page resume (replaces editor content) */
+  onGenerateResume?: () => void
+  /** True while resume generation is running */
+  resumeLoading?: boolean
   /** Callback for PDF download */
   onDownloadPDF: () => void
   /** Callback for markdown export */

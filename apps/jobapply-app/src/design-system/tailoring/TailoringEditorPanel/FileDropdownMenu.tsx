@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next'
-import { RightOutlined, SyncOutlined } from '@ant-design/icons'
+import { RightOutlined, SyncOutlined, RetweetOutlined, FileTextOutlined } from '@ant-design/icons'
 import type { EditorKeywords } from './TailoringEditorPanel.types'
 import * as S from './TailoringEditorPanel.styles'
 
@@ -18,6 +18,10 @@ interface FileDropdownMenuProps {
   onSaveCV?: () => void
   onReanalyze?: () => void
   reanalyzeLoading?: boolean
+  onRewriteCV?: () => void
+  rewriteLoading?: boolean
+  onGenerateResume?: () => void
+  resumeLoading?: boolean
 }
 
 export function FileDropdownMenu({
@@ -35,6 +39,10 @@ export function FileDropdownMenu({
   onSaveCV,
   onReanalyze,
   reanalyzeLoading = false,
+  onRewriteCV,
+  rewriteLoading = false,
+  onGenerateResume,
+  resumeLoading = false,
 }: FileDropdownMenuProps) {
   const { t } = useTranslation()
 
@@ -144,6 +152,30 @@ export function FileDropdownMenu({
         >
           <span>{t('tailoring.reanalyze')}</span>
           <S.MenuItemIcon><SyncOutlined spin={reanalyzeLoading} /></S.MenuItemIcon>
+        </S.MenuItemRow>
+
+        {/* Rewrite CV */}
+        <S.MenuItemRow
+          onClick={(e) => {
+            e.stopPropagation()
+            onRewriteCV?.()
+          }}
+          disabled={rewriteLoading || !onRewriteCV}
+        >
+          <span>{t('tailoring.rewriteCV')}</span>
+          <S.MenuItemIcon><RetweetOutlined spin={rewriteLoading} /></S.MenuItemIcon>
+        </S.MenuItemRow>
+
+        {/* Generate Resume */}
+        <S.MenuItemRow
+          onClick={(e) => {
+            e.stopPropagation()
+            onGenerateResume?.()
+          }}
+          disabled={resumeLoading || !onGenerateResume}
+        >
+          <span>{t('tailoring.generateResume')}</span>
+          <S.MenuItemIcon><FileTextOutlined /></S.MenuItemIcon>
         </S.MenuItemRow>
 
         {/* Divider */}

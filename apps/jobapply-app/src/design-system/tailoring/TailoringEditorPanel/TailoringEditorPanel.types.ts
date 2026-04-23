@@ -25,6 +25,14 @@ export interface TailoringEditorPanelProps {
   onReanalyze?: () => void
   /** True while an ATS analysis is in progress — disables the reanalyze menu item */
   reanalyzeLoading?: boolean
+  /** Trigger CV rewrite via tailorCV endpoint */
+  onRewriteCV?: () => void
+  /** True while CV rewrite is in progress */
+  rewriteLoading?: boolean
+  /** Trigger 1-page resume generation via generateResume endpoint */
+  onGenerateResume?: () => void
+  /** True while resume generation is in progress */
+  resumeLoading?: boolean
   onDownloadPDF?: () => void | Promise<void>
   onExportMarkdown?: () => void
   onSaveAsVersion?: () => void | Promise<void>

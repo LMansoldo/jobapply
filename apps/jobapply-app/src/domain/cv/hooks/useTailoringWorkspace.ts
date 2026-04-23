@@ -18,9 +18,11 @@ import { prependObjectiveSection } from '../tailoringHelpers'
 import {
   getCV,
   analyzeCV,
+  tailorCV,
   generateCoverLetter,
   generateVideoScript,
   generateInterviewPrep,
+  generateResume,
 } from '../../../infrastructure/repositories/cvRepository'
 
 export interface TailoringWorkspaceState {
@@ -38,7 +40,11 @@ export interface TailoringWorkspaceState {
   videoLoading: boolean
   interviewPrep: InterviewPrep | null
   interviewPrepLoading: boolean
+  resumeLoading: boolean
+  handleGenerateResume: () => Promise<void>
   handleReanalyze: () => Promise<void>
+  handleRewriteCV: () => Promise<void>
+  rewriteLoading: boolean
   handleGenerateCoverLetter: (voiceAnswers?: VoiceAnswers) => Promise<void>
   handleGenerateVideoScript: () => Promise<void>
   handleGenerateInterviewPrep: () => Promise<void>
@@ -54,6 +60,7 @@ interface Params {
   job: Job | null
   /** When true, triggers setup flow even without a job (manual description mode) */
   manualMode?: boolean
+  atsPlatform?: string
   onError: (messageKey: string) => void
   onNeedSetup: (locales: ('en' | 'pt-BR')[], initialJobDescription: string) => Promise<WorkspaceSetupResult>
 }
@@ -62,6 +69,7 @@ export function useTailoringWorkspace({
   cvId,
   job,
   manualMode,
+  atsPlatform,
   onError,
   onNeedSetup,
 }: Params): TailoringWorkspaceState {
@@ -120,8 +128,8 @@ export function useTailoringWorkspace({
   )
 
   const atsQuery = useQuery({
-    queryKey: ['atsReport', cvId, chosenLocale, editedJobDescription, job?._id ?? null],
-    queryFn: () => analyzeCV(cvId, job?._id, chosenLocale!, editedJobDescription!, tailoredContent),
+    queryKey: ['atsReport', cvId, chosenLocale, editedJobDescription, job?._id ?? null, atsPlatform ?? null, job?.url ?? null],
+    queryFn: () => analyzeCV(cvId, job?._id, chosenLocale!, editedJobDescription!, tailoredContent, atsPlatform, job?.url),
     enabled: atsEnabled,
     staleTime: 30 * 60 * 1000,
   })
@@ -135,8 +143,14 @@ export function useTailoringWorkspace({
   }, [atsQuery.data])
 
   // ── On-demand mutations ──────────────────────────────────────────────────
+  const rewriteMutation = useMutation({
+    mutationFn: () => tailorCV(cvId, job!._id),
+    onSuccess: (result) => setTailoredContent(result.tailoredCV),
+    onError: () => onErrorRef.current('tailoring.rewriteCVError'),
+  })
+
   const reanalyzeMutation = useMutation({
-    mutationFn: () => analyzeCV(cvId, job?._id, chosenLocale!, editedJobDescription!, tailoredContent),
+    mutationFn: () => analyzeCV(cvId, job?._id, chosenLocale!, editedJobDescription!, tailoredContent, atsPlatform, job?.url),
     onSuccess: (result) => setDetectedLocale(result.locale),
     onError: () => onErrorRef.current('tailoring.analysisError'),
   })
@@ -160,6 +174,23 @@ export function useTailoringWorkspace({
     onSuccess: (result) => setInterviewPrepData(result.interviewPrep),
     onError: () => onErrorRef.current('tailoring.interviewError'),
   })
+
+  const resumeMutation = useMutation({
+    mutationFn: () =>
+      generateResume(cvId, job?._id, detectedLocale, editedJobDescription!, tailoredContent),
+    onSuccess: (result) => setTailoredContent(result.resume),
+    onError: () => onErrorRef.current('tailoring.resumeError'),
+  })
+
+  const handleGenerateResume = useCallback(async () => {
+    if (!cvId || (!job && !manualMode)) return
+    await resumeMutation.mutateAsync()
+  }, [cvId, job, manualMode, resumeMutation])
+
+  const handleRewriteCV = useCallback(async () => {
+    if (!cvId || !job?._id) return
+    await rewriteMutation.mutateAsync()
+  }, [cvId, job, rewriteMutation])
 
   const handleReanalyze = useCallback(async () => {
     if (!atsEnabled) return
@@ -186,7 +217,7 @@ export function useTailoringWorkspace({
     setTailoredContent,
     tailoring,
     chosenLocale,
-    atsReport: atsQuery.data?.report ?? reanalyzeMutation.data?.report ?? null,
+    atsReport: reanalyzeMutation.data?.report ?? atsQuery.data?.report ?? null,
     atsLoading: atsQuery.isFetching || reanalyzeMutation.isPending,
     coverContent,
     setCoverContent,
@@ -196,7 +227,11 @@ export function useTailoringWorkspace({
     videoLoading: videoMutation.isPending,
     interviewPrep: interviewPrepData,
     interviewPrepLoading: interviewMutation.isPending,
+    resumeLoading: resumeMutation.isPending,
+    handleGenerateResume,
     handleReanalyze,
+    handleRewriteCV,
+    rewriteLoading: rewriteMutation.isPending,
     handleGenerateCoverLetter,
     handleGenerateVideoScript,
     handleGenerateInterviewPrep,

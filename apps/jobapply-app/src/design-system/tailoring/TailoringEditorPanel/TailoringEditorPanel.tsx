@@ -160,6 +160,8 @@ export const TailoringEditorPanel = forwardRef<TailoringEditorHandle, TailoringE
   function TailoringEditorPanel({ value, onChange, locale = 'pt-BR', editorKeywords,
     onInsertKeyword, onReplaceKeyword, hasAnalysisNotification = false, jobTitle,
     onReanalyze, reanalyzeLoading = false,
+    onRewriteCV, rewriteLoading = false,
+    onGenerateResume, resumeLoading = false,
     onDownloadPDF, onExportMarkdown, onSaveAsVersion }, ref) {
 
     const { t } = useTranslation()
@@ -233,6 +235,10 @@ export const TailoringEditorPanel = forwardRef<TailoringEditorHandle, TailoringE
                   onSaveCV={() => { onSaveAsVersion?.(); setFileMenuOpen(false) }}
                   onReanalyze={() => { onReanalyze?.(); setFileMenuOpen(false) }}
                   reanalyzeLoading={reanalyzeLoading}
+                  onRewriteCV={onRewriteCV ? () => { onRewriteCV(); setFileMenuOpen(false) } : undefined}
+                  rewriteLoading={rewriteLoading}
+                  onGenerateResume={onGenerateResume ? () => { onGenerateResume(); setFileMenuOpen(false) } : undefined}
+                  resumeLoading={resumeLoading}
                 />
               )}
             </S.FileMenuWrapper>

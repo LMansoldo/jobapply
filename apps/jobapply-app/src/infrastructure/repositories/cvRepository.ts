@@ -203,6 +203,8 @@ export async function analyzeCV(
   locale: 'en' | 'pt-BR',
   jobDescription: string,
   cvMarkdown: string,
+  platform?: string,
+  jobUrl?: string,
 ): Promise<AnalyzeCVResponse> {
   if (USE_MOCK) {
     await delay(1200)
@@ -235,7 +237,35 @@ export async function analyzeCV(
 
   const body: Record<string, string> = { locale, jobDescription, cvMarkdown }
   if (jobId) body.jobId = jobId
+  if (platform) body.platform = platform
+  if (jobUrl) body.jobUrl = jobUrl
   const { data } = await api.post<AnalyzeCVResponse>(`/cv/${cvId}/analyze`, body)
+  return data
+}
+
+export interface GenerateResumeResponse {
+  resume: string
+  locale: 'en' | 'pt-BR'
+}
+
+export async function generateResume(
+  cvId: string,
+  jobId: string | undefined,
+  locale: 'en' | 'pt-BR',
+  jobDescription: string,
+  cvMarkdown: string,
+): Promise<GenerateResumeResponse> {
+  if (USE_MOCK) {
+    await delay(2500)
+    return {
+      resume: `# CV Mock — Tailored Resume\n\n## Summary\nThis is a mock ATS-optimized resume generated for the target role.\n\n## Skills\n**Frontend:** React, TypeScript, Svelte\n\n## Experience\n### Senior Engineer | Mock Company\n**Jan 2023 – Present**\n- Built scalable frontend systems using React and TypeScript.\n`,
+      locale,
+    }
+  }
+
+  const body: Record<string, string> = { locale, jobDescription, cvMarkdown }
+  if (jobId) body.jobId = jobId
+  const { data } = await api.post<GenerateResumeResponse>(`/cv/${cvId}/generate-resume`, body)
   return data
 }
 

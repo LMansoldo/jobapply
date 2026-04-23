@@ -29,6 +29,10 @@ export function ATSWorkspace({
   onInsertKeyword,
   onReplaceKeyword,
   onReanalyze,
+  onRewriteCV,
+  rewriteLoading,
+  onGenerateResume,
+  resumeLoading,
   onDownloadPDF,
   onExportMarkdown,
   onSaveAsVersion,
@@ -126,6 +130,10 @@ export function ATSWorkspace({
               jobTitle={job?.title}
               onReanalyze={onReanalyze}
               reanalyzeLoading={atsLoading}
+              onRewriteCV={onRewriteCV}
+              rewriteLoading={rewriteLoading}
+              onGenerateResume={onGenerateResume}
+              resumeLoading={resumeLoading}
               onDownloadPDF={onDownloadPDF}
               onExportMarkdown={onExportMarkdown}
               onSaveAsVersion={onSaveAsVersion}
