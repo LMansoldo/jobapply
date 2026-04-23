@@ -6,7 +6,7 @@ import Job from '../models/Job';
 import User from '../models/User';
 import PublishedCV from '../models/PublishedCV';
 import { tailorCV as tailorCVService, generateCoverLetter as generateCoverLetterLLM, generateVideoScript as generateVideoScriptLLM } from '../services/llmService';
-import { analyzeWithATS, generateCVWithATS, analyzeLinkedInWithATS } from '../services/atsService'
+import { analyzeWithATS, generateCVWithATS, analyzeLinkedInWithATS, generateResumeWithATS } from '../services/atsService'
 import { sanitizeUserInput } from '../utils/sanitize'
 import { generateInterviewPrep } from '../services/interviewPrepService';
 
@@ -207,11 +207,13 @@ export async function analyzeCVWithATS(req: AuthRequest, res: Response, next: Ne
     if (!cv) { res.status(404).json({ message: 'CV not found' }); return; }
     if (cv.user.toString() !== req.user.id) { res.status(403).json({ message: 'Access denied' }); return; }
 
-    const { jobId, jobDescription, cvMarkdown, locale } = req.body as {
+    const { jobId, jobDescription, cvMarkdown, locale, platform, jobUrl } = req.body as {
       jobId?: string;
       jobDescription?: string;
       cvMarkdown?: string;
       locale?: string;
+      platform?: string;
+      jobUrl?: string;
     };
 
     if (!jobId && !jobDescription) { res.status(400).json({ message: 'jobId or jobDescription is required' }); return; }
@@ -228,7 +230,7 @@ export async function analyzeCVWithATS(req: AuthRequest, res: Response, next: Ne
     const sanitizedMarkdown = sanitizeUserInput(cvMarkdown);
 
     const resolvedLocale = locale ?? detectLocale(description);
-    const report = await analyzeWithATS(sanitizedMarkdown, sanitizedJD, resolvedLocale);
+    const report = await analyzeWithATS(sanitizedMarkdown, sanitizedJD, resolvedLocale, platform, jobUrl);
 
     res.json({ report, locale: resolvedLocale });
   } catch (err: unknown) {
@@ -400,10 +402,12 @@ export async function deleteCVLocaleVersion(req: AuthRequest, res: Response, nex
 
 export async function analyzeCVDirect(req: AuthRequest, res: Response, next: NextFunction): Promise<void> {
   try {
-    const { cvMarkdown, jobDescription, locale } = req.body as {
+    const { cvMarkdown, jobDescription, locale, platform, jobUrl } = req.body as {
       cvMarkdown: string;
       jobDescription: string;
       locale?: 'en' | 'pt-BR';
+      platform?: string;
+      jobUrl?: string;
     };
 
     if (!cvMarkdown || !jobDescription) {
@@ -412,7 +416,7 @@ export async function analyzeCVDirect(req: AuthRequest, res: Response, next: Nex
     }
 
     const resolvedLocale = locale ?? detectLocale(jobDescription);
-    const report = await analyzeWithATS(cvMarkdown, jobDescription, resolvedLocale);
+    const report = await analyzeWithATS(cvMarkdown, jobDescription, resolvedLocale, platform, jobUrl);
 
     res.json({ report, locale: resolvedLocale });
   } catch (err: unknown) {
@@ -483,6 +487,71 @@ export async function analyzeLinkedInDirect(req: AuthRequest, res: Response, nex
       res.status(502).json({ message: 'ATS agent error', detail: e.message });
       return;
     }
+    next(err);
+  }
+}
+
+export async function generateResumeDirect(req: AuthRequest, res: Response, next: NextFunction): Promise<void> {
+  try {
+    const { cvMarkdown, jobDescription, locale } = req.body as {
+      cvMarkdown: string;
+      jobDescription: string;
+      locale?: 'en' | 'pt-BR';
+    };
+
+    if (!cvMarkdown || !jobDescription) {
+      res.status(400).json({ message: 'cvMarkdown and jobDescription are required' });
+      return;
+    }
+
+    const resolvedLocale = locale ?? detectLocale(jobDescription);
+    const result = await generateResumeWithATS(cvMarkdown, jobDescription, resolvedLocale);
+
+    res.json({ ...(result as Record<string, unknown>), locale: resolvedLocale });
+  } catch (err: unknown) {
+    const e = err as { name?: string; status?: number; message?: string };
+    if (e.status) {
+      res.status(502).json({ message: 'ATS agent error', detail: e.message });
+      return;
+    }
+    next(err);
+  }
+}
+
+export async function generateResumeWithCV(req: AuthRequest, res: Response, next: NextFunction): Promise<void> {
+  try {
+    const cv = await CV.findById(req.params.id);
+    if (!cv) { res.status(404).json({ message: 'CV not found' }); return; }
+    if (cv.user.toString() !== req.user.id) { res.status(403).json({ message: 'Access denied' }); return; }
+
+    const { jobId, jobDescription, cvMarkdown, locale } = req.body as {
+      jobId?: string;
+      jobDescription?: string;
+      cvMarkdown?: string;
+      locale?: string;
+    };
+
+    if (!jobId && !jobDescription) { res.status(400).json({ message: 'jobId or jobDescription is required' }); return; }
+    if (!cvMarkdown) { res.status(400).json({ message: 'cvMarkdown is required' }); return; }
+
+    let description = jobDescription;
+    if (!description) {
+      const job = await Job.findById(jobId);
+      if (!job) { res.status(404).json({ message: 'Job not found' }); return; }
+      description = job.description;
+    }
+
+    const sanitizedJD = sanitizeUserInput(description);
+    const sanitizedMarkdown = sanitizeUserInput(cvMarkdown);
+    const resolvedLocale = locale ?? detectLocale(description);
+
+    const result = await generateResumeWithATS(sanitizedMarkdown, sanitizedJD, resolvedLocale);
+
+    res.json({ ...(result as Record<string, unknown>), locale: resolvedLocale });
+  } catch (err: unknown) {
+    const e = err as { name?: string; status?: number; message?: string };
+    if (e.name === 'CastError') { res.status(404).json({ message: 'Resource not found' }); return; }
+    if (e.status) { res.status(502).json({ message: 'ATS agent error', detail: e.message }); return; }
     next(err);
   }
 }
