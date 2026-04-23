@@ -6,6 +6,7 @@ import { ruleScorerNode } from './nodes/ruleScorer'
 import { semanticAnalyzerNode } from './nodes/semanticAnalyzer'
 import { cvGeneratorNode } from './nodes/cvGenerator'
 import { aggregatorNode } from './nodes/aggregator'
+import { resumeGeneratorNode } from './nodes/resumeGenerator'
 
 const GraphAnnotation = Annotation.Root({
   input: Annotation<AgentInput>({
@@ -45,6 +46,10 @@ const GraphAnnotation = Annotation.Root({
     default: () => undefined,
   }),
   adaptedCV: Annotation<CV | undefined>({
+    reducer: (_, update) => update,
+    default: () => undefined,
+  }),
+  resume: Annotation<string | undefined>({
     reducer: (_, update) => update,
     default: () => undefined,
   }),

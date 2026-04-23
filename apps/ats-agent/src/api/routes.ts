@@ -2,6 +2,9 @@ import type { FastifyInstance } from 'fastify'
 import { z } from 'zod'
 import { graph } from '../graph'
 import { mapperNode } from '../graph/nodes/mapper'
+import { jdKeywordExtractorNode } from '../graph/nodes/jdKeywordExtractor'
+import { semanticAnalyzerNode } from '../graph/nodes/semanticAnalyzer'
+import { resumeGeneratorNode } from '../graph/nodes/resumeGenerator'
 import { interviewPrepAnalyzerNode } from '../graph/nodes/interviewPrepAnalyzer'
 import { linkedinAnalyzerNode } from '../graph/nodes/linkedinAnalyzer'
 import type { AgentInput } from '../types'
@@ -147,6 +150,48 @@ export async function registerRoutes(app: FastifyInstance): Promise<void> {
         locale: input.locale,
       })
       return reply.send(interviewPrep)
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Internal error'
+      return reply.status(502).send({ message })
+    }
+  })
+
+  app.post('/generate-resume', async (request, reply) => {
+    const parse = AnalyzeBodySchema.safeParse(request.body)
+    if (!parse.success) {
+      return reply.status(400).send({ message: parse.error.errors[0]?.message ?? 'Invalid request body' })
+    }
+
+    if (!parse.data.cv && !parse.data.cvMarkdown) {
+      return reply.status(400).send({ message: 'cv or cvMarkdown is required' })
+    }
+
+    const input: AgentInput = parse.data
+
+    try {
+      // Run the extraction + semantic analysis pipeline in sequence
+      const { mapped } = mapperNode({ input })
+      const { jdKeywords } = await jdKeywordExtractorNode({ input })
+
+      const semanticState = {
+        input,
+        mapped,
+        jdKeywords,
+        platformScores: [],
+      }
+      const semantic = await semanticAnalyzerNode(semanticState as Parameters<typeof semanticAnalyzerNode>[0])
+
+      const resume = await resumeGeneratorNode({
+        input,
+        mapped,
+        jdKeywords,
+        semanticGaps: semantic.semanticGaps,
+        rephraseSuggestions: semantic.rephraseSuggestions,
+        keywordPhrases: semantic.keywordPhrases,
+        removeSuggestions: semantic.removeSuggestions,
+      })
+
+      return reply.send(resume)
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Internal error'
       return reply.status(502).send({ message })

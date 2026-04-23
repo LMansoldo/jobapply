@@ -164,4 +164,5 @@ export interface GraphState {
   removeSuggestions?: RemoveSuggestion[]
   report?: ATSReport
   adaptedCV?: CV
+  resume?: string
 }
