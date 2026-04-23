@@ -81,6 +81,8 @@ const AnalyzeBodySchema = z.object({
   cvMarkdown: z.string().optional(),
   jobDescription: z.string().min(1, 'jobDescription must not be empty'),
   locale: z.enum(['en', 'pt-BR']).optional(),
+  platform: z.string().optional(),
+  jobUrl: z.string().optional(),
 })
 
 const VoiceAnswerSchema = z.object({

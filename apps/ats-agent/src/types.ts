@@ -77,6 +77,8 @@ export interface AgentInput {
   cvMarkdown?: string
   jobDescription: string
   locale?: 'en' | 'pt-BR'
+  platform?: string
+  jobUrl?: string
 }
 
 export interface MappedCV {

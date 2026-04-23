@@ -108,7 +108,10 @@ export function aggregatorNode(state: {
 
   if (platforms.length === 0) throw new Error('aggregatorNode: no platform scores in state')
 
-  const universalScore = weightedScore(platforms, state.input?.locale)
+  // Single platform: use its score directly (no weighting distortion)
+  const universalScore = platforms.length === 1
+    ? platforms[0].score
+    : weightedScore(platforms, state.input?.locale)
 
   // Keywords to add: union of missingRequired + missingPreferred across all platforms
   const keywordsToAdd = [...new Set([
