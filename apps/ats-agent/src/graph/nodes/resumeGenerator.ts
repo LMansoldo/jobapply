@@ -2,7 +2,7 @@ import { genAI } from '../../lib/gemini'
 import type { MappedCV, KeywordPhrase, RemoveSuggestion } from '../../types'
 
 // Use the stronger model — resume generation needs higher quality output
-const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash-preview-04-17' })
+const model = genAI.getGenerativeModel({ model: 'gemini-3-flash-preview' })
 
 const LOCALE_LABEL: Record<string, string> = {
   'en': 'English',
