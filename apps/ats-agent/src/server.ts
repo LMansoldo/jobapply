@@ -1,4 +1,5 @@
-import 'dotenv/config'
+import dotenv from 'dotenv'
+dotenv.config({ override: false })
 import Fastify from 'fastify'
 import { registerRoutes } from './api/routes'
 
