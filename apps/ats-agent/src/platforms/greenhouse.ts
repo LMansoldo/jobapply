@@ -7,13 +7,16 @@ import {
   detectCareerProgression,
 } from './utils'
 
-function splitJDBlocks(jd: string): { required: string; preferred: string; full: string } {
+function splitJDBlocks(jd: string): { required: string; preferred: string; hasExplicitRequired: boolean } {
   const lower = jd.toLowerCase()
   const reqIdx = lower.search(/\brequired\b|\bmust\s+have\b|\bobrigatório\b|\brequisitos\b/)
   const prefIdx = lower.search(/\bpreferred\b|\bnice\s+to\s+have\b|\bdesirable\b|\bdiferencial\b|\bdesejável\b/)
 
+  // No section markers found — cannot distinguish required vs preferred.
+  // Return full JD as context but mark it as NOT having an explicit required section
+  // so the score cap is not applied.
   if (reqIdx === -1 && prefIdx === -1) {
-    return { required: jd, preferred: '', full: jd }
+    return { required: jd, preferred: '', hasExplicitRequired: false }
   }
 
   let required = ''
@@ -34,13 +37,13 @@ function splitJDBlocks(jd: string): { required: string; preferred: string; full:
     required = jd.slice(0, prefIdx)
   }
 
-  return { required: required || jd, preferred, full: jd }
+  return { required: required || jd, preferred, hasExplicitRequired: reqIdx !== -1 }
 }
 
 export function scoreGreenhouse(cv: MappedCV, jd: string, jdKeywords?: string[]): PlatformScore {
-  const { required, preferred } = splitJDBlocks(jd)
+  const { required, preferred, hasExplicitRequired } = splitJDBlocks(jd)
 
-  const requiredKeywords = extractJDKeywords(required)
+  const requiredKeywords = hasExplicitRequired ? extractJDKeywords(required) : []
   const preferredKeywords = extractJDKeywords(preferred)
 
   const { baseScore, matchedKeywords } = scoreKeywords(cv, jd, undefined, jdKeywords)
@@ -52,6 +55,10 @@ export function scoreGreenhouse(cv: MappedCV, jd: string, jdKeywords?: string[])
 
   const flags: string[] = []
   const notes: string[] = []
+
+  if (!hasExplicitRequired) {
+    notes.push('No explicit "Required" section found — scoring against full JD without cap')
+  }
 
   const gaps = detectGaps(cv.entities.experiencePeriods)
   for (const gap of gaps) {
@@ -66,7 +73,8 @@ export function scoreGreenhouse(cv: MappedCV, jd: string, jdKeywords?: string[])
   let score = baseScore
   let scoreCapped = false
 
-  if (missingRequired.length > 0) {
+  // Only apply the cap when the JD actually has an explicit "Required" section
+  if (hasExplicitRequired && missingRequired.length > 0) {
     score = Math.min(score, 60)
     scoreCapped = true
     notes.push(`Score capped at 60 — missing ${missingRequired.length} required keyword(s)`)

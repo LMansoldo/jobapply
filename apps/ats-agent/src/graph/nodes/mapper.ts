@@ -45,6 +45,13 @@ export function mapFromMarkdown(cvMarkdown: string): MappedCV {
   // Extract skills text (strip bold labels)
   const skillsText = skillsRaw.replace(/\*\*[^*]+:\*\*/g, '').replace(/\n/g, ' ').trim()
 
+  // Parse individual skill items for entity extraction
+  const skillItems = skillsRaw
+    .replace(/\*\*[^*]+:\*\*/g, '')   // strip bold category labels
+    .split(/[,·|\/\n;]+/)
+    .map(t => t.replace(/^[-•*\s]+/, '').trim())
+    .filter(t => t.length >= 2 && t.length <= 50 && !t.startsWith('#') && !/^\*/.test(t))
+
   // Extract experience entities from markdown structure
   const jobTitles: string[] = []
   const companies: string[] = []
@@ -93,8 +100,8 @@ export function mapFromMarkdown(cvMarkdown: string): MappedCV {
     entities: {
       jobTitles,
       companies,
-      skills: [],
-      techStack: [],
+      skills: skillItems,
+      techStack: skillItems,
       softSkills: [],
       dates,
       degrees,

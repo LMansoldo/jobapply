@@ -54,8 +54,11 @@ export function scoreInhire(cv: MappedCV, jd: string, jdKeywords?: string[]): Pl
     flags.push('No GitHub or portfolio URL detected — strongly recommended for tech roles on Inhire')
   }
 
-  // Boost stack match into score
-  score = score * 0.6 + stackMatchPct * 0.4
+  // Blend stack match into score — only when the JD has recognizable tech terms
+  // and the CV has parseable tech entities. Otherwise avoid penalizing for missing data.
+  if (jdTechStack.length > 0 && cvTechLower.length > 0) {
+    score = score * 0.6 + stackMatchPct * 0.4
+  }
 
   score = Math.round(Math.min(100, score))
 
