@@ -32,7 +32,10 @@ export default function LinkedInCallbackPage() {
       .then((result) => {
         if (result.action === 'login' && result.token && result.user) {
           login(result.token, result.user)
-          if (!result.user.cv) {
+          const isOnboarded = localStorage.getItem('jobapply_onboarded') === 'true'
+          if (!isOnboarded) {
+            navigate({ to: '/onboarding' })
+          } else if (!result.user.cv) {
             sessionStorage.setItem('cv_prefill_from_linkedin', 'true')
             navigate({ to: '/cv' })
           } else {

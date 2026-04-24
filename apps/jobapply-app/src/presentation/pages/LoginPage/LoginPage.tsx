@@ -34,7 +34,8 @@ export default function LoginPage() {
       const { token, user } = await loginService(values.email, values.password)
       login(token, user)
       message.success(t('auth.loginSuccess', { name: user.name }))
-      navigate({ to: user.cv ? '/' : '/cv' })
+      const isOnboarded = localStorage.getItem('jobapply_onboarded') === 'true'
+      navigate({ to: isOnboarded ? (user.cv ? '/' : '/cv') : '/onboarding' })
     } catch (err: unknown) {
       const msg =
         (err as { response?: { data?: { message?: string } } })?.response?.data?.message ??
