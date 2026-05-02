@@ -20,7 +20,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "cd /Users/lucasmansoldo/Projects/jobapply && yarn workspaces run build 2>&1 | tail -30"
+            "command": "cd \"$(git rev-parse --show-toplevel)\" && yarn workspaces run build 2>&1 | tail -30"
           }
         ]
       }
