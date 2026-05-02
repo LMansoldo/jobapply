@@ -105,7 +105,7 @@ export function extractJDKeywords(jd: string): string[] {
   const cleaned = parseJobDescription(jd).replace(UNICODE_DASH_RE, '-')
   const tokens = cleaned
     .toLowerCase()
-    .split(/[\s,;.:!()\[\]{}"'\/\\@#$%^&*+=<>|?]+/)
+    .split(/[\s,;.:!()[\]{}"'/\\@#$%^&*+=<>|?]+/)
     .filter(t => t.length >= 3 && !STOP_WORDS.has(t) && !/^\d+$/.test(t))
   return Array.from(new Set(tokens))
 }
