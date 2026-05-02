@@ -1,0 +1,18 @@
+{
+  "name": "jobapply",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev:api": "yarn workspace jobapply-api dev",
+    "dev:agent": "yarn workspace ats-agent dev",
+    "dev:app": "yarn workspace jobapply-app dev",
+    "lint": "yarn workspaces run lint",
+    "typecheck": "yarn workspaces run typecheck",
+    "build": "yarn workspaces run build",
+    "test": "yarn workspaces run test --if-present"
+  },
+  "packageManager": "yarn@1.22.22"
+}
