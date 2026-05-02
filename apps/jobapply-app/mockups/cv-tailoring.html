@@ -1,0 +1,1385 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>JobBoard – CV Tailoring</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=Sora:wght@400;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+
+  <style>
+    :root {
+      --primary:       #a78bfa;
+      --primary-dark:  #7c3aed;
+      --primary-light: #ede9fe;
+      --primary-mid:   #c4b5fd;
+      --accent:        #f0abfc;
+      --bg:            #f5f3ff;
+      --surface:       #ffffff;
+      --border:        #e9e4fc;
+      --text-main:     #1e1b2e;
+      --text-sub:      #6b7280;
+      --text-light:    #a0aec0;
+      --green:         #34d399;
+      --green-bg:      #d1fae5;
+      --green-dark:    #065f46;
+      --orange:        #fb923c;
+      --orange-bg:     #ffedd5;
+      --orange-dark:   #c2410c;
+      --red:           #f87171;
+      --red-bg:        #fef2f2;
+      --red-dark:      #b91c1c;
+      --blue:          #60a5fa;
+      --blue-bg:       #dbeafe;
+      --blue-dark:     #1d4ed8;
+      --yellow:        #fbbf24;
+      --yellow-bg:     #fef3c7;
+      --radius:        14px;
+      --radius-sm:     8px;
+      --shadow:        0 2px 16px rgba(124,58,237,.08);
+      --shadow-md:     0 4px 32px rgba(124,58,237,.14);
+      --font-head:     'Sora', sans-serif;
+      --font-body:     'DM Sans', sans-serif;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body { font-family: var(--font-body); background: var(--bg); color: var(--text-main); font-size: 14px; min-height: 100vh; }
+
+    /* ── HEADER ─────────────────────────────────── */
+    .header { background: var(--surface); border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 200; box-shadow: var(--shadow); }
+    .header-inner { max-width: 1400px; margin: 0 auto; padding: 0 24px; height: 60px; display: flex; align-items: center; gap: 20px; }
+    .logo { font-family: var(--font-head); font-size: 22px; font-weight: 700; color: var(--primary-dark); letter-spacing: -.5px; white-space: nowrap; flex-shrink: 0; }
+    .logo span { color: var(--primary); }
+    .header-search { flex: 1; max-width: 340px; position: relative; }
+    .header-search input { width: 100%; height: 38px; border: 1.5px solid var(--border); border-radius: 99px; padding: 0 16px 0 40px; font-family: var(--font-body); font-size: 13.5px; background: var(--bg); color: var(--text-main); outline: none; }
+    .header-search .ico { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: var(--text-sub); font-size: 13px; }
+    .nav-links { display: flex; align-items: center; gap: 2px; margin-left: auto; }
+    .nav-link { display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 8px 12px; border-radius: var(--radius-sm); color: var(--text-sub); font-size: 11px; font-weight: 500; text-decoration: none; cursor: pointer; transition: color .15s, background .15s; white-space: nowrap; }
+    .nav-link i { font-size: 18px; }
+    .nav-link:hover { color: var(--primary-dark); background: var(--primary-light); }
+    .nav-link.active { color: var(--primary-dark); font-weight: 600; }
+    .nav-link.active i { color: var(--primary); }
+    .btn-primary { background: var(--primary); color: #fff; border: none; border-radius: 99px; padding: 8px 20px; font-family: var(--font-body); font-size: 13.5px; font-weight: 600; cursor: pointer; transition: background .2s, transform .1s; white-space: nowrap; }
+    .btn-primary:hover { background: var(--primary-dark); transform: translateY(-1px); }
+    .btn-ghost { background: transparent; color: var(--primary-dark); border: 1.5px solid var(--primary); border-radius: 99px; padding: 7px 18px; font-family: var(--font-body); font-size: 13.5px; font-weight: 600; cursor: pointer; transition: all .2s; white-space: nowrap; }
+    .btn-ghost:hover { background: var(--primary-light); }
+
+    /* ── SCREENS ─────────────────────────────────── */
+    .screen { display: none; }
+    .screen.active { display: block; }
+
+    /* ════════════════════════════════════════════════
+       SCREEN 0 — JOB CARD LIST (simplified mock)
+    ════════════════════════════════════════════════ */
+    .jobs-wrap { max-width: 860px; margin: 0 auto; padding: 32px 24px; display: flex; flex-direction: column; gap: 16px; }
+
+    .job-card {
+      background: var(--surface); border-radius: var(--radius); border: 1px solid var(--border);
+      padding: 20px; box-shadow: var(--shadow); cursor: pointer;
+      transition: box-shadow .2s, border-color .2s, transform .15s;
+      position: relative; overflow: hidden;
+    }
+    .job-card:hover { box-shadow: var(--shadow-md); border-color: var(--primary-mid); transform: translateY(-2px); }
+    .job-card.featured::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 4px; background: linear-gradient(180deg, var(--primary), var(--accent)); border-radius: 4px 0 0 4px; }
+
+    .job-top { display: flex; align-items: flex-start; gap: 14px; margin-bottom: 12px; }
+    .clogo { width: 52px; height: 52px; border-radius: 12px; background: var(--primary-light); display: flex; align-items: center; justify-content: center; font-family: var(--font-head); font-weight: 700; font-size: 17px; color: var(--primary-dark); flex-shrink: 0; border: 1.5px solid var(--border); }
+    .jmain { flex: 1; min-width: 0; }
+    .jtitle { font-family: var(--font-head); font-size: 15.5px; font-weight: 700; color: var(--text-main); margin-bottom: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .jcompany { font-size: 13px; color: var(--primary-dark); font-weight: 600; margin-bottom: 2px; }
+    .jmeta { display: flex; align-items: center; gap: 14px; font-size: 12.5px; color: var(--text-sub); flex-wrap: wrap; }
+    .jmeta span { display: flex; align-items: center; gap: 5px; }
+    .jmeta i { font-size: 11px; }
+    .badge { border-radius: 99px; padding: 2px 9px; font-size: 10.5px; font-weight: 700; text-transform: uppercase; letter-spacing: .4px; }
+    .badge.hot { background: var(--orange); color: #fff; }
+    .badge.new { background: var(--green); color: #fff; }
+    .jdesc { font-size: 13px; color: var(--text-sub); line-height: 1.55; margin-bottom: 14px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+    .jfooter { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; }
+    .stags { display: flex; flex-wrap: wrap; gap: 6px; }
+    .stag { background: var(--primary-light); color: var(--primary-dark); border-radius: 99px; padding: 3px 11px; font-size: 11.5px; font-weight: 600; }
+    .stag.bl { background: var(--blue-bg); color: var(--blue-dark); }
+    .stag.gr { background: var(--green-bg); color: var(--green-dark); }
+    .stag.or { background: var(--orange-bg); color: var(--orange-dark); }
+    .jsalary { font-family: var(--font-head); font-size: 14px; font-weight: 700; color: var(--primary-dark); white-space: nowrap; }
+
+    /* card action buttons row */
+    .card-actions { display: flex; align-items: center; gap: 8px; }
+    .tailor-btn {
+      display: flex; align-items: center; gap: 7px;
+      background: linear-gradient(135deg, var(--primary-dark), #6d28d9);
+      color: #fff; border: none; border-radius: 99px;
+      padding: 8px 18px;
+      font-family: var(--font-body); font-size: 12.5px; font-weight: 700;
+      cursor: pointer; transition: all .2s;
+      box-shadow: 0 2px 12px rgba(124,58,237,.3);
+    }
+    .tailor-btn:hover { transform: translateY(-1px); box-shadow: 0 4px 20px rgba(124,58,237,.45); }
+    .tailor-btn .spark { font-size: 14px; }
+    .apply-btn { background: var(--primary); color: #fff; border: none; border-radius: 99px; padding: 8px 18px; font-family: var(--font-body); font-size: 12.5px; font-weight: 600; cursor: pointer; transition: background .2s; }
+    .apply-btn:hover { background: var(--primary-dark); }
+    .bkbtn { width: 34px; height: 34px; border-radius: 50%; border: 1.5px solid var(--border); background: transparent; display: flex; align-items: center; justify-content: center; cursor: pointer; color: var(--text-sub); transition: all .15s; font-size: 14px; }
+    .bkbtn:hover { border-color: var(--primary); color: var(--primary); background: var(--primary-light); }
+
+    /* ════════════════════════════════════════════════
+       SCREEN 1 — CV SELECT MODAL (language picker)
+    ════════════════════════════════════════════════ */
+    .modal-backdrop {
+      position: fixed; inset: 0;
+      background: rgba(30,27,46,.55);
+      backdrop-filter: blur(4px);
+      display: flex; align-items: center; justify-content: center;
+      z-index: 300;
+    }
+    .modal-box {
+      background: var(--surface);
+      border-radius: 20px;
+      border: 1px solid var(--border);
+      box-shadow: 0 24px 64px rgba(124,58,237,.22);
+      padding: 32px;
+      width: 480px; max-width: 95vw;
+      animation: popIn .25s cubic-bezier(.34,1.56,.64,1) both;
+    }
+    @keyframes popIn { from { opacity:0; transform: scale(.9) translateY(12px); } to { opacity:1; transform: scale(1) translateY(0); } }
+    .modal-title { font-family: var(--font-head); font-size: 20px; font-weight: 700; margin-bottom: 6px; }
+    .modal-sub { font-size: 13px; color: var(--text-sub); margin-bottom: 24px; line-height: 1.55; }
+    .lang-cards { display: flex; gap: 14px; margin-bottom: 20px; }
+    .lang-card {
+      flex: 1; padding: 18px 14px; border-radius: var(--radius);
+      border: 2px solid var(--border);
+      background: var(--bg); cursor: pointer;
+      text-align: center; transition: all .2s;
+    }
+    .lang-card:hover { border-color: var(--primary-mid); background: var(--primary-light); }
+    .lang-card.selected { border-color: var(--primary-dark); background: var(--primary-light); box-shadow: 0 0 0 3px rgba(124,58,237,.15); }
+    .lang-card .flag { font-size: 32px; margin-bottom: 8px; }
+    .lang-card .lname { font-family: var(--font-head); font-size: 14px; font-weight: 700; color: var(--text-main); margin-bottom: 3px; }
+    .lang-card .ldesc { font-size: 11.5px; color: var(--text-sub); }
+    .lang-card .check-ring {
+      width: 22px; height: 22px; border-radius: 50%;
+      border: 2px solid var(--border);
+      margin: 10px auto 0;
+      display: flex; align-items: center; justify-content: center;
+      transition: all .15s;
+    }
+    .lang-card.selected .check-ring { background: var(--primary-dark); border-color: var(--primary-dark); color: #fff; font-size: 11px; }
+    .modal-footer { display: flex; justify-content: flex-end; gap: 10px; }
+    .modal-cancel { background: none; border: 1.5px solid var(--border); border-radius: 99px; padding: 9px 20px; font-family: var(--font-body); font-size: 13.5px; font-weight: 600; color: var(--text-sub); cursor: pointer; }
+    .modal-cancel:hover { background: var(--bg); }
+    .modal-confirm { background: var(--primary-dark); color: #fff; border: none; border-radius: 99px; padding: 9px 24px; font-family: var(--font-body); font-size: 13.5px; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 8px; transition: background .2s; }
+    .modal-confirm:hover { background: #5b21b6; }
+
+    /* ════════════════════════════════════════════════
+       SCREEN 2 — TAILORING WORKSPACE
+    ════════════════════════════════════════════════ */
+    .tailoring-page { display: flex; flex-direction: column; height: calc(100vh - 60px); overflow: hidden; }
+
+    /* Top context bar */
+    .ctx-bar {
+      background: var(--surface); border-bottom: 1px solid var(--border);
+      padding: 10px 24px;
+      display: flex; align-items: center; gap: 14px;
+      flex-shrink: 0;
+    }
+    .ctx-back { background: none; border: none; color: var(--primary-dark); cursor: pointer; font-size: 13px; font-family: var(--font-body); font-weight: 600; display: flex; align-items: center; gap: 6px; padding: 6px 10px; border-radius: var(--radius-sm); transition: background .15s; }
+    .ctx-back:hover { background: var(--primary-light); }
+    .ctx-sep { width: 1px; height: 20px; background: var(--border); }
+    .ctx-job { display: flex; align-items: center; gap: 10px; }
+    .ctx-clogo { width: 30px; height: 30px; border-radius: 7px; background: var(--primary-light); display: flex; align-items: center; justify-content: center; font-family: var(--font-head); font-weight: 700; font-size: 11px; color: var(--primary-dark); flex-shrink: 0; }
+    .ctx-title { font-size: 13.5px; font-weight: 700; color: var(--text-main); }
+    .ctx-sub { font-size: 12px; color: var(--text-sub); }
+    .ctx-lang-badge { background: var(--blue-bg); color: var(--blue-dark); border-radius: 99px; padding: 3px 12px; font-size: 12px; font-weight: 700; margin-left: 4px; }
+    .ctx-actions { margin-left: auto; display: flex; align-items: center; gap: 8px; }
+
+    /* Tabs */
+    .workspace-tabs {
+      background: var(--surface); border-bottom: 1px solid var(--border);
+      padding: 0 24px;
+      display: flex; align-items: center; gap: 4px;
+      flex-shrink: 0;
+    }
+    .ws-tab {
+      padding: 12px 16px; border: none; background: none;
+      font-family: var(--font-body); font-size: 13px; font-weight: 600;
+      color: var(--text-sub); cursor: pointer;
+      border-bottom: 2px solid transparent;
+      display: flex; align-items: center; gap: 7px;
+      transition: color .15s, border-color .15s;
+      white-space: nowrap;
+    }
+    .ws-tab:hover { color: var(--primary-dark); }
+    .ws-tab.active { color: var(--primary-dark); border-bottom-color: var(--primary); }
+    .ws-tab .tab-badge { background: var(--primary); color: #fff; border-radius: 99px; padding: 1px 7px; font-size: 10px; font-weight: 700; }
+    .ws-tab .tab-badge.green { background: var(--green); }
+    .ws-tab .tab-badge.orange { background: var(--orange); }
+
+    /* Main workspace grid */
+    .workspace { flex: 1; overflow: hidden; display: grid; grid-template-columns: 300px 1fr 320px; }
+
+    /* ── LEFT: ATS Score panel ───────────────────── */
+    .ats-panel {
+      border-right: 1px solid var(--border);
+      background: var(--surface);
+      overflow-y: auto;
+      display: flex; flex-direction: column;
+    }
+    .ats-panel-inner { padding: 20px; flex: 1; }
+
+    .ats-score-block {
+      text-align: center; padding: 20px 0 18px;
+      border-bottom: 1px solid var(--border); margin-bottom: 18px;
+    }
+    .ats-ring-wrap { position: relative; display: inline-block; margin-bottom: 10px; }
+    .ats-ring-svg { transform: rotate(-90deg); }
+    .ats-ring-bg { fill: none; stroke: var(--primary-light); stroke-width: 10; }
+    .ats-ring-fill { fill: none; stroke-width: 10; stroke-linecap: round; transition: stroke-dashoffset 1s ease; }
+    .ats-ring-label {
+      position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%);
+      text-align: center;
+    }
+    .ats-ring-label .score-num { font-family: var(--font-head); font-size: 28px; font-weight: 700; color: var(--primary-dark); display: block; line-height: 1; }
+    .ats-ring-label .score-unit { font-size: 11px; color: var(--text-sub); }
+    .ats-score-title { font-family: var(--font-head); font-size: 14px; font-weight: 700; margin-bottom: 3px; }
+    .ats-score-sub { font-size: 12px; color: var(--text-sub); }
+    .ats-improvement {
+      display: inline-flex; align-items: center; gap: 5px;
+      background: var(--green-bg); color: var(--green-dark);
+      border-radius: 99px; padding: 3px 12px;
+      font-size: 12px; font-weight: 700; margin-top: 8px;
+    }
+
+    /* Category breakdown */
+    .ats-section-title { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .6px; color: var(--text-sub); margin-bottom: 10px; }
+    .ats-category { margin-bottom: 12px; }
+    .ats-cat-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px; }
+    .ats-cat-name { font-size: 12.5px; font-weight: 600; color: var(--text-main); }
+    .ats-cat-score { font-size: 12px; font-weight: 700; }
+    .ats-bar { height: 6px; background: var(--bg); border-radius: 99px; overflow: hidden; border: 1px solid var(--border); }
+    .ats-bar-fill { height: 100%; border-radius: 99px; }
+
+    /* Keywords list */
+    .kw-section { margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--border); }
+    .kw-item {
+      display: flex; align-items: flex-start; gap: 8px;
+      padding: 8px 0; border-bottom: 1px solid var(--bg);
+      font-size: 12.5px;
+    }
+    .kw-item:last-child { border-bottom: none; }
+    .kw-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; margin-top: 4px; }
+    .kw-word { font-weight: 600; color: var(--text-main); }
+    .kw-hint { font-size: 11.5px; color: var(--text-sub); margin-top: 1px; }
+    .kw-status { margin-left: auto; flex-shrink: 0; font-size: 10.5px; font-weight: 700; border-radius: 99px; padding: 2px 8px; }
+    .kw-status.found { background: var(--green-bg); color: var(--green-dark); }
+    .kw-status.missing { background: var(--red-bg); color: var(--red-dark); }
+    .kw-status.weak { background: var(--yellow-bg); color: #92400e; }
+
+    /* ── CENTER: Monaco Editor ───────────────────── */
+    .editor-col {
+      display: flex; flex-direction: column;
+      overflow: hidden; background: #1a1730;
+    }
+
+    /* Toolbar */
+    .editor-toolbar { background: #13102a; border-bottom: 1px solid #2d2850; padding: 0; display: flex; flex-direction: column; }
+    .toolbar-row { display: flex; align-items: center; padding: 4px 8px; gap: 2px; border-bottom: 1px solid #1e1b3a; }
+    .toolbar-row:last-child { border-bottom: none; }
+    .tb-group { display: flex; align-items: center; gap: 1px; padding-right: 8px; margin-right: 6px; border-right: 1px solid #2d2850; }
+    .tb-group:last-child { border-right: none; padding-right: 0; margin-right: 0; }
+    .tb-btn { width: 28px; height: 26px; border-radius: 4px; border: none; background: transparent; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 12px; color: #9ca3af; transition: background .1s, color .1s; }
+    .tb-btn:hover { background: rgba(167,139,250,.15); color: var(--primary); }
+    .tb-btn.active { background: rgba(167,139,250,.2); color: var(--primary-mid); }
+    .tb-btn.wide { width: auto; padding: 0 8px; font-size: 11.5px; font-family: var(--font-body); font-weight: 600; gap: 4px; }
+    .tb-select { height: 24px; border: 1px solid #2d2850; border-radius: 4px; background: #1e1b3a; font-family: var(--font-body); font-size: 12px; color: #d1d5db; padding: 0 6px; outline: none; cursor: pointer; }
+
+    /* AI suggestion toolbar */
+    .ai-toolbar {
+      background: linear-gradient(90deg, rgba(124,58,237,.15) 0%, rgba(240,171,252,.08) 100%);
+      border-bottom: 1px solid #2d2850;
+      padding: 7px 12px;
+      display: flex; align-items: center; gap: 10px;
+    }
+    .ai-pulse { width: 8px; height: 8px; border-radius: 50%; background: var(--primary); flex-shrink: 0; animation: pulse 2s infinite; }
+    @keyframes pulse { 0%,100% { opacity:1; transform:scale(1); } 50% { opacity:.5; transform:scale(1.4); } }
+    .ai-text { font-size: 12.5px; color: var(--primary-mid); font-weight: 600; flex: 1; }
+    .ai-nav { display: flex; align-items: center; gap: 6px; }
+    .ai-nav-btn { background: rgba(167,139,250,.15); border: 1px solid rgba(167,139,250,.25); color: var(--primary-mid); border-radius: 6px; padding: 3px 10px; font-size: 12px; font-weight: 600; cursor: pointer; font-family: var(--font-body); transition: all .15s; }
+    .ai-nav-btn:hover { background: rgba(167,139,250,.3); }
+    .ai-accept-all { background: var(--primary); color: #fff; border: none; border-radius: 99px; padding: 5px 14px; font-size: 12px; font-weight: 700; cursor: pointer; font-family: var(--font-body); transition: background .15s; }
+    .ai-accept-all:hover { background: var(--primary-dark); }
+
+    /* Editor area */
+    .editor-area { flex: 1; display: flex; overflow: hidden; }
+    .line-numbers { padding: 14px 8px; background: #13102a; color: #3d3868; font-family: 'Courier New', monospace; font-size: 12px; line-height: 1.65; text-align: right; user-select: none; min-width: 40px; border-right: 1px solid #2d2850; overflow: hidden; }
+    .editor-code { flex: 1; background: transparent; border: none; outline: none; resize: none; font-family: 'Courier New', monospace; font-size: 12.5px; line-height: 1.65; color: #e2d9f3; padding: 14px 16px; caret-color: var(--primary); overflow-y: auto; white-space: pre-wrap; }
+
+    .status-bar { background: var(--primary-dark); color: rgba(255,255,255,.55); font-family: 'Courier New', monospace; font-size: 11px; padding: 3px 14px; display: flex; gap: 16px; flex-shrink: 0; }
+    .status-bar span { color: rgba(255,255,255,.85); }
+    .status-bar .diff-badge { background: rgba(52,211,153,.2); color: var(--green); border-radius: 4px; padding: 0 6px; font-size: 10.5px; font-weight: 700; }
+
+    /* ── RIGHT: Preview + actions ────────────────── */
+    .preview-col {
+      border-left: 1px solid var(--border);
+      background: var(--surface);
+      display: flex; flex-direction: column;
+      overflow: hidden;
+    }
+    .preview-col-tabs { display: flex; background: #fafafa; border-bottom: 1px solid var(--border); }
+    .pcol-tab { flex: 1; padding: 10px; font-family: var(--font-body); font-size: 12px; font-weight: 600; cursor: pointer; border: none; background: transparent; color: var(--text-sub); border-bottom: 2px solid transparent; transition: all .15s; }
+    .pcol-tab.active { color: var(--primary-dark); border-bottom-color: var(--primary); }
+
+    .preview-col-content { flex: 1; overflow-y: auto; padding: 18px 16px; }
+
+    /* Mini CV preview */
+    .mini-cv { font-size: 11.5px; line-height: 1.6; }
+    .mini-cv-head { background: linear-gradient(135deg, var(--primary-dark) 0%, #6d28d9 100%); color: #fff; border-radius: 8px; padding: 14px; margin-bottom: 12px; }
+    .mini-cv-head h2 { font-family: var(--font-head); font-size: 15px; font-weight: 700; margin-bottom: 2px; }
+    .mini-cv-head .role { font-size: 11px; opacity: .8; margin-bottom: 8px; }
+    .mini-cv-head .contacts { font-size: 10.5px; opacity: .75; line-height: 1.7; }
+    .mini-sec-title { font-size: 9.5px; font-weight: 700; text-transform: uppercase; letter-spacing: .8px; color: var(--primary-dark); border-bottom: 1.5px solid var(--primary-light); padding-bottom: 3px; margin: 10px 0 6px; }
+    .mini-cv p { color: var(--text-sub); font-size: 11px; margin-bottom: 5px; }
+    .mini-cv ul { padding-left: 14px; color: var(--text-sub); font-size: 11px; }
+    .mini-cv li { margin-bottom: 3px; }
+
+    /* Highlight diff */
+    .ins { background: rgba(52,211,153,.2); color: #065f46; border-radius: 2px; padding: 0 2px; text-decoration: underline; text-decoration-color: var(--green); text-decoration-style: dotted; }
+    .del { background: rgba(248,113,113,.15); color: var(--red-dark); text-decoration: line-through; text-decoration-color: var(--red); opacity: .7; }
+
+    /* Download actions */
+    .download-section { padding: 14px 16px; border-top: 1px solid var(--border); background: var(--bg); flex-shrink: 0; }
+    .download-section .dl-title { font-size: 11.5px; font-weight: 700; color: var(--text-sub); text-transform: uppercase; letter-spacing: .5px; margin-bottom: 10px; }
+    .dl-btn { display: flex; align-items: center; gap: 9px; width: 100%; padding: 10px 14px; border-radius: var(--radius-sm); border: 1.5px solid var(--border); background: #fff; font-family: var(--font-body); font-size: 13px; font-weight: 600; cursor: pointer; margin-bottom: 7px; transition: all .2s; color: var(--text-main); }
+    .dl-btn:hover { border-color: var(--primary); background: var(--primary-light); color: var(--primary-dark); }
+    .dl-btn i { font-size: 14px; }
+    .dl-btn .dl-sub { font-size: 11px; font-weight: 400; color: var(--text-light); margin-left: auto; }
+    .dl-btn.primary-dl { background: var(--primary); border-color: var(--primary); color: #fff; }
+    .dl-btn.primary-dl:hover { background: var(--primary-dark); }
+    .dl-btn.primary-dl .dl-sub { color: rgba(255,255,255,.7); }
+
+    /* ════════════════════════════════════════════════
+       COVER LETTER TAB
+    ════════════════════════════════════════════════ */
+    .cover-workspace { flex: 1; overflow-y: auto; padding: 24px; display: grid; grid-template-columns: 1fr 360px; gap: 20px; align-items: start; }
+    .cover-editor-wrap { background: #fff; border-radius: var(--radius); border: 1px solid var(--border); overflow: hidden; box-shadow: var(--shadow); }
+    .cover-toolbar { background: #fafafa; border-bottom: 1px solid var(--border); padding: 6px 10px; display: flex; gap: 4px; align-items: center; flex-wrap: wrap; }
+    .cov-btn { background: none; border: 1px solid var(--border); border-radius: 5px; padding: 4px 10px; font-size: 12px; font-family: var(--font-body); font-weight: 600; cursor: pointer; color: var(--text-sub); transition: all .15s; }
+    .cov-btn:hover { background: var(--primary-light); border-color: var(--primary); color: var(--primary-dark); }
+    .cov-btn.active { background: var(--primary-light); border-color: var(--primary); color: var(--primary-dark); }
+    .cov-sep { width: 1px; height: 18px; background: var(--border); margin: 0 3px; }
+    .cover-textarea { width: 100%; min-height: 420px; padding: 20px; border: none; outline: none; font-family: var(--font-body); font-size: 13.5px; line-height: 1.75; color: var(--text-main); resize: none; }
+
+    .cover-side { display: flex; flex-direction: column; gap: 14px; }
+    .side-card { background: var(--surface); border-radius: var(--radius); border: 1px solid var(--border); padding: 18px; box-shadow: var(--shadow); }
+    .side-card-title { font-family: var(--font-head); font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: .5px; margin-bottom: 12px; color: var(--text-main); }
+
+    .tone-chips { display: flex; flex-wrap: wrap; gap: 7px; margin-bottom: 14px; }
+    .tone-chip { border: 1.5px solid var(--border); border-radius: 99px; padding: 5px 13px; font-size: 12px; font-weight: 600; cursor: pointer; color: var(--text-sub); transition: all .15s; }
+    .tone-chip:hover, .tone-chip.active { background: var(--primary-light); border-color: var(--primary); color: var(--primary-dark); }
+
+    .ai-regen-btn { display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; padding: 10px; background: linear-gradient(135deg, var(--primary-dark), #6d28d9); color: #fff; border: none; border-radius: var(--radius-sm); font-family: var(--font-body); font-size: 13px; font-weight: 700; cursor: pointer; transition: opacity .2s; }
+    .ai-regen-btn:hover { opacity: .9; }
+
+    .struct-item { display: flex; align-items: center; gap: 10px; padding: 8px 0; border-bottom: 1px solid var(--bg); font-size: 12.5px; color: var(--text-sub); }
+    .struct-item:last-child { border-bottom: none; }
+    .struct-item i { color: var(--primary); font-size: 12px; width: 16px; text-align: center; }
+    .struct-num { width: 20px; height: 20px; border-radius: 50%; background: var(--primary-light); color: var(--primary-dark); font-size: 10px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+
+    /* ════════════════════════════════════════════════
+       VIDEO SCRIPT TAB
+    ════════════════════════════════════════════════ */
+    .video-workspace { flex: 1; overflow-y: auto; padding: 24px; display: grid; grid-template-columns: 1fr 340px; gap: 20px; align-items: start; }
+    .video-script-wrap { background: #fff; border-radius: var(--radius); border: 1px solid var(--border); overflow: hidden; box-shadow: var(--shadow); }
+    .video-script-head { padding: 16px 20px; border-bottom: 1px solid var(--border); background: linear-gradient(90deg, var(--primary-light), #fff); display: flex; align-items: center; gap: 12px; }
+    .video-icon { width: 40px; height: 40px; border-radius: 10px; background: var(--primary); display: flex; align-items: center; justify-content: center; color: #fff; font-size: 16px; flex-shrink: 0; }
+    .video-script-body { padding: 20px; }
+
+    .script-scene { margin-bottom: 20px; border-left: 3px solid var(--primary-mid); padding-left: 14px; }
+    .scene-label { font-size: 10.5px; font-weight: 700; text-transform: uppercase; letter-spacing: .6px; color: var(--primary-dark); margin-bottom: 4px; }
+    .scene-time { font-size: 10.5px; color: var(--text-light); margin-bottom: 8px; display: flex; align-items: center; gap: 5px; }
+    .scene-text { font-size: 13px; line-height: 1.7; color: var(--text-main); background: var(--bg); border-radius: var(--radius-sm); padding: 12px 14px; border: 1px solid var(--border); }
+    .scene-notes { font-size: 11.5px; color: var(--text-sub); margin-top: 7px; display: flex; align-items: flex-start; gap: 6px; font-style: italic; }
+    .scene-notes i { color: var(--orange); margin-top: 2px; }
+
+    .video-side { display: flex; flex-direction: column; gap: 14px; }
+    .duration-chip { display: inline-flex; align-items: center; gap: 6px; background: var(--primary-light); color: var(--primary-dark); border-radius: 99px; padding: 4px 14px; font-size: 12px; font-weight: 700; margin-bottom: 8px; }
+    .tip-item { display: flex; align-items: flex-start; gap: 10px; padding: 9px 0; border-bottom: 1px solid var(--bg); font-size: 12.5px; }
+    .tip-item:last-child { border-bottom: none; }
+    .tip-item .tip-ico { width: 26px; height: 26px; border-radius: 7px; display: flex; align-items: center; justify-content: center; font-size: 13px; flex-shrink: 0; }
+    .tip-item .tip-text { color: var(--text-sub); line-height: 1.5; }
+    .tip-item .tip-text strong { color: var(--text-main); display: block; margin-bottom: 1px; }
+
+    /* ── ANIMATIONS ──────────────────────────────── */
+    @keyframes fadeUp { from { opacity:0; transform:translateY(12px); } to { opacity:1; transform:translateY(0); } }
+    .job-card { animation: fadeUp .3s ease both; }
+    .job-card:nth-child(1) { animation-delay:.05s; }
+    .job-card:nth-child(2) { animation-delay:.10s; }
+    .job-card:nth-child(3) { animation-delay:.15s; }
+
+    /* ── RESPONSIVE ──────────────────────────────── */
+    @media (max-width: 1100px) {
+      .workspace { grid-template-columns: 260px 1fr 280px; }
+      .cover-workspace, .video-workspace { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 860px) {
+      .workspace { grid-template-columns: 1fr; }
+      .ats-panel, .preview-col { display: none; }
+      .nav-links { display: none; }
+    }
+
+    /* Diff colors in editor */
+    .editor-diff-ins { color: #86efac; }
+    .editor-diff-del { color: #fca5a5; text-decoration: line-through; opacity: .6; }
+    .editor-diff-mark { color: #fcd34d; font-style: italic; }
+  </style>
+</head>
+<body>
+
+<!-- HEADER -->
+<!-- jobboard-header -->
+<header class="header jobboard-header">
+  <div class="header-inner">
+    <div class="logo jobboard-logo">job<span>board</span></div>
+    <div class="header-search jobboard-header-search">
+      <i class="fas fa-search ico"></i>
+      <input type="text" placeholder="Buscar vagas, empresas…" />
+    </div>
+    <nav class="nav-links jobboard-nav">
+      <a class="nav-link jobboard-nav-link jobboard-nav-link--active" href="#"><i class="fas fa-briefcase"></i> Vagas</a>
+      <a class="nav-link jobboard-nav-link" href="#"><i class="fas fa-building"></i> Empresas</a>
+      <a class="nav-link jobboard-nav-link" href="#"><i class="fas fa-chart-line"></i> Salários</a>
+      <a class="nav-link jobboard-nav-link" href="#"><i class="fas fa-bell"></i> Alertas</a>
+      <a class="nav-link jobboard-nav-link" href="#"><i class="fas fa-file-alt"></i> Currículo</a>
+    </nav>
+    <button class="btn-primary jobboard-btn-primary" style="margin-left:12px;">Publicar Vaga</button>
+  </div>
+</header>
+
+
+<!-- ══════════════════════════════════════════════════
+     SCREEN 0 — JOB CARD LIST
+══════════════════════════════════════════════════ -->
+<div id="screen0" class="screen active">
+  <div class="jobs-wrap">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;">
+      <div style="font-size:13px;color:var(--text-sub);"><strong style="color:var(--primary-dark);">2.847</strong> vagas encontradas</div>
+      <select style="border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:6px 12px;font-family:var(--font-body);font-size:13px;color:var(--text-main);background:#fff;outline:none;">
+        <option>Mais Relevantes</option><option>Mais Recentes</option><option>Maior Salário</option>
+      </select>
+    </div>
+
+    <!-- CARD 1 -->
+    <!-- jobboard-job-card jobboard-job-card--featured -->
+    <div class="job-card featured jobboard-job-card jobboard-job-card--featured">
+      <div class="job-top jobboard-job-card__top">
+        <div class="clogo jobboard-company-logo">NB</div>
+        <div class="jmain jobboard-job-card__main">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:3px;">
+            <div class="jtitle jobboard-job-card__title">Senior Frontend Engineer</div>
+            <span class="badge hot jobboard-badge jobboard-badge--hot">🔥 Hot</span>
+          </div>
+          <div class="jcompany jobboard-job-card__company">Nubank</div>
+          <div class="jmeta jobboard-job-card__meta">
+            <span><i class="fas fa-map-marker-alt"></i> São Paulo, SP</span>
+            <span><i class="fas fa-laptop-house"></i> Híbrido</span>
+            <span><i class="fas fa-clock"></i> há 2 dias</span>
+          </div>
+        </div>
+      </div>
+      <p class="jdesc">Buscamos um engenheiro frontend sênior para trabalhar em produtos financeiros usados por mais de 90 milhões de clientes. Você vai liderar decisões técnicas e colaborar com produto e design.</p>
+      <div class="jfooter">
+        <div class="stags jobboard-skill-tags">
+          <span class="stag jobboard-skill-tag">React</span>
+          <span class="stag jobboard-skill-tag">TypeScript</span>
+          <span class="stag bl jobboard-skill-tag jobboard-skill-tag--blue">GraphQL</span>
+          <span class="stag gr jobboard-skill-tag jobboard-skill-tag--green">Jest</span>
+        </div>
+        <div class="jsalary jobboard-salary-label">R$ 18k – 25k</div>
+      </div>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-top:14px;padding-top:14px;border-top:1px solid var(--border);">
+        <div class="card-actions">
+          <!-- jobboard-tailor-btn: Gradient AI Tailoring CTA -->
+          <button class="tailor-btn jobboard-tailor-btn" onclick="openModal()">
+            <span class="spark">✦</span> Tailoring IA
+          </button>
+          <button class="apply-btn jobboard-apply-btn">Candidatar</button>
+        </div>
+        <button class="bkbtn jobboard-bookmark-btn"><i class="far fa-bookmark"></i></button>
+      </div>
+    </div>
+
+    <!-- CARD 2 -->
+    <!-- jobboard-job-card -->
+    <div class="job-card jobboard-job-card">
+      <div class="job-top jobboard-job-card__top">
+        <div class="clogo" style="background:#dbeafe;color:#1d4ed8;">IF</div>
+        <div class="jmain jobboard-job-card__main">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:3px;">
+            <div class="jtitle jobboard-job-card__title">React Developer – Pleno</div>
+            <span class="badge new jobboard-badge jobboard-badge--new">Novo</span>
+          </div>
+          <div class="jcompany jobboard-job-card__company">iFood</div>
+          <div class="jmeta jobboard-job-card__meta">
+            <span><i class="fas fa-map-marker-alt"></i> Campinas, SP</span>
+            <span><i class="fas fa-home"></i> Remoto</span>
+            <span><i class="fas fa-clock"></i> há 5 horas</span>
+          </div>
+        </div>
+      </div>
+      <p class="jdesc">Integre o time de plataforma e contribua com micro-frontends e design system compartilhado. Performance, testes e boas práticas são essenciais aqui.</p>
+      <div class="jfooter">
+        <div class="stags jobboard-skill-tags">
+          <span class="stag jobboard-skill-tag">React</span>
+          <span class="stag jobboard-skill-tag">Webpack</span>
+          <span class="stag bl jobboard-skill-tag jobboard-skill-tag--blue">Node.js</span>
+          <span class="stag or jobboard-skill-tag jobboard-skill-tag--orange">Docker</span>
+        </div>
+        <div class="jsalary jobboard-salary-label">R$ 12k – 16k</div>
+      </div>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-top:14px;padding-top:14px;border-top:1px solid var(--border);">
+        <div class="card-actions">
+          <!-- jobboard-tailor-btn: Gradient AI Tailoring CTA -->
+          <button class="tailor-btn jobboard-tailor-btn" onclick="openModal()">
+            <span class="spark">✦</span> Tailoring IA
+          </button>
+          <button class="apply-btn jobboard-apply-btn">Candidatar</button>
+        </div>
+        <button class="bkbtn jobboard-bookmark-btn"><i class="far fa-bookmark"></i></button>
+      </div>
+    </div>
+
+    <!-- CARD 3 -->
+    <!-- jobboard-job-card -->
+    <div class="job-card jobboard-job-card">
+      <div class="job-top jobboard-job-card__top">
+        <div class="clogo" style="background:#f3e8ff;color:#6d28d9;">ST</div>
+        <div class="jmain jobboard-job-card__main">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:3px;">
+            <div class="jtitle jobboard-job-card__title">Staff Frontend Engineer</div>
+          </div>
+          <div class="jcompany jobboard-job-card__company">Stone Pagamentos</div>
+          <div class="jmeta jobboard-job-card__meta">
+            <span><i class="fas fa-map-marker-alt"></i> Rio de Janeiro, RJ</span>
+            <span><i class="fas fa-home"></i> Full Remote</span>
+            <span><i class="fas fa-clock"></i> há 1 dia</span>
+          </div>
+        </div>
+      </div>
+      <p class="jdesc">Líder técnico de squad de produto em plataforma de pagamentos B2B de alta disponibilidade. Influencie arquitetura e processos de engenharia.</p>
+      <div class="jfooter">
+        <div class="stags jobboard-skill-tags">
+          <span class="stag jobboard-skill-tag">Vue.js</span>
+          <span class="stag jobboard-skill-tag">TypeScript</span>
+          <span class="stag bl jobboard-skill-tag jobboard-skill-tag--blue">AWS</span>
+          <span class="stag gr jobboard-skill-tag jobboard-skill-tag--green">Cypress</span>
+        </div>
+        <div class="jsalary jobboard-salary-label">R$ 20k – 28k</div>
+      </div>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-top:14px;padding-top:14px;border-top:1px solid var(--border);">
+        <div class="card-actions">
+          <!-- jobboard-tailor-btn: Gradient AI Tailoring CTA -->
+          <button class="tailor-btn jobboard-tailor-btn" onclick="openModal()">
+            <span class="spark">✦</span> Tailoring IA
+          </button>
+          <button class="apply-btn jobboard-apply-btn">Candidatar</button>
+        </div>
+        <button class="bkbtn jobboard-bookmark-btn"><i class="far fa-bookmark"></i></button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════════════
+     MODAL — LANGUAGE PICKER
+══════════════════════════════════════════════════ -->
+<!-- jobboard-lang-modal: Language picker modal -->
+<div id="langModal" class="modal-backdrop jobboard-lang-modal" style="display:none;">
+  <div class="modal-box jobboard-lang-modal__box">
+    <div style="font-size:28px;margin-bottom:12px;">✦</div>
+    <div class="modal-title">Tailoring IA para esta vaga</div>
+    <div class="modal-sub">Escolha qual versão do seu currículo deseja otimizar. A IA analisará a descrição da vaga e sugerirá melhorias para maximizar sua compatibilidade ATS.</div>
+    <!-- jobboard-lang-card (repeated) -->
+    <div class="lang-cards jobboard-lang-cards">
+      <div class="lang-card selected jobboard-lang-card jobboard-lang-card--selected" onclick="selectLang(this)">
+        <div class="flag">🇧🇷</div>
+        <div class="lname">Português</div>
+        <div class="ldesc">CV em PT-BR<br/>para vagas nacionais</div>
+        <div class="check-ring"><i class="fas fa-check"></i></div>
+      </div>
+      <div class="lang-card jobboard-lang-card" onclick="selectLang(this)">
+        <div class="flag">🇺🇸</div>
+        <div class="lname">English</div>
+        <div class="ldesc">Resume em inglês<br/>para vagas globais</div>
+        <div class="check-ring"></div>
+      </div>
+    </div>
+    <div style="background:var(--primary-light);border-radius:var(--radius-sm);padding:10px 14px;font-size:12.5px;color:var(--primary-dark);margin-bottom:20px;display:flex;align-items:center;gap:8px;">
+      <i class="fas fa-shield-alt"></i>
+      Seu CV original não é alterado. O Tailoring gera uma <strong>versão nova</strong> otimizada para esta vaga.
+    </div>
+    <div class="modal-footer">
+      <button class="modal-cancel" onclick="closeModal()">Cancelar</button>
+      <button class="modal-confirm" onclick="openTailoring()">
+        <i class="fas fa-magic"></i> Analisar e Otimizar
+      </button>
+    </div>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════════════
+     SCREEN 1 — TAILORING WORKSPACE
+══════════════════════════════════════════════════ -->
+<div id="screen1" class="screen">
+  <!-- Tailoring workspace root -->
+  <div class="tailoring-page jobboard-tailoring-page">
+
+    <!-- Context bar -->
+    <!-- jobboard-ctx-bar: Context breadcrumb bar -->
+    <div class="ctx-bar jobboard-ctx-bar">
+      <!-- jobboard-btn-ghost: Back button -->
+      <button class="ctx-back jobboard-btn-ghost" onclick="goScreen(0)"><i class="fas fa-arrow-left"></i> Voltar às vagas</button>
+      <div class="ctx-sep"></div>
+      <div class="ctx-job jobboard-ctx-bar__job">
+        <div class="ctx-clogo jobboard-company-logo">NB</div>
+        <div>
+          <div class="ctx-title">Senior Frontend Engineer <span class="ctx-lang-badge jobboard-badge jobboard-badge--lang">🇧🇷 PT-BR</span></div>
+          <div class="ctx-sub">Nubank · São Paulo, SP · Híbrido</div>
+        </div>
+      </div>
+      <div class="ctx-actions">
+        <div style="font-size:12px;color:var(--text-sub);display:flex;align-items:center;gap:5px;">
+          <i class="fas fa-circle" style="font-size:7px;color:var(--green);"></i>
+          Análise concluída
+        </div>
+      </div>
+    </div>
+
+    <!-- Tab bar -->
+    <!-- jobboard-workspace-tabs: ATS / Cover Letter / Video tabs -->
+    <div class="workspace-tabs jobboard-workspace-tabs">
+      <button class="ws-tab active jobboard-workspace-tabs__tab jobboard-workspace-tabs__tab--active" onclick="switchTab('ats')">
+        <i class="fas fa-chart-bar"></i> ATS & Keywords
+        <span class="tab-badge jobboard-inline-badge">12</span>
+      </button>
+      <button class="ws-tab jobboard-workspace-tabs__tab" onclick="switchTab('coverletter')">
+        <i class="fas fa-envelope-open-text"></i> Cover Letter
+        <span class="tab-badge green jobboard-inline-badge jobboard-inline-badge--success">Novo</span>
+      </button>
+      <button class="ws-tab jobboard-workspace-tabs__tab" onclick="switchTab('video')">
+        <i class="fas fa-video"></i> Roteiro de Vídeo
+        <span class="tab-badge orange jobboard-inline-badge jobboard-inline-badge--warning">Beta</span>
+      </button>
+    </div>
+
+    <!-- ── ATS TAB CONTENT ──────────────────────── -->
+    <!-- jobboard-ats-panel wrapper -->
+    <div id="tab-ats" class="workspace jobboard-workspace-grid">
+
+      <!-- LEFT: ATS Score panel -->
+      <!-- jobboard-ats-panel: Left ATS score + keywords panel -->
+      <div class="ats-panel jobboard-ats-panel">
+        <div class="ats-panel-inner">
+
+          <!-- jobboard-ats-score-ring: Circular score ring wrapper -->
+          <div class="ats-score-block jobboard-ats-score-block">
+            <div class="ats-ring-wrap">
+              <svg class="ats-ring-svg" width="120" height="120" viewBox="0 0 120 120">
+                <circle class="ats-ring-bg" cx="60" cy="60" r="50"/>
+                <!-- 62% score: circumference = 2π×50 ≈ 314. 62% = 194.5 filled, gap = 119.5 -->
+                <circle class="ats-ring-fill" cx="60" cy="60" r="50"
+                  stroke="url(#scoreGrad)"
+                  stroke-dasharray="195 120"
+                  stroke-dashoffset="0"/>
+                <defs>
+                  <linearGradient id="scoreGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                    <stop offset="0%" stop-color="#a78bfa"/>
+                    <stop offset="100%" stop-color="#f0abfc"/>
+                  </linearGradient>
+                </defs>
+              </svg>
+              <div class="ats-ring-label">
+                <span class="score-num">62</span>
+                <span class="score-unit">/100</span>
+              </div>
+            </div>
+            <div class="ats-score-title">Score de Compatibilidade</div>
+            <div class="ats-score-sub">ATS antes do tailoring</div>
+            <div class="ats-improvement jobboard-ats-score-block__improvement">
+              <i class="fas fa-arrow-up"></i> +23 pts com sugestões aplicadas
+            </div>
+          </div>
+
+          <!-- Category breakdown -->
+          <div style="margin-bottom:16px;">
+            <div class="ats-section-title">Categorias</div>
+
+            <!-- jobboard-ats-category-bar: Category score row -->
+            <div class="ats-category jobboard-ats-category-bar">
+              <div class="ats-cat-row">
+                <span class="ats-cat-name">Keywords técnicas</span>
+                <span class="ats-cat-score" style="color:var(--orange-dark);">58%</span>
+              </div>
+              <div class="ats-bar jobboard-progress-bar"><div class="ats-bar-fill jobboard-progress-bar__fill" style="width:58%;background:var(--orange);"></div></div>
+            </div>
+
+            <!-- jobboard-ats-category-bar: Category score row -->
+            <div class="ats-category jobboard-ats-category-bar">
+              <div class="ats-cat-row">
+                <span class="ats-cat-name">Experiência relevante</span>
+                <span class="ats-cat-score" style="color:var(--green-dark);">81%</span>
+              </div>
+              <div class="ats-bar jobboard-progress-bar"><div class="ats-bar-fill jobboard-progress-bar__fill" style="width:81%;background:var(--green);"></div></div>
+            </div>
+
+            <!-- jobboard-ats-category-bar: Category score row -->
+            <div class="ats-category jobboard-ats-category-bar">
+              <div class="ats-cat-row">
+                <span class="ats-cat-name">Soft skills</span>
+                <span class="ats-cat-score" style="color:var(--red-dark);">44%</span>
+              </div>
+              <div class="ats-bar jobboard-progress-bar"><div class="ats-bar-fill jobboard-progress-bar__fill" style="width:44%;background:var(--red);"></div></div>
+            </div>
+
+            <!-- jobboard-ats-category-bar: Category score row -->
+            <div class="ats-category jobboard-ats-category-bar">
+              <div class="ats-cat-row">
+                <span class="ats-cat-name">Formação</span>
+                <span class="ats-cat-score" style="color:var(--green-dark);">90%</span>
+              </div>
+              <div class="ats-bar jobboard-progress-bar"><div class="ats-bar-fill jobboard-progress-bar__fill" style="width:90%;background:var(--green);"></div></div>
+            </div>
+
+            <!-- jobboard-ats-category-bar: Category score row -->
+            <div class="ats-category jobboard-ats-category-bar">
+              <div class="ats-cat-row">
+                <span class="ats-cat-name">Estrutura do CV</span>
+                <span class="ats-cat-score" style="color:var(--orange-dark);">65%</span>
+              </div>
+              <div class="ats-bar jobboard-progress-bar"><div class="ats-bar-fill jobboard-progress-bar__fill" style="width:65%;background:var(--orange);"></div></div>
+            </div>
+          </div>
+
+          <!-- Keywords -->
+          <!-- jobboard-keyword-item (repeated): Keywords list -->
+          <div class="kw-section jobboard-ats-keywords">
+            <div class="ats-section-title">Keywords da vaga <span style="float:right;font-weight:700;color:var(--primary-dark);">8/14</span></div>
+
+            <!-- jobboard-keyword-item: Single keyword row -->
+            <div class="kw-item jobboard-keyword-item">
+              <div class="kw-dot" style="background:var(--green);"></div>
+              <div style="flex:1;">
+                <div class="kw-word">React</div>
+                <div class="kw-hint">Encontrado 5× no CV</div>
+              </div>
+              <span class="kw-status found jobboard-keyword-status jobboard-keyword-status--found">✓ OK</span>
+            </div>
+            <!-- jobboard-keyword-item: Single keyword row -->
+            <div class="kw-item jobboard-keyword-item">
+              <div class="kw-dot" style="background:var(--green);"></div>
+              <div style="flex:1;">
+                <div class="kw-word">TypeScript</div>
+                <div class="kw-hint">Encontrado 3× no CV</div>
+              </div>
+              <span class="kw-status found jobboard-keyword-status jobboard-keyword-status--found">✓ OK</span>
+            </div>
+            <!-- jobboard-keyword-item: Single keyword row -->
+            <div class="kw-item jobboard-keyword-item">
+              <div class="kw-dot" style="background:var(--yellow);"></div>
+              <div style="flex:1;">
+                <div class="kw-word">GraphQL</div>
+                <div class="kw-hint">Mencionado mas pouca ênfase</div>
+              </div>
+              <span class="kw-status weak jobboard-keyword-status jobboard-keyword-status--weak">⚡ Fraco</span>
+            </div>
+            <!-- jobboard-keyword-item: Single keyword row -->
+            <div class="kw-item jobboard-keyword-item">
+              <div class="kw-dot" style="background:var(--red);"></div>
+              <div style="flex:1;">
+                <div class="kw-word">Design System</div>
+                <div class="kw-hint">Ausente — alta relevância</div>
+              </div>
+              <span class="kw-status missing jobboard-keyword-status jobboard-keyword-status--missing">✗ Falta</span>
+            </div>
+            <!-- jobboard-keyword-item: Single keyword row -->
+            <div class="kw-item jobboard-keyword-item">
+              <div class="kw-dot" style="background:var(--red);"></div>
+              <div style="flex:1;">
+                <div class="kw-word">Microfrontend</div>
+                <div class="kw-hint">Ausente — crítico para ATS</div>
+              </div>
+              <span class="kw-status missing jobboard-keyword-status jobboard-keyword-status--missing">✗ Falta</span>
+            </div>
+            <!-- jobboard-keyword-item: Single keyword row -->
+            <div class="kw-item jobboard-keyword-item">
+              <div class="kw-dot" style="background:var(--red);"></div>
+              <div style="flex:1;">
+                <div class="kw-word">Performance Web</div>
+                <div class="kw-hint">Não encontrado no CV</div>
+              </div>
+              <span class="kw-status missing jobboard-keyword-status jobboard-keyword-status--missing">✗ Falta</span>
+            </div>
+            <!-- jobboard-keyword-item: Single keyword row -->
+            <div class="kw-item jobboard-keyword-item">
+              <div class="kw-dot" style="background:var(--yellow);"></div>
+              <div style="flex:1;">
+                <div class="kw-word">Liderança técnica</div>
+                <div class="kw-hint">Implícito, não explícito</div>
+              </div>
+              <span class="kw-status weak jobboard-keyword-status jobboard-keyword-status--weak">⚡ Fraco</span>
+            </div>
+            <!-- jobboard-keyword-item: Single keyword row -->
+            <div class="kw-item jobboard-keyword-item">
+              <div class="kw-dot" style="background:var(--green);"></div>
+              <div style="flex:1;">
+                <div class="kw-word">Jest / Testing</div>
+                <div class="kw-hint">Encontrado 2× no CV</div>
+              </div>
+              <span class="kw-status found jobboard-keyword-status jobboard-keyword-status--found">✓ OK</span>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- CENTER: Monaco Editor -->
+      <!-- jobboard-monaco-editor wrapper -->
+      <div class="editor-col jobboard-editor-col">
+
+        <!-- Word-like toolbar -->
+        <!-- jobboard-editor-toolbar -->
+        <div class="editor-toolbar jobboard-editor-toolbar">
+          <div class="toolbar-row jobboard-editor-toolbar__row">
+            <div class="tb-group jobboard-editor-toolbar__group">
+              <select class="tb-select jobboard-toolbar-select" style="width:110px;"><option>DM Sans</option><option>Sora</option><option>Courier New</option></select>
+            </div>
+            <div class="tb-group jobboard-editor-toolbar__group">
+              <select class="tb-select jobboard-toolbar-select" style="width:46px;"><option>12</option><option selected>14</option><option>16</option></select>
+            </div>
+            <div class="tb-group jobboard-editor-toolbar__group">
+              <button class="tb-btn jobboard-toolbar-btn" title="Negrito"><b style="color:inherit;">B</b></button>
+              <button class="tb-btn jobboard-toolbar-btn" title="Itálico"><i style="color:inherit;">I</i></button>
+              <button class="tb-btn jobboard-toolbar-btn" title="Sublinhado" style="text-decoration:underline;">U</button>
+            </div>
+            <div class="tb-group jobboard-editor-toolbar__group">
+              <button class="tb-btn wide jobboard-toolbar-btn jobboard-toolbar-btn--wide"><i class="fas fa-heading"></i> H1</button>
+              <button class="tb-btn wide active"><i class="fas fa-heading"></i> H2</button>
+              <button class="tb-btn wide jobboard-toolbar-btn jobboard-toolbar-btn--wide"><i class="fas fa-heading"></i> H3</button>
+            </div>
+            <div class="tb-group jobboard-editor-toolbar__group">
+              <button class="tb-btn jobboard-toolbar-btn"><i class="fas fa-list-ul"></i></button>
+              <button class="tb-btn jobboard-toolbar-btn"><i class="fas fa-list-ol"></i></button>
+            </div>
+            <div class="tb-group jobboard-editor-toolbar__group">
+              <button class="tb-btn jobboard-toolbar-btn"><i class="fas fa-undo"></i></button>
+              <button class="tb-btn jobboard-toolbar-btn"><i class="fas fa-redo"></i></button>
+            </div>
+          </div>
+          <div class="toolbar-row jobboard-editor-toolbar__row">
+            <div class="tb-group jobboard-editor-toolbar__group">
+              <button class="tb-btn active jobboard-toolbar-btn jobboard-toolbar-btn--active"><i class="fas fa-align-left"></i></button>
+              <button class="tb-btn jobboard-toolbar-btn"><i class="fas fa-align-center"></i></button>
+              <button class="tb-btn jobboard-toolbar-btn"><i class="fas fa-align-right"></i></button>
+            </div>
+            <div class="tb-group jobboard-editor-toolbar__group">
+              <button class="tb-btn jobboard-toolbar-btn"><i class="fas fa-palette"></i></button>
+              <button class="tb-btn jobboard-toolbar-btn"><i class="fas fa-highlighter"></i></button>
+              <button class="tb-btn jobboard-toolbar-btn"><i class="fas fa-link"></i></button>
+            </div>
+            <div class="tb-group jobboard-editor-toolbar__group">
+              <button class="tb-btn wide jobboard-toolbar-btn jobboard-toolbar-btn--wide" style="color:#86efac;"><i class="fas fa-plus-circle"></i> Aceitar tudo</button>
+              <button class="tb-btn wide jobboard-toolbar-btn jobboard-toolbar-btn--wide" style="color:#fca5a5;"><i class="fas fa-times-circle"></i> Rejeitar tudo</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- AI suggestion bar -->
+        <!-- jobboard-ai-suggestion-bar: Pulsing AI suggestions strip -->
+        <div class="ai-toolbar jobboard-ai-suggestion-bar">
+          <div class="ai-pulse"></div>
+          <div class="ai-text">✦ 6 sugestões de keyword · clique para navegar ou aceitar individualmente</div>
+          <div class="ai-nav">
+            <button class="ai-nav-btn">← Ant.</button>
+            <span style="color:rgba(255,255,255,.5);font-size:12px;">2/6</span>
+            <button class="ai-nav-btn">Próx. →</button>
+          </div>
+          <button class="ai-accept-all">Aceitar todas</button>
+        </div>
+
+        <!-- Editor -->
+        <div class="editor-area jobboard-monaco-editor">
+          <div class="line-numbers jobboard-monaco-editor__lines">
+            1<br/>2<br/>3<br/>4<br/>5<br/>6<br/>7<br/>8<br/>9<br/>10<br/>
+            11<br/>12<br/>13<br/>14<br/>15<br/>16<br/>17<br/>18<br/>19<br/>20<br/>
+            21<br/>22<br/>23<br/>24<br/>25<br/>26<br/>27<br/>28<br/>29<br/>30<br/>
+            31<br/>32<br/>33<br/>34<br/>35<br/>36<br/>37<br/>38<br/>39<br/>40
+          </div>
+          <textarea class="editor-code jobboard-monaco-editor__code" spellcheck="false"
+># Lucas Gonçalves
+### Senior Frontend Engineer
+
+---
+
+## Resumo
+
+Engenheiro frontend sênior com 7+ anos de experiência
+construindo produtos digitais escaláveis para o setor
+financeiro. Especialista em React, TypeScript e
+[SUGESTÃO: design systems e microfrontends], com forte
+foco em performance web e acessibilidade (WCAG 2.1).
+Experiência comprovada em [SUGESTÃO: liderança técnica]
+de squads em fintechs de alto crescimento.
+
+---
+
+## Experiência
+
+### Senior Frontend Engineer
+**Venturus** · Campinas, SP | Jan 2023 – Presente
+
+- Liderou a migração para arquitetura de
+  [SUGESTÃO: microfrontends], reduzindo deploy time em 60%
+- Criou e mantém [SUGESTÃO: design system] com 80+
+  componentes reutilizáveis usando React + Storybook
+- Otimizações de [SUGESTÃO: performance web]: LCP -42%,
+  FID -68% medidos via Lighthouse
+- Mentorou 4 devs e conduziu 200+ code reviews
+
+### Frontend Engineer
+**Ília Digital (JPMC)** · Remoto | Mar 2021 – Dez 2022
+
+- Desenvolveu ferramentas de banking para JP Morgan Chase
+- Stack: React, TypeScript, [SUGESTÃO: GraphQL], Redux
+          </textarea>
+        </div>
+
+        <!-- jobboard-editor-status-bar -->
+        <div class="status-bar jobboard-editor-status-bar">
+          <span>Markdown</span> · Ln 22, Col 18 · <span>UTF-8</span> ·
+          <span class="diff-badge">+6 sugestões</span> ·
+          Score atual: <span>62</span> → com aplicação: <span style="color:var(--green);">85</span>
+        </div>
+      </div>
+
+      <!-- RIGHT: Preview -->
+      <!-- jobboard-preview-panel: CV preview + download panel -->
+      <div class="preview-col jobboard-preview-col">
+        <!-- jobboard-preview-tabs -->
+        <div class="preview-col-tabs jobboard-preview-tabs">
+          <button class="pcol-tab active jobboard-preview-tabs__tab jobboard-preview-tabs__tab--active">📄 Preview CV</button>
+          <button class="pcol-tab jobboard-preview-tabs__tab">🔍 Job Description</button>
+        </div>
+
+        <div class="preview-col-content">
+          <div class="mini-cv">
+            <div class="mini-cv-head">
+              <h2>Lucas Gonçalves</h2>
+              <div class="role">Senior Frontend Engineer</div>
+              <div class="contacts">
+                📧 <a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="95f9e0f6f4e6d5f0f8f4fcf9bbf6faf8">[email&#160;protected]</a> · 📱 +55 11 9 9999-9999<br/>
+                💼 linkedin.com/in/lucasg · 📍 São Paulo, SP
+              </div>
+            </div>
+
+            <div class="mini-sec-title">Resumo</div>
+            <p>
+              Engenheiro frontend sênior com 7+ anos de experiência. Especialista em React, TypeScript e
+              <span class="ins">design systems e microfrontends</span>,
+              com foco em <span class="ins">performance web</span> e acessibilidade.
+              Experiência em <span class="ins">liderança técnica</span> de squads em fintechs.
+            </p>
+
+            <div class="mini-sec-title">Experiência</div>
+            <p><strong>Senior Frontend Engineer</strong> · Venturus</p>
+            <ul>
+              <li>Migração para <span class="ins">microfrontends</span> (−60% deploy time)</li>
+              <li><span class="ins">Design system</span> com 80+ componentes</li>
+              <li>Otimizações de <span class="ins">performance web</span>: LCP −42%, FID −68%</li>
+              <li>Mentorou 4 devs · 200+ code reviews</li>
+            </ul>
+
+            <p style="margin-top:8px;"><strong>Frontend Engineer</strong> · Ília Digital (JPMC)</p>
+            <ul>
+              <li>Banking tools para JP Morgan Chase</li>
+              <li>React, TypeScript, <span class="ins">GraphQL</span>, Redux Toolkit</li>
+            </ul>
+
+            <div class="mini-sec-title">Educação</div>
+            <p><strong>B.Sc. Ciência da Computação</strong> · UNICAMP · 2014–2018</p>
+          </div>
+        </div>
+
+        <!-- Score after badge -->
+        <div style="padding:10px 16px;border-top:1px solid var(--border);border-bottom:1px solid var(--border);background:var(--green-bg);display:flex;align-items:center;gap:10px;">
+          <i class="fas fa-arrow-trend-up" style="color:var(--green-dark);font-size:14px;"></i>
+          <div style="font-size:12.5px;color:var(--green-dark);">Com sugestões: <strong>62 → 85 pts</strong></div>
+          <div style="margin-left:auto;background:var(--green);color:#fff;border-radius:99px;padding:2px 10px;font-size:11px;font-weight:700;">+23 pts</div>
+        </div>
+
+        <!-- Download -->
+        <!-- jobboard-download-section: Export options -->
+        <div class="download-section jobboard-download-section">
+          <div class="dl-title">Exportar versão otimizada</div>
+          <!-- jobboard-dl-btn jobboard-dl-btn--primary -->
+          <button class="dl-btn primary-dl jobboard-dl-btn jobboard-dl-btn--primary">
+            <i class="fas fa-file-pdf"></i>
+            Baixar CV otimizado · PDF
+            <span class="dl-sub">Com sugestões</span>
+          </button>
+          <!-- jobboard-dl-btn: Export action button -->
+          <button class="dl-btn jobboard-dl-btn">
+            <i class="fas fa-file-word"></i>
+            Baixar como .DOCX
+            <span class="dl-sub">Editável</span>
+          </button>
+          <!-- jobboard-dl-btn: Export action button -->
+          <button class="dl-btn jobboard-dl-btn">
+            <i class="fas fa-file-code"></i>
+            Exportar Markdown
+            <span class="dl-sub">.md</span>
+          </button>
+          <!-- jobboard-dl-btn: Export action button -->
+          <button class="dl-btn jobboard-dl-btn">
+            <i class="fas fa-copy"></i>
+            Salvar como nova versão
+            <span class="dl-sub">No perfil</span>
+          </button>
+        </div>
+      </div>
+    </div><!-- /tab-ats -->
+
+    <!-- ── COVER LETTER TAB ────────────────────── -->
+    <div id="tab-coverletter" style="display:none;flex:1;overflow:hidden;flex-direction:column;">
+      <!-- jobboard-cover-editor wrapper -->
+      <div class="cover-workspace jobboard-cover-workspace">
+
+        <!-- Editor -->
+        <!-- jobboard-cover-editor: Rich text editor -->
+        <div class="cover-editor-wrap jobboard-cover-editor">
+          <!-- jobboard-cover-toolbar: Formatting toolbar -->
+          <div class="cover-toolbar jobboard-cover-toolbar">
+            <button class="cov-btn active jobboard-toolbar-btn jobboard-toolbar-btn--active"><b>N</b></button>
+            <button class="cov-btn jobboard-toolbar-btn"><i>I</i></button>
+            <button class="cov-btn" style="text-decoration:underline;">S</button>
+            <div class="cov-sep"></div>
+            <button class="cov-btn jobboard-toolbar-btn"><i class="fas fa-align-left"></i></button>
+            <button class="cov-btn jobboard-toolbar-btn"><i class="fas fa-align-center"></i></button>
+            <div class="cov-sep"></div>
+            <button class="cov-btn jobboard-toolbar-btn"><i class="fas fa-list-ul"></i></button>
+            <button class="cov-btn jobboard-toolbar-btn"><i class="fas fa-list-ol"></i></button>
+            <div class="cov-sep"></div>
+            <select style="height:26px;border:1px solid var(--border);border-radius:5px;font-family:var(--font-body);font-size:12px;padding:0 6px;background:#fff;cursor:pointer;outline:none;">
+              <option>DM Sans</option><option>Sora</option><option>Georgia</option>
+            </select>
+            <select style="height:26px;border:1px solid var(--border);border-radius:5px;font-family:var(--font-body);font-size:12px;padding:0 6px;background:#fff;cursor:pointer;outline:none;width:50px;">
+              <option>12</option><option selected>14</option><option>16</option>
+            </select>
+            <div class="cov-sep"></div>
+            <button class="cov-btn jobboard-toolbar-btn"><i class="fas fa-undo"></i></button>
+            <button class="cov-btn jobboard-toolbar-btn"><i class="fas fa-redo"></i></button>
+          </div>
+          <textarea class="cover-textarea jobboard-cover-editor__textarea">São Paulo, 04 de abril de 2026
+
+Prezado(a) Time de Recrutamento,
+Nubank
+
+Escrevo para expressar meu interesse na posição de Senior Frontend Engineer no Nubank. Com mais de 7 anos de experiência desenvolvendo produtos digitais para o setor financeiro e um histórico sólido em React, TypeScript e arquiteturas de microfrontend, acredito que posso contribuir diretamente para a missão de democratizar os serviços financeiros.
+
+Na Venturus, liderei a migração de uma arquitetura monolítica para microfrontends, reduzindo o tempo de deploy em 60% e aumentando a autonomia dos squads. Criei e mantive um design system com mais de 80 componentes reutilizáveis — algo que entendo ser central na cultura de produto do Nubank. Antes disso, trabalhei com o JP Morgan Chase através da Ília Digital, onde desenvolvi ferramentas internas de banking com alto padrão de qualidade e segurança.
+
+O que me atrai no Nubank vai além da stack técnica: é a escala real do impacto. A ideia de que decisões de código afetam mais de 90 milhões de clientes é o tipo de desafio que me motiva a escrever software mais cuidadoso, mais acessível e mais performático.
+
+Estou disponível para uma conversa a qualquer momento e ansioso para contribuir com o time.
+
+Atenciosamente,
+Lucas Gonçalves
+lucas@email.com · +55 11 9 9999-9999</textarea>
+        </div>
+
+        <!-- Side panel -->
+        <div class="cover-side">
+
+          <!-- jobboard-card: Side panel card -->
+          <div class="side-card jobboard-card">
+            <div class="side-card-title jobboard-card-title">✦ Gerar com IA</div>
+            <div style="font-size:12.5px;color:var(--text-sub);margin-bottom:12px;line-height:1.55;">A IA cria uma carta personalizada cruzando seu CV com a job description.</div>
+            <!-- jobboard-tone-chip (repeated): Writing tone selector chips -->
+            <div class="tone-chips jobboard-tone-chips">
+              <span class="tone-chip active jobboard-tone-chip jobboard-tone-chip--active">Profissional</span>
+              <span class="tone-chip jobboard-tone-chip">Direto</span>
+              <span class="tone-chip jobboard-tone-chip">Entusiasmado</span>
+              <span class="tone-chip jobboard-tone-chip">Formal</span>
+              <span class="tone-chip jobboard-tone-chip">Conversacional</span>
+            </div>
+            <!-- jobboard-ai-regen-btn: Gradient AI generation button -->
+            <button class="ai-regen-btn jobboard-ai-regen-btn">
+              <i class="fas fa-rotate"></i> Regenerar carta
+            </button>
+          </div>
+
+          <!-- jobboard-card: Side panel card -->
+          <div class="side-card jobboard-card">
+            <div class="side-card-title jobboard-card-title">Estrutura sugerida</div>
+            <!-- jobboard-struct-item: Numbered structure guide item -->
+            <div class="struct-item jobboard-struct-item">
+              <div class="struct-num">1</div>
+              <div><strong style="font-size:12.5px;">Saudação personalizada</strong><div style="font-size:11.5px;color:var(--text-sub);">Nome da empresa e cargo</div></div>
+            </div>
+            <!-- jobboard-struct-item: Numbered structure guide item -->
+            <div class="struct-item jobboard-struct-item">
+              <div class="struct-num">2</div>
+              <div><strong style="font-size:12.5px;">Gancho de interesse</strong><div style="font-size:11.5px;color:var(--text-sub);">Por que essa empresa/vaga</div></div>
+            </div>
+            <!-- jobboard-struct-item: Numbered structure guide item -->
+            <div class="struct-item jobboard-struct-item">
+              <div class="struct-num">3</div>
+              <div><strong style="font-size:12.5px;">Conquistas relevantes</strong><div style="font-size:11.5px;color:var(--text-sub);">2–3 exemplos com métricas</div></div>
+            </div>
+            <!-- jobboard-struct-item: Numbered structure guide item -->
+            <div class="struct-item jobboard-struct-item">
+              <div class="struct-num">4</div>
+              <div><strong style="font-size:12.5px;">Alinhamento cultural</strong><div style="font-size:11.5px;color:var(--text-sub);">Missão / valores da empresa</div></div>
+            </div>
+            <!-- jobboard-struct-item: Numbered structure guide item -->
+            <div class="struct-item jobboard-struct-item">
+              <div class="struct-num">5</div>
+              <div><strong style="font-size:12.5px;">CTA e assinatura</strong><div style="font-size:11.5px;color:var(--text-sub);">Convite para entrevista</div></div>
+            </div>
+          </div>
+
+          <!-- jobboard-card: Side panel card -->
+          <div class="side-card jobboard-card">
+            <div class="side-card-title jobboard-card-title">Exportar carta</div>
+            <button class="dl-btn" style="margin-bottom:7px;">
+              <i class="fas fa-file-pdf"></i> Baixar PDF
+              <span class="dl-sub">Formatado</span>
+            </button>
+            <!-- jobboard-dl-btn: Export action button -->
+          <button class="dl-btn jobboard-dl-btn">
+              <i class="fas fa-copy"></i> Copiar texto
+              <span class="dl-sub">Plain text</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── VIDEO SCRIPT TAB ───────────────────── -->
+    <div id="tab-video" style="display:none;flex:1;overflow:hidden;flex-direction:column;">
+      <!-- jobboard-script-scene wrapper -->
+      <div class="video-workspace jobboard-video-workspace">
+
+        <div class="video-script-wrap jobboard-card">
+          <div class="video-script-head">
+            <div class="video-icon"><i class="fas fa-video"></i></div>
+            <div>
+              <div style="font-family:var(--font-head);font-size:15px;font-weight:700;">Roteiro de Vídeo de Apresentação</div>
+              <div style="font-size:12px;color:var(--text-sub);margin-top:2px;">Nubank · Senior Frontend Engineer · ~90 segundos</div>
+            </div>
+            <!-- jobboard-ai-regen-btn: Gradient AI generation button -->
+            <button class="ai-regen-btn jobboard-ai-regen-btn" style="margin-left:auto;padding:8px 16px;font-size:12px;border-radius:99px;width:auto;">
+              <i class="fas fa-rotate"></i> Regenerar
+            </button>
+          </div>
+
+          <div class="video-script-body">
+
+            <!-- jobboard-script-scene: Single script scene block -->
+          <div class="script-scene jobboard-script-scene">
+              <div class="scene-label jobboard-script-scene__label">🎬 Abertura</div>
+              <div class="scene-time jobboard-script-scene__time"><i class="fas fa-clock" style="font-size:10px;"></i> 0:00 – 0:15 · 15 segundos</div>
+              <div class="scene-text jobboard-script-scene__text">
+                "Olá, meu nome é Lucas Gonçalves, sou engenheiro frontend sênior com mais de 7 anos de experiência construindo produtos financeiros digitais. Hoje quero mostrar por que me candidatei para o Nubank e o que eu trago para o time."
+              </div>
+              <!-- jobboard-scene-notes: Director tip below scene -->
+              <div class="scene-notes jobboard-scene-notes"><i class="fas fa-lightbulb" style="color:var(--orange);"></i> Dica: sorria, olhe diretamente para a câmera. Fundo limpo e iluminação frontal.</div>
+            </div>
+
+            <!-- jobboard-script-scene: Single script scene block -->
+          <div class="script-scene jobboard-script-scene">
+              <div class="scene-label jobboard-script-scene__label">⚡ Conquistas principais</div>
+              <div class="scene-time jobboard-script-scene__time"><i class="fas fa-clock" style="font-size:10px;"></i> 0:15 – 0:50 · 35 segundos</div>
+              <div class="scene-text jobboard-script-scene__text">
+                "Na Venturus, liderei a migração para microfrontends — reduzimos o tempo de deploy em 60% e ganhamos escala de produto real. Antes disso, construí ferramentas de banking para o JP Morgan Chase, onde aprendi a escrever código com padrões de qualidade e segurança muito altos. Eu crio, eu entrego, e eu mensuro o impacto."
+              </div>
+              <!-- jobboard-scene-notes: Director tip below scene -->
+              <div class="scene-notes jobboard-scene-notes"><i class="fas fa-lightbulb" style="color:var(--orange);"></i> Dica: use gestos leves para marcar os números. Fale com ritmo — não muito rápido.</div>
+            </div>
+
+            <!-- jobboard-script-scene: Single script scene block -->
+          <div class="script-scene jobboard-script-scene">
+              <div class="scene-label jobboard-script-scene__label">💜 Por que Nubank</div>
+              <div class="scene-time jobboard-script-scene__time"><i class="fas fa-clock" style="font-size:10px;"></i> 0:50 – 1:10 · 20 segundos</div>
+              <div class="scene-text jobboard-script-scene__text">
+                "O que me atrai no Nubank é a escala do impacto. Escrever código que chega a 90 milhões de pessoas é um nível de responsabilidade que me motiva a ser mais cuidadoso, mais acessível e mais performático em cada linha."
+              </div>
+              <!-- jobboard-scene-notes: Director tip below scene -->
+              <div class="scene-notes jobboard-scene-notes"><i class="fas fa-lightbulb" style="color:var(--orange);"></i> Dica: mostre genuíno entusiasmo aqui. Este é o momento de mostrar que você pesquisou a empresa.</div>
+            </div>
+
+            <!-- jobboard-script-scene: Single script scene block -->
+          <div class="script-scene jobboard-script-scene">
+              <div class="scene-label jobboard-script-scene__label">🎯 Call to Action</div>
+              <div class="scene-time jobboard-script-scene__time"><i class="fas fa-clock" style="font-size:10px;"></i> 1:10 – 1:30 · 20 segundos</div>
+              <div class="scene-text jobboard-script-scene__text">
+                "Estou disponível para uma conversa e ansioso para mostrar o que posso construir com o time de vocês. Obrigado pela oportunidade — nos falamos em breve."
+              </div>
+              <!-- jobboard-scene-notes: Director tip below scene -->
+              <div class="scene-notes jobboard-scene-notes"><i class="fas fa-lightbulb" style="color:var(--orange);"></i> Dica: termine com um sorriso e um aceno leve. Mantenha o contato visual até o final.</div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- Video side -->
+        <div class="video-side">
+
+          <!-- jobboard-card: Side panel card -->
+          <div class="side-card jobboard-card">
+            <div class="side-card-title jobboard-card-title">Configurações</div>
+            <div style="margin-bottom:12px;">
+              <div style="font-size:12px;font-weight:600;color:var(--text-sub);margin-bottom:6px;">Duração alvo</div>
+              <div style="display:flex;gap:8px;">
+                <!-- jobboard-duration-chip: Duration selector pill -->
+                <span class="duration-chip jobboard-duration-chip"><i class="fas fa-clock"></i> 60s</span>
+                <span class="duration-chip" style="background:var(--primary);color:#fff;"><i class="fas fa-clock"></i> 90s</span>
+                <!-- jobboard-duration-chip: Duration selector pill -->
+                <span class="duration-chip jobboard-duration-chip"><i class="fas fa-clock"></i> 2min</span>
+              </div>
+            </div>
+            <div style="margin-bottom:12px;">
+              <div style="font-size:12px;font-weight:600;color:var(--text-sub);margin-bottom:6px;">Tom</div>
+              <div class="tone-chips" style="margin-bottom:0;">
+                <span class="tone-chip active jobboard-tone-chip jobboard-tone-chip--active">Confiante</span>
+                <span class="tone-chip jobboard-tone-chip">Entusiasmado</span>
+                <span class="tone-chip jobboard-tone-chip">Formal</span>
+                <span class="tone-chip jobboard-tone-chip">Direto</span>
+              </div>
+            </div>
+            <!-- jobboard-ai-regen-btn: Gradient AI generation button -->
+            <button class="ai-regen-btn jobboard-ai-regen-btn" style="border-radius:var(--radius-sm);">
+              <i class="fas fa-rotate"></i> Gerar novo roteiro
+            </button>
+          </div>
+
+          <!-- jobboard-card: Side panel card -->
+          <div class="side-card jobboard-card">
+            <div class="side-card-title jobboard-card-title">Dicas de gravação</div>
+            <!-- jobboard-tip-item: Icon + text tip row -->
+            <div class="tip-item jobboard-tip-item">
+              <div class="tip-ico" style="background:var(--blue-bg);">💡</div>
+              <div class="tip-text"><strong>Iluminação frontal</strong> Luz natural ou ring light na frente, nunca atrás.</div>
+            </div>
+            <!-- jobboard-tip-item: Icon + text tip row -->
+            <div class="tip-item jobboard-tip-item">
+              <div class="tip-ico" style="background:var(--green-bg);">🎙️</div>
+              <div class="tip-text"><strong>Áudio limpo</strong> Grave em ambiente silencioso. Fone com microfone ajuda.</div>
+            </div>
+            <!-- jobboard-tip-item: Icon + text tip row -->
+            <div class="tip-item jobboard-tip-item">
+              <div class="tip-ico" style="background:var(--yellow-bg);">👔</div>
+              <div class="tip-text"><strong>Visual adequado</strong> Camisa simples, cor sólida. Evite estampas chamativas.</div>
+            </div>
+            <!-- jobboard-tip-item: Icon + text tip row -->
+            <div class="tip-item jobboard-tip-item">
+              <div class="tip-ico" style="background:var(--orange-bg);">📱</div>
+              <div class="tip-text"><strong>Horizontal</strong> Grave em landscape (16:9) para melhor enquadramento.</div>
+            </div>
+            <!-- jobboard-tip-item: Icon + text tip row -->
+            <div class="tip-item jobboard-tip-item">
+              <div class="tip-ico" style="background:var(--primary-light);">🔁</div>
+              <div class="tip-text"><strong>Pratique antes</strong> Leia o roteiro 3–4× antes de gravar. Não memorize, naturalize.</div>
+            </div>
+          </div>
+
+          <!-- jobboard-card: Side panel card -->
+          <div class="side-card jobboard-card">
+            <div class="side-card-title jobboard-card-title">Exportar roteiro</div>
+            <button class="dl-btn" style="margin-bottom:7px;">
+              <i class="fas fa-file-pdf"></i> Baixar PDF
+              <span class="dl-sub">Com marcações</span>
+            </button>
+            <!-- jobboard-dl-btn: Export action button -->
+          <button class="dl-btn jobboard-dl-btn">
+              <i class="fas fa-copy"></i> Copiar texto
+              <span class="dl-sub">Plain text</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div><!-- /tab-video -->
+
+  </div><!-- /tailoring-page -->
+</div><!-- /screen1 -->
+
+
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+  /* ── Navigation ──────────────────────────── */
+  function goScreen(n) {
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.getElementById('screen' + n).classList.add('active');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function openModal() {
+    document.getElementById('langModal').style.display = 'flex';
+  }
+  function closeModal() {
+    document.getElementById('langModal').style.display = 'none';
+  }
+  function openTailoring() {
+    closeModal();
+    goScreen(1);
+  }
+
+  /* ── Language card select ────────────────── */
+  function selectLang(el) {
+    el.closest('.lang-cards').querySelectorAll('.lang-card').forEach(c => {
+      c.classList.remove('selected');
+      c.querySelector('.check-ring').innerHTML = '';
+    });
+    el.classList.add('selected');
+    el.querySelector('.check-ring').innerHTML = '<i class="fas fa-check" style="font-size:10px;color:#fff;"></i>';
+  }
+
+  /* ── Tab switching ───────────────────────── */
+  function switchTab(tab) {
+    // hide all tab contents
+    ['tab-ats', 'tab-coverletter', 'tab-video'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) { el.style.display = 'none'; el.style.flex = ''; }
+    });
+    // deactivate all tab buttons
+    document.querySelectorAll('.ws-tab').forEach(t => t.classList.remove('active'));
+
+    // show target
+    const target = document.getElementById('tab-' + tab);
+    if (target) { target.style.display = 'flex'; target.style.flex = '1'; }
+
+    // activate clicked button
+    const allTabs = document.querySelectorAll('.ws-tab');
+    const tabMap = { ats: 0, coverletter: 1, video: 2 };
+    if (allTabs[tabMap[tab]]) allTabs[tabMap[tab]].classList.add('active');
+  }
+
+  /* ── Preview col tab ─────────────────────── */
+  document.querySelectorAll('.pcol-tab').forEach(tab => {
+    tab.addEventListener('click', function() {
+      this.closest('.preview-col-tabs').querySelectorAll('.pcol-tab').forEach(t => t.classList.remove('active'));
+      this.classList.add('active');
+    });
+  });
+
+  /* ── Toolbar btns ────────────────────────── */
+  document.querySelectorAll('.tb-btn:not(.wide), .cov-btn, .tone-chip, .duration-chip').forEach(btn => {
+    btn.addEventListener('click', function() { this.classList.toggle('active'); });
+  });
+
+  /* ── Bookmark toggle ─────────────────────── */
+  document.querySelectorAll('.bkbtn').forEach(btn => {
+    btn.addEventListener('click', e => {
+      e.stopPropagation();
+      btn.classList.toggle('saved');
+      const i = btn.querySelector('i');
+      if (i) { i.classList.toggle('fas'); i.classL

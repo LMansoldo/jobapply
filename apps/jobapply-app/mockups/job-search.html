@@ -1,0 +1,1085 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>JobBoard – Encontre sua vaga</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=Sora:wght@400;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+
+  <style>
+    :root {
+      --primary:       #a78bfa;
+      --primary-dark:  #7c3aed;
+      --primary-light: #ede9fe;
+      --primary-mid:   #c4b5fd;
+      --accent:        #f0abfc;
+      --bg:            #f5f3ff;
+      --surface:       #ffffff;
+      --border:        #e9e4fc;
+      --text-main:     #1e1b2e;
+      --text-sub:      #6b7280;
+      --text-light:    #a0aec0;
+      --green:         #34d399;
+      --orange:        #fb923c;
+      --blue:          #60a5fa;
+      --radius:        14px;
+      --radius-sm:     8px;
+      --shadow:        0 2px 16px rgba(124,58,237,.08);
+      --shadow-md:     0 4px 32px rgba(124,58,237,.14);
+      --font-head:     'Sora', sans-serif;
+      --font-body:     'DM Sans', sans-serif;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: var(--font-body);
+      background: var(--bg);
+      color: var(--text-main);
+      font-size: 14px;
+      min-height: 100vh;
+    }
+
+    /* HEADER */
+    .header {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: var(--shadow);
+    }
+    .header-inner {
+      max-width: 1320px;
+      margin: 0 auto;
+      padding: 0 24px;
+      height: 60px;
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+    .logo {
+      font-family: var(--font-head);
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--primary-dark);
+      letter-spacing: -0.5px;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+    .logo span { color: var(--primary); }
+
+    .header-search {
+      flex: 1;
+      max-width: 400px;
+      position: relative;
+    }
+    .header-search input {
+      width: 100%;
+      height: 38px;
+      border: 1.5px solid var(--border);
+      border-radius: 99px;
+      padding: 0 16px 0 40px;
+      font-family: var(--font-body);
+      font-size: 13.5px;
+      background: var(--bg);
+      color: var(--text-main);
+      outline: none;
+      transition: border-color .2s;
+    }
+    .header-search input:focus { border-color: var(--primary); background: #fff; }
+    .header-search .ico {
+      position: absolute;
+      left: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-sub);
+      font-size: 13px;
+    }
+
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 2px;
+      margin-left: auto;
+    }
+    .nav-link {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 2px;
+      padding: 8px 12px;
+      border-radius: var(--radius-sm);
+      color: var(--text-sub);
+      font-size: 11px;
+      font-weight: 500;
+      text-decoration: none;
+      cursor: pointer;
+      transition: color .15s, background .15s;
+      white-space: nowrap;
+    }
+    .nav-link i { font-size: 18px; }
+    .nav-link:hover { color: var(--primary-dark); background: var(--primary-light); }
+    .nav-link.active { color: var(--primary-dark); font-weight: 600; }
+    .nav-link.active i { color: var(--primary); }
+
+    .btn-primary {
+      background: var(--primary);
+      color: #fff;
+      border: none;
+      border-radius: 99px;
+      padding: 8px 20px;
+      font-family: var(--font-body);
+      font-size: 13.5px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background .2s, transform .1s, box-shadow .2s;
+      white-space: nowrap;
+    }
+    .btn-primary:hover { background: var(--primary-dark); box-shadow: 0 4px 16px rgba(124,58,237,.3); transform: translateY(-1px); }
+
+    /* HERO */
+    .hero {
+      background: linear-gradient(135deg, var(--primary-dark) 0%, #6d28d9 50%, #4c1d95 100%);
+      padding: 36px 24px 40px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+    .hero::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(ellipse 70% 80% at 60% 50%, rgba(196,181,253,.18) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .hero h1 { font-family: var(--font-head); font-size: 28px; font-weight: 700; color: #fff; margin-bottom: 6px; position: relative; }
+    .hero p { color: rgba(255,255,255,.72); font-size: 14px; margin-bottom: 22px; position: relative; }
+
+    .hero-bar {
+      display: flex;
+      align-items: center;
+      gap: 0;
+      max-width: 720px;
+      margin: 0 auto;
+      background: #fff;
+      border-radius: 99px;
+      box-shadow: 0 8px 40px rgba(0,0,0,.22);
+      padding: 6px 6px 6px 20px;
+      position: relative;
+    }
+    .hero-bar input {
+      flex: 1;
+      border: none;
+      outline: none;
+      font-family: var(--font-body);
+      font-size: 14.5px;
+      color: var(--text-main);
+      background: transparent;
+      min-width: 0;
+    }
+    .hero-bar .div { width: 1px; height: 28px; background: var(--border); margin: 0 16px; flex-shrink: 0; }
+    .hero-bar .loc { display: flex; align-items: center; gap: 8px; color: var(--text-sub); }
+    .hero-bar .loc input { font-family: var(--font-body); font-size: 14px; width: 150px; }
+    .hero-bar .loc i { font-size: 13px; }
+    .hero-bar .sbtn {
+      background: var(--primary);
+      color: #fff;
+      border: none;
+      border-radius: 99px;
+      padding: 10px 26px;
+      font-family: var(--font-head);
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background .2s;
+      flex-shrink: 0;
+    }
+    .hero-bar .sbtn:hover { background: var(--primary-dark); }
+
+    .hero-tags { display: flex; justify-content: center; gap: 8px; margin-top: 16px; flex-wrap: wrap; position: relative; }
+    .hero-tag {
+      background: rgba(255,255,255,.15);
+      color: #fff;
+      border: 1px solid rgba(255,255,255,.25);
+      border-radius: 99px;
+      padding: 4px 14px;
+      font-size: 12.5px;
+      cursor: pointer;
+      transition: background .2s;
+    }
+    .hero-tag:hover { background: rgba(255,255,255,.25); }
+
+    /* LAYOUT */
+    .page-body {
+      max-width: 1320px;
+      margin: 0 auto;
+      padding: 28px 24px 60px;
+      display: grid;
+      grid-template-columns: 260px 1fr 300px;
+      gap: 24px;
+      align-items: start;
+    }
+
+    /* CARD */
+    .card {
+      background: var(--surface);
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      padding: 20px;
+      box-shadow: var(--shadow);
+    }
+    .card-title {
+      font-family: var(--font-head);
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--text-main);
+      margin-bottom: 16px;
+      text-transform: uppercase;
+      letter-spacing: .6px;
+    }
+
+    /* LEFT SIDEBAR */
+    .sidebar-left { display: flex; flex-direction: column; gap: 16px; }
+    .filter-section { margin-bottom: 18px; }
+    .filter-section:last-child { margin-bottom: 0; }
+    .filter-label { font-size: 12px; font-weight: 600; color: var(--text-sub); text-transform: uppercase; letter-spacing: .5px; margin-bottom: 10px; }
+
+    .check-list { display: flex; flex-direction: column; gap: 8px; }
+    .check-item { display: flex; align-items: center; gap: 10px; cursor: pointer; font-size: 13.5px; color: var(--text-main); }
+    .check-item input[type="checkbox"] { display: none; }
+    .check-box {
+      width: 17px; height: 17px;
+      border: 2px solid var(--border);
+      border-radius: 4px;
+      flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      transition: all .15s;
+    }
+    .check-item input:checked + .check-box { background: var(--primary); border-color: var(--primary); }
+    .check-item input:checked + .check-box::after { content: '✓'; color: #fff; font-size: 10px; font-weight: 700; }
+    .check-count { margin-left: auto; background: var(--primary-light); color: var(--primary-dark); border-radius: 99px; padding: 1px 8px; font-size: 11px; font-weight: 600; }
+
+    .range-labels { display: flex; justify-content: space-between; font-size: 12px; color: var(--text-sub); margin-bottom: 8px; }
+    .range-current { font-family: var(--font-head); font-size: 15px; font-weight: 700; color: var(--primary-dark); margin-bottom: 6px; }
+    input[type="range"] {
+      -webkit-appearance: none;
+      width: 100%; height: 5px;
+      border-radius: 99px;
+      background: linear-gradient(to right, var(--primary) 0%, var(--primary) 65%, var(--border) 65%);
+      outline: none;
+    }
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 18px; height: 18px;
+      border-radius: 50%;
+      background: var(--primary-dark);
+      cursor: pointer;
+      box-shadow: 0 2px 8px rgba(124,58,237,.35);
+      border: 2px solid #fff;
+    }
+
+    .tag-cloud { display: flex; flex-wrap: wrap; gap: 6px; }
+    .filter-tag {
+      border: 1.5px solid var(--border);
+      border-radius: 99px;
+      padding: 4px 12px;
+      font-size: 12px;
+      color: var(--text-sub);
+      cursor: pointer;
+      transition: all .15s;
+      user-select: none;
+    }
+    .filter-tag:hover, .filter-tag.active { background: var(--primary-light); border-color: var(--primary); color: var(--primary-dark); font-weight: 600; }
+
+    .filter-actions { display: flex; gap: 8px; margin-top: 4px; }
+    .filter-actions button { flex: 1; padding: 8px; border-radius: var(--radius-sm); font-family: var(--font-body); font-size: 13px; font-weight: 600; cursor: pointer; border: none; transition: all .2s; }
+    .filter-actions .apply { background: var(--primary); color: #fff; }
+    .filter-actions .apply:hover { background: var(--primary-dark); }
+    .filter-actions .reset { background: var(--primary-light); color: var(--primary-dark); }
+
+    /* CENTER */
+    .jobs-center { display: flex; flex-direction: column; gap: 16px; }
+    .jobs-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px; }
+    .jobs-count { font-size: 13px; color: var(--text-sub); }
+    .jobs-count strong { color: var(--primary-dark); font-weight: 700; }
+    .sort-select {
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 6px 12px;
+      font-family: var(--font-body);
+      font-size: 13px;
+      color: var(--text-main);
+      background: #fff;
+      outline: none;
+      cursor: pointer;
+    }
+    .sort-select:focus { border-color: var(--primary); }
+
+    /* JOB CARD */
+    .job-card {
+      background: var(--surface);
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      padding: 20px 20px 16px;
+      box-shadow: var(--shadow);
+      cursor: pointer;
+      transition: box-shadow .2s, border-color .2s, transform .15s;
+      position: relative;
+      overflow: hidden;
+    }
+    .job-card:hover { box-shadow: var(--shadow-md); border-color: var(--primary-mid); transform: translateY(-2px); }
+    .job-card.featured::before {
+      content: '';
+      position: absolute;
+      left: 0; top: 0; bottom: 0;
+      width: 4px;
+      background: linear-gradient(180deg, var(--primary), var(--accent));
+      border-radius: 4px 0 0 4px;
+    }
+
+    .job-top { display: flex; align-items: flex-start; gap: 14px; margin-bottom: 12px; }
+    .clogo {
+      width: 52px; height: 52px;
+      border-radius: 12px;
+      background: var(--primary-light);
+      display: flex; align-items: center; justify-content: center;
+      font-family: var(--font-head); font-weight: 700; font-size: 17px;
+      color: var(--primary-dark);
+      flex-shrink: 0;
+      border: 1.5px solid var(--border);
+    }
+    .jmain { flex: 1; min-width: 0; }
+    .jtitle {
+      font-family: var(--font-head);
+      font-size: 15.5px; font-weight: 700;
+      color: var(--text-main);
+      margin-bottom: 3px;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .jcompany { font-size: 13px; color: var(--primary-dark); font-weight: 600; margin-bottom: 2px; }
+    .jmeta { display: flex; align-items: center; gap: 14px; font-size: 12.5px; color: var(--text-sub); flex-wrap: wrap; }
+    .jmeta span { display: flex; align-items: center; gap: 5px; }
+    .jmeta i { font-size: 11px; }
+
+    .jactions { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+    .bkbtn {
+      width: 34px; height: 34px;
+      border-radius: 50%;
+      border: 1.5px solid var(--border);
+      background: transparent;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer;
+      color: var(--text-sub);
+      transition: all .15s;
+      font-size: 14px;
+    }
+    .bkbtn:hover, .bkbtn.saved { border-color: var(--primary); color: var(--primary); background: var(--primary-light); }
+
+    .jdesc {
+      font-size: 13px; color: var(--text-sub); line-height: 1.55;
+      margin-bottom: 14px;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    .jfooter { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; }
+    .skill-tags { display: flex; flex-wrap: wrap; gap: 6px; }
+    .stag { background: var(--primary-light); color: var(--primary-dark); border-radius: 99px; padding: 3px 11px; font-size: 11.5px; font-weight: 600; }
+    .stag.bl { background: #dbeafe; color: #1d4ed8; }
+    .stag.gr { background: #d1fae5; color: #065f46; }
+    .stag.or { background: #ffedd5; color: #c2410c; }
+
+    .jsalary { font-family: var(--font-head); font-size: 14px; font-weight: 700; color: var(--primary-dark); white-space: nowrap; }
+
+    .badge { border-radius: 99px; padding: 2px 9px; font-size: 10.5px; font-weight: 700; text-transform: uppercase; letter-spacing: .4px; }
+    .badge.new { background: var(--green); color: #fff; }
+    .badge.hot { background: var(--orange); color: #fff; }
+    .badge.rem { background: var(--blue); color: #fff; }
+
+    .applybtn { background: var(--primary); color: #fff; border: none; border-radius: 99px; padding: 7px 18px; font-family: var(--font-body); font-size: 12.5px; font-weight: 600; cursor: pointer; transition: background .2s; }
+    .applybtn:hover { background: var(--primary-dark); }
+
+    /* Pagination */
+    .pagination { display: flex; align-items: center; justify-content: center; gap: 6px; margin-top: 8px; }
+    .pgbtn { width: 34px; height: 34px; border-radius: 8px; border: 1.5px solid var(--border); background: #fff; color: var(--text-sub); font-family: var(--font-body); font-size: 13px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all .15s; }
+    .pgbtn:hover, .pgbtn.active { background: var(--primary); border-color: var(--primary); color: #fff; }
+
+    /* RIGHT SIDEBAR */
+    .sidebar-right { display: flex; flex-direction: column; gap: 16px; }
+
+    .profile-card { background: var(--surface); border-radius: var(--radius); border: 1px solid var(--border); box-shadow: var(--shadow); overflow: hidden; }
+    .p-banner { height: 70px; background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%); position: relative; }
+    .p-avatar {
+      width: 60px; height: 60px;
+      border-radius: 50%;
+      border: 3px solid #fff;
+      background: var(--primary-dark);
+      position: absolute;
+      bottom: -30px; left: 20px;
+      display: flex; align-items: center; justify-content: center;
+      font-family: var(--font-head); font-weight: 700; font-size: 22px; color: #fff;
+      box-shadow: 0 2px 12px rgba(0,0,0,.15);
+    }
+    .p-body { padding: 38px 20px 18px; }
+    .p-name { font-family: var(--font-head); font-size: 16px; font-weight: 700; margin-bottom: 2px; }
+    .p-role { font-size: 12.5px; color: var(--text-sub); margin-bottom: 12px; }
+    .p-stats { display: flex; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); margin-bottom: 14px; }
+    .p-stat { flex: 1; padding: 10px 0; text-align: center; font-size: 11.5px; color: var(--text-sub); border-right: 1px solid var(--border); }
+    .p-stat:last-child { border-right: none; }
+    .p-stat strong { display: block; font-family: var(--font-head); font-size: 16px; color: var(--primary-dark); font-weight: 700; }
+
+    .p-completion { margin-bottom: 14px; }
+    .p-comp-label { display: flex; justify-content: space-between; font-size: 12px; color: var(--text-sub); margin-bottom: 6px; }
+    .p-comp-label strong { color: var(--primary-dark); font-weight: 700; }
+    .prog-bar { height: 6px; background: var(--primary-light); border-radius: 99px; overflow: hidden; }
+    .prog-fill { height: 100%; background: linear-gradient(90deg, var(--primary), var(--accent)); border-radius: 99px; width: 75%; }
+
+    .alert-row { display: flex; align-items: center; gap: 10px; padding: 10px 0; border-bottom: 1px solid var(--border); cursor: pointer; }
+    .alert-row:last-child { border-bottom: none; padding-bottom: 0; }
+    .aico { width: 34px; height: 34px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 14px; flex-shrink: 0; }
+    .atext { font-size: 12.5px; color: var(--text-main); flex: 1; line-height: 1.4; }
+    .atext span { color: var(--text-sub); font-size: 11px; display: block; }
+    .abadge { background: var(--primary); color: #fff; border-radius: 99px; padding: 2px 7px; font-size: 10.5px; font-weight: 700; }
+
+    .news-item { display: flex; gap: 10px; padding: 10px 0; border-bottom: 1px solid var(--border); cursor: pointer; transition: opacity .15s; }
+    .news-item:hover { opacity: .8; }
+    .news-item:last-child { border-bottom: none; padding-bottom: 0; }
+    .nthumb { width: 56px; height: 44px; border-radius: 8px; background: var(--primary-light); flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 20px; }
+    .ntext { flex: 1; min-width: 0; }
+    .ntitle { font-size: 12.5px; font-weight: 600; color: var(--text-main); line-height: 1.4; margin-bottom: 3px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+    .nmeta { font-size: 11px; color: var(--text-light); }
+
+    /* Companies sidebar */
+    .co-row { display: flex; align-items: center; gap: 10px; cursor: pointer; padding: 6px 0; border-bottom: 1px solid var(--border); }
+    .co-row:last-child { border-bottom: none; }
+    .cologo { width: 38px; height: 38px; border-radius: 8px; background: var(--primary-light); color: var(--primary-dark); display: flex; align-items: center; justify-content: center; font-family: var(--font-head); font-weight: 700; font-size: 13px; flex-shrink: 0; border: 1.5px solid var(--border); }
+    .coname { font-size: 13px; font-weight: 600; }
+    .cojobs { font-size: 11.5px; color: var(--text-sub); }
+
+    /* RESPONSIVE */
+    @media (max-width: 1100px) {
+      .page-body { grid-template-columns: 240px 1fr; }
+      .sidebar-right { display: none; }
+    }
+    @media (max-width: 768px) {
+      .page-body { grid-template-columns: 1fr; padding: 16px; gap: 16px; }
+      .sidebar-left { display: none; }
+      .nav-links { display: none; }
+      .hero h1 { font-size: 20px; }
+      .hero-bar { flex-wrap: wrap; border-radius: var(--radius); padding: 12px 14px; gap: 8px; }
+      .hero-bar .div { display: none; }
+      .hero-bar .loc input { width: 100%; }
+      .hero-bar .sbtn { width: 100%; text-align: center; border-radius: var(--radius-sm); }
+      .job-top { flex-wrap: wrap; }
+    }
+
+    /* ANIMATIONS */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(14px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .job-card { animation: fadeUp .35s ease both; }
+    .job-card:nth-child(1) { animation-delay: .05s; }
+    .job-card:nth-child(2) { animation-delay: .10s; }
+    .job-card:nth-child(3) { animation-delay: .15s; }
+    .job-card:nth-child(4) { animation-delay: .20s; }
+    .job-card:nth-child(5) { animation-delay: .25s; }
+    .job-card:nth-child(6) { animation-delay: .30s; }
+
+    .mob-filter { display: none; }
+    @media (max-width: 768px) {
+      .mob-filter { display: flex; align-items: center; gap: 8px; background: #fff; border: 1.5px solid var(--border); border-radius: 99px; padding: 8px 18px; font-family: var(--font-body); font-size: 13.5px; font-weight: 600; color: var(--primary-dark); cursor: pointer; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- HEADER -->
+<!-- jobboard-header: Sticky top navigation bar -->
+<header class="header jobboard-header">
+  <div class="header-inner jobboard-header__inner">
+    <div class="logo jobboard-logo">job<span>board</span></div>
+    <!-- jobboard-header-search: Pill search input inside header -->
+    <div class="header-search jobboard-header-search">
+      <i class="fas fa-search ico"></i>
+      <input type="text" placeholder="Buscar vagas, empresas…" />
+    </div>
+    <!-- jobboard-nav-link (repeated): Icon+label nav item -->
+    <nav class="nav-links jobboard-nav">
+      <a class="nav-link jobboard-nav-link jobboard-nav-link--active" href="#">
+        <i class="fas fa-briefcase"></i> Vagas
+      </a>
+      <a class="nav-link jobboard-nav-link" href="#">
+        <i class="fas fa-building"></i> Empresas
+      </a>
+      <a class="nav-link jobboard-nav-link" href="#">
+        <i class="fas fa-chart-line"></i> Salários
+      </a>
+      <a class="nav-link jobboard-nav-link" href="#">
+        <i class="fas fa-bell"></i> Alertas
+      </a>
+      <a class="nav-link jobboard-nav-link" href="#">
+        <i class="fas fa-user-circle"></i> Perfil
+      </a>
+    </nav>
+    <!-- jobboard-btn-primary: Filled pill primary button -->
+    <button class="btn-primary jobboard-btn-primary" style="margin-left:12px;">Publicar Vaga</button>
+  </div>
+</header>
+
+<!-- HERO -->
+<!-- jobboard-hero-search: Full-width gradient hero with dual search + quick tags -->
+<section class="hero jobboard-hero-search">
+  <h1>Encontre a vaga dos seus sonhos</h1>
+  <p>Mais de 48.000 vagas ativas em todo o Brasil e no exterior</p>
+  <!-- jobboard-hero-search-bar: Pill dual-input search bar -->
+  <div class="hero-bar jobboard-hero-search-bar">
+    <i class="fas fa-search" style="color:var(--primary);margin-right:6px;font-size:15px;"></i>
+    <input type="text" placeholder="Cargo, palavra-chave ou empresa" />
+    <div class="div"></div>
+    <div class="loc">
+      <i class="fas fa-map-marker-alt"></i>
+      <input type="text" placeholder="Cidade ou estado" />
+    </div>
+    <button class="sbtn">Buscar</button>
+  </div>
+  <!-- jobboard-hero-tag (repeated): Quick-search ghost pills -->
+  <div class="hero-tags jobboard-hero-tags">
+    <span class="hero-tag jobboard-hero-tag">React Developer</span>
+    <span class="hero-tag jobboard-hero-tag">Product Manager</span>
+    <span class="hero-tag jobboard-hero-tag">UX Designer</span>
+    <span class="hero-tag jobboard-hero-tag">Data Scientist</span>
+    <span class="hero-tag jobboard-hero-tag">DevOps Engineer</span>
+    <span class="hero-tag jobboard-hero-tag">Remoto</span>
+  </div>
+</section>
+
+<!-- PAGE BODY -->
+<!-- jobboard-page-layout: 3-col responsive grid (filters | jobs | sidebar) -->
+<div class="page-body jobboard-page-layout">
+
+  <!-- LEFT SIDEBAR -->
+  <!-- jobboard-filter-panel: Left sidebar filter container -->
+  <aside class="sidebar-left jobboard-filter-panel">
+    <!-- jobboard-card: Base surface card -->
+    <div class="card jobboard-card">
+      <!-- jobboard-card-title: Uppercase section header -->
+      <div class="card-title jobboard-card-title">Filtros</div>
+
+      <div class="filter-section jobboard-filter-section">
+        <div class="filter-label jobboard-filter-label">Tipo de Contrato</div>
+        <!-- jobboard-filter-checkbox (repeated): Custom checkbox with count badge -->
+        <div class="check-list jobboard-filter-checklist">
+          <label class="check-item jobboard-filter-checkbox">
+            <input type="checkbox" checked />
+            <span class="check-box jobboard-filter-checkbox__box"></span>
+            CLT <span class="check-count jobboard-filter-checkbox__count">1.2k</span>
+          </label>
+          <label class="check-item jobboard-filter-checkbox">
+            <input type="checkbox" checked />
+            <span class="check-box jobboard-filter-checkbox__box"></span>
+            PJ <span class="check-count jobboard-filter-checkbox__count">843</span>
+          </label>
+          <label class="check-item jobboard-filter-checkbox">
+            <input type="checkbox" />
+            <span class="check-box jobboard-filter-checkbox__box"></span>
+            Freelance <span class="check-count jobboard-filter-checkbox__count">319</span>
+          </label>
+          <label class="check-item jobboard-filter-checkbox">
+            <input type="checkbox" />
+            <span class="check-box jobboard-filter-checkbox__box"></span>
+            Estágio <span class="check-count jobboard-filter-checkbox__count">207</span>
+          </label>
+        </div>
+      </div>
+
+      <div class="filter-section jobboard-filter-section">
+        <div class="filter-label jobboard-filter-label">Modalidade</div>
+        <!-- jobboard-filter-tag-cloud: Flex wrap group of filter tags -->
+        <div class="tag-cloud jobboard-filter-tag-cloud">
+          <span class="filter-tag jobboard-filter-tag jobboard-filter-tag--active">Remoto</span>
+          <span class="filter-tag jobboard-filter-tag jobboard-filter-tag--active">Híbrido</span>
+          <span class="filter-tag jobboard-filter-tag">Presencial</span>
+        </div>
+      </div>
+
+      <div class="filter-section jobboard-filter-section">
+        <div class="filter-label jobboard-filter-label">Nível de Experiência</div>
+        <!-- jobboard-filter-checkbox (repeated): Custom checkbox with count badge -->
+        <div class="check-list jobboard-filter-checklist">
+          <label class="check-item jobboard-filter-checkbox">
+            <input type="checkbox" />
+            <span class="check-box jobboard-filter-checkbox__box"></span>
+            Júnior <span class="check-count jobboard-filter-checkbox__count">614</span>
+          </label>
+          <label class="check-item jobboard-filter-checkbox">
+            <input type="checkbox" checked />
+            <span class="check-box jobboard-filter-checkbox__box"></span>
+            Pleno <span class="check-count jobboard-filter-checkbox__count">887</span>
+          </label>
+          <label class="check-item jobboard-filter-checkbox">
+            <input type="checkbox" checked />
+            <span class="check-box jobboard-filter-checkbox__box"></span>
+            Sênior <span class="check-count jobboard-filter-checkbox__count">723</span>
+          </label>
+          <label class="check-item jobboard-filter-checkbox">
+            <input type="checkbox" />
+            <span class="check-box jobboard-filter-checkbox__box"></span>
+            Especialista <span class="check-count jobboard-filter-checkbox__count">241</span>
+          </label>
+        </div>
+      </div>
+
+      <div class="filter-section jobboard-filter-section">
+        <div class="filter-label jobboard-filter-label">Faixa Salarial (R$)</div>
+        <!-- jobboard-salary-range: Range slider with live label -->
+        <div class="range-current jobboard-salary-range__label">Até R$ 18.000</div>
+        <input type="range" min="3000" max="40000" value="18000" id="salRange" />
+        <div class="range-labels"><span>R$ 3k</span><span>R$ 40k</span></div>
+      </div>
+
+      <div class="filter-section jobboard-filter-section">
+        <div class="filter-label jobboard-filter-label">Tecnologias</div>
+        <!-- jobboard-filter-tag-cloud: Flex wrap group of filter tags -->
+        <div class="tag-cloud jobboard-filter-tag-cloud">
+          <span class="filter-tag jobboard-filter-tag jobboard-filter-tag--active">React</span>
+          <span class="filter-tag jobboard-filter-tag jobboard-filter-tag--active">TypeScript</span>
+          <span class="filter-tag jobboard-filter-tag">Node.js</span>
+          <span class="filter-tag jobboard-filter-tag">Python</span>
+          <span class="filter-tag jobboard-filter-tag">AWS</span>
+          <span class="filter-tag jobboard-filter-tag">Docker</span>
+          <span class="filter-tag jobboard-filter-tag">GraphQL</span>
+        </div>
+      </div>
+
+      <!-- jobboard-filter-actions: Apply / Reset button pair -->
+      <div class="filter-actions jobboard-filter-actions">
+        <button class="apply">Aplicar</button>
+        <button class="reset">Limpar</button>
+      </div>
+    </div>
+
+    <!-- Empresas destaque -->
+    <!-- jobboard-card: Featured companies card -->
+    <div class="card jobboard-card">
+      <div class="card-title jobboard-card-title">Empresas em Destaque</div>
+      <!-- jobboard-company-row: Company logo + name + open jobs count -->
+      <div class="co-row jobboard-company-row">
+        <div class="cologo jobboard-company-logo">NB</div>
+        <div><div class="coname jobboard-company-row__name">Nubank</div><div class="cojobs jobboard-company-row__jobs">34 vagas abertas</div></div>
+      </div>
+      <!-- jobboard-company-row: Company logo + name + open jobs count -->
+      <div class="co-row jobboard-company-row">
+        <div class="cologo" style="background:#dbeafe;color:#1d4ed8;">IF</div>
+        <div><div class="coname jobboard-company-row__name">iFood</div><div class="cojobs jobboard-company-row__jobs">21 vagas abertas</div></div>
+      </div>
+      <!-- jobboard-company-row: Company logo + name + open jobs count -->
+      <div class="co-row jobboard-company-row">
+        <div class="cologo" style="background:#d1fae5;color:#065f46;">TO</div>
+        <div><div class="coname jobboard-company-row__name">Totvs</div><div class="cojobs jobboard-company-row__jobs">18 vagas abertas</div></div>
+      </div>
+      <!-- jobboard-company-row: Company logo + name + open jobs count -->
+      <div class="co-row jobboard-company-row">
+        <div class="cologo" style="background:#ffedd5;color:#c2410c;">RD</div>
+        <div><div class="coname jobboard-company-row__name">RD Station</div><div class="cojobs jobboard-company-row__jobs">12 vagas abertas</div></div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- CENTER -->
+  <!-- Main jobs listing column -->
+  <main class="jobs-center jobboard-jobs-list">
+    <!-- jobboard-jobs-header: Result count + sort selector -->
+    <div class="jobs-header jobboard-jobs-header">
+      <div class="jobs-count jobboard-jobs-header__count"><strong>2.847</strong> vagas encontradas</div>
+      <div style="display:flex;align-items:center;gap:10px;">
+        <button class="mob-filter"><i class="fas fa-sliders-h"></i> Filtros</button>
+        <!-- jobboard-sort-select: Result ordering dropdown -->
+        <select class="sort-select jobboard-sort-select">
+          <option>Mais Relevantes</option>
+          <option>Mais Recentes</option>
+          <option>Maior Salário</option>
+          <option>Mais Candidaturas</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- JOB 1 -->
+    <!-- jobboard-job-card jobboard-job-card--featured: Job listing card with accent bar -->
+    <div class="job-card jobboard-job-card jobboard-job-card--featured featured">
+      <div class="job-top jobboard-job-card__top">
+        <!-- jobboard-company-logo: Square rounded company avatar -->
+        <div class="clogo jobboard-company-logo">NB</div>
+        <div class="jmain jobboard-job-card__main">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:3px;">
+            <!-- jobboard-job-card__title -->
+            <div class="jtitle jobboard-job-card__title">Senior Frontend Engineer</div>
+            <span class="badge hot jobboard-badge jobboard-badge--hot">🔥 Hot</span>
+          </div>
+          <div class="jcompany jobboard-job-card__company">Nubank</div>
+          <!-- jobboard-job-card__meta: location + modality + date -->
+            <div class="jmeta jobboard-job-card__meta">
+            <span><i class="fas fa-map-marker-alt"></i> São Paulo, SP</span>
+            <span><i class="fas fa-laptop-house"></i> Híbrido</span>
+            <span><i class="fas fa-clock"></i> há 2 dias</span>
+          </div>
+        </div>
+        <!-- jobboard-bookmark-btn wrapper -->
+        <div class="jactions jobboard-job-card__actions">
+          <!-- jobboard-bookmark-btn: Circular toggle bookmark -->
+          <button class="bkbtn jobboard-bookmark-btn jobboard-bookmark-btn--saved saved"><i class="fas fa-bookmark"></i></button>
+        </div>
+      </div>
+      <p class="jdesc jobboard-job-card__desc">Buscamos um engenheiro frontend sênior para trabalhar em produtos financeiros usados por mais de 90 milhões de clientes. Você vai liderar decisões técnicas, mentorear devs juniores e colaborar com produto e design para criar experiências excepcionais.</p>
+      <div class="jfooter jobboard-job-card__footer">
+        <!-- jobboard-skill-tag (repeated): Technology label pill -->
+        <div class="skill-tags jobboard-skill-tags">
+          <span class="stag jobboard-skill-tag">React</span>
+          <span class="stag jobboard-skill-tag">TypeScript</span>
+          <span class="stag bl jobboard-skill-tag jobboard-skill-tag--blue">GraphQL</span>
+          <span class="stag gr jobboard-skill-tag jobboard-skill-tag--green">Jest</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:12px;">
+          <!-- jobboard-salary-label: Bold salary range -->
+          <div class="jsalary jobboard-salary-label">R$ 18k – 25k</div>
+          <!-- jobboard-apply-btn: Inline apply CTA -->
+          <button class="applybtn jobboard-apply-btn">Candidatar</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- JOB 2 -->
+    <!-- jobboard-job-card: Standard job listing card -->
+    <div class="job-card jobboard-job-card">
+      <div class="job-top jobboard-job-card__top">
+        <div class="clogo jobboard-company-logo" style="background:#dbeafe;color:#1d4ed8;">IF</div>
+        <div class="jmain jobboard-job-card__main">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:3px;">
+            <div class="jtitle jobboard-job-card__title">React Developer – Pleno</div>
+            <span class="badge new jobboard-badge jobboard-badge--new">Novo</span>
+          </div>
+          <div class="jcompany jobboard-job-card__company">iFood</div>
+          <div class="jmeta jobboard-job-card__meta">
+            <span><i class="fas fa-map-marker-alt"></i> Campinas, SP</span>
+            <span><i class="fas fa-home"></i> Remoto</span>
+            <span><i class="fas fa-clock"></i> há 5 horas</span>
+          </div>
+        </div>
+        <div class="jactions jobboard-job-card__actions">
+          <button class="bkbtn jobboard-bookmark-btn"><i class="far fa-bookmark"></i></button>
+        </div>
+      </div>
+      <p class="jdesc jobboard-job-card__desc">Integre o time de plataforma e contribua com o desenvolvimento de micro-frontends e componentes de design system compartilhados. Precisamos de alguém que goste de performance, testes e boas práticas de engenharia.</p>
+      <div class="jfooter jobboard-job-card__footer">
+        <div class="skill-tags jobboard-skill-tags">
+          <span class="stag jobboard-skill-tag">React</span>
+          <span class="stag jobboard-skill-tag">Webpack</span>
+          <span class="stag bl jobboard-skill-tag jobboard-skill-tag--blue">Node.js</span>
+          <span class="stag or jobboard-skill-tag jobboard-skill-tag--orange">Docker</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:12px;">
+          <div class="jsalary jobboard-salary-label">R$ 12k – 16k</div>
+          <button class="applybtn jobboard-apply-btn">Candidatar</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- JOB 3 -->
+    <!-- jobboard-job-card: Standard job listing card -->
+    <div class="job-card jobboard-job-card">
+      <div class="job-top jobboard-job-card__top">
+        <div class="clogo jobboard-company-logo" style="background:#f3e8ff;color:#6d28d9;">ST</div>
+        <div class="jmain jobboard-job-card__main">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:3px;">
+            <div class="jtitle jobboard-job-card__title">Staff Frontend Engineer</div>
+            <span class="badge rem jobboard-badge jobboard-badge--remote">🌎 Remoto</span>
+          </div>
+          <div class="jcompany jobboard-job-card__company">Stone Pagamentos</div>
+          <div class="jmeta jobboard-job-card__meta">
+            <span><i class="fas fa-map-marker-alt"></i> Rio de Janeiro, RJ</span>
+            <span><i class="fas fa-home"></i> Full Remote</span>
+            <span><i class="fas fa-clock"></i> há 1 dia</span>
+          </div>
+        </div>
+        <div class="jactions jobboard-job-card__actions">
+          <button class="bkbtn jobboard-bookmark-btn"><i class="far fa-bookmark"></i></button>
+        </div>
+      </div>
+      <p class="jdesc jobboard-job-card__desc">Líder técnico de um squad de produto, trabalhando na evolução de uma plataforma de pagamentos B2B de alta disponibilidade. Oportunidade de influenciar a arquitetura e os processos de engenharia de um time de alto desempenho.</p>
+      <div class="jfooter jobboard-job-card__footer">
+        <div class="skill-tags jobboard-skill-tags">
+          <span class="stag jobboard-skill-tag">Vue.js</span>
+          <span class="stag jobboard-skill-tag">TypeScript</span>
+          <span class="stag bl jobboard-skill-tag jobboard-skill-tag--blue">AWS</span>
+          <span class="stag gr jobboard-skill-tag jobboard-skill-tag--green">Cypress</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:12px;">
+          <div class="jsalary jobboard-salary-label">R$ 20k – 28k</div>
+          <button class="applybtn jobboard-apply-btn">Candidatar</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- JOB 4 -->
+    <!-- jobboard-job-card: Standard job listing card -->
+    <div class="job-card jobboard-job-card">
+      <div class="job-top jobboard-job-card__top">
+        <div class="clogo jobboard-company-logo" style="background:#d1fae5;color:#065f46;">RD</div>
+        <div class="jmain jobboard-job-card__main">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:3px;">
+            <div class="jtitle jobboard-job-card__title">Frontend Developer – Pleno/Sênior</div>
+          </div>
+          <div class="jcompany jobboard-job-card__company">RD Station</div>
+          <div class="jmeta jobboard-job-card__meta">
+            <span><i class="fas fa-map-marker-alt"></i> Florianópolis, SC</span>
+            <span><i class="fas fa-laptop-house"></i> Híbrido</span>
+            <span><i class="fas fa-clock"></i> há 3 dias</span>
+          </div>
+        </div>
+        <div class="jactions jobboard-job-card__actions">
+          <button class="bkbtn jobboard-bookmark-btn"><i class="far fa-bookmark"></i></button>
+        </div>
+      </div>
+      <p class="jdesc jobboard-job-card__desc">Construa features de alto impacto em um dos maiores CRMs do Brasil. O time valoriza autonomia, testes automatizados e revisão de código cuidadosa. Stack moderna com React, Next.js e Storybook.</p>
+      <div class="jfooter jobboard-job-card__footer">
+        <div class="skill-tags jobboard-skill-tags">
+          <span class="stag jobboard-skill-tag">Next.js</span>
+          <span class="stag jobboard-skill-tag">React</span>
+          <span class="stag bl jobboard-skill-tag jobboard-skill-tag--blue">Storybook</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:12px;">
+          <div class="jsalary jobboard-salary-label">R$ 13k – 18k</div>
+          <button class="applybtn jobboard-apply-btn">Candidatar</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- JOB 5 -->
+    <div class="job-card featured">
+      <div class="job-top jobboard-job-card__top">
+        <div class="clogo jobboard-company-logo" style="background:#ffedd5;color:#c2410c;">CR</div>
+        <div class="jmain jobboard-job-card__main">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:3px;">
+            <div class="jtitle jobboard-job-card__title">Senior React Native Engineer</div>
+            <span class="badge hot jobboard-badge jobboard-badge--hot">🔥 Hot</span>
+          </div>
+          <div class="jcompany jobboard-job-card__company">Creditas</div>
+          <div class="jmeta jobboard-job-card__meta">
+            <span><i class="fas fa-map-marker-alt"></i> São Paulo, SP</span>
+            <span><i class="fas fa-home"></i> Remoto</span>
+            <span><i class="fas fa-clock"></i> há 4 dias</span>
+          </div>
+        </div>
+        <div class="jactions jobboard-job-card__actions">
+          <button class="bkbtn jobboard-bookmark-btn"><i class="far fa-bookmark"></i></button>
+        </div>
+      </div>
+      <p class="jdesc jobboard-job-card__desc">Trabalhe no super-app de crédito da América Latina. Você vai construir e evoluir features nativas para iOS e Android com foco em performance e experiência do usuário. Time com cultura forte de dados e experimentação.</p>
+      <div class="jfooter jobboard-job-card__footer">
+        <div class="skill-tags jobboard-skill-tags">
+          <span class="stag jobboard-skill-tag">React Native</span>
+          <span class="stag jobboard-skill-tag">TypeScript</span>
+          <span class="stag or jobboard-skill-tag jobboard-skill-tag--orange">iOS</span>
+          <span class="stag gr jobboard-skill-tag jobboard-skill-tag--green">Android</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:12px;">
+          <div class="jsalary jobboard-salary-label">R$ 16k – 22k</div>
+          <button class="applybtn jobboard-apply-btn">Candidatar</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- JOB 6 -->
+    <!-- jobboard-job-card: Standard job listing card -->
+    <div class="job-card jobboard-job-card">
+      <div class="job-top jobboard-job-card__top">
+        <div class="clogo jobboard-company-logo" style="background:#fce7f3;color:#9d174d;">PG</div>
+        <div class="jmain jobboard-job-card__main">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:3px;">
+            <div class="jtitle jobboard-job-card__title">Frontend Tech Lead</div>
+            <span class="badge new jobboard-badge jobboard-badge--new">Novo</span>
+          </div>
+          <div class="jcompany jobboard-job-card__company">PagBank</div>
+          <div class="jmeta jobboard-job-card__meta">
+            <span><i class="fas fa-map-marker-alt"></i> São Paulo, SP</span>
+            <span><i class="fas fa-laptop-house"></i> Híbrido</span>
+            <span><i class="fas fa-clock"></i> há 6 horas</span>
+          </div>
+        </div>
+        <div class="jactions jobboard-job-card__actions">
+          <button class="bkbtn jobboard-bookmark-btn"><i class="far fa-bookmark"></i></button>
+        </div>
+      </div>
+      <p class="jdesc jobboard-job-card__desc">Lidere um time de 6 engenheiros frontend na construção de jornadas de onboarding e crédito digital. Responsável por decisões arquiteturais, code review e alinhamento com stakeholders de produto e design.</p>
+      <div class="jfooter jobboard-job-card__footer">
+        <div class="skill-tags jobboard-skill-tags">
+          <span class="stag jobboard-skill-tag">React</span>
+          <span class="stag jobboard-skill-tag">Microfrontend</span>
+          <span class="stag bl jobboard-skill-tag jobboard-skill-tag--blue">CI/CD</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:12px;">
+          <div class="jsalary jobboard-salary-label">R$ 22k – 30k</div>
+          <button class="applybtn jobboard-apply-btn">Candidatar</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- PAGINATION -->
+    <!-- jobboard-pagination: Page number controls -->
+    <div class="pagination jobboard-pagination">
+      <button class="pgbtn jobboard-pagination__btn"><i class="fas fa-chevron-left"></i></button>
+      <button class="pgbtn jobboard-pagination__btn jobboard-pagination__btn--active">1</button>
+      <button class="pgbtn jobboard-pagination__btn">2</button>
+      <button class="pgbtn jobboard-pagination__btn">3</button>
+      <button class="pgbtn jobboard-pagination__btn">…</button>
+      <button class="pgbtn jobboard-pagination__btn">24</button>
+      <button class="pgbtn jobboard-pagination__btn"><i class="fas fa-chevron-right"></i></button>
+    </div>
+  </main>
+
+  <!-- RIGHT SIDEBAR -->
+  <!-- Right sidebar: profile + alerts + news -->
+  <aside class="sidebar-right jobboard-sidebar-right">
+
+    <!-- Profile -->
+    <!-- jobboard-profile-card: User mini-profile widget -->
+    <div class="profile-card jobboard-profile-card">
+      <div class="p-banner jobboard-profile-banner"></div>
+      <div class="p-body jobboard-profile-card__body">
+        <div class="p-avatar jobboard-profile-avatar">LG</div>
+        <div class="p-name jobboard-profile-card__name">Lucas G.</div>
+        <div class="p-role jobboard-profile-card__role">Senior Frontend Engineer · Venturus</div>
+        <!-- jobboard-profile-stats: 3-col stat row -->
+        <div class="p-stats jobboard-profile-stats">
+          <div class="p-stat jobboard-profile-stats__item"><strong>47</strong>Candidaturas</div>
+          <div class="p-stat jobboard-profile-stats__item"><strong>12</strong>Entrevistas</div>
+          <div class="p-stat jobboard-profile-stats__item"><strong>3</strong>Ofertas</div>
+        </div>
+        <!-- jobboard-progress-bar: Profile completion indicator -->
+        <div class="p-completion jobboard-profile-completion">
+          <div class="p-comp-label">Perfil completo <strong>75%</strong></div>
+          <div class="prog-bar jobboard-progress-bar"><div class="prog-fill jobboard-progress-bar__fill"></div></div>
+        </div>
+        <button class="btn-primary" style="width:100%;text-align:center;">Ver meu perfil</button>
+      </div>
+    </div>
+
+    <!-- Alerts -->
+    <!-- jobboard-card: Job alerts card -->
+    <div class="card jobboard-card">
+      <div class="card-title jobboard-card-title" style="display:flex;align-items:center;justify-content:space-between;">
+        Alertas de Vaga
+        <button style="background:none;border:none;color:var(--primary);font-size:12px;font-family:var(--font-body);font-weight:600;cursor:pointer;">+ Novo</button>
+      </div>
+      <!-- jobboard-alert-row: Job alert item with icon + badge -->
+      <div class="alert-row jobboard-alert-row">
+        <div class="aico jobboard-alert-row__icon" style="background:var(--primary-light);">⚛️</div>
+        <div class="atext jobboard-alert-row__text">React Sênior · Remoto<span>Atualizado diariamente</span></div>
+        <span class="abadge jobboard-inline-badge">14</span>
+      </div>
+      <!-- jobboard-alert-row: Job alert item with icon + badge -->
+      <div class="alert-row jobboard-alert-row">
+        <div class="aico jobboard-alert-row__icon" style="background:#dbeafe;">🟦</div>
+        <div class="atext jobboard-alert-row__text">TypeScript · SP<span>Atualizado diariamente</span></div>
+        <span class="abadge jobboard-inline-badge">7</span>
+      </div>
+      <!-- jobboard-alert-row: Job alert item with icon + badge -->
+      <div class="alert-row jobboard-alert-row">
+        <div class="aico jobboard-alert-row__icon" style="background:#d1fae5;">💼</div>
+        <div class="atext jobboard-alert-row__text">Tech Lead Frontend<span>Atualizado semanalmente</span></div>
+        <span class="abadge jobboard-inline-badge">3</span>
+      </div>
+    </div>
+
+    <!-- News -->
+    <!-- jobboard-card: Industry news card -->
+    <div class="card jobboard-card">
+      <div class="card-title jobboard-card-title">Notícias do Setor</div>
+      <!-- jobboard-news-item: Industry news row -->
+      <div class="news-item jobboard-news-item">
+        <div class="nthumb jobboard-news-item__thumb">📈</div>
+        <div class="ntext jobboard-news-item__text">
+          <div class="ntitle jobboard-news-item__title">Mercado de tech no Brasil cresce 22% em 2025</div>
+          <div class="nmeta jobboard-news-item__meta">TechCrunch Brasil · 3h atrás</div>
+        </div>
+      </div>
+      <!-- jobboard-news-item: Industry news row -->
+      <div class="news-item jobboard-news-item">
+        <div class="nthumb jobboard-news-item__thumb">🤖</div>
+        <div class="ntext jobboard-news-item__text">
+          <div class="ntitle jobboard-news-item__title">Como IA está mudando o papel dos devs sêniors</div>
+          <div class="nmeta jobboard-news-item__meta">InfoQ · 1 dia atrás</div>
+        </div>
+      </div>
+      <!-- jobboard-news-item: Industry news row -->
+      <div class="news-item jobboard-news-item">
+        <div class="nthumb jobboard-news-item__thumb">💰</div>
+        <div class="ntext jobboard-news-item__text">
+          <div class="ntitle jobboard-news-item__title">Salários de frontend em 2025: o que mudou?</div>
+          <div class="nmeta jobboard-news-item__meta">Revelo Insights · 2 dias atrás</div>
+        </div>
+      </div>
+      <!-- jobboard-news-item: Industry news row -->
+      <div class="news-item jobboard-news-item">
+        <div class="nthumb jobboard-news-item__thumb">🌍</div>
+        <div class="ntext jobboard-news-item__text">
+          <div class="ntitle jobboard-news-item__title">Empresas globais ampliam contratações remotas no BR</div>
+          <div class="nmeta jobboard-news-item__meta">Exame · 3 dias atrás</div>
+        </div>
+      </div>
+    </div>
+
+  </aside>
+</div>
+
+<script>
+  // Bookmark toggle
+  document.querySelectorAll('.bkbtn').forEach(btn => {
+    btn.addEventListener('click', e => {
+      e.stopPropagation();
+      btn.classList.toggle('saved');
+      const i = btn.querySelector('i');
+      i.classList.toggle('fas');
+      i.classList.toggle('far');
+    });
+  });
+
+  // Filter tag toggle
+  document.querySelectorAll('.filter-tag').forEach(t => t.addEventListener('click', () => t.classList.toggle('active')));
+
+  // Range slider
+  const r = document.getElementById('salRange');
+  const rl = document.querySelector('.range-current');
+  r.addEventListener('input', () => {
+    const v = parseInt(r.value).toLocaleString('pt-BR');
+    rl.textContent = `Até R$ ${v}`;
+    const pct = ((r.value - r.min) / (r.max - r.min)) * 100;
+    r.style.background = `linear-gradient(to right, var(--primary) 0%, var(--primary) ${pct}%, var(--border) ${pct}%)`;
+  });
+
+  // Pagination
+  document.querySelectorAll('.pgbtn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      if (!btn.querySelector('i')) {
+        document.querySelectorAll('.pgbtn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+      }
+    });
+  });
+
+  // Job card hover effect
+  document.querySelectorAll('.job-card').forEach(card => {
+    card.addEventListener('click', () => {
+      document.querySelectorAll('.job-card').forEach(c => c.style.borderColor = '');
+      card.style.borderColor = 'var(--primary)';
+    });
+  });
+</script>
+</body>
+</html>

@@ -1,0 +1,1382 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>JobBoard – Encontre sua próxima oportunidade</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=Sora:wght@300;400;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+
+  <style>
+    /* ═══════════════════════════════════════════
+       TOKENS
+    ═══════════════════════════════════════════ */
+    :root {
+      --primary:       #a78bfa;
+      --primary-dark:  #7c3aed;
+      --primary-deeper:#5b21b6;
+      --primary-light: #ede9fe;
+      --primary-mid:   #c4b5fd;
+      --accent:        #f0abfc;
+      --accent2:       #fb7185;
+      --bg:            #f5f3ff;
+      --surface:       #ffffff;
+      --border:        #e9e4fc;
+      --text-main:     #1e1b2e;
+      --text-sub:      #6b7280;
+      --text-light:    #a0aec0;
+      --green:         #34d399;
+      --orange:        #fb923c;
+      --blue:          #60a5fa;
+      --radius:        16px;
+      --radius-sm:     10px;
+      --shadow:        0 2px 20px rgba(124,58,237,.09);
+      --shadow-md:     0 8px 40px rgba(124,58,237,.16);
+      --shadow-lg:     0 20px 60px rgba(124,58,237,.22);
+      --font-head:     'Sora', sans-serif;
+      --font-body:     'DM Sans', sans-serif;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body { font-family: var(--font-body); background: var(--bg); color: var(--text-main); font-size: 15px; min-height: 100vh; overflow-x: hidden; }
+
+    /* ── SCREENS ─────────────────────────────── */
+    .screen { display: none; }
+    .screen.active { display: block; }
+
+    /* ════════════════════════════════════════════
+       SHARED NAV
+    ════════════════════════════════════════════ */
+    .topnav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      padding: 0 48px;
+      height: 68px;
+      display: flex; align-items: center;
+      transition: background .3s, box-shadow .3s;
+    }
+    .topnav.scrolled { background: rgba(255,255,255,.92); backdrop-filter: blur(16px); box-shadow: 0 1px 0 var(--border); }
+    .topnav.dark { background: transparent; }
+    .nav-logo { font-family: var(--font-head); font-size: 24px; font-weight: 800; color: #fff; letter-spacing: -.5px; cursor: pointer; }
+    .nav-logo .dot { color: var(--primary-mid); }
+    .nav-logo.light-logo { color: var(--primary-dark); }
+    .nav-logo.light-logo .dot { color: var(--primary); }
+    .nav-links-lp { display: flex; align-items: center; gap: 6px; margin-left: 40px; }
+    .nav-links-lp a { font-size: 14px; font-weight: 600; color: rgba(255,255,255,.8); text-decoration: none; padding: 7px 14px; border-radius: 99px; transition: all .2s; cursor: pointer; }
+    .nav-links-lp a:hover { color: #fff; background: rgba(255,255,255,.12); }
+    .nav-links-lp.light a { color: var(--text-sub); }
+    .nav-links-lp.light a:hover { color: var(--primary-dark); background: var(--primary-light); }
+    .nav-ctas { margin-left: auto; display: flex; align-items: center; gap: 10px; }
+    .nav-btn-ghost { background: rgba(255,255,255,.15); border: 1.5px solid rgba(255,255,255,.3); color: #fff; border-radius: 99px; padding: 8px 20px; font-family: var(--font-body); font-size: 14px; font-weight: 600; cursor: pointer; transition: all .2s; }
+    .nav-btn-ghost:hover { background: rgba(255,255,255,.25); }
+    .nav-btn-ghost.light { background: transparent; border-color: var(--primary); color: var(--primary-dark); }
+    .nav-btn-ghost.light:hover { background: var(--primary-light); }
+    .nav-btn-solid { background: #fff; color: var(--primary-dark); border: none; border-radius: 99px; padding: 8px 22px; font-family: var(--font-body); font-size: 14px; font-weight: 700; cursor: pointer; transition: all .2s; box-shadow: 0 2px 12px rgba(0,0,0,.1); }
+    .nav-btn-solid:hover { background: var(--primary-light); transform: translateY(-1px); }
+    .nav-btn-solid.dark { background: var(--primary); color: #fff; }
+    .nav-btn-solid.dark:hover { background: var(--primary-dark); }
+
+    /* ════════════════════════════════════════════
+       LANDING PAGE
+    ════════════════════════════════════════════ */
+
+    /* — HERO ———————————————————————————————— */
+    .hero {
+      min-height: 100vh;
+      background: linear-gradient(145deg, #1a0533 0%, #2d1065 40%, #4c1d95 70%, #6d28d9 100%);
+      position: relative;
+      display: flex; flex-direction: column;
+      overflow: hidden;
+    }
+
+    /* animated mesh orbs */
+    .orb {
+      position: absolute; border-radius: 50%;
+      filter: blur(80px); pointer-events: none; opacity: .45;
+    }
+    .orb1 { width: 600px; height: 600px; background: radial-gradient(circle, var(--accent) 0%, transparent 70%); top: -100px; right: -100px; animation: floatOrb 12s ease-in-out infinite; }
+    .orb2 { width: 400px; height: 400px; background: radial-gradient(circle, var(--blue) 0%, transparent 70%); bottom: 50px; left: -80px; animation: floatOrb 9s ease-in-out infinite reverse; }
+    .orb3 { width: 300px; height: 300px; background: radial-gradient(circle, var(--primary-mid) 0%, transparent 70%); top: 40%; right: 20%; animation: floatOrb 14s ease-in-out infinite 2s; opacity: .3; }
+    @keyframes floatOrb { 0%,100% { transform: translate(0,0) scale(1); } 33% { transform: translate(30px,-40px) scale(1.05); } 66% { transform: translate(-20px,20px) scale(.95); } }
+
+    /* grid texture */
+    .hero::before {
+      content: '';
+      position: absolute; inset: 0;
+      background-image: linear-gradient(rgba(255,255,255,.04) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.04) 1px, transparent 1px);
+      background-size: 60px 60px;
+      pointer-events: none;
+    }
+
+    .hero-content {
+      flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;
+      text-align: center; padding: 120px 24px 80px;
+      position: relative; z-index: 2;
+    }
+
+    .hero-eyebrow {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: rgba(255,255,255,.1); border: 1px solid rgba(255,255,255,.2);
+      border-radius: 99px; padding: 6px 16px;
+      font-size: 13px; font-weight: 600; color: var(--primary-mid);
+      margin-bottom: 28px;
+      animation: fadeUp .6s ease both;
+    }
+    .hero-eyebrow .live-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--green); animation: pulse 2s infinite; }
+    @keyframes pulse { 0%,100%{opacity:1;transform:scale(1);}50%{opacity:.5;transform:scale(1.4);} }
+
+    .hero-h1 {
+      font-family: var(--font-head);
+      font-size: clamp(42px, 7vw, 80px);
+      font-weight: 800; line-height: 1.05;
+      color: #fff; letter-spacing: -2px;
+      margin-bottom: 24px;
+      animation: fadeUp .6s ease .1s both;
+    }
+    .hero-h1 .grad {
+      background: linear-gradient(90deg, var(--primary-mid), var(--accent), #fb7185);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    }
+
+    .hero-sub {
+      font-size: clamp(16px, 2vw, 20px);
+      color: rgba(255,255,255,.65); line-height: 1.6;
+      max-width: 580px; margin: 0 auto 40px;
+      animation: fadeUp .6s ease .2s both;
+    }
+
+    .hero-ctas {
+      display: flex; align-items: center; gap: 14px; flex-wrap: wrap; justify-content: center;
+      animation: fadeUp .6s ease .3s both;
+      margin-bottom: 60px;
+    }
+    .cta-main {
+      background: #fff; color: var(--primary-dark);
+      border: none; border-radius: 99px;
+      padding: 14px 32px; font-family: var(--font-head);
+      font-size: 15px; font-weight: 700; cursor: pointer;
+      transition: all .25s;
+      box-shadow: 0 4px 24px rgba(0,0,0,.2);
+      display: flex; align-items: center; gap: 9px;
+    }
+    .cta-main:hover { background: var(--primary-light); transform: translateY(-2px); box-shadow: 0 8px 32px rgba(0,0,0,.25); }
+    .cta-sec {
+      background: rgba(255,255,255,.1); border: 1.5px solid rgba(255,255,255,.25);
+      color: #fff; border-radius: 99px;
+      padding: 13px 28px; font-family: var(--font-head);
+      font-size: 15px; font-weight: 600; cursor: pointer;
+      transition: all .2s;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .cta-sec:hover { background: rgba(255,255,255,.18); }
+
+    /* Stats row */
+    .hero-stats {
+      display: flex; align-items: center; gap: 40px;
+      justify-content: center; flex-wrap: wrap;
+      animation: fadeUp .6s ease .4s both;
+    }
+    .hstat { text-align: center; }
+    .hstat-num { font-family: var(--font-head); font-size: 28px; font-weight: 800; color: #fff; letter-spacing: -1px; }
+    .hstat-label { font-size: 12px; color: rgba(255,255,255,.5); margin-top: 2px; }
+    .hstat-sep { width: 1px; height: 36px; background: rgba(255,255,255,.15); }
+
+    /* scroll arrow */
+    .scroll-hint {
+      position: absolute; bottom: 32px; left: 50%; transform: translateX(-50%);
+      color: rgba(255,255,255,.35); font-size: 20px;
+      animation: bounce 2s infinite; cursor: pointer; z-index: 2;
+    }
+    @keyframes bounce { 0%,100%{transform:translateX(-50%) translateY(0);}50%{transform:translateX(-50%) translateY(8px);} }
+
+    /* — FEATURES ——————————————————————————— */
+    .section { padding: 100px 48px; max-width: 1280px; margin: 0 auto; }
+    .section-label { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.5px; color: var(--primary); margin-bottom: 12px; }
+    .section-title { font-family: var(--font-head); font-size: clamp(28px, 4vw, 44px); font-weight: 800; color: var(--text-main); line-height: 1.15; letter-spacing: -1px; margin-bottom: 16px; }
+    .section-sub { font-size: 17px; color: var(--text-sub); line-height: 1.65; max-width: 540px; }
+
+    .features-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-top: 56px; }
+    .feat-card {
+      background: var(--surface); border-radius: var(--radius); border: 1px solid var(--border);
+      padding: 28px 26px; box-shadow: var(--shadow);
+      transition: transform .25s, box-shadow .25s, border-color .25s;
+      cursor: default;
+    }
+    .feat-card:hover { transform: translateY(-6px); box-shadow: var(--shadow-md); border-color: var(--primary-mid); }
+    .feat-icon {
+      width: 52px; height: 52px; border-radius: 14px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 22px; margin-bottom: 18px;
+    }
+    .feat-title { font-family: var(--font-head); font-size: 17px; font-weight: 700; margin-bottom: 8px; color: var(--text-main); }
+    .feat-desc { font-size: 14px; color: var(--text-sub); line-height: 1.65; }
+    .feat-tag { display: inline-block; margin-top: 14px; background: var(--primary-light); color: var(--primary-dark); border-radius: 99px; padding: 3px 12px; font-size: 11.5px; font-weight: 700; }
+
+    /* — HOW IT WORKS ————————————————————— */
+    .hiw-bg { background: linear-gradient(180deg, #fff 0%, var(--bg) 100%); }
+    .hiw-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 80px; align-items: center; margin-top: 56px; }
+    .step-list { display: flex; flex-direction: column; gap: 0; }
+    .step-row {
+      display: flex; gap: 20px; padding: 22px 0;
+      border-bottom: 1px solid var(--border); cursor: default;
+      transition: all .2s;
+    }
+    .step-row:last-child { border-bottom: none; }
+    .step-row:hover .step-num { background: var(--primary); color: #fff; }
+    .step-num {
+      width: 40px; height: 40px; border-radius: 12px;
+      background: var(--primary-light); color: var(--primary-dark);
+      font-family: var(--font-head); font-size: 16px; font-weight: 800;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0; transition: all .2s;
+    }
+    .step-body {}
+    .step-title { font-family: var(--font-head); font-size: 16px; font-weight: 700; margin-bottom: 4px; }
+    .step-desc { font-size: 14px; color: var(--text-sub); line-height: 1.6; }
+
+    /* mock screenshot / visual */
+    .hiw-visual {
+      background: var(--surface); border-radius: var(--radius);
+      border: 1px solid var(--border); box-shadow: var(--shadow-lg);
+      overflow: hidden; position: relative;
+    }
+    .hiw-visual-bar { background: #f8f7fc; border-bottom: 1px solid var(--border); padding: 12px 16px; display: flex; align-items: center; gap: 8px; }
+    .dot-red { width: 10px; height: 10px; border-radius: 50%; background: #f87171; }
+    .dot-yel { width: 10px; height: 10px; border-radius: 50%; background: #fbbf24; }
+    .dot-grn { width: 10px; height: 10px; border-radius: 50%; background: #34d399; }
+    .hiw-visual-body { padding: 24px; }
+
+    /* mini ATS demo inside visual */
+    .mini-ats { display: flex; flex-direction: column; gap: 12px; }
+    .mini-ats-title { font-family: var(--font-head); font-size: 13px; font-weight: 700; color: var(--primary-dark); }
+    .mini-kw-row { display: flex; align-items: center; gap: 10px; font-size: 12px; }
+    .mini-kw-label { width: 110px; font-weight: 600; color: var(--text-main); }
+    .mini-kw-bar { flex: 1; height: 8px; background: var(--primary-light); border-radius: 99px; overflow: hidden; }
+    .mini-kw-fill { height: 100%; border-radius: 99px; }
+    .mini-kw-pct { width: 36px; text-align: right; font-weight: 700; font-size: 11.5px; }
+    .mini-score-badge { display: inline-flex; align-items: center; gap: 8px; background: var(--green-bg, #d1fae5); color: #065f46; border-radius: 99px; padding: 5px 14px; font-size: 12px; font-weight: 700; margin-top: 4px; }
+
+    /* — TESTIMONIALS ———————————————————— */
+    .test-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-top: 56px; }
+    .test-card {
+      background: var(--surface); border-radius: var(--radius); border: 1px solid var(--border);
+      padding: 28px; box-shadow: var(--shadow);
+      transition: transform .2s;
+    }
+    .test-card:hover { transform: translateY(-4px); }
+    .test-quote { font-size: 14.5px; color: var(--text-sub); line-height: 1.7; margin-bottom: 20px; font-style: italic; }
+    .test-quote::before { content: '"'; font-family: var(--font-head); font-size: 28px; color: var(--primary-mid); line-height: 0; vertical-align: -10px; margin-right: 4px; }
+    .test-author { display: flex; align-items: center; gap: 12px; }
+    .test-avatar { width: 42px; height: 42px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-family: var(--font-head); font-weight: 700; font-size: 16px; color: #fff; flex-shrink: 0; }
+    .test-name { font-weight: 700; font-size: 14px; }
+    .test-role { font-size: 12px; color: var(--text-sub); }
+    .test-stars { color: #fbbf24; font-size: 12px; margin-bottom: 3px; }
+
+    /* — CTA BAND ———————————————————————— */
+    .cta-band {
+      background: linear-gradient(135deg, var(--primary-dark) 0%, #4c1d95 50%, var(--primary-dark) 100%);
+      padding: 80px 48px; text-align: center; position: relative; overflow: hidden;
+    }
+    .cta-band::before { content:''; position:absolute; inset:0; background-image: linear-gradient(rgba(255,255,255,.04) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.04) 1px,transparent 1px); background-size:60px 60px; pointer-events:none; }
+    .cta-band h2 { font-family: var(--font-head); font-size: clamp(28px,4vw,44px); font-weight: 800; color: #fff; margin-bottom: 16px; position: relative; }
+    .cta-band p { font-size: 17px; color: rgba(255,255,255,.65); margin-bottom: 36px; position: relative; }
+    .cta-band .cta-main { display: inline-flex; }
+
+    /* — FOOTER ——————————————————————————— */
+    .footer { background: var(--text-main); padding: 48px 48px 32px; }
+    .footer-inner { max-width: 1280px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 20px; }
+    .footer-logo { font-family: var(--font-head); font-size: 22px; font-weight: 800; color: #fff; }
+    .footer-logo span { color: var(--primary-mid); }
+    .footer-links { display: flex; gap: 24px; }
+    .footer-links a { font-size: 13.5px; color: rgba(255,255,255,.45); text-decoration: none; cursor: pointer; transition: color .15s; }
+    .footer-links a:hover { color: var(--primary-mid); }
+    .footer-copy { width: 100%; text-align: center; font-size: 12.5px; color: rgba(255,255,255,.25); margin-top: 24px; padding-top: 24px; border-top: 1px solid rgba(255,255,255,.08); }
+
+    /* animations */
+    @keyframes fadeUp { from{opacity:0;transform:translateY(20px);} to{opacity:1;transform:translateY(0);} }
+    @keyframes fadeIn { from{opacity:0;} to{opacity:1;} }
+
+    /* ════════════════════════════════════════════
+       AUTH PAGES (Login & Register)
+    ════════════════════════════════════════════ */
+    .auth-page {
+      min-height: 100vh;
+      display: grid; grid-template-columns: 1fr 1fr;
+    }
+
+    /* LEFT decorative panel */
+    .auth-left {
+      background: linear-gradient(145deg, #1a0533 0%, #2d1065 40%, #4c1d95 70%, #6d28d9 100%);
+      position: relative; overflow: hidden;
+      display: flex; flex-direction: column; align-items: flex-start; justify-content: space-between;
+      padding: 48px;
+    }
+    .auth-left::before { content:''; position:absolute; inset:0; background-image:linear-gradient(rgba(255,255,255,.04) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.04) 1px,transparent 1px); background-size:60px 60px; pointer-events:none; }
+    .auth-orb1 { position:absolute; width:400px;height:400px;background:radial-gradient(circle,var(--accent) 0%,transparent 70%);top:-100px;right:-80px;filter:blur(70px);opacity:.4;pointer-events:none; animation: floatOrb 12s ease-in-out infinite; }
+    .auth-orb2 { position:absolute; width:300px;height:300px;background:radial-gradient(circle,var(--blue) 0%,transparent 70%);bottom:-50px;left:-60px;filter:blur(60px);opacity:.35;pointer-events:none; animation: floatOrb 9s ease-in-out infinite reverse; }
+
+    .auth-left-logo { font-family:var(--font-head); font-size:26px; font-weight:800; color:#fff; position:relative; z-index:2; cursor:pointer; }
+    .auth-left-logo span { color:var(--primary-mid); }
+
+    .auth-left-body { position:relative; z-index:2; }
+    .auth-left-body h2 { font-family:var(--font-head); font-size:clamp(26px,3vw,38px); font-weight:800; color:#fff; line-height:1.15; letter-spacing:-1px; margin-bottom:14px; }
+    .auth-left-body p { font-size:15px; color:rgba(255,255,255,.6); line-height:1.65; margin-bottom:32px; max-width:360px; }
+    .auth-left-body h2 .grad { background:linear-gradient(90deg,var(--primary-mid),var(--accent)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
+
+    .auth-feature-list { display:flex; flex-direction:column; gap:12px; }
+    .auth-feat { display:flex; align-items:center; gap:12px; font-size:14px; color:rgba(255,255,255,.75); }
+    .auth-feat-ico { width:30px; height:30px; border-radius:9px; background:rgba(255,255,255,.12); border:1px solid rgba(255,255,255,.18); display:flex; align-items:center; justify-content:center; font-size:13px; flex-shrink:0; }
+
+    .auth-left-foot { position:relative; z-index:2; }
+    .social-proof { display:flex; align-items:center; gap:12px; }
+    .avatars { display:flex; }
+    .avatars .av { width:32px; height:32px; border-radius:50%; border:2px solid rgba(255,255,255,.3); margin-left:-8px; display:flex; align-items:center; justify-content:center; font-family:var(--font-head); font-size:11px; font-weight:700; color:#fff; flex-shrink:0; }
+    .avatars .av:first-child { margin-left:0; }
+    .sp-text { font-size:13px; color:rgba(255,255,255,.6); line-height:1.5; }
+    .sp-text strong { color:#fff; }
+
+    /* RIGHT: form */
+    .auth-right {
+      background: var(--surface);
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      padding: 48px 56px;
+      overflow-y: auto;
+    }
+    .auth-form-wrap { width: 100%; max-width: 420px; }
+    .auth-form-logo { font-family:var(--font-head); font-size:22px; font-weight:800; color:var(--primary-dark); margin-bottom:36px; display:flex; align-items:center; gap:8px; cursor:pointer; }
+    .auth-form-logo span { color:var(--primary); }
+
+    .auth-title { font-family:var(--font-head); font-size:26px; font-weight:800; color:var(--text-main); margin-bottom:6px; letter-spacing:-.5px; }
+    .auth-sub { font-size:14px; color:var(--text-sub); margin-bottom:32px; line-height:1.55; }
+    .auth-sub a { color:var(--primary-dark); font-weight:700; text-decoration:none; cursor:pointer; }
+    .auth-sub a:hover { text-decoration:underline; }
+
+    /* Social login */
+    .social-btns { display:flex; gap:10px; margin-bottom:24px; }
+    .social-btn {
+      flex:1; display:flex; align-items:center; justify-content:center; gap:8px;
+      height:44px; border-radius:var(--radius-sm); border:1.5px solid var(--border);
+      background:#fff; font-family:var(--font-body); font-size:14px; font-weight:600;
+      color:var(--text-main); cursor:pointer; transition:all .2s;
+    }
+    .social-btn:hover { border-color:var(--primary); background:var(--primary-light); color:var(--primary-dark); }
+    .social-btn img { width:18px; height:18px; }
+
+    .divider-row { display:flex; align-items:center; gap:12px; margin-bottom:24px; }
+    .divider-line { flex:1; height:1px; background:var(--border); }
+    .divider-text { font-size:12px; color:var(--text-light); font-weight:600; white-space:nowrap; }
+
+    /* Form fields */
+    .form-row { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+    .form-row.single { grid-template-columns:1fr; }
+    .fgroup { display:flex; flex-direction:column; gap:6px; margin-bottom:16px; }
+    .flabel { font-size:13px; font-weight:600; color:var(--text-sub); display:flex; align-items:center; justify-content:space-between; }
+    .flabel a { font-size:12px; color:var(--primary-dark); text-decoration:none; font-weight:600; cursor:pointer; }
+    .flabel a:hover { text-decoration:underline; }
+    .finput {
+      height:46px; border:1.5px solid var(--border); border-radius:var(--radius-sm);
+      padding:0 14px; font-family:var(--font-body); font-size:14.5px;
+      color:var(--text-main); background:var(--bg); outline:none;
+      transition:border-color .2s, background .2s, box-shadow .2s;
+    }
+    .finput:focus { border-color:var(--primary); background:#fff; box-shadow:0 0 0 3px rgba(167,139,250,.2); }
+    .finput::placeholder { color:var(--text-light); }
+    .finput.has-icon { padding-left:42px; }
+    .finput-wrap { position:relative; }
+    .finput-ico { position:absolute; left:14px; top:50%; transform:translateY(-50%); color:var(--text-light); font-size:14px; pointer-events:none; }
+    .finput-action { position:absolute; right:14px; top:50%; transform:translateY(-50%); color:var(--text-light); font-size:14px; cursor:pointer; transition:color .15s; }
+    .finput-action:hover { color:var(--primary-dark); }
+
+    /* Password strength */
+    .pwd-strength { margin-top:6px; }
+    .pwd-bars { display:flex; gap:4px; margin-bottom:4px; }
+    .pwd-bar { flex:1; height:3px; border-radius:99px; background:var(--border); transition:background .3s; }
+    .pwd-bar.weak { background:var(--accent2); }
+    .pwd-bar.medium { background:var(--orange); }
+    .pwd-bar.strong { background:var(--green); }
+    .pwd-label { font-size:11.5px; color:var(--text-light); }
+
+    /* Role selector */
+    .role-cards { display:flex; gap:10px; margin-bottom:16px; }
+    .role-card {
+      flex:1; border:1.5px solid var(--border); border-radius:var(--radius-sm);
+      padding:14px 10px; text-align:center; cursor:pointer; transition:all .2s;
+      background:#fff;
+    }
+    .role-card:hover { border-color:var(--primary-mid); background:var(--primary-light); }
+    .role-card.selected { border-color:var(--primary-dark); background:var(--primary-light); box-shadow:0 0 0 3px rgba(124,58,237,.12); }
+    .role-card .rc-ico { font-size:22px; margin-bottom:6px; }
+    .role-card .rc-name { font-size:12.5px; font-weight:700; color:var(--text-main); }
+    .role-card .rc-desc { font-size:11px; color:var(--text-sub); margin-top:2px; }
+
+    /* Terms checkbox */
+    .terms-row { display:flex; align-items:flex-start; gap:10px; margin-bottom:20px; }
+    .terms-check { display:none; }
+    .check-box-custom {
+      width:18px; height:18px; border-radius:5px; border:2px solid var(--border);
+      flex-shrink:0; margin-top:1px; display:flex; align-items:center; justify-content:center;
+      cursor:pointer; transition:all .15s;
+    }
+    .terms-check:checked + .check-box-custom { background:var(--primary); border-color:var(--primary); }
+    .terms-check:checked + .check-box-custom::after { content:'✓'; color:#fff; font-size:10px; font-weight:700; }
+    .terms-text { font-size:13px; color:var(--text-sub); line-height:1.55; }
+    .terms-text a { color:var(--primary-dark); font-weight:600; text-decoration:none; cursor:pointer; }
+    .terms-text a:hover { text-decoration:underline; }
+
+    /* Submit btn */
+    .submit-btn {
+      width:100%; height:50px; background:var(--primary-dark);
+      color:#fff; border:none; border-radius:var(--radius-sm);
+      font-family:var(--font-head); font-size:15px; font-weight:700;
+      cursor:pointer; transition:all .2s;
+      display:flex; align-items:center; justify-content:center; gap:10px;
+      box-shadow:0 4px 20px rgba(124,58,237,.35);
+    }
+    .submit-btn:hover { background:var(--primary-deeper); box-shadow:0 6px 28px rgba(124,58,237,.45); transform:translateY(-1px); }
+    .submit-btn:active { transform:translateY(0); }
+
+    /* Step indicator (register) */
+    .reg-steps { display:flex; align-items:center; gap:0; margin-bottom:28px; }
+    .rs { display:flex; align-items:center; flex:1; }
+    .rs:last-child { flex:0; }
+    .rs-circle { width:28px; height:28px; border-radius:50%; border:2px solid var(--border); background:#fff; display:flex; align-items:center; justify-content:center; font-family:var(--font-head); font-size:11px; font-weight:700; color:var(--text-light); flex-shrink:0; transition:all .25s; }
+    .rs-circle.done { background:var(--primary); border-color:var(--primary); color:#fff; }
+    .rs-circle.active { background:var(--primary-dark); border-color:var(--primary-dark); color:#fff; box-shadow:0 0 0 4px rgba(124,58,237,.2); }
+    .rs-line { flex:1; height:2px; background:var(--border); margin: 0 6px; margin-bottom:0; transition:background .3s; }
+    .rs-line.done { background:var(--primary); }
+    .rs-col { display:flex; flex-direction:column; align-items:center; }
+    .rs-label { font-size:10.5px; color:var(--text-light); margin-top:5px; font-weight:600; white-space:nowrap; }
+    .rs-label.active { color:var(--primary-dark); }
+    .rs-label.done { color:var(--primary); }
+
+    /* Error / hint */
+    .field-hint { font-size:12px; color:var(--text-light); margin-top:4px; }
+    .field-error { font-size:12px; color:#ef4444; margin-top:4px; display:flex; align-items:center; gap:4px; }
+
+    /* ── RESPONSIVE ─────────────────────────── */
+    @media (max-width:900px) {
+      .auth-page { grid-template-columns:1fr; }
+      .auth-left { display:none; }
+      .features-grid, .test-grid { grid-template-columns:1fr; }
+      .hiw-grid { grid-template-columns:1fr; }
+      .topnav { padding:0 20px; }
+      .section { padding:64px 20px; }
+      .auth-right { padding:40px 24px; }
+      .social-btns { flex-direction:column; }
+    }
+    @media (max-width:640px) {
+      .form-row { grid-template-columns:1fr; }
+      .hero-stats { gap:24px; }
+      .role-cards { flex-direction:column; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ══════════════════════════════════════════
+     SCREEN 0 — LANDING PAGE
+══════════════════════════════════════════ -->
+<div id="screen0" class="screen active">
+
+  <!-- NAV -->
+  <!-- jobboard-landing-nav: Transparent-to-white sticky landing nav -->
+<nav class="topnav dark jobboard-landing-nav" id="mainNav">
+    <div class="nav-logo jobboard-logo" onclick="goScreen(0)">job<span class="dot">board</span></div>
+    <!-- jobboard-nav-link (repeated): Landing page nav links -->
+    <div class="nav-links-lp jobboard-nav" id="navLinks">
+      <a href="#features" onclick="smoothTo('features')">Funcionalidades</a>
+      <a href="#como" onclick="smoothTo('como')">Como funciona</a>
+      <a href="#depoimentos" onclick="smoothTo('depoimentos')">Depoimentos</a>
+      <a href="#empresas">Para empresas</a>
+    </div>
+    <div class="nav-ctas jobboard-nav__ctas">
+      <!-- jobboard-btn-ghost-dark: Ghost button on dark nav -->
+      <button class="nav-btn-ghost jobboard-btn-ghost-dark" onclick="goScreen(2)">Entrar</button>
+      <!-- jobboard-btn-solid-white: Solid white CTA on dark nav -->
+      <button class="nav-btn-solid jobboard-btn-solid-white" onclick="goScreen(1)">Criar conta grátis</button>
+    </div>
+  </nav>
+
+  <!-- HERO -->
+  <!-- jobboard-hero-section: Full-viewport dark hero section -->
+<section class="hero jobboard-hero-section">
+    <!-- jobboard-hero-orb: Animated blurred gradient orb -->
+    <div class="orb orb1 jobboard-hero-orb"></div>
+    <div class="orb orb2 jobboard-hero-orb"></div>
+    <div class="orb orb3 jobboard-hero-orb"></div>
+
+    <div class="hero-content">
+      <!-- jobboard-hero-eyebrow: Live-dot badge above headline -->
+      <div class="hero-eyebrow jobboard-hero-eyebrow">
+        <div class="live-dot"></div>
+        48.000+ vagas ativas agora
+      </div>
+
+      <h1 class="hero-h1">
+        Sua próxima vaga<br/>
+        <span class="grad">com IA do seu lado</span>
+      </h1>
+
+      <p class="hero-sub">
+        Encontre oportunidades alinhadas ao seu perfil, otimize seu currículo com IA e aumente sua aderência ao ATS — tudo em um só lugar.
+      </p>
+
+      <!-- jobboard-btn-primary / jobboard-btn-ghost wrappers -->
+      <div class="hero-ctas jobboard-hero-ctas">
+        <!-- jobboard-btn-primary: Hero main CTA -->
+        <button class="cta-main jobboard-btn-primary" onclick="goScreen(1)">
+          <i class="fas fa-rocket"></i>
+          Começar gratuitamente
+        </button>
+        <!-- jobboard-btn-ghost-dark: Hero secondary CTA -->
+        <button class="cta-sec jobboard-btn-ghost-dark" onclick="smoothTo('como')">
+          <i class="fas fa-play"></i>
+          Ver como funciona
+        </button>
+      </div>
+
+      <!-- jobboard-hero-stats: Horizontal stat row with separators -->
+      <div class="hero-stats jobboard-hero-stats">
+        <div class="hstat jobboard-hero-stats__item">
+          <div class="hstat-num">48k+</div>
+          <div class="hstat-label">Vagas ativas</div>
+        </div>
+        <div class="hstat-sep"></div>
+        <div class="hstat jobboard-hero-stats__item">
+          <div class="hstat-num">120k</div>
+          <div class="hstat-label">Candidatos ativos</div>
+        </div>
+        <div class="hstat-sep"></div>
+        <div class="hstat jobboard-hero-stats__item">
+          <div class="hstat-num">3.2k</div>
+          <div class="hstat-label">Empresas parceiras</div>
+        </div>
+        <div class="hstat-sep"></div>
+        <div class="hstat jobboard-hero-stats__item">
+          <div class="hstat-num">92%</div>
+          <div class="hstat-label">Taxa de satisfação</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="scroll-hint" onclick="smoothTo('features')">
+      <i class="fas fa-chevron-down"></i>
+    </div>
+  </section>
+
+  <!-- FEATURES -->
+  <div id="features">
+    <div class="section">
+      <div class="section-label">Funcionalidades</div>
+      <div style="display:flex;align-items:flex-end;justify-content:space-between;flex-wrap:wrap;gap:20px;">
+        <div>
+          <h2 class="section-title">Tudo que você precisa<br/>para ser contratado</h2>
+          <p class="section-sub">Uma plataforma completa que combina busca inteligente, otimização de currículo com IA e ferramentas de candidatura em um só lugar.</p>
+        </div>
+      </div>
+
+      <!-- jobboard-feature-card (repeated): Feature grid -->
+      <div class="features-grid jobboard-features-grid">
+        <!-- jobboard-feature-card: Feature highlight card -->
+        <div class="feat-card jobboard-feature-card">
+          <div class="feat-icon jobboard-feature-card__icon" style="background:var(--primary-light);">✦</div>
+          <div class="feat-title jobboard-feature-card__title">Tailoring IA</div>
+          <div class="feat-desc jobboard-feature-card__desc">Cole a descrição da vaga e deixe a IA analisar seu CV, sugerir keywords e aumentar sua compatibilidade ATS automaticamente.</div>
+          <span class="feat-tag jobboard-tag">Score ATS em tempo real</span>
+        </div>
+        <!-- jobboard-feature-card: Feature highlight card -->
+        <div class="feat-card jobboard-feature-card">
+          <div class="feat-icon jobboard-feature-card__icon" style="background:#dbeafe;">🔍</div>
+          <div class="feat-title jobboard-feature-card__title">Busca Inteligente</div>
+          <div class="feat-desc jobboard-feature-card__desc">Filtros avançados por cargo, localização, salário, regime de trabalho e stack tecnológica. Alertas automáticos de novas vagas.</div>
+          <span class="feat-tag jobboard-tag" style="background:#dbeafe;color:#1d4ed8;">Notificações em tempo real</span>
+        </div>
+        <!-- jobboard-feature-card: Feature highlight card -->
+        <div class="feat-card jobboard-feature-card">
+          <div class="feat-icon jobboard-feature-card__icon" style="background:#d1fae5;">📄</div>
+          <div class="feat-title jobboard-feature-card__title">Builder de Currículo</div>
+          <div class="feat-desc jobboard-feature-card__desc">Editor de currículo em Markdown com preview ao vivo, exportação para PDF e suporte a versões PT-BR e EN side-by-side.</div>
+          <span class="feat-tag jobboard-tag" style="background:#d1fae5;color:#065f46;">PT-BR + English</span>
+        </div>
+        <!-- jobboard-feature-card: Feature highlight card -->
+        <div class="feat-card jobboard-feature-card">
+          <div class="feat-icon jobboard-feature-card__icon" style="background:#ffedd5;">✉️</div>
+          <div class="feat-title jobboard-feature-card__title">Cover Letter IA</div>
+          <div class="feat-desc jobboard-feature-card__desc">Gere cartas de apresentação personalizadas para cada vaga com tom e estilo configuráveis. Baseado no seu CV + JD.</div>
+          <span class="feat-tag jobboard-tag" style="background:#ffedd5;color:#c2410c;">Personalizável por vaga</span>
+        </div>
+        <!-- jobboard-feature-card: Feature highlight card -->
+        <div class="feat-card jobboard-feature-card">
+          <div class="feat-icon jobboard-feature-card__icon" style="background:#fce7f3;">🎬</div>
+          <div class="feat-title jobboard-feature-card__title">Roteiro de Vídeo</div>
+          <div class="feat-desc jobboard-feature-card__desc">Crie roteiros de vídeo de apresentação para processos seletivos que pedem esse formato, com dicas de gravação inclusas.</div>
+          <span class="feat-tag jobboard-tag" style="background:#fce7f3;color:#9d174d;">Com dicas de gravação</span>
+        </div>
+        <!-- jobboard-feature-card: Feature highlight card -->
+        <div class="feat-card jobboard-feature-card">
+          <div class="feat-icon jobboard-feature-card__icon" style="background:#fef3c7;">📊</div>
+          <div class="feat-title jobboard-feature-card__title">Dashboard de Candidaturas</div>
+          <div class="feat-desc jobboard-feature-card__desc">Acompanhe todas as suas candidaturas em um kanban visual. Veja em qual etapa você está em cada processo seletivo.</div>
+          <span class="feat-tag jobboard-tag" style="background:#fef3c7;color:#92400e;">Kanban visual</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- HOW IT WORKS -->
+  <div id="como" class="hiw-bg">
+    <div class="section">
+      <div class="section-label">Como funciona</div>
+      <h2 class="section-title">De candidato a contratado<br/>em 4 passos</h2>
+
+      <!-- jobboard-how-it-works: Steps + visual 2-col section -->
+      <div class="hiw-grid jobboard-hiw-grid">
+        <div class="step-list jobboard-step-list">
+          <!-- jobboard-step-row: Numbered how-it-works step -->
+          <div class="step-row jobboard-step-row">
+            <div class="step-col"><div class="step-num jobboard-step-row__num">1</div></div>
+            <div class="step-body">
+              <div class="step-title jobboard-step-row__title">Crie seu perfil e currículo</div>
+              <div class="step-desc jobboard-step-row__desc">Monte seu currículo no nosso editor e adicione suas experiências, habilidades e conquistas em PT-BR e inglês.</div>
+            </div>
+          </div>
+          <!-- jobboard-step-row: Numbered how-it-works step -->
+          <div class="step-row jobboard-step-row">
+            <div class="step-col"><div class="step-num jobboard-step-row__num">2</div></div>
+            <div class="step-body">
+              <div class="step-title jobboard-step-row__title">Explore vagas alinhadas ao seu perfil</div>
+              <div class="step-desc jobboard-step-row__desc">Busque vagas com filtros inteligentes ou ative alertas e receba notificações das oportunidades certas para você.</div>
+            </div>
+          </div>
+          <!-- jobboard-step-row: Numbered how-it-works step -->
+          <div class="step-row jobboard-step-row">
+            <div class="step-col"><div class="step-num jobboard-step-row__num">3</div></div>
+            <div class="step-body">
+              <div class="step-title jobboard-step-row__title">Otimize com Tailoring IA</div>
+              <div class="step-desc jobboard-step-row__desc">Para cada vaga de interesse, rode o Tailoring IA. Veja o score ATS, aplique sugestões de keywords e gere a cover letter.</div>
+            </div>
+          </div>
+          <!-- jobboard-step-row: Numbered how-it-works step -->
+          <div class="step-row jobboard-step-row">
+            <div class="step-col"><div class="step-num jobboard-step-row__num">4</div></div>
+            <div class="step-body">
+              <div class="step-title jobboard-step-row__title">Candidate-se com confiança</div>
+              <div class="step-desc jobboard-step-row__desc">Baixe o CV otimizado em PDF e candidate-se com um currículo calibrado para passar pelo ATS e chamar atenção do recrutador.</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Visual mockup -->
+        <div class="hiw-visual">
+          <div class="hiw-visual-bar">
+            <div class="dot-red"></div>
+            <div class="dot-yel"></div>
+            <div class="dot-grn"></div>
+            <div style="flex:1;height:20px;background:var(--border);border-radius:99px;margin:0 10px;"></div>
+          </div>
+          <div class="hiw-visual-body">
+            <div class="mini-ats">
+              <div class="mini-ats-title">✦ Análise ATS · Senior Frontend Engineer @ Nubank</div>
+
+              <div style="background:var(--primary-light);border-radius:10px;padding:14px;margin-bottom:12px;text-align:center;">
+                <div style="font-family:var(--font-head);font-size:36px;font-weight:800;color:var(--primary-dark);">85</div>
+                <div style="font-size:11px;color:var(--text-sub);">Score com otimizações</div>
+                <div style="width:80%;height:6px;background:#fff;border-radius:99px;margin:8px auto 0;overflow:hidden;">
+                  <div style="width:85%;height:100%;background:linear-gradient(90deg,var(--primary),var(--accent));border-radius:99px;"></div>
+                </div>
+              </div>
+
+              <div class="mini-kw-row">
+                <div class="mini-kw-label">React</div>
+                <div class="mini-kw-bar"><div class="mini-kw-fill" style="width:95%;background:var(--green);"></div></div>
+                <div class="mini-kw-pct" style="color:var(--green-dark,#065f46);">95%</div>
+              </div>
+              <div class="mini-kw-row">
+                <div class="mini-kw-label">TypeScript</div>
+                <div class="mini-kw-bar"><div class="mini-kw-fill" style="width:90%;background:var(--green);"></div></div>
+                <div class="mini-kw-pct" style="color:#065f46;">90%</div>
+              </div>
+              <div class="mini-kw-row">
+                <div class="mini-kw-label">Microfrontend</div>
+                <div class="mini-kw-bar"><div class="mini-kw-fill" style="width:80%;background:var(--primary);"></div></div>
+                <div class="mini-kw-pct" style="color:var(--primary-dark);">80%</div>
+              </div>
+              <div class="mini-kw-row">
+                <div class="mini-kw-label">Design System</div>
+                <div class="mini-kw-bar"><div class="mini-kw-fill" style="width:78%;background:var(--primary);"></div></div>
+                <div class="mini-kw-pct" style="color:var(--primary-dark);">78%</div>
+              </div>
+              <div class="mini-kw-row">
+                <div class="mini-kw-label">Soft skills</div>
+                <div class="mini-kw-bar"><div class="mini-kw-fill" style="width:55%;background:var(--orange);"></div></div>
+                <div class="mini-kw-pct" style="color:var(--orange-dark,#c2410c);">55%</div>
+              </div>
+
+              <div style="margin-top:14px;display:flex;align-items:center;gap:8px;">
+                <div class="mini-score-badge"><i class="fas fa-arrow-up" style="font-size:10px;"></i> +23 pts aplicados</div>
+                <div style="background:var(--primary-light);color:var(--primary-dark);border-radius:99px;padding:5px 14px;font-size:12px;font-weight:700;display:inline-flex;align-items:center;gap:6px;"><i class="fas fa-file-pdf" style="font-size:10px;"></i> Baixar PDF</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TESTIMONIALS -->
+  <div id="depoimentos">
+    <div class="section" style="padding-bottom:80px;">
+      <div class="section-label">Depoimentos</div>
+      <h2 class="section-title">Quem já encontrou<br/>sua próxima vaga</h2>
+
+      <!-- jobboard-testimonial-card (repeated): Testimonial grid -->
+      <div class="test-grid jobboard-testimonials-grid">
+        <!-- jobboard-testimonial-card: User quote + author card -->
+        <div class="test-card jobboard-testimonial-card">
+          <div class="test-stars">★★★★★</div>
+          <div class="test-quote jobboard-testimonial-card__quote">O Tailoring IA foi um divisor de águas. Aumentei meu score ATS de 58 para 91 em menos de 5 minutos e passei pela triagem automática que antes me barrava.</div>
+          <div class="test-author jobboard-testimonial-card__author">
+            <div class="test-avatar jobboard-profile-avatar" style="background:linear-gradient(135deg,var(--primary),var(--accent));">MC</div>
+            <div>
+              <div class="test-name jobboard-testimonial-card__name">Mariana Costa</div>
+              <div class="test-role jobboard-testimonial-card__role">UX Designer · Contratada pelo iFood</div>
+            </div>
+          </div>
+        </div>
+        <!-- jobboard-testimonial-card: User quote + author card -->
+        <div class="test-card jobboard-testimonial-card">
+          <div class="test-stars">★★★★★</div>
+          <div class="test-quote jobboard-testimonial-card__quote">Consegui minha primeira vaga de dev em 3 semanas usando a plataforma. O editor de currículo com preview e a cover letter gerada pela IA fizeram toda a diferença.</div>
+          <div class="test-author jobboard-testimonial-card__author">
+            <div class="test-avatar jobboard-profile-avatar" style="background:linear-gradient(135deg,#60a5fa,#34d399);">RL</div>
+            <div>
+              <div class="test-name jobboard-testimonial-card__name">Rafael Lima</div>
+              <div class="test-role jobboard-testimonial-card__role">Frontend Dev Jr · Contratado pela Totvs</div>
+            </div>
+          </div>
+        </div>
+        <!-- jobboard-testimonial-card: User quote + author card -->
+        <div class="test-card jobboard-testimonial-card">
+          <div class="test-stars">★★★★★</div>
+          <div class="test-quote jobboard-testimonial-card__quote">Fui de 12 tentativas sem resposta para 4 entrevistas em 10 dias. O diferencial foi ter um CV em inglês otimizado para vagas remotas globais.</div>
+          <div class="test-author jobboard-testimonial-card__author">
+            <div class="test-avatar jobboard-profile-avatar" style="background:linear-gradient(135deg,#fb923c,#f0abfc);">AS</div>
+            <div>
+              <div class="test-name jobboard-testimonial-card__name">Ana Silva</div>
+              <div class="test-role jobboard-testimonial-card__role">Product Manager · Remote Global</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CTA BAND -->
+  <!-- jobboard-cta-band: Full-width gradient CTA section -->
+<div class="cta-band jobboard-cta-band">
+    <h2>Pronto para encontrar<br/>sua próxima oportunidade?</h2>
+    <p>Crie sua conta gratuitamente e comece a otimizar seu perfil hoje mesmo.</p>
+    <!-- jobboard-btn-primary: Hero main CTA -->
+        <button class="cta-main jobboard-btn-primary" onclick="goScreen(1)" style="margin:0 auto;">
+      <i class="fas fa-rocket"></i>
+      Criar conta grátis agora
+    </button>
+  </div>
+
+  <!-- FOOTER -->
+  <!-- jobboard-footer: Dark site footer -->
+<footer class="footer jobboard-footer">
+    <div class="footer-inner">
+      <div class="footer-logo jobboard-logo jobboard-logo--inverse">job<span>board</span></div>
+      <div class="footer-links">
+        <a>Sobre</a>
+        <a>Blog</a>
+        <a>Para empresas</a>
+        <a>Privacidade</a>
+        <a>Termos</a>
+        <a>Suporte</a>
+      </div>
+    </div>
+    <div class="footer-copy">© 2026 JobBoard. Todos os direitos reservados.</div>
+  </footer>
+</div><!-- /screen0 -->
+
+
+<!-- ══════════════════════════════════════════
+     SCREEN 1 — REGISTER
+══════════════════════════════════════════ -->
+<div id="screen1" class="screen">
+  <!-- jobboard-auth-layout: 2-col auth page (decorative | form) -->
+  <div class="auth-page jobboard-auth-layout">
+
+    <!-- LEFT -->
+    <!-- jobboard-auth-left: Dark decorative left panel -->
+    <div class="auth-left jobboard-auth-left">
+      <!-- jobboard-hero-orb: Background orb -->
+      <div class="auth-orb1 jobboard-hero-orb"></div>
+      <div class="auth-orb2 jobboard-hero-orb"></div>
+
+      <div class="auth-left-logo jobboard-logo jobboard-logo--inverse" onclick="goScreen(0)">job<span>board</span></div>
+
+      <div class="auth-left-body">
+        <h2>
+          Comece sua<br/>
+          jornada para a<br/>
+          <span class="grad">vaga dos sonhos</span>
+        </h2>
+        <p>Crie sua conta gratuitamente e tenha acesso a ferramentas de IA para otimizar seu currículo e aumentar suas chances de contratação.</p>
+        <!-- jobboard-auth-left-features: Bulleted feature list -->
+        <div class="auth-feature-list jobboard-auth-left-features">
+          <div class="auth-feat jobboard-auth-left-features__item">
+            <div class="auth-feat-ico jobboard-auth-left-features__icon">✦</div>
+            Tailoring de CV com score ATS em tempo real
+          </div>
+          <div class="auth-feat jobboard-auth-left-features__item">
+            <div class="auth-feat-ico jobboard-auth-left-features__icon">📄</div>
+            Editor de currículo PT-BR + English
+          </div>
+          <div class="auth-feat jobboard-auth-left-features__item">
+            <div class="auth-feat-ico jobboard-auth-left-features__icon">✉️</div>
+            Cover letters personalizadas por vaga
+          </div>
+          <div class="auth-feat jobboard-auth-left-features__item">
+            <div class="auth-feat-ico jobboard-auth-left-features__icon">🔍</div>
+            48.000+ vagas com filtros avançados
+          </div>
+        </div>
+      </div>
+
+      <div class="auth-left-foot">
+        <!-- jobboard-social-proof: Stacked avatars + text -->
+      <div class="social-proof jobboard-social-proof">
+          <div class="avatars jobboard-social-proof__avatars">
+            <div class="av" style="background:linear-gradient(135deg,var(--primary),var(--accent));">MC</div>
+            <div class="av" style="background:linear-gradient(135deg,#60a5fa,#34d399);">RL</div>
+            <div class="av" style="background:linear-gradient(135deg,#fb923c,#f0abfc);">AS</div>
+            <div class="av" style="background:linear-gradient(135deg,#a78bfa,#fb7185);">+</div>
+          </div>
+          <div class="sp-text jobboard-social-proof__text">
+            <strong>+120.000 candidatos</strong><br/>
+            já encontraram oportunidades aqui
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- RIGHT: Register form -->
+    <!-- jobboard-auth-form: Right panel form container -->
+    <div class="auth-right jobboard-auth-form">
+      <div class="auth-form-wrap">
+        <div class="auth-form-logo jobboard-logo jobboard-logo--light" onclick="goScreen(0)">job<span>board</span></div>
+
+        <!-- Step indicator -->
+        <!-- jobboard-register-steps: 3-step register progress -->
+        <div class="reg-steps jobboard-register-steps">
+          <div class="rs">
+            <div class="rs-col">
+              <div class="rs-circle active" id="rs1">1</div>
+              <div class="rs-label active" id="rl1">Conta</div>
+            </div>
+            <div class="rs-line" id="rl12"></div>
+          </div>
+          <div class="rs">
+            <div class="rs-col">
+              <div class="rs-circle" id="rs2">2</div>
+              <div class="rs-label" id="rl2">Perfil</div>
+            </div>
+            <div class="rs-line" id="rl23"></div>
+          </div>
+          <div class="rs">
+            <div class="rs-col">
+              <div class="rs-circle" id="rs3">3</div>
+              <div class="rs-label" id="rl3">Pronto</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- STEP 1: account -->
+        <div id="reg-step1">
+          <div class="auth-title jobboard-auth-form__title">Criar sua conta</div>
+          <div class="auth-sub jobboard-auth-form__sub">Já tem uma conta? <a onclick="goScreen(2)">Entrar</a></div>
+
+          <!-- jobboard-social-login-btn (repeated): OAuth provider buttons -->
+        <div class="social-btns jobboard-social-btns">
+            <button class="social-btn jobboard-social-login-btn">
+              <svg width="18" height="18" viewBox="0 0 18 18"><path d="M17.64 9.2a10.34 10.34 0 0 0-.16-1.84H9v3.48h4.84a4.14 4.14 0 0 1-1.8 2.72v2.26h2.92A8.78 8.78 0 0 0 17.64 9.2z" fill="#4285F4"/><path d="M9 18a8.59 8.59 0 0 0 5.96-2.18l-2.92-2.26a5.43 5.43 0 0 1-8.07-2.85H.96v2.33A9 9 0 0 0 9 18z" fill="#34A853"/><path d="M3.97 10.71a5.41 5.41 0 0 1 0-3.42V4.96H.96a9 9 0 0 0 0 8.08z" fill="#FBBC05"/><path d="M9 3.58a4.86 4.86 0 0 1 3.44 1.35l2.58-2.58A8.63 8.63 0 0 0 9 0 9 9 0 0 0 .96 4.96L3.97 7.3A5.36 5.36 0 0 1 9 3.58z" fill="#EA4335"/></svg>
+              Google
+            </button>
+            <button class="social-btn jobboard-social-login-btn">
+              <i class="fab fa-linkedin" style="color:#0077b5;font-size:16px;"></i>
+              LinkedIn
+            </button>
+            <button class="social-btn jobboard-social-login-btn">
+              <i class="fab fa-github" style="font-size:16px;"></i>
+              GitHub
+            </button>
+          </div>
+
+          <!-- jobboard-divider-or: "ou com e-mail" divider -->
+        <div class="divider-row jobboard-divider-or">
+            <div class="divider-line"></div>
+            <div class="divider-text">ou com e-mail</div>
+            <div class="divider-line"></div>
+          </div>
+
+          <div class="form-row">
+            <div class="fgroup jobboard-form-group">
+              <label class="flabel jobboard-form-group__label">Nome</label>
+              <div class="finput-wrap jobboard-form-input-wrap">
+                <i class="fas fa-user finput-ico"></i>
+                <!-- jobboard-form-input-icon: Input with icon decoration -->
+          <input class="finput has-icon jobboard-form-input jobboard-form-input--icon" type="text" placeholder="Lucas" />
+              </div>
+            </div>
+            <div class="fgroup jobboard-form-group">
+              <label class="flabel jobboard-form-group__label">Sobrenome</label>
+              <input class="finput jobboard-form-input" type="text" placeholder="Gonçalves" />
+            </div>
+          </div>
+
+          <div class="fgroup jobboard-form-group">
+            <label class="flabel jobboard-form-group__label">E-mail</label>
+            <div class="finput-wrap jobboard-form-input-wrap">
+              <i class="fas fa-envelope finput-ico"></i>
+              <!-- jobboard-form-input-icon: Input with icon decoration -->
+          <input class="finput has-icon jobboard-form-input jobboard-form-input--icon" type="email" placeholder="seu@email.com" />
+            </div>
+          </div>
+
+          <div class="fgroup jobboard-form-group">
+            <label class="flabel jobboard-form-group__label">Senha</label>
+            <div class="finput-wrap jobboard-form-input-wrap">
+              <i class="fas fa-lock finput-ico"></i>
+              <!-- jobboard-form-input-icon: Input with icon decoration -->
+          <input class="finput has-icon jobboard-form-input jobboard-form-input--icon" type="password" placeholder="Mínimo 8 caracteres" id="pwdInput" />
+              <i class="fas fa-eye finput-action" onclick="togglePwd('pwdInput',this)"></i>
+            </div>
+            <!-- jobboard-password-strength: Color bar strength indicator -->
+          <div class="pwd-strength jobboard-password-strength">
+              <div class="pwd-bars jobboard-password-strength__bars">
+                <div class="pwd-bar jobboard-password-strength__bar" id="pb1"></div>
+                <div class="pwd-bar jobboard-password-strength__bar" id="pb2"></div>
+                <div class="pwd-bar jobboard-password-strength__bar" id="pb3"></div>
+                <div class="pwd-bar jobboard-password-strength__bar" id="pb4"></div>
+              </div>
+              <div class="pwd-label" id="pwdLabel">Digite sua senha</div>
+            </div>
+          </div>
+
+          <!-- jobboard-terms-row: Checkbox + ToS text -->
+          <div class="terms-row jobboard-terms-row">
+            <input type="checkbox" class="terms-check" id="termsCheck" />
+            <label class="check-box-custom jobboard-filter-checkbox__box" for="termsCheck"></label>
+            <div class="terms-text jobboard-terms-row__text">
+              Concordo com os <a>Termos de Uso</a> e a <a>Política de Privacidade</a> do JobBoard.
+            </div>
+          </div>
+
+          <!-- jobboard-submit-btn: Full-width auth submit button -->
+          <button class="submit-btn jobboard-submit-btn" onclick="regNextStep()">
+            Continuar <i class="fas fa-arrow-right"></i>
+          </button>
+        </div>
+
+        <!-- STEP 2: profile -->
+        <div id="reg-step2" style="display:none;">
+          <div class="auth-title jobboard-auth-form__title">Seu perfil profissional</div>
+          <div class="auth-sub jobboard-auth-form__sub">Essas informações ajudam a mostrar vagas mais relevantes para você.</div>
+
+          <!-- Role selector -->
+          <div style="font-size:13px;font-weight:600;color:var(--text-sub);margin-bottom:10px;">Você está buscando vaga como:</div>
+          <!-- jobboard-role-card (repeated): Selectable user role cards -->
+          <div class="role-cards jobboard-role-cards">
+            <!-- jobboard-role-card: User role selector card -->
+            <div class="role-card selected jobboard-role-card jobboard-role-card--selected" onclick="selectRole(this)">
+              <div class="rc-ico">💻</div>
+              <div class="rc-name">Candidato</div>
+              <div class="rc-desc">Busco oportunidades</div>
+            </div>
+            <div class="role-card jobboard-role-card" onclick="selectRole(this)">
+              <div class="rc-ico">🏢</div>
+              <div class="rc-name">Empresa</div>
+              <div class="rc-desc">Quero contratar</div>
+            </div>
+            <div class="role-card jobboard-role-card" onclick="selectRole(this)">
+              <div class="rc-ico">🤝</div>
+              <div class="rc-name">Ambos</div>
+              <div class="rc-desc">Busco e contrato</div>
+            </div>
+          </div>
+
+          <div class="form-row single">
+            <div class="fgroup jobboard-form-group">
+              <label class="flabel jobboard-form-group__label">Cargo atual ou desejado</label>
+              <div class="finput-wrap jobboard-form-input-wrap">
+                <i class="fas fa-briefcase finput-ico"></i>
+                <!-- jobboard-form-input-icon: Input with icon decoration -->
+          <input class="finput has-icon jobboard-form-input jobboard-form-input--icon" type="text" placeholder="Ex: Senior Frontend Engineer" />
+              </div>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="fgroup jobboard-form-group">
+              <label class="flabel jobboard-form-group__label">Localização</label>
+              <div class="finput-wrap jobboard-form-input-wrap">
+                <i class="fas fa-map-marker-alt finput-ico"></i>
+                <!-- jobboard-form-input-icon: Input with icon decoration -->
+          <input class="finput has-icon jobboard-form-input jobboard-form-input--icon" type="text" placeholder="São Paulo, SP" />
+              </div>
+            </div>
+            <div class="fgroup jobboard-form-group">
+              <label class="flabel jobboard-form-group__label">Experiência</label>
+              <select class="finput" style="cursor:pointer;">
+                <option value="">Selecione</option>
+                <option>Estudante / Estágio</option>
+                <option>Júnior (0–2 anos)</option>
+                <option selected>Pleno (2–5 anos)</option>
+                <option>Sênior (5+ anos)</option>
+                <option>Especialista / Staff</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="fgroup jobboard-form-group">
+            <label class="flabel jobboard-form-group__label">Modalidade preferida</label>
+            <div style="display:flex;gap:8px;flex-wrap:wrap;">
+              <span style="border:1.5px solid var(--primary);background:var(--primary-light);color:var(--primary-dark);border-radius:99px;padding:5px 14px;font-size:13px;font-weight:600;cursor:pointer;">Remoto</span>
+              <span style="border:1.5px solid var(--primary);background:var(--primary-light);color:var(--primary-dark);border-radius:99px;padding:5px 14px;font-size:13px;font-weight:600;cursor:pointer;">Híbrido</span>
+              <span style="border:1.5px solid var(--border);border-radius:99px;padding:5px 14px;font-size:13px;font-weight:600;cursor:pointer;color:var(--text-sub);">Presencial</span>
+            </div>
+          </div>
+
+          <div class="fgroup jobboard-form-group">
+            <label class="flabel jobboard-form-group__label">LinkedIn (opcional)</label>
+            <div class="finput-wrap jobboard-form-input-wrap">
+              <i class="fab fa-linkedin finput-ico" style="color:#0077b5;"></i>
+              <!-- jobboard-form-input-icon: Input with icon decoration -->
+          <input class="finput has-icon jobboard-form-input jobboard-form-input--icon" type="text" placeholder="linkedin.com/in/seu-perfil" />
+            </div>
+          </div>
+
+          <div style="display:flex;gap:10px;margin-top:4px;">
+            <button onclick="regPrevStep()" style="flex:1;height:50px;background:var(--primary-light);color:var(--primary-dark);border:none;border-radius:var(--radius-sm);font-family:var(--font-head);font-size:14px;font-weight:700;cursor:pointer;transition:all .2s;">
+              ← Voltar
+            </button>
+            <!-- jobboard-submit-btn: Full-width auth submit button -->
+          <button class="submit-btn jobboard-submit-btn" style="flex:2;" onclick="regNextStep()">
+              Finalizar cadastro <i class="fas fa-check"></i>
+            </button>
+          </div>
+        </div>
+
+        <!-- STEP 3: success -->
+        <div id="reg-step3" style="display:none;text-align:center;">
+          <div style="font-size:64px;margin-bottom:20px;animation:fadeUp .4s ease both;">🎉</div>
+          <div class="auth-title" style="margin-bottom:8px;">Conta criada!</div>
+          <div class="auth-sub" style="margin-bottom:32px;text-align:center;">Seu perfil está pronto. Agora é hora de encontrar a vaga perfeita e otimizar seu currículo com IA.</div>
+          <!-- jobboard-submit-btn: Full-width auth submit button -->
+          <button class="submit-btn jobboard-submit-btn" onclick="goScreen(3)" style="margin-bottom:12px;">
+            <i class="fas fa-rocket"></i> Explorar vagas agora
+          </button>
+          <div style="font-size:13px;color:var(--text-sub);">Ou <a onclick="goScreen(3)" style="color:var(--primary-dark);font-weight:600;cursor:pointer;text-decoration:underline;">complete seu currículo primeiro</a></div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div><!-- /screen1 -->
+
+
+<!-- ══════════════════════════════════════════
+     SCREEN 2 — LOGIN
+══════════════════════════════════════════ -->
+<div id="screen2" class="screen">
+  <!-- jobboard-auth-layout: 2-col auth page (decorative | form) -->
+  <div class="auth-page jobboard-auth-layout">
+
+    <!-- LEFT -->
+    <!-- jobboard-auth-left: Dark decorative left panel -->
+    <div class="auth-left jobboard-auth-left">
+      <!-- jobboard-hero-orb: Background orb -->
+      <div class="auth-orb1 jobboard-hero-orb"></div>
+      <div class="auth-orb2 jobboard-hero-orb"></div>
+      <div class="auth-left-logo jobboard-logo jobboard-logo--inverse" onclick="goScreen(0)">job<span>board</span></div>
+
+      <div class="auth-left-body">
+        <h2>
+          Bem-vindo<br/>de volta!<br/>
+          <span class="grad">Continue de onde parou.</span>
+        </h2>
+        <p>Seu currículo, suas candidaturas e suas análises ATS estão aqui te esperando.</p>
+        <!-- jobboard-auth-left-features: Bulleted feature list -->
+        <div class="auth-feature-list jobboard-auth-left-features">
+          <div class="auth-feat jobboard-auth-left-features__item">
+            <div class="auth-feat-ico jobboard-auth-left-features__icon">📊</div>
+            Dashboard de candidaturas atualizado
+          </div>
+          <div class="auth-feat jobboard-auth-left-features__item">
+            <div class="auth-feat-ico jobboard-auth-left-features__icon">🔔</div>
+            Novas vagas desde seu último acesso
+          </div>
+          <div class="auth-feat jobboard-auth-left-features__item">
+            <div class="auth-feat-ico jobboard-auth-left-features__icon">✦</div>
+            Continue o Tailoring das suas vagas salvas
+          </div>
+        </div>
+      </div>
+
+      <div class="auth-left-foot">
+        <!-- jobboard-social-proof: Stacked avatars + text -->
+      <div class="social-proof jobboard-social-proof">
+          <div class="avatars jobboard-social-proof__avatars">
+            <div class="av" style="background:linear-gradient(135deg,var(--primary),var(--accent));">MC</div>
+            <div class="av" style="background:linear-gradient(135deg,#60a5fa,#34d399);">RL</div>
+            <div class="av" style="background:linear-gradient(135deg,#fb923c,#f0abfc);">AS</div>
+          </div>
+          <div class="sp-text jobboard-social-proof__text">
+            <strong>Novos candidatos</strong> encontrando vagas<br/>
+            agora mesmo
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- RIGHT: Login form -->
+    <!-- jobboard-auth-form: Right panel form container -->
+    <div class="auth-right jobboard-auth-form">
+      <div class="auth-form-wrap">
+        <div class="auth-form-logo jobboard-logo jobboard-logo--light" onclick="goScreen(0)">job<span>board</span></div>
+
+        <div class="auth-title jobboard-auth-form__title">Entrar na sua conta</div>
+        <div class="auth-sub jobboard-auth-form__sub">Não tem conta? <a onclick="goScreen(1)">Criar gratuitamente</a></div>
+
+        <!-- jobboard-social-login-btn (repeated): OAuth provider buttons -->
+        <div class="social-btns jobboard-social-btns">
+          <button class="social-btn jobboard-social-login-btn">
+            <svg width="18" height="18" viewBox="0 0 18 18"><path d="M17.64 9.2a10.34 10.34 0 0 0-.16-1.84H9v3.48h4.84a4.14 4.14 0 0 1-1.8 2.72v2.26h2.92A8.78 8.78 0 0 0 17.64 9.2z" fill="#4285F4"/><path d="M9 18a8.59 8.59 0 0 0 5.96-2.18l-2.92-2.26a5.43 5.43 0 0 1-8.07-2.85H.96v2.33A9 9 0 0 0 9 18z" fill="#34A853"/><path d="M3.97 10.71a5.41 5.41 0 0 1 0-3.42V4.96H.96a9 9 0 0 0 0 8.08z" fill="#FBBC05"/><path d="M9 3.58a4.86 4.86 0 0 1 3.44 1.35l2.58-2.58A8.63 8.63 0 0 0 9 0 9 9 0 0 0 .96 4.96L3.97 7.3A5.36 5.36 0 0 1 9 3.58z" fill="#EA4335"/></svg>
+            Google
+          </button>
+          <button class="social-btn jobboard-social-login-btn">
+            <i class="fab fa-linkedin" style="color:#0077b5;font-size:16px;"></i>
+            LinkedIn
+          </button>
+          <button class="social-btn jobboard-social-login-btn">
+            <i class="fab fa-github" style="font-size:16px;"></i>
+            GitHub
+          </button>
+        </div>
+
+        <!-- jobboard-divider-or: "ou com e-mail" divider -->
+        <div class="divider-row jobboard-divider-or">
+          <div class="divider-line"></div>
+          <div class="divider-text">ou com e-mail</div>
+          <div class="divider-line"></div>
+        </div>
+
+        <div class="fgroup jobboard-form-group">
+          <label class="flabel jobboard-form-group__label">E-mail</label>
+          <div class="finput-wrap jobboard-form-input-wrap">
+            <i class="fas fa-envelope finput-ico"></i>
+            <!-- jobboard-form-input-icon: Input with icon decoration -->
+          <input class="finput has-icon jobboard-form-input jobboard-form-input--icon" type="email" placeholder="seu@email.com" value="lucas@email.com" />
+          </div>
+        </div>
+
+        <div class="fgroup jobboard-form-group">
+          <label class="flabel jobboard-form-group__label">
+            Senha
+            <a>Esqueci minha senha</a>
+          </label>
+          <div class="finput-wrap jobboard-form-input-wrap">
+            <i class="fas fa-lock finput-ico"></i>
+            <!-- jobboard-form-input-icon: Input with icon decoration -->
+          <input class="finput has-icon jobboard-form-input jobboard-form-input--icon" type="password" placeholder="Sua senha" id="loginPwd" value="••••••••" />
+            <i class="fas fa-eye finput-action" onclick="togglePwd('loginPwd',this)"></i>
+          </div>
+        </div>
+
+        <!-- Remember me -->
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:24px;">
+          <input type="checkbox" class="terms-check" id="rememberMe" checked />
+          <label class="check-box-custom jobboard-filter-checkbox__box" for="rememberMe"></label>
+          <div style="font-size:13.5px;color:var(--text-sub);">Manter conectado por 30 dias</div>
+        </div>
+
+        <!-- jobboard-submit-btn: Full-width auth submit button -->
+          <button class="submit-btn jobboard-submit-btn" onclick="goScreen(3)">
+          <i class="fas fa-sign-in-alt"></i>
+          Entrar na conta
+        </button>
+
+        <!-- Divider -->
+        <div class="divider-row" style="margin-top:20px;">
+          <div class="divider-line"></div>
+          <div class="divider-text">segurança</div>
+          <div class="divider-line"></div>
+        </div>
+
+        <div style="display:flex;align-items:center;justify-content:center;gap:8px;font-size:12.5px;color:var(--text-light);">
+          <i class="fas fa-shield-alt" style="color:var(--primary);font-size:13px;"></i>
+          Conexão protegida com criptografia SSL
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div><!-- /screen2 -->
+
+
+<!-- SCREEN 3: redirect placeholder (goes to main app) -->
+<div id="screen3" class="screen" style="min-height:100vh;display:none;align-items:center;justify-content:center;flex-direction:column;gap:20px;">
+  <div style="font-size:48px;">🚀</div>
+  <div style="font-family:var(--font-head);font-size:24px;font-weight:800;color:var(--primary-dark);">Entrando no JobBoard…</div>
+  <div style="font-size:14px;color:var(--text-sub);">Esta tela redirecionaria para o app principal.</div>
+  <button onclick="goScreen(0)" style="background:var(--primary);color:#fff;border:none;border-radius:99px;padding:10px 24px;font-family:var(--font-body);font-size:14px;font-weight:600;cursor:pointer;margin-top:12px;">← Voltar à Landing</button>
+</div>
+
+<script>
+  /* ── Navigation ──────────────────────────── */
+  function goScreen(n) {
+    document.querySelectorAll('.screen').forEach(s => {
+      s.classList.remove('active');
+      s.style.display = '';
+    });
+    const t = document.getElementById('screen'+n);
+    t.classList.add('active');
+    if (n === 3) t.style.display = 'flex';
+    window.scrollTo(0,0);
+  }
+
+  function smoothTo(id) {
+    const el = document.getElementById(id);
+    if (el) el.scrollIntoView({ behavior:'smooth' });
+  }
+
+  /* ── Nav scroll effect ───────────────────── */
+  window.addEventListener('scroll', () => {
+    const nav = document.getElementById('mainNav');
+    if (!nav) return;
+    if (window.scrollY > 40) {
+      nav.classList.add('scrolled');
+      nav.classList.remove('dark');
+      nav.querySelectorAll('.nav-logo').forEach(l => { l.classList.add('light-logo'); l.style.color = ''; });
+      nav.querySelectorAll('.nav-links-lp').forEach(l => l.classList.add('light'));
+      nav.querySelectorAll('.nav-btn-ghost').forEach(b => b.classList.add('light'));
+      nav.querySelectorAll('.nav-btn-solid').forEach(b => b.classList.add('dark'));
+    } else {
+      nav.classList.remove('scrolled');
+      nav.classList.add('dark');
+      nav.querySelectorAll('.nav-logo').forEach(l => { l.classList.remove('light-logo'); l.style.color = '#fff'; });
+      nav.querySelectorAll('.nav-links-lp').forEach(l => l.classList.remove('light'));
+      nav.querySelectorAll('.nav-btn-ghost').forEach(b => b.classList.remove('light'));
+      nav.querySelectorAll('.nav-btn-solid').forEach(b => b.classList.remove('dark'));
+    }
+  });
+
+  /* ── Password toggle ─────────────────────── */
+  function togglePwd(id, ico) {
+    const inp = document.getElementById(id);
+    if (!inp) return;
+    const isHidden = inp.type === 'password';
+    inp.type = isHidden ? 'text' : 'password';
+    ico.classList.toggle('fa-eye', !isHidden);
+    ico.classList.toggle('fa-eye-slash', isHidden);
+  }
+
+  /* ── Password strength ───────────────────── */
+  const pwdInput = document.getElementById('pwdInput');
+  if (pwdInput) {
+    pwdInput.addEventListener('input', function() {
+      const v = this.value;
+      const bars = [document.getElementById('pb1'),document.getElementById('pb2'),document.getElementById('pb3'),document.getElementById('pb4')];
+      const lbl = document.getElementById('pwdLabel');
+      bars.forEach(b => { if(b) { b.className='pwd-bar'; } });
+
+      if (v.length === 0) { if(lbl) lbl.textContent='Digite sua senha'; lbl.style.color=''; return; }
+      let score = 0;
+      if (v.length >= 8) score++;
+      if (/[A-Z]/.test(v)) score++;
+      if (/[0-9]/.test(v)) score++;
+      if (/[^A-Za-z0-9]/.test(v)) score++;
+
+      const levels = ['weak','weak','medium','strong'];
+      const labels = ['Muito fraca','Fraca','Média','Forte'];
+      const colors = ['#ef4444','#ef4444','#fb923c','#34d399'];
+
+      for (let i=0;i<score;i++) { if(bars[i]) bars[i].classList.add(levels[score-1]); }
+      if (lbl) { lbl.textContent = labels[score-1] || 'Muito fraca'; lbl.style.color = colors[score-1] || '#ef4444'; }
+    });
+  }
+
+  /* ── Register steps ──────────────────────── */
+  let regStep = 1;
+  function regNextStep() {
+    if (regStep === 1) {
+      document.getElementById('reg-step1').style.display = 'none';
+      document.getElementById('reg-step2').style.display = 'block';
+      document.getElementById('rs1').className = 'rs-circle done';
+      document.getElementById('rs1').innerHTML = '<i class="fas fa-check" style="font-size:10px;"></i>';
+      document.getElementById('rl1').className = 'rs-label done';
+      document.getElementById('rs2').className = 'rs-circle active';
+      document.getElementById('rl2').className = 'rs-label active';
+      document.getElementById('rl12').className = 'rs-line done';
+      regStep = 2;
+    } else if (regStep === 2) {
+      document.getElementById('reg-step2').style.display = 'none';
+      document.getElementById('reg-step3').style.display = 'block';
+      document.getElementById('rs2').className = 'rs-circle done';
+      document.getElementById('rs2').innerHTML = '<i class="fas fa-check" style="font-size:10px;"></i>';
+      document.getElementById('rl2').className = 'rs-label done';
+      document.getElementById('rs3').className = 'rs-circle active';
+      document.getElementById('rl3').className = 'rs-label active';
+      document.getElementById('rl23').className = 'rs-line done';
+      regStep = 3;
+    }
+  }
+  function regPrevStep() {
+    if (regStep === 2) {
+      document.getElementById('reg-step2').style.display = 'none';
+      document.getElementById('reg-step1').style.display = 'block';
+      document.getElementById('rs1').className = 'rs-circle active';
+      document.getElementById('rs1').innerHTML = '1';
+      document.getElementById('rl1').className = 'rs-label active';
+      document.getElementById('rs2').className = 'rs-circle';
+      document.getElementById('rs2').innerHTML = '2';
+      document.getElementById('rl2').className = 'rs-label';
+      document.getElementById('rl12').className = 'rs-line';
+      regStep = 1;
+    }
+  }
+
+  /* ── Role card select ────────────────────── */
+  function selectRole(el) {
+    el.closest('.role-cards').querySelectorAll('.role-card').forEach(c => c.classList.remove('selected'));
+    el.classList.add('selected');
+  }
+
+  /* ── Modality chips ──────────────────────── */
+  document.querySelectorAll('.tone-chip, [data-toggle]').forEach(c => {
+    c.addEventListener('click', function() { this.classList.toggle('active'); });
+  });
+
+  /* Modality chips in register step 2 */
+  document.querySelectorAll('#reg-step2 span[style]').forEach(chip => {
+    chip.addEventListener('click', function() {
+      const isActive = this.style.background.includes('primary-light') || this.style.background === 'var(--primary-light)';
+      if (isActive) {
+        this.style.borderColor = 'var(--border)';
+        this.style.background = '';
+        this.style.color = 'var(--text-sub)';
+      } else {
+        this.style.borderColor = 'var(--primary)';
+        this.style.background = 'var(--primary-light)';
+        this.style.color = 'var(--primary-dark)';
+      }
+    });
+  });
+</script>
+</body>
+</html>
