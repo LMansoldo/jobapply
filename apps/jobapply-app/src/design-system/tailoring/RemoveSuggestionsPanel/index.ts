@@ -1,1 +1,0 @@
-export { RemoveSuggestionsPanel } from './RemoveSuggestionsPanel'

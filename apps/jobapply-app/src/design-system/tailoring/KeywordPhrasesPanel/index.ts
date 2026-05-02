@@ -1,1 +1,0 @@
-export { KeywordPhrasesPanel } from './KeywordPhrasesPanel'
