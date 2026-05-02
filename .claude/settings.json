@@ -1,0 +1,29 @@
+{
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "PKG_ROOT=$(/Users/lucasmansoldo/Projects/jobapply/scripts/find-package-root.sh \"$CLAUDE_TOOL_INPUT_FILE_PATH\" 2>/dev/null) && [ -n \"$PKG_ROOT\" ] && cd \"$PKG_ROOT\" && yarn lint --quiet 2>&1 | head -20 || true"
+          },
+          {
+            "type": "command",
+            "command": "PKG_ROOT=$(/Users/lucasmansoldo/Projects/jobapply/scripts/find-package-root.sh \"$CLAUDE_TOOL_INPUT_FILE_PATH\" 2>/dev/null) && [ -n \"$PKG_ROOT\" ] && cd \"$PKG_ROOT\" && yarn typecheck 2>&1 | head -20 || true"
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "cd /Users/lucasmansoldo/Projects/jobapply && yarn workspaces run build 2>&1 | tail -30"
+          }
+        ]
+      }
+    ]
+  }
+}
