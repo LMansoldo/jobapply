@@ -48,7 +48,7 @@ export function mapFromMarkdown(cvMarkdown: string): MappedCV {
   // Parse individual skill items for entity extraction
   const skillItems = skillsRaw
     .replace(/\*\*[^*]+:\*\*/g, '')   // strip bold category labels
-    .split(/[,·|\/\n;]+/)
+    .split(/[,·|/\n;]+/)
     .map(t => t.replace(/^[-•*\s]+/, '').trim())
     .filter(t => t.length >= 2 && t.length <= 50 && !t.startsWith('#') && !/^\*/.test(t))
 

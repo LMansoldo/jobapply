@@ -26,6 +26,7 @@ export function sanitizeUserInput(text: string): string {
   let s = text.slice(0, MAX_INPUT_LENGTH)
 
   // Strip null bytes and non-printable control characters (keep \n \r \t)
+  // eslint-disable-next-line no-control-regex
   s = s.replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, '')
 
   // Remove structural prompt tags
