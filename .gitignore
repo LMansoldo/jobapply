@@ -9,4 +9,5 @@ coverage/
 *.tsbuildinfo
 .eslintcache
 .turbo/
-.claude/worktrees/
+apps/**/.claude/
+packages/**/.claude/
