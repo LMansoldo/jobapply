@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Carousel</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background: #1e1e1e;
+            color: white;
+        }
+        .test-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: #2d2d2d;
+            padding: 20px;
+            border-radius: 8px;
+        }
+        .carousel-container {
+            width: 100%;
+            border: 2px solid cyan;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        .keyword-item {
+            background: rgba(239, 68, 68, 0.12);
+            border: 1px solid rgba(239, 68, 68, 0.35);
+            border-radius: 4px;
+            color: rgba(239, 68, 68, 0.85);
+            padding: 8px 16px;
+            margin: 0 5px;
+            cursor: pointer;
+        }
+        .keyword-item:hover {
+            background: rgba(239, 68, 68, 0.22);
+        }
+    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/antd/5.16.5/antd.min.css">
+</head>
+<body>
+    <div class="test-container">
+        <h1>Test Ant Design Carousel</h1>
+        <p>This tests if Ant Design Carousel works standalone.</p>
+
+        <div class="carousel-container">
+            <div id="carousel-root"></div>
+        </div>
+
+        <div id="logs"></div>
+    </div>
+
+    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@ant-design/icons@5.3.7/dist/index.umd.js"></script>
+    <script src="https://unpkg.com/antd@5.16.5/dist/antd.min.js"></script>
+
+    <script>
+        const { Carousel } = antd
+
+        function TestCarousel() {
+            const items = ['React', 'TypeScript', 'JavaScript', 'Node.js', 'Python', 'Java', 'C++']
+
+            const settings = {
+                dots: false,
+                arrows: true,
+                infinite: false,
+                slidesToShow: 5,
+                slidesToScroll: 2,
+                swipeToSlide: true,
+                draggable: true,
+            }
+
+            return React.createElement('div', { style: { width: '100%' } },
+                React.createElement(Carousel, settings,
+                    items.map(item =>
+                        React.createElement('div', { key: item, style: { padding: '0 10px' } },
+                            React.createElement('div', {
+                                className: 'keyword-item',
+                                onClick: () => console.log('Clicked:', item)
+                            }, item)
+                        )
+                    )
+                )
+            )
+        }
+
+        const root = ReactDOM.createRoot(document.getElementById('carousel-root'))
+        root.render(React.createElement(TestCarousel))
+
+        console.log('Ant Design Carousel test loaded')
+    </script>
+</body>
+</html>

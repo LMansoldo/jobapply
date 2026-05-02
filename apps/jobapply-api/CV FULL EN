@@ -1,0 +1,89 @@
+## Summary
+
+Senior Front-End Engineer with 7+ years building financial platforms, data visualization tools, interactive documentation, and AI-powered applications.
+Specialized in Svelte, React, and TypeScript — focused on performance, accessibility, scalable component architecture, and AI-driven development with Agents, MCP, RAG, and Context Engineering.
+
+
+## Skills
+
+**Frontend:** Svelte, React, Redux, Next.js, Qwik, Astro, Tailwind, Storybook
+**Languages:** TypeScript, JavaScript, PHP, Elixir, Lua, Bash
+**Tooling:** Vite, Webpack, Docker, Git, Jenkins, GitHub Actions, AWS
+**Testing:** Jest, Cypress, Playwright
+**Runtime:** Node.js, Express
+**AI Engineering:** AI Agents, MCP Servers, MCP Clients, RAG, Fine-tuning, Embeddings, Context Engineering, Prompt Engineering, LLM Integration, AI Chatbots, Vector Databases, Anthropic API, OpenAI API, LangChain
+
+**API & Integration:** RESTful APIs, GraphQL, WebSockets, Microservices, MongoDB
+**Frontend Craft:** UI/UX, Accessibility, Mobile-first, Performance Optimization, Component Architecture, Web Components, SASS/LESS, Cross-browser Compatibility
+**Engineering:** TDD, DevOps & CI/CD, SSR, Clean Architecture, Technical Leadership
+**AI & Automation:** AI Agent Development, Automated AI Workflows, Retrieval-Augmented Generation (RAG), Model Fine-tuning, Embedding Pipelines, Context Engineering, MCP Server & Client Development, AI Chatbot Creation, Semantic Search, AI-assisted Development
+
+**Soft Skills:** Delivering high value balancing quality and delivery cycles with excellent time management, Problem-solving and critical thinking, optimizing systems and addressing complex challenges, Knowledge sharing through code reviews, documentation, and pair programming, Highly adaptable in remote teams, consistently meeting deadlines and achieving business objectives
+
+## Experience
+
+### Senior Front-End Developer — Venturus
+*Campinas, Brazil · Jun 2025 - Present*
+
+Develop AI-powered internal tools and mentor junior developers in a consultancy serving enterprise clients.
+
+- Mentor Jr. developers in acquiring new knowledge, applying methodologies, critical thinking, and effective AI usage.
+- Develop AI workflows to automate code review, task management, metrics, and granular context control.
+- Built AI agents for pre-analysis of project bugs, TDD planning and E2E testing — reducing test elaboration and debug time by 60%.
+- Built screen annotation tools with COCO-format annotations for AI agent training, UI creation with assertive prompts and task planning — reducing planning time by 90%.
+- Developed MCP Servers with project instructions, component context, libraries, design tokens and screens — responsible for reducing AI Slop in initial prompts.
+- Refactoring legacy architecture areas in projects to reduce unreadable code and optimize features.
+- Building complex components using LLMs and MCP Clients (Claude Code, Cline, etc).
+
+### Senior Front-End Developer — Ília Digital (JPMC)
+*Brasília, Brazil · Apr 2022 - Apr 2025*
+
+Led front-end development for banking and investment platforms used by thousands of JPMC clients.
+
+- Led the development of an MVP to manage bank accounts, investments, and company ownership using Svelte, TypeScript, SCSS, Tailwind, Vite, DevContainer, and Jest — reducing lifecycle issues by 90%.
+- Delivered a PWA for managing expenses, transfers, and property investments using Svelte, TypeScript, SCSS, Tailwind, Vite, Playwright, and Jest — reducing app loading times by 40% via Lazy Loading and code splitting.
+- Designed and implemented a component library using Svelte, Tailwind, Vite, Jest, and Storybook — decreasing sprint development time by 70%.
+- Implemented endpoint documentation components using Svelte, TypeScript, SCSS, Tailwind, Storybook, Vite, and Markdown — outperforming Docusaurus + React.
+- Spearheaded an interactive documentation platform with microfrontend approach using React, Docusaurus, Widdershins, Webpack, Svelte, TypeScript, and PostCSS.
+- Built a high-performance PWA for managing credit cards, points, payments, and budget groups using Svelte, TypeScript, SCSS, Tailwind, Vite, and Storybook — reducing sprint time by 70% with a custom component library over Material-UI.
+- Refactored the static documentation platform using Svelte, Vite, TypeScript, PostCSS, and Tailwind to process OpenAPI spec files — reducing first load by 60% and script execution from 11s to 1s via SSR and Lazy Loading.
+- Built an SSR documentation app with Svelte, Qwik, React, and Astro to benchmark performance, state management, and bundle size — capable of generating static pages with CRUD components from a JSON file.
+- Created an NPM Package with core static documentation features reusable across React, Vue.js, Svelte, and Angular — built with Vite, TypeScript, Jest, and Salt-DS.
+
+### Mid Front-End Developer — Stone Payments
+*Rio de Janeiro, Brazil · Sep 2021 - Apr 2022*
+
+Maintained embedded payment device interfaces and scalable platform applications.
+
+- Maintained and improved embedded systems for payment devices.
+- Leveraged Svelte, JavaScript, and Docker to deliver scalable platform applications, reducing small screen issues by 70%.
+
+### Mid Front-End Developer — Decode Data Marketing
+*São Paulo, Brazil · Apr 2020 - Sep 2021*
+
+Built landing pages and data visualization PWAs for BTG Pactual and other clients.
+
+- Built landing pages for BTG Pactual using React, Redux, Gatsby, Styled Components, and TypeScript.
+- Developed PWAs for visualizing public and private data trends using React, Redux, Styled Components, D3 Charts, and a full CI/CD pipeline with Jenkins.
+- Developed a Node.js and MongoDB API to fetch and return data trends.
+
+### Junior Front-End Developer — Cuponeria
+*Rio de Janeiro, Brazil · Jun 2019 - Mar 2020*
+
+Developed a discount coupon app focused on data collection and partner insights.
+
+- Built a discount coupon app focused on data collection and insights for industry partners using React, Next.js, and Styled Components.
+- Built a design system improving development time by 40% using React, TypeScript, Storybook, Figma, and Jest.
+
+### Junior Front-End Developer — E-Create
+*Rio de Janeiro, Brazil · Jul 2018 - Jun 2019*
+ 
+Designed custom WordPress and Moodle themes and plugins for educational clients.
+
+- Designed and implemented custom WordPress and Moodle themes and plugins.
+- Migrated legacy PHP code to modern standards, improving maintainability.
+
+## Education
+
+**Bachelor's Degree in Information Systems**
+Universidade Estácio de Sá · Dec 2022

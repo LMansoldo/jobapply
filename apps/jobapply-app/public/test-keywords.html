@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test KeywordsPanel</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background: #1e1e1e;
+            color: white;
+        }
+        .test-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: #2d2d2d;
+            padding: 20px;
+            border-radius: 8px;
+        }
+        .logs {
+            margin-top: 20px;
+            background: #1a1a1a;
+            color: #fff;
+            padding: 15px;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 12px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        .log-entry {
+            margin: 5px 0;
+            padding: 5px;
+            border-bottom: 1px solid #333;
+        }
+        .log-entry.info { color: #4fc3f7; }
+        .log-entry.warn { color: #ffb74d; }
+        .log-entry.error { color: #f44336; }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>KeywordsPanel Test</h1>
+        <p>Open browser console (F12) to see debug logs from the component.</p>
+        <p>Check for:</p>
+        <ul>
+            <li>"KeywordsPanel render:" log showing keyword counts</li>
+            <li>"Container width:" log showing width calculation</li>
+            <li>"Calculated slidesToShow:" log showing slides calculation</li>
+            <li>Click on keywords should log "Inserting keyword:" or "Replacing keyword:"</li>
+        </ul>
+        <div id="root"></div>
+        <div class="logs" id="logs">
+            <div class="log-entry info">Console logs will appear here when you open the app...</div>
+        </div>
+    </div>
+
+    <script type="module">
+        import React from 'https://esm.sh/react@18'
+        import ReactDOM from 'https://esm.sh/react-dom@18/client'
+        import { KeywordsPanel } from './src/design-system/tailoring/KeywordsPanel/index.ts'
+
+        const testKeywords = {
+            toAdd: ['React', 'TypeScript', 'JavaScript', 'Node.js', 'Python', 'Java', 'C++', 'Go', 'Rust', 'Swift'],
+            toRephrase: [
+                { from: 'experienced', to: 'proficient' },
+                { from: 'good at', to: 'skilled in' },
+                { from: 'know', to: 'have expertise in' },
+                { from: 'familiar with', to: 'experienced with' },
+            ],
+        }
+
+        function TestApp() {
+            const handleInsertKeyword = (keyword) => {
+                console.log('INSERT keyword:', keyword)
+                logToScreen('INSERT keyword: ' + keyword, 'info')
+            }
+
+            const handleReplaceKeyword = (from, to) => {
+                console.log('REPLACE keyword:', from, '->', to)
+                logToScreen(`REPLACE keyword: ${from} -> ${to}`, 'info')
+            }
+
+            return React.createElement('div', { style: { padding: '20px', border: '2px solid cyan' } },
+                React.createElement(KeywordsPanel, {
+                    editorKeywords: testKeywords,
+                    onInsertKeyword: handleInsertKeyword,
+                    onReplaceKeyword: handleReplaceKeyword
+                })
+            )
+        }
+
+        function logToScreen(message, level = 'info') {
+            const logsElement = document.getElementById('logs')
+            const logEntry = document.createElement('div')
+            logEntry.className = `log-entry ${level}`
+            logEntry.textContent = message
+            logsElement.appendChild(logEntry)
+            logsElement.scrollTop = logsElement.scrollHeight
+        }
+
+        // Capture console logs
+        const originalLog = console.log
+        const originalWarn = console.warn
+        const originalError = console.error
+
+        console.log = function(...args) {
+            originalLog.apply(console, args)
+            logToScreen(args.map(arg =>
+                typeof arg === 'object' ? JSON.stringify(arg) : String(arg)
+            ).join(' '), 'info')
+        }
+
+        console.warn = function(...args) {
+            originalWarn.apply(console, args)
+            logToScreen(args.map(arg =>
+                typeof arg === 'object' ? JSON.stringify(arg) : String(arg)
+            ).join(' '), 'warn')
+        }
+
+        console.error = function(...args) {
+            originalError.apply(console, args)
+            logToScreen(args.map(arg =>
+                typeof arg === 'object' ? JSON.stringify(arg) : String(arg)
+            ).join(' '), 'error')
+        }
+
+        const root = ReactDOM.createRoot(document.getElementById('root'))
+        root.render(React.createElement(TestApp))
+    </script>
+</body>
+</html>

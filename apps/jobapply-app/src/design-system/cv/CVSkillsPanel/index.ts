@@ -1,0 +1,1 @@
+export { CVSkillsPanel } from './CVSkillsPanel'

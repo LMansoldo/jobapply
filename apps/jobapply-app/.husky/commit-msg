@@ -1,0 +1,36 @@
+#!/usr/bin/env sh
+
+commit_msg=$(cat "$1")
+
+pattern="^(feat|fix|bug|docs|style|refactor|test|chore|perf|ci|build|revert)\([A-Za-z][A-Za-z0-9]*\): .+"
+
+if ! echo "$commit_msg" | grep -qE "$pattern"; then
+  echo ""
+  echo "Commit bloqueado: mensagem fora do padrao semantico."
+  echo ""
+  echo "Formato:  type(Scope): descricao"
+  echo ""
+  echo "Tipos validos:"
+  echo "  feat      nova funcionalidade"
+  echo "  fix       correcao de bug"
+  echo "  bug       alias para fix"
+  echo "  refactor  refatoracao sem mudanca de comportamento"
+  echo "  docs      documentacao"
+  echo "  style     formatacao, lint (sem logica)"
+  echo "  test      adicao ou correcao de testes"
+  echo "  chore     tarefas de build, dependencias"
+  echo "  perf      melhoria de performance"
+  echo "  ci        mudancas de CI/CD"
+  echo "  build     mudancas no sistema de build"
+  echo "  revert    reversao de commit"
+  echo ""
+  echo "Exemplos:"
+  echo "  feat(Auth): adicionar validacao de email"
+  echo "  bug(Tailoring): corrigir erro no parser de markdown"
+  echo "  refactor(Register): extrair logica de validacao do formulario"
+  echo "  chore(Deps): atualizar dependencias do projeto"
+  echo ""
+  echo "Recebido: '$commit_msg'"
+  echo ""
+  exit 1
+fi

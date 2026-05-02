@@ -1,0 +1,91 @@
+{
+  "name": "jobapply-app",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview --host",
+    "lint": "eslint src",
+    "lint:fix": "eslint src --fix",
+    "format": "prettier --write src",
+    "stylelint": "stylelint \"src/**/*.css\"",
+    "storybook": "storybook dev -p 6006",
+    "build-storybook": "storybook build",
+    "prepare": "husky",
+    "postbuild": "echo 'Build complete'"
+  },
+  "reactSnap": {
+    "source": "dist",
+    "destination": "dist",
+    "include": [
+      "/public/"
+    ],
+    "exclude": [
+      "/",
+      "/cv",
+      "/tailoring",
+      "/login",
+      "/register"
+    ],
+    "puppeteerArgs": [
+      "--no-sandbox",
+      "--disable-setuid-sandbox"
+    ],
+    "inlineCss": true
+  },
+  "dependencies": {
+    "@ant-design/icons": "^5.3.7",
+    "@emotion/css": "^11.13.5",
+    "@emotion/react": "^11.14.0",
+    "@emotion/styled": "^11.14.0",
+    "@monaco-editor/react": "^4.7.0",
+    "@tanstack/react-query": "^5.99.1",
+    "@tanstack/react-query-devtools": "^5.99.1",
+    "@tanstack/react-router": "^1.168.23",
+    "@tanstack/router-devtools": "^1.166.13",
+    "@tanstack/router-plugin": "^1.167.22",
+    "@xionkq/md-to-pdf": "^0.1.2",
+    "antd": "^5.17.0",
+    "axios": "^1.7.2",
+    "dayjs": "^1.11.11",
+    "i18next": "^26.0.3",
+    "pdfjs-dist": "^5.6.205",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-i18next": "^17.0.2",
+    "react-markdown": "^10.1.0",
+    "remark-gfm": "^4.0.1"
+  },
+  "lint-staged": {
+    "*.css": "stylelint --max-warnings 0"
+  },
+  "devDependencies": {
+    "@storybook/addon-a11y": "^8.6.18",
+    "@storybook/addon-essentials": "^8.6.14",
+    "@storybook/addon-interactions": "^8.6.14",
+    "@storybook/react": "^8.6.18",
+    "@storybook/react-vite": "^8.6.18",
+    "@types/pdfmake": "^0.3.2",
+    "@types/react": "^18.3.3",
+    "@types/react-dom": "^18.3.0",
+    "@typescript-eslint/eslint-plugin": "^8.58.0",
+    "@typescript-eslint/parser": "^8.58.0",
+    "@vitejs/plugin-react": "^4.3.0",
+    "autoprefixer": "^10.5.0",
+    "eslint": "^9.39.4",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-react": "^7.37.5",
+    "eslint-plugin-react-hooks": "^7.0.1",
+    "husky": "^9.1.7",
+    "lint-staged": "^16.4.0",
+    "prettier": "^3.8.1",
+    "react-snap": "^1.23.0",
+    "storybook": "^8.6.18",
+    "stylelint": "^17.6.0",
+    "stylelint-config-standard": "^40.0.0",
+    "typescript": "^5.4.5",
+    "vite": "^5.2.12"
+  }
+}
