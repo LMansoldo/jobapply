@@ -6,6 +6,7 @@
     "packages/*"
   ],
   "scripts": {
+    "dev": "concurrently --names \"api,agent,app\" --prefix-colors \"blue,green,magenta\" \"yarn workspace jobapply-api dev\" \"yarn workspace ats-agent dev\" \"yarn workspace jobapply-app dev\"",
     "dev:api": "yarn workspace jobapply-api dev",
     "dev:agent": "yarn workspace ats-agent dev",
     "dev:app": "yarn workspace jobapply-app dev",
@@ -13,6 +14,9 @@
     "typecheck": "yarn workspaces run typecheck",
     "build": "yarn workspaces run build",
     "test": "yarn workspaces run test --if-present"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.2"
   },
   "packageManager": "yarn@1.22.22"
 }
