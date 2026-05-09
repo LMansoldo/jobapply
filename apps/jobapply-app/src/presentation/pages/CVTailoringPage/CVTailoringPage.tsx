@@ -20,8 +20,6 @@ import { CoverLetterOnboardingFlow } from '../../../design-system/tailoring/Cove
 import type { VoiceAnswers } from '../../../domain/linkedin/types'
 import { VideoScriptWorkspace } from '../../../design-system/tailoring/VideoScriptWorkspace'
 import { InterviewWorkspace } from '../../../design-system/tailoring/InterviewWorkspace'
-import { LinkedInWorkspace } from '../../../design-system/tailoring/LinkedInWorkspace'
-import { useLinkedInAnalysis } from '../../../domain/linkedin/hooks/useLinkedInAnalysis'
 import { type TailoringEditorHandle } from '../../../design-system/tailoring/TailoringEditorPanel'
 import { mapATSReportToPanel, buildSuggestionsList, buildEditorKeywords } from '../../../domain/cv/tailoringHelpers'
 import { useTailoringWorkspace } from '../../../domain/cv/hooks/useTailoringWorkspace'
@@ -69,7 +67,6 @@ export default function CVTailoringPage() {
   })
 
   const ui = useTailoringPageUI({ atsReport: workspace.atsReport })
-  const linkedin = useLinkedInAnalysis()
   const [coverVoiceAnswers, setCoverVoiceAnswers] = useState<VoiceAnswers | null>(null)
 
   const { handleDownloadPDF, handleExportMarkdown, handleSaveAsVersion } = useTailoringExport({
@@ -219,15 +216,6 @@ export default function CVTailoringPage() {
             interviewPrep={workspace.interviewPrep}
             loading={workspace.interviewPrepLoading}
             onGenerate={workspace.handleGenerateInterviewPrep}
-          />
-        )}
-        {ui.activeTab === 'linkedin' && (
-          <LinkedInWorkspace
-            view={linkedin.result ? 'results' : 'pdf'}
-            analysis={linkedin.result}
-            loading={linkedin.loading}
-            onAnalyzePDF={(_file, _voiceAnswers) => Promise.resolve()}
-            onReset={linkedin.reset}
           />
         )}
       </div>
