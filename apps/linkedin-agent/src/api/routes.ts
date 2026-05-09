@@ -65,26 +65,28 @@ export async function registerRoutes(app: FastifyInstance): Promise<void> {
     jobs.set(requestId, job)
     reply.send({ requestId, status: 'pending' })
 
-    job.status = 'running'
-    try {
-      const state = await graph.invoke({ input })
-      const result: LinkedInResult = {
-        seo: {
-          before: state.seoBefore,
-          after: state.seoAfter,
-          delta: state.delta,
-        },
-        generation: state.generation,
-        locale: input.locale ?? 'en',
+    setImmediate(async () => {
+      job.status = 'running'
+      try {
+        const state = await graph.invoke({ input })
+        const result: LinkedInResult = {
+          seo: {
+            before: state.seoBefore,
+            after: state.seoAfter,
+            delta: state.delta,
+          },
+          generation: state.generation,
+          locale: input.locale ?? 'en',
+        }
+        job.status = 'done'
+        job.result = result
+      } catch (err) {
+        job.status = 'error'
+        job.error = err instanceof Error ? err.message : 'Internal error'
+        request.log.error({ err, requestId }, 'linkedin-agent: graph failed')
+      } finally {
+        job.completedAt = Date.now()
       }
-      job.status = 'done'
-      job.result = result
-    } catch (err) {
-      job.status = 'error'
-      job.error = err instanceof Error ? err.message : 'Internal error'
-      request.log.error({ err, requestId }, 'linkedin-agent: graph failed')
-    } finally {
-      job.completedAt = Date.now()
-    }
+    })
   })
 }

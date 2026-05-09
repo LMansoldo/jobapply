@@ -17,10 +17,10 @@ function detectLocale(profile: { headline: string; about: string; experience: st
 }
 
 export async function profileGeneratorNode(
-  state: Pick<GraphState, 'input' | 'normalizedProfile'>
+  state: Pick<GraphState, 'input' | 'normalizedProfile' | 'jdKeywords' | 'seoBefore'>
 ): Promise<Pick<GraphState, 'generation'>> {
   const { input, normalizedProfile } = state
-  const { targetRole, locale, voiceAnswers = [], anchorEvidence, positioning } = input
+  const { targetRole, locale, voiceAnswers = [], anchorEvidence, positioning, tone } = input
   const profile = normalizedProfile
 
   const resolvedLocale = locale ?? detectLocale(profile)
@@ -79,7 +79,7 @@ Inject subtle markers of human writing without making the text unprofessional:
 </human_markers>
 
 ${anchorEvidence ? `<anchor_evidence>\nMetric: ${anchorEvidence.metric}\nTimeframe: ${anchorEvidence.timeframe}\nAction: ${anchorEvidence.action}\n</anchor_evidence>` : ''}
-${positioning?.length ? `<positioning>${positioning.join(', ')}</positioning>` : ''}
+${positioning?.length ? `<positioning>\nArchetypes: ${positioning.join(', ')}${tone ? `\nTone: ${tone}` : ''}\n</positioning>` : ''}
 
 <linkedin_profile>
   <headline>${profile.headline}</headline>

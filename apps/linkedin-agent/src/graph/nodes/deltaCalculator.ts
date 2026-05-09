@@ -20,7 +20,7 @@ function buildGeneratedProfile(state: Pick<GraphState, 'generation' | 'normalize
 }
 
 export function deltaCalculatorNode(
-  state: Pick<GraphState, 'generation' | 'normalizedProfile' | 'jdKeywords' | 'seoBefore' | 'input'>
+  state: Pick<GraphState, 'generation' | 'normalizedProfile' | 'jdKeywords' | 'seoBefore' | 'input' | 'keywordDensityScore' | 'completenessScore' | 'roleAlignmentScore' | 'authorityScore' | 'specificityScore'>
 ): Pick<GraphState, 'seoAfter' | 'delta'> {
   const generatedProfile = buildGeneratedProfile(state)
 
