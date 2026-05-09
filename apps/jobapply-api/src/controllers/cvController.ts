@@ -480,7 +480,14 @@ export async function analyzeLinkedInDirect(req: AuthRequest, res: Response, nex
     const resolvedLocale = locale ?? (targetRole ? detectLocale(targetRole) : detectLocale(profile.headline));
 
     const sanitizedPayload = {
-      profile: sanitizeUserInput(JSON.stringify(profile)),
+      profile: {
+        headline: sanitizeUserInput(profile.headline || ''),
+        about: sanitizeUserInput(profile.about || ''),
+        experience: sanitizeUserInput(profile.experience || ''),
+        skills: sanitizeUserInput(profile.skills || ''),
+        education: sanitizeUserInput(profile.education || ''),
+        ...(profile.certifications ? { certifications: sanitizeUserInput(profile.certifications) } : {}),
+      },
       ...(targetRole && { targetRole: sanitizeUserInput(targetRole) }),
       locale: resolvedLocale,
       ...(voiceAnswers?.length && { voiceAnswers }),
