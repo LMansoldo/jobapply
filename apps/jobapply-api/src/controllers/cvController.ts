@@ -6,7 +6,7 @@ import Job from '../models/Job';
 import User from '../models/User';
 import PublishedCV from '../models/PublishedCV';
 import { tailorCV as tailorCVService, generateCoverLetter as generateCoverLetterLLM, generateVideoScript as generateVideoScriptLLM } from '../services/llmService';
-import { analyzeWithATS, generateCVWithATS, analyzeLinkedInWithATS, generateResumeWithATS } from '../services/atsService'
+import { analyzeWithATS, generateCVWithATS, generateResumeWithATS, analyzeLinkedInWithLinkedInAgent, getLinkedInJobResult } from '../services/atsService'
 import { sanitizeUserInput } from '../utils/sanitize'
 import { generateInterviewPrep } from '../services/interviewPrepService';
 
@@ -478,13 +478,38 @@ export async function analyzeLinkedInDirect(req: AuthRequest, res: Response, nex
     }
 
     const resolvedLocale = locale ?? (targetRole ? detectLocale(targetRole) : detectLocale(profile.headline));
-    const analysis = await analyzeLinkedInWithATS(profile, targetRole, resolvedLocale, voiceAnswers);
 
-    res.json({ ...(analysis as Record<string, unknown>), locale: resolvedLocale });
+    const sanitizedPayload = {
+      profile: sanitizeUserInput(JSON.stringify(profile)),
+      ...(targetRole && { targetRole: sanitizeUserInput(targetRole) }),
+      locale: resolvedLocale,
+      ...(voiceAnswers?.length && { voiceAnswers }),
+    };
+
+    // 1. Send to linkedin-agent
+    const { requestId } = await analyzeLinkedInWithLinkedInAgent(sanitizedPayload)
+
+    // 2. Poll until done (max 120s, 1.5s interval)
+    const MAX_WAIT_MS = 120_000
+    const POLL_INTERVAL_MS = 1_500
+    const deadline = Date.now() + MAX_WAIT_MS
+
+    while (Date.now() < deadline) {
+      const jobResult = await getLinkedInJobResult(requestId) as { status: string; result?: unknown; error?: string }
+      if (jobResult.status === 'done') {
+        res.json(jobResult.result); return;
+      }
+      if (jobResult.status === 'error') {
+        res.status(500).json({ error: jobResult.error ?? 'LinkedIn analysis failed' }); return;
+      }
+      await new Promise(resolve => setTimeout(resolve, POLL_INTERVAL_MS))
+    }
+
+    res.status(504).json({ error: 'LinkedIn analysis timed out' })
   } catch (err: unknown) {
     const e = err as { name?: string; status?: number; message?: string };
     if (e.status) {
-      res.status(502).json({ message: 'ATS agent error', detail: e.message });
+      res.status(502).json({ message: 'linkedin-agent error', detail: e.message });
       return;
     }
     next(err);

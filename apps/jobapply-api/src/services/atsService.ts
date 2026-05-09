@@ -52,31 +52,24 @@ export async function generateCVWithATS(cv: object, jobDescription: string, loca
   return response.json();
 }
 
-export async function analyzeLinkedInWithATS(profile: {
-  headline: string;
-  about: string;
-  experience: string;
-  skills: string;
-  education: string;
-  certifications?: string;
-}, targetRole?: string, locale?: string, voiceAnswers?: { label: string; answer: string }[]): Promise<unknown> {
-  const response = await fetch(`${ATS_AGENT_URL}/linkedin-analyze`, {
+export async function analyzeLinkedInWithLinkedInAgent(payload: unknown): Promise<{ requestId: string }> {
+  const url = `${process.env.LINKEDIN_AGENT_URL}/analyze`
+  const response = await fetch(url, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      profile,
-      ...(targetRole && { targetRole }),
-      ...(locale && { locale }),
-      ...(voiceAnswers?.length && { voiceAnswers }),
-    }),
-  });
-
+    body: JSON.stringify(payload),
+  })
   if (!response.ok) {
-    const body = await response.json().catch(() => ({})) as { message?: string };
-    const err = new Error(body.message ?? 'ATS agent error') as Error & { status: number };
-    err.status = response.status;
-    throw err;
+    throw new Error(`linkedin-agent /analyze failed: ${response.status}`)
   }
+  return response.json() as Promise<{ requestId: string }>
+}
 
-  return response.json();
+export async function getLinkedInJobResult(requestId: string): Promise<unknown> {
+  const url = `${process.env.LINKEDIN_AGENT_URL}/result/${requestId}`
+  const response = await fetch(url)
+  if (!response.ok) {
+    throw new Error(`linkedin-agent /result failed: ${response.status}`)
+  }
+  return response.json()
 }
