@@ -1,6 +1,9 @@
 const ATS_AGENT_URL = process.env.ATS_AGENT_URL;
 if (!ATS_AGENT_URL) throw new Error('ATS_AGENT_URL environment variable is not set');
 
+const LINKEDIN_AGENT_URL = process.env.LINKEDIN_AGENT_URL;
+if (!LINKEDIN_AGENT_URL) throw new Error('LINKEDIN_AGENT_URL environment variable is not set');
+
 export async function analyzeWithATS(cvMarkdown: string, jobDescription: string, locale?: string, platform?: string, jobUrl?: string): Promise<unknown> {
   const response = await fetch(`${ATS_AGENT_URL}/analyze`, {
     method: 'POST',
@@ -53,7 +56,7 @@ export async function generateCVWithATS(cv: object, jobDescription: string, loca
 }
 
 export async function analyzeLinkedInWithLinkedInAgent(payload: unknown): Promise<{ requestId: string }> {
-  const url = `${process.env.LINKEDIN_AGENT_URL}/analyze`
+  const url = `${LINKEDIN_AGENT_URL}/analyze`
   const response = await fetch(url, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -66,7 +69,7 @@ export async function analyzeLinkedInWithLinkedInAgent(payload: unknown): Promis
 }
 
 export async function getLinkedInJobResult(requestId: string): Promise<unknown> {
-  const url = `${process.env.LINKEDIN_AGENT_URL}/result/${requestId}`
+  const url = `${LINKEDIN_AGENT_URL}/result/${requestId}`
   const response = await fetch(url)
   if (!response.ok) {
     throw new Error(`linkedin-agent /result failed: ${response.status}`)
