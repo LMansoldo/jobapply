@@ -1,10 +1,10 @@
 import { LinkedinOutlined } from '@ant-design/icons'
 import { useTranslation } from 'react-i18next'
-import type { LinkedInAnalysis } from '../../../../domain/linkedin/types'
+import type { LinkedInResult } from '../../../../domain/linkedin/types'
 import * as S from './ResultsPanel.styles'
 
 interface ResultsPanelProps {
-  analysis: LinkedInAnalysis
+  analysis: LinkedInResult
   onReset: () => void
 }
 
@@ -16,7 +16,7 @@ const SCORE_COLOR: Record<'weak' | 'moderate' | 'strong', string> = {
 
 export function ResultsPanel({ analysis, onReset }: ResultsPanelProps) {
   const { t } = useTranslation()
-  const { headlineAnalysis, aboutAudit, experienceGaps, keywordGaps, quickWins, overallScore } = analysis
+  const { headlineAnalysis, aboutAudit, experienceGaps, keywordGaps, quickWins, overallScore, voiceProfile } = analysis.generation
 
   return (
     <div className={S.grid}>
@@ -116,21 +116,21 @@ export function ResultsPanel({ analysis, onReset }: ResultsPanelProps) {
           </ol>
         </div>
 
-        {analysis.voiceProfile && (
+        {voiceProfile && !voiceProfile.rawInputMissing && (
           <div className={S.voiceProfileSection}>
             <p className={S.sectionLabel}>{t('tailoring.linkedinVoiceProfile')}</p>
-            {analysis.voiceProfile.signaturePatterns.length > 0 && (
+            {voiceProfile.signaturePatterns.length > 0 && (
               <>
                 <span className={S.voiceSubLabel}>{t('tailoring.linkedinSignaturePatterns')}</span>
                 <ul className={S.bulletList}>
-                  {analysis.voiceProfile.signaturePatterns.map((p, i) => (
+                  {voiceProfile.signaturePatterns.map((p, i) => (
                     <li key={i} className={S.bulletGreen}>{p}</li>
                   ))}
                 </ul>
               </>
             )}
             <span className={S.voiceSubLabel}>{t('tailoring.linkedinQualityNote')}</span>
-            <p className={S.qualityNote}>{analysis.voiceProfile.qualityNote}</p>
+            <p className={S.qualityNote}>{voiceProfile.qualityNote}</p>
           </div>
         )}
 

@@ -1,9 +1,9 @@
 import api, { USE_MOCK } from '../http/client'
-import type { LinkedInAnalysis, AnalyzeLinkedInPayload, LinkedInOAuthProfile, LinkedInProfile, VoiceAnswers } from '../../domain/linkedin/types'
+import type { LinkedInOAuthProfile, LinkedInProfile, VoiceAnswers, LinkedInInput, LinkedInResult } from '../../domain/linkedin/types'
 import { setLinkedInConnected } from '../../domain/linkedin/linkedinOAuth'
 import { parsePDFToLinkedInProfile } from '../../domain/linkedin/pdfParser'
 import type { User } from '../../domain/auth/types'
-import { MOCK_LINKEDIN_PROFILE, MOCK_LINKEDIN_ANALYSIS } from '../mock/linkedinMockData'
+import { MOCK_LINKEDIN_PROFILE, MOCK_LINKEDIN_RESULT } from '../mock/linkedinMockData'
 
 function oauthProfileToLinkedInProfile(oauth: LinkedInOAuthProfile): LinkedInProfile {
   return {
@@ -66,20 +66,26 @@ export async function handleLinkedInCallback(code: string, state: string): Promi
   return { action }
 }
 
-export async function analyzeLinkedIn(payload: AnalyzeLinkedInPayload): Promise<LinkedInAnalysis> {
-  if (USE_MOCK) {
-    await delay(1800)
-    return MOCK_LINKEDIN_ANALYSIS
+export async function analyzeLinkedIn(input: LinkedInInput): Promise<LinkedInResult> {
+  const token = localStorage.getItem('token')
+  const response = await fetch(`${import.meta.env.VITE_API_URL}/cv/linkedin/analyze`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify(input),
+  })
+  if (!response.ok) {
+    throw new Error(`LinkedIn analysis failed: ${response.status}`)
   }
-
-  const { data } = await api.post<LinkedInAnalysis>('/cv/linkedin/analyze', payload)
-  return data
+  return response.json() as Promise<LinkedInResult>
 }
 
-export async function analyzeLinkedInPDF(file: File, voiceAnswers?: VoiceAnswers): Promise<LinkedInAnalysis> {
+export async function analyzeLinkedInPDF(file: File, voiceAnswers?: VoiceAnswers): Promise<LinkedInResult> {
   if (USE_MOCK) {
     await delay(2000)
-    return MOCK_LINKEDIN_ANALYSIS
+    return MOCK_LINKEDIN_RESULT
   }
 
   const profile = await parsePDFToLinkedInProfile(file)

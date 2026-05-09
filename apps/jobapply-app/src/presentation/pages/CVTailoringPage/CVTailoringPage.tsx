@@ -69,7 +69,7 @@ export default function CVTailoringPage() {
   })
 
   const ui = useTailoringPageUI({ atsReport: workspace.atsReport })
-  const linkedin = useLinkedInAnalysis({ onError: handleError })
+  const linkedin = useLinkedInAnalysis()
   const [coverVoiceAnswers, setCoverVoiceAnswers] = useState<VoiceAnswers | null>(null)
 
   const { handleDownloadPDF, handleExportMarkdown, handleSaveAsVersion } = useTailoringExport({
@@ -223,11 +223,11 @@ export default function CVTailoringPage() {
         )}
         {ui.activeTab === 'linkedin' && (
           <LinkedInWorkspace
-            view={linkedin.view}
-            analysis={linkedin.analysis}
+            view={linkedin.result ? 'results' : 'pdf'}
+            analysis={linkedin.result}
             loading={linkedin.loading}
-            onAnalyzePDF={linkedin.handleAnalyzePDF}
-            onReset={linkedin.handleReset}
+            onAnalyzePDF={(_file, _voiceAnswers) => Promise.resolve()}
+            onReset={linkedin.reset}
           />
         )}
       </div>
