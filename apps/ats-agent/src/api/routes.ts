@@ -7,7 +7,6 @@ import { jdKeywordExtractorNode } from '../graph/nodes/jdKeywordExtractor'
 import { semanticAnalyzerNode } from '../graph/nodes/semanticAnalyzer'
 import { resumeGeneratorNode } from '../graph/nodes/resumeGenerator'
 import { interviewPrepAnalyzerNode } from '../graph/nodes/interviewPrepAnalyzer'
-import { linkedinAnalyzerNode } from '../graph/nodes/linkedinAnalyzer'
 import type { AgentInput, ATSReport, CV } from '../types'
 
 const SkillGroupSchema = z.object({
@@ -87,25 +86,6 @@ const AnalyzeBodySchema = z.object({
   locale: z.enum(['en', 'pt-BR']).optional(),
   platform: z.string().optional(),
   jobUrl: z.string().optional(),
-})
-
-const VoiceAnswerSchema = z.object({
-  label: z.string(),
-  answer: z.string(),
-})
-
-const LinkedInAnalyzeBodySchema = z.object({
-  profile: z.object({
-    headline: z.string(),
-    about: z.string(),
-    experience: z.string(),
-    skills: z.string(),
-    education: z.string(),
-    certifications: z.string().optional(),
-  }),
-  targetRole: z.string().optional(),
-  locale: z.enum(['en', 'pt-BR']).optional(),
-  voiceAnswers: z.array(VoiceAnswerSchema).optional(),
 })
 
 // ── Background job store ─────────────────────────────────────────────────────
@@ -241,30 +221,6 @@ export async function registerRoutes(app: FastifyInstance): Promise<void> {
       })
 
       return reply.send(resume)
-    } catch (err) {
-      const message = err instanceof Error ? err.message : 'Internal error'
-      return reply.status(502).send({ message })
-    }
-  })
-
-  app.post('/linkedin-analyze', async (request, reply) => {
-    const parse = LinkedInAnalyzeBodySchema.safeParse(request.body)
-    if (!parse.success) {
-      return reply.status(400).send({ message: parse.error.errors[0]?.message ?? 'Invalid request body' })
-    }
-
-    const { profile, targetRole, locale, voiceAnswers } = parse.data
-
-    try {
-      const linkedinAnalysis = await linkedinAnalyzerNode({
-        input: {
-          profile,
-          targetRole,
-          locale,
-          voiceAnswers,
-        },
-      })
-      return reply.send(linkedinAnalysis)
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Internal error'
       return reply.status(502).send({ message })
