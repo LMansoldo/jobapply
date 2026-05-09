@@ -6,7 +6,7 @@
     "packages/*"
   ],
   "scripts": {
-    "dev": "concurrently --names \"api,agent,app\" --prefix-colors \"blue,green,magenta\" \"yarn workspace jobapply-api dev\" \"yarn workspace ats-agent dev\" \"yarn workspace jobapply-app dev\"",
+    "dev": "concurrently --names \"api,agent,linkedin,app\" --prefix-colors \"blue,green,cyan,magenta\" \"yarn workspace jobapply-api dev\" \"yarn workspace ats-agent dev\" \"yarn workspace linkedin-agent dev\" \"yarn workspace jobapply-app dev\"",
     "dev:api": "yarn workspace jobapply-api dev",
     "dev:agent": "yarn workspace ats-agent dev",
     "dev:app": "yarn workspace jobapply-app dev",
