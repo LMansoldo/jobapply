@@ -7,9 +7,14 @@ function buildGeneratedProfile(state: Pick<GraphState, 'generation' | 'normalize
   return {
     headline: generation.headlineAnalysis.alternatives[0] ?? normalizedProfile.headline,
     about: generation.aboutAudit.rewrite ?? normalizedProfile.about,
-    experience: generation.experienceGaps.length > 0
-      ? generation.experienceGaps.map(g => `${g.role}\n${g.rewrite}`).join('\n\n')
-      : normalizedProfile.experience,
+    // Build a merged experience: start with original, then append all rewrites
+    // This ensures no roles are dropped when only partial rewrites exist
+    experience: (() => {
+      const experienceRewrites = generation.experienceGaps.map(g => g.rewrite).join('\n\n')
+      return experienceRewrites.length > 0
+        ? `${normalizedProfile.experience}\n\n${experienceRewrites}`
+        : normalizedProfile.experience
+    })(),
     skills: [
       ...normalizedProfile.skills.split(',').map(s => s.trim()),
       ...generation.keywordGaps.technical.slice(0, 5),
