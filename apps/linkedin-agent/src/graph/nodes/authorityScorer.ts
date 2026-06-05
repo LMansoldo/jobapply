@@ -1,7 +1,7 @@
 import { genAI } from '../../lib/gemini'
 import type { GraphState } from '../../types'
 
-const model = genAI.getGenerativeModel({ model: 'gemini-flash-lite-latest' })
+const model = genAI.getGenerativeModel({ model: 'gemini-3-flash-preview' })
 
 export async function authorityScorerNode(
   state: Pick<GraphState, 'normalizedProfile' | 'input'>
