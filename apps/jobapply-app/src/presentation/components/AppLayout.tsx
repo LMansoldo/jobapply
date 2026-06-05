@@ -4,6 +4,7 @@ import {
   FileSearchOutlined,
   UserOutlined,
   LogoutOutlined,
+  LinkedinOutlined,
 } from '@ant-design/icons'
 import { useNavigate, useRouterState, Outlet } from '@tanstack/react-router'
 import { useTranslation } from 'react-i18next'
@@ -15,7 +16,7 @@ import { AppHeader as DSAppHeader } from '../../design-system/layout/AppHeader'
 import { useAuth } from '../../application/providers/AuthProvider'
 import * as styles from './AppLayout.styles'
 
-const MOBILE_NAV_KEYS = ['jobs', 'tailoring', 'profile']
+const MOBILE_NAV_KEYS = ['jobs', 'tailoring', 'linkedin', 'profile']
 
 const { useBreakpoint } = Grid
 
@@ -57,6 +58,13 @@ export default function AppLayout() {
       icon: <FileSearchOutlined />,
       href: '/tailoring',
       active: pathname === '/tailoring',
+    },
+    {
+      key: 'linkedin',
+      label: t('nav.linkedin'),
+      icon: <LinkedinOutlined />,
+      href: '/linkedin',
+      active: pathname === '/linkedin' || pathname.startsWith('/linkedin/'),
     },
     {
       key: 'profile',

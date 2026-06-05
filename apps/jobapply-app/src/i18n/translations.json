@@ -73,6 +73,7 @@
       "profile": "Perfil",
       "cv": "CV",
       "tailoring": "Tailoring",
+      "linkedin": "LinkedIn",
       "user": "Usuário",
       "publishJob": "Publicar Vaga"
     },
@@ -678,6 +679,7 @@
       "profile": "Profile",
       "cv": "CV",
       "tailoring": "Tailoring",
+      "linkedin": "LinkedIn",
       "user": "User",
       "publishJob": "Post a Job"
     },

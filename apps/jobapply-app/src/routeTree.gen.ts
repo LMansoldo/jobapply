@@ -17,9 +17,9 @@ import { Route as AuthRouteImport } from './routes/_auth'
 import { Route as AuthIndexRouteImport } from './routes/_auth/index'
 import { Route as PublicPublicIdRouteImport } from './routes/public/$publicId'
 import { Route as AuthTailoringIndexRouteImport } from './routes/_auth/tailoring/index'
+import { Route as AuthLinkedinIndexRouteImport } from './routes/_auth/linkedin/index'
 import { Route as AuthCvIndexRouteImport } from './routes/_auth/cv/index'
 import { Route as AuthTailoringJobIdRouteImport } from './routes/_auth/tailoring/$jobId'
-import { Route as AuthLinkedinIndexRouteImport } from './routes/_auth/linkedin/index'
 
 const RegisterRoute = RegisterRouteImport.update({
   id: '/register',
@@ -60,14 +60,14 @@ const AuthTailoringIndexRoute = AuthTailoringIndexRouteImport.update({
   path: '/tailoring/',
   getParentRoute: () => AuthRoute,
 } as any)
-const AuthCvIndexRoute = AuthCvIndexRouteImport.update({
-  id: '/cv/',
-  path: '/cv/',
-  getParentRoute: () => AuthRoute,
-} as any)
 const AuthLinkedinIndexRoute = AuthLinkedinIndexRouteImport.update({
   id: '/linkedin/',
   path: '/linkedin/',
+  getParentRoute: () => AuthRoute,
+} as any)
+const AuthCvIndexRoute = AuthCvIndexRouteImport.update({
+  id: '/cv/',
+  path: '/cv/',
   getParentRoute: () => AuthRoute,
 } as any)
 const AuthTailoringJobIdRoute = AuthTailoringJobIdRouteImport.update({
@@ -85,8 +85,8 @@ export interface FileRoutesByFullPath {
   '/public/$publicId': typeof PublicPublicIdRoute
   '/tailoring/$jobId': typeof AuthTailoringJobIdRoute
   '/cv/': typeof AuthCvIndexRoute
-  '/tailoring/': typeof AuthTailoringIndexRoute
   '/linkedin/': typeof AuthLinkedinIndexRoute
+  '/tailoring/': typeof AuthTailoringIndexRoute
 }
 export interface FileRoutesByTo {
   '/linkedin-callback': typeof LinkedinCallbackRoute
@@ -97,8 +97,8 @@ export interface FileRoutesByTo {
   '/': typeof AuthIndexRoute
   '/tailoring/$jobId': typeof AuthTailoringJobIdRoute
   '/cv': typeof AuthCvIndexRoute
-  '/tailoring': typeof AuthTailoringIndexRoute
   '/linkedin': typeof AuthLinkedinIndexRoute
+  '/tailoring': typeof AuthTailoringIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -111,8 +111,8 @@ export interface FileRoutesById {
   '/_auth/': typeof AuthIndexRoute
   '/_auth/tailoring/$jobId': typeof AuthTailoringJobIdRoute
   '/_auth/cv/': typeof AuthCvIndexRoute
-  '/_auth/tailoring/': typeof AuthTailoringIndexRoute
   '/_auth/linkedin/': typeof AuthLinkedinIndexRoute
+  '/_auth/tailoring/': typeof AuthTailoringIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -125,8 +125,8 @@ export interface FileRouteTypes {
     | '/public/$publicId'
     | '/tailoring/$jobId'
     | '/cv/'
-    | '/tailoring/'
     | '/linkedin/'
+    | '/tailoring/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/linkedin-callback'
@@ -137,8 +137,8 @@ export interface FileRouteTypes {
     | '/'
     | '/tailoring/$jobId'
     | '/cv'
-    | '/tailoring'
     | '/linkedin'
+    | '/tailoring'
   id:
     | '__root__'
     | '/_auth'
@@ -150,8 +150,8 @@ export interface FileRouteTypes {
     | '/_auth/'
     | '/_auth/tailoring/$jobId'
     | '/_auth/cv/'
-    | '/_auth/tailoring/'
     | '/_auth/linkedin/'
+    | '/_auth/tailoring/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -221,6 +221,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthTailoringIndexRouteImport
       parentRoute: typeof AuthRoute
     }
+    '/_auth/linkedin/': {
+      id: '/_auth/linkedin/'
+      path: '/linkedin'
+      fullPath: '/linkedin/'
+      preLoaderRoute: typeof AuthLinkedinIndexRouteImport
+      parentRoute: typeof AuthRoute
+    }
     '/_auth/cv/': {
       id: '/_auth/cv/'
       path: '/cv'
@@ -235,13 +242,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthTailoringJobIdRouteImport
       parentRoute: typeof AuthRoute
     }
-    '/_auth/linkedin/': {
-      id: '/_auth/linkedin/'
-      path: '/linkedin'
-      fullPath: '/linkedin/'
-      preLoaderRoute: typeof AuthLinkedinIndexRouteImport
-      parentRoute: typeof AuthRoute
-    }
   }
 }
 
@@ -249,16 +249,16 @@ interface AuthRouteChildren {
   AuthIndexRoute: typeof AuthIndexRoute
   AuthTailoringJobIdRoute: typeof AuthTailoringJobIdRoute
   AuthCvIndexRoute: typeof AuthCvIndexRoute
-  AuthTailoringIndexRoute: typeof AuthTailoringIndexRoute
   AuthLinkedinIndexRoute: typeof AuthLinkedinIndexRoute
+  AuthTailoringIndexRoute: typeof AuthTailoringIndexRoute
 }
 
 const AuthRouteChildren: AuthRouteChildren = {
   AuthIndexRoute: AuthIndexRoute,
   AuthTailoringJobIdRoute: AuthTailoringJobIdRoute,
   AuthCvIndexRoute: AuthCvIndexRoute,
-  AuthTailoringIndexRoute: AuthTailoringIndexRoute,
   AuthLinkedinIndexRoute: AuthLinkedinIndexRoute,
+  AuthTailoringIndexRoute: AuthTailoringIndexRoute,
 }
 
 const AuthRouteWithChildren = AuthRoute._addFileChildren(AuthRouteChildren)
