@@ -4,6 +4,27 @@ if (!ATS_AGENT_URL) throw new Error('ATS_AGENT_URL environment variable is not s
 const LINKEDIN_AGENT_URL = process.env.LINKEDIN_AGENT_URL;
 if (!LINKEDIN_AGENT_URL) throw new Error('LINKEDIN_AGENT_URL environment variable is not set');
 
+async function pollATSResult(requestId: string): Promise<unknown> {
+  const MAX_WAIT_MS = 120_000
+  const POLL_INTERVAL_MS = 2_000
+  const deadline = Date.now() + MAX_WAIT_MS
+
+  while (Date.now() < deadline) {
+    const res = await fetch(`${ATS_AGENT_URL}/result/${requestId}`)
+    if (!res.ok) {
+      const err = new Error('ATS agent result error') as Error & { status: number }
+      err.status = res.status
+      throw err
+    }
+    const job = await res.json() as { status: string; report?: unknown; adaptedCV?: unknown; resume?: unknown; error?: string }
+    if (job.status === 'done') return job.report
+    if (job.status === 'error') throw new Error(job.error ?? 'ATS analysis failed')
+    await new Promise(resolve => setTimeout(resolve, POLL_INTERVAL_MS))
+  }
+
+  throw new Error('ATS analysis timed out')
+}
+
 export async function analyzeWithATS(cvMarkdown: string, jobDescription: string, locale?: string, platform?: string, jobUrl?: string): Promise<unknown> {
   const response = await fetch(`${ATS_AGENT_URL}/analyze`, {
     method: 'POST',
@@ -18,7 +39,8 @@ export async function analyzeWithATS(cvMarkdown: string, jobDescription: string,
     throw err;
   }
 
-  return response.json();
+  const { requestId } = await response.json() as { requestId: string; status: string }
+  return pollATSResult(requestId)
 }
 
 export async function generateResumeWithATS(cvMarkdown: string, jobDescription: string, locale?: string): Promise<unknown> {
