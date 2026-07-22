@@ -5,7 +5,7 @@ import User from '../models/User';
 export async function register(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
     const { name, email, password } = req.body as { name?: unknown; email?: unknown; password?: unknown };
-    if (typeof email !== 'string' || typeof password !== 'string') {
+    if (typeof name !== 'string' || typeof email !== 'string' || typeof password !== 'string') {
       res.status(400).json({ message: 'Invalid payload' });
       return;
     }

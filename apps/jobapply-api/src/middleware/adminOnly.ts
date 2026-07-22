@@ -6,7 +6,7 @@ export async function adminOnly(req: AuthRequest, res: Response, next: NextFunct
   try {
     const admins = (process.env.ADMIN_EMAILS ?? '').split(',').map((e) => e.trim().toLowerCase()).filter(Boolean);
     const user = await User.findById(req.user.id);
-    if (!user || !admins.includes(user.email)) {
+    if (!user || !admins.includes(user.email.toLowerCase())) {
       res.status(403).json({ message: 'Access denied' });
       return;
     }
