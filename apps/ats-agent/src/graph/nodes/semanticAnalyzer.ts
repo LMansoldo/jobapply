@@ -1,6 +1,6 @@
 import { genAI } from '../../lib/gemini'
 import type { MappedCV, PlatformScore, KeywordPhrase, RemoveSuggestion } from '../../types'
-import { parseJobDescription } from '../../platforms/utils'
+import { parseJobDescription } from '../../lib/jd'
 
 const model = genAI.getGenerativeModel({ model: 'gemini-flash-lite-latest' })
 
