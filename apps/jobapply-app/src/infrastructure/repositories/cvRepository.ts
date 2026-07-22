@@ -203,8 +203,6 @@ export async function analyzeCV(
   locale: 'en' | 'pt-BR',
   jobDescription: string,
   cvMarkdown: string,
-  platform?: string,
-  jobUrl?: string,
 ): Promise<AnalyzeCVResponse> {
   if (USE_MOCK) {
     await delay(1200)
@@ -230,8 +228,6 @@ export async function analyzeCV(
 
   const body: Record<string, string> = { locale, jobDescription, cvMarkdown }
   if (jobId) body.jobId = jobId
-  if (platform) body.platform = platform
-  if (jobUrl) body.jobUrl = jobUrl
   const { data } = await api.post<AnalyzeCVResponse>(`/cv/${cvId}/analyze`, body)
   return data
 }

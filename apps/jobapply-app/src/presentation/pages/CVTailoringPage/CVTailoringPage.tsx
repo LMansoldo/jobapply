@@ -28,7 +28,6 @@ import { useTailoringPageData } from '../../../domain/cv/hooks/useTailoringPageD
 import { useTailoringPageUI } from '../../../domain/cv/hooks/useTailoringPageUI'
 import { useTailoringExport } from '../../../domain/cv/hooks/useTailoringExport'
 import { buildToneOptions, calculateScoreMetrics } from '../../../domain/cv/tailoringUIHelpers'
-import { AtsPlatformSelector } from '../../../domain/cv/components/AtsPlatformSelector'
 import * as styles from './CVTailoringPage.styles'
 
 export default function CVTailoringPage() {
@@ -55,13 +54,10 @@ export default function CVTailoringPage() {
     onJobNotFound: () => navigate({ to: '/' }),
   })
 
-  const [atsPlatform, setAtsPlatform] = useState<string | null>(null)
-
   const workspace = useTailoringWorkspace({
     cvId,
     job,
     manualMode: isManualMode,
-    atsPlatform: atsPlatform ?? undefined,
     onError: handleError,
     onNeedSetup,
   })
@@ -129,11 +125,6 @@ export default function CVTailoringPage() {
         />
         {ui.activeTab === 'ats' && (
           <div className={styles.workspaceContainer}>
-            <AtsPlatformSelector
-              jobUrl={job?.url}
-              value={atsPlatform}
-              onChange={setAtsPlatform}
-            />
             <ATSWorkspace
               atsLoading={workspace.atsLoading}
               panelData={panelData}

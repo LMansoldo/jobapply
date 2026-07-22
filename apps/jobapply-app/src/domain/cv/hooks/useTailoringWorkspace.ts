@@ -60,7 +60,6 @@ interface Params {
   job: Job | null
   /** When true, triggers setup flow even without a job (manual description mode) */
   manualMode?: boolean
-  atsPlatform?: string
   onError: (messageKey: string) => void
   onNeedSetup: (locales: ('en' | 'pt-BR')[], initialJobDescription: string) => Promise<WorkspaceSetupResult>
 }
@@ -69,7 +68,6 @@ export function useTailoringWorkspace({
   cvId,
   job,
   manualMode,
-  atsPlatform,
   onError,
   onNeedSetup,
 }: Params): TailoringWorkspaceState {
@@ -128,8 +126,8 @@ export function useTailoringWorkspace({
   )
 
   const atsQuery = useQuery({
-    queryKey: ['atsReport', cvId, chosenLocale, editedJobDescription, job?._id ?? null, atsPlatform ?? null, job?.url ?? null],
-    queryFn: () => analyzeCV(cvId, job?._id, chosenLocale!, editedJobDescription!, tailoredContent, atsPlatform, job?.url),
+    queryKey: ['atsReport', cvId, chosenLocale, editedJobDescription, job?._id ?? null],
+    queryFn: () => analyzeCV(cvId, job?._id, chosenLocale!, editedJobDescription!, tailoredContent),
     enabled: atsEnabled,
     staleTime: 30 * 60 * 1000,
   })
@@ -150,7 +148,7 @@ export function useTailoringWorkspace({
   })
 
   const reanalyzeMutation = useMutation({
-    mutationFn: () => analyzeCV(cvId, job?._id, chosenLocale!, editedJobDescription!, tailoredContent, atsPlatform, job?.url),
+    mutationFn: () => analyzeCV(cvId, job?._id, chosenLocale!, editedJobDescription!, tailoredContent),
     onSuccess: (result) => setDetectedLocale(result.locale),
     onError: () => onErrorRef.current('tailoring.analysisError'),
   })
