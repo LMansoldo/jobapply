@@ -1,4 +1,3 @@
-import type { Job } from '../../../domain/jobs/types'
 import type { ATSPanelData } from '../../../domain/cv/tailoringHelpers'
 import type { KeywordPhrase, RemoveSuggestion } from '../../../domain/cv/types'
 
@@ -31,8 +30,6 @@ export interface ATSWorkspaceProps {
   chosenLocale?: string
   /** Callback to update tailored content */
   onTailoredContentChange: (content: string) => void
-  /** Job data for preview */
-  job: Job | null
   /** Current ATS score */
   currentScore: number
   /** Projected score after changes */
@@ -45,10 +42,6 @@ export interface ATSWorkspaceProps {
   onReplaceKeyword: (from: string, to: string) => void
   /** Callback to re-run ATS analysis */
   onReanalyze: () => void
-  /** Callback to rewrite the CV via tailorCV endpoint (only available in job mode) */
-  onRewriteCV?: () => void
-  /** True while CV rewrite is running */
-  rewriteLoading?: boolean
   /** Callback to generate a 1-page resume (replaces editor content) */
   onGenerateResume?: () => void
   /** True while resume generation is running */

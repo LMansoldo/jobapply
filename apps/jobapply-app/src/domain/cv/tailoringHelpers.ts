@@ -90,10 +90,10 @@ export function buildEditorKeywords(report: ATSReport): EditorKeywords {
   }
 }
 
-export function mapATSReportToPanel(report: ATSReport, jobTags: string[]): ATSPanelData {
+export function mapATSReportToPanel(report: ATSReport): ATSPanelData {
   const requiredMissing = collectRequiredMissing(report)
   const preferredMissing = collectPreferredMissing(report, requiredMissing)
-  const keywords = buildKeywords(jobTags, requiredMissing, preferredMissing)
+  const keywords = buildKeywords([], requiredMissing, preferredMissing)
   const categories = buildCategories(report)
   const suggestionsCount = countSuggestions(report)
   const projectedScore = computeProjectedScore(report.universalScore, suggestionsCount)

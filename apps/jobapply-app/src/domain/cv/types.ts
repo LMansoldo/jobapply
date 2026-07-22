@@ -63,16 +63,6 @@ export interface RemoveSuggestion {
   reason: string
 }
 
-export interface InterviewStory {
-  jdRequirement: string
-  story: string
-}
-
-export interface InterviewPrep {
-  stories: InterviewStory[]
-  overallPositioning: string
-}
-
 export interface ATSOptimalTemplate {
   keywordsToAdd: string[]
   keywordPhrases: KeywordPhrase[]
@@ -222,8 +212,3 @@ export interface PublishCVResponse {
   public_id: string
 }
 
-// ─── Tailor ───────────────────────────────────────────────────────────────────
-
-export interface TailorCVResponse {
-  tailoredCV: string
-}

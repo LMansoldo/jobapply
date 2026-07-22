@@ -9,7 +9,6 @@ import { useMutation } from '@tanstack/react-query'
 import { downloadMarkdownText, downloadMarkdownAsPdf, parseMarkdownToLocale } from '../helpers'
 import { updateCVLocale } from '../../../infrastructure/repositories/cvRepository'
 import type { CV } from '../types'
-import type { Job } from '../../jobs/types'
 
 interface MessageApi {
   loading: (content: string, duration?: number) => void
@@ -25,7 +24,6 @@ interface UseTailoringExportParams {
   tailoredContent: string
   chosenLocale: 'en' | 'pt-BR' | null
   setupLocale: 'en' | 'pt-BR'
-  job: Job | null
   manualDescription: string
   message: MessageApi
   t: (key: string, options?: Record<string, unknown>) => string
@@ -42,7 +40,6 @@ export function useTailoringExport({
   tailoredContent,
   chosenLocale,
   setupLocale,
-  job,
   manualDescription,
   message,
   t,
@@ -87,7 +84,7 @@ export function useTailoringExport({
     try {
       messageRef.current.loading(tRef.current('tailoring.generatingPDF'), 0)
       const locale = chosenLocale ?? setupLocale
-      const jobTitle = job?.title ?? manualDescription.split('\n')[0]?.substring(0, 50) ?? 'untitled'
+      const jobTitle = manualDescription.split('\n')[0]?.substring(0, 50) ?? 'untitled'
       await downloadMarkdownAsPdf(tailoredContent, cv, locale, jobTitle)
       messageRef.current.destroy()
       messageRef.current.success(tRef.current('tailoring.downloadPDFSuccess'))
@@ -96,7 +93,7 @@ export function useTailoringExport({
       console.error('PDF generation error:', error)
       messageRef.current.error(tRef.current('tailoring.downloadPDFError'))
     }
-  }, [tailoredContent, cv, chosenLocale, setupLocale, job, manualDescription])
+  }, [tailoredContent, cv, chosenLocale, setupLocale, manualDescription])
 
   const handleExportMarkdown = useCallback(() => {
     if (!tailoredContent) {

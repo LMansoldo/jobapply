@@ -39,7 +39,6 @@ export * from './cv/AvatarUpload'
 
 // ATS
 export * from './ats/KeywordItem'
-export * from './ats/ToneChips'
 export * from './ats/AIsuggestionBar'
 export * from './ats/ATSPanel'
 

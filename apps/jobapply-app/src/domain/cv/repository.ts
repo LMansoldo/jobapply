@@ -5,9 +5,7 @@ import type {
   CVLocalePayload,
   PublishCVPayload,
   PublishCVResponse,
-  TailorCVResponse,
   ATSReport,
-  InterviewPrep,
 } from './types'
 
 export interface AnalyzeCVResponse {
@@ -15,16 +13,8 @@ export interface AnalyzeCVResponse {
   locale: 'en' | 'pt-BR'
 }
 
-export interface GenerateCoverLetterResponse {
-  coverLetter: string
-}
-
-export interface GenerateVideoScriptResponse {
-  script: string
-}
-
-export interface GenerateInterviewPrepResponse {
-  interviewPrep: InterviewPrep
+export interface GenerateResumeResponse {
+  resume: string
   locale: 'en' | 'pt-BR'
 }
 
@@ -36,9 +26,6 @@ export interface ICVRepository {
   updateCVLocale(id: string, locale: 'en' | 'pt-BR', payload: CVLocalePayload): Promise<CVLocaleVersion>
   deleteCVLocale(id: string, locale: 'en' | 'pt-BR'): Promise<void>
   publishCV(id: string, payload?: PublishCVPayload): Promise<PublishCVResponse>
-  tailorCV(cvId: string, jobId: string): Promise<TailorCVResponse>
-  analyzeCV(cvId: string, jobId: string | undefined, locale: 'en' | 'pt-BR', jobDescription: string, cvMarkdown: string): Promise<AnalyzeCVResponse>
-  generateCoverLetter(cvId: string, jobId: string | undefined, locale: 'en' | 'pt-BR'): Promise<GenerateCoverLetterResponse>
-  generateVideoScript(cvId: string, jobId: string | undefined, locale: 'en' | 'pt-BR'): Promise<GenerateVideoScriptResponse>
-  generateInterviewPrep(cvId: string, jobId: string | undefined, locale: 'en' | 'pt-BR', jobDescription?: string): Promise<GenerateInterviewPrepResponse>
+  analyzeCV(cvId: string, jobId: string | undefined, locale: 'en' | 'pt-BR', jobDescription: string, cvMarkdown: string, atsPlatform?: string): Promise<AnalyzeCVResponse>
+  generateResume(cvId: string, jobId: string | undefined, locale: 'en' | 'pt-BR', jobDescription: string, cvMarkdown: string): Promise<GenerateResumeResponse>
 }
