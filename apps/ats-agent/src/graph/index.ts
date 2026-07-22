@@ -7,9 +7,7 @@ import { mapperNode } from './nodes/mapper'
 import { jdKeywordExtractorNode } from './nodes/jdKeywordExtractor'
 import { universalScorerNode } from './nodes/universalScorer'
 import { semanticAnalyzerNode } from './nodes/semanticAnalyzer'
-import { cvGeneratorNode } from './nodes/cvGenerator'
 import { aggregatorNode } from './nodes/aggregator'
-import { resumeGeneratorNode } from './nodes/resumeGenerator'
 
 const GraphAnnotation = Annotation.Root({
   input: Annotation<AgentInput>({
@@ -90,14 +88,12 @@ const graph = new StateGraph(GraphAnnotation)
     weightedKeywords: state.weightedKeywords ?? [],
   }))
   .addNode('semanticAnalyzer', semanticAnalyzerNode)
-  .addNode('cvGenerator', cvGeneratorNode)
   .addNode('aggregator', aggregatorNode)
   .addEdge('__start__', 'mapper')
   .addEdge('mapper', 'jdKeywordExtractor')
   .addEdge('jdKeywordExtractor', 'universalScorer')
   .addEdge('universalScorer', 'semanticAnalyzer')
-  .addEdge('semanticAnalyzer', 'cvGenerator')
-  .addEdge('cvGenerator', 'aggregator')
+  .addEdge('semanticAnalyzer', 'aggregator')
   .addEdge('aggregator', '__end__')
   .compile()
 

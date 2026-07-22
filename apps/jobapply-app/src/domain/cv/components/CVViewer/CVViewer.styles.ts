@@ -13,7 +13,7 @@ export const desktopGrid = css({
 
 export const fab = css({
   position: 'fixed',
-  bottom: '2.4rem',
+  bottom: '9.4rem',
   right: '2rem',
   width: '5.6rem',
   height: '5.6rem',

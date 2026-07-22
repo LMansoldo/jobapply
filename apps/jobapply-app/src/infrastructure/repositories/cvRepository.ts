@@ -3,14 +3,12 @@ import { MOCK_CV } from '../mock/data'
 import type {
   CV,
   CVCreatePayload,
-  TailorCVResponse,
   PublishCVPayload,
   PublishCVResponse,
   PublishedCV,
   CVLocaleVersion,
   CVLocalePayload,
   ATSReport,
-  InterviewPrep,
 } from '../../domain/cv/types'
 import {
   createCVFromPersonalDataAndLocale,
@@ -178,20 +176,6 @@ export async function publishCV(id: string, payload?: PublishCVPayload): Promise
   return data
 }
 
-export async function tailorCV(cvId: string, jobId: string): Promise<TailorCVResponse> {
-  if (USE_MOCK) {
-    await delay(1500)
-    if (!mockCV) throw { response: { data: { message: 'CV não encontrado' }, status: 404 } }
-    const ptBrVersion = mockCV.localeVersions?.find((v) => v.locale === 'pt-BR')
-    const summary = ptBrVersion?.summary ?? ''
-    const tailored = `# CV Adaptado – ${mockCV.fullName}\n\n## Resumo\n${summary}\n\n> *Este currículo foi otimizado para a vaga (jobId: ${jobId}).*\n`
-    return { tailoredCV: tailored }
-  }
-
-  const { data } = await api.post<TailorCVResponse>(`/cv/${cvId}/tailor`, { jobId })
-  return data
-}
-
 export interface AnalyzeCVResponse {
   report: ATSReport
   locale: 'en' | 'pt-BR'
@@ -203,6 +187,7 @@ export async function analyzeCV(
   locale: 'en' | 'pt-BR',
   jobDescription: string,
   cvMarkdown: string,
+  atsPlatform?: string,
 ): Promise<AnalyzeCVResponse> {
   if (USE_MOCK) {
     await delay(1200)
@@ -228,6 +213,7 @@ export async function analyzeCV(
 
   const body: Record<string, string> = { locale, jobDescription, cvMarkdown }
   if (jobId) body.jobId = jobId
+  if (atsPlatform) body.atsPlatform = atsPlatform
   const { data } = await api.post<AnalyzeCVResponse>(`/cv/${cvId}/analyze`, body)
   return data
 }
@@ -258,93 +244,3 @@ export async function generateResume(
   return data
 }
 
-export interface GenerateCoverLetterResponse {
-  coverLetter: string
-}
-
-export async function generateCoverLetter(
-  cvId: string,
-  jobId: string | undefined,
-  locale: 'en' | 'pt-BR',
-  voiceAnswers?: import('../../domain/linkedin/types').VoiceAnswers,
-  jobDescription?: string,
-): Promise<GenerateCoverLetterResponse> {
-  if (USE_MOCK) {
-    await delay(2000)
-    return {
-      coverLetter: `Prezado(a) recrutador(a),\n\nEscrevo para expressar meu interesse na vaga anunciada. Com minha experiência sólida em desenvolvimento de software, acredito que posso contribuir significativamente para a equipe.\n\nAtenciosamente,\n${mockCV?.fullName ?? 'Candidato'}`,
-    }
-  }
-
-  const body: Record<string, unknown> = { locale }
-  if (jobId) body.jobId = jobId
-  else if (jobDescription) body.jobDescription = jobDescription
-  if (voiceAnswers?.length) body.voiceAnswers = voiceAnswers
-  const { data } = await api.post<GenerateCoverLetterResponse>(
-    `/cv/${cvId}/cover-letter`,
-    body,
-  )
-  return data
-}
-
-export interface GenerateVideoScriptResponse {
-  script: string
-}
-
-export async function generateVideoScript(
-  cvId: string,
-  jobId: string | undefined,
-  locale: 'en' | 'pt-BR',
-): Promise<GenerateVideoScriptResponse> {
-  if (USE_MOCK) {
-    await delay(2500)
-    return {
-      script: `Olá! Meu nome é ${mockCV?.fullName ?? 'Candidato'}.\n\nEstou muito animado com esta oportunidade. Nos últimos anos, venho desenvolvendo minhas habilidades em engenharia de software e gostaria de compartilhar como posso agregar valor à sua equipe.\n\nObrigado por assistir!`,
-    }
-  }
-
-  const body: Record<string, string> = { locale }
-  if (jobId) body.jobId = jobId
-  const { data } = await api.post<GenerateVideoScriptResponse>(
-    `/cv/${cvId}/video-script`,
-    body,
-  )
-  return data
-}
-
-export interface GenerateInterviewPrepResponse {
-  interviewPrep: InterviewPrep
-  locale: 'en' | 'pt-BR'
-}
-
-export async function generateInterviewPrep(
-  cvId: string,
-  jobId: string | undefined,
-  locale: 'en' | 'pt-BR',
-  jobDescription?: string,
-): Promise<GenerateInterviewPrepResponse> {
-  if (USE_MOCK) {
-    await delay(2000)
-    return {
-      interviewPrep: {
-        stories: [
-          {
-            jdRequirement: 'Liderança técnica de equipes ágeis',
-            story: 'Na minha última posição, assumi a liderança técnica de um squad de 5 engenheiros durante um momento crítico de reordenação organizacional. A missão era entregar um novo módulo de pagamentos em 10 semanas sem atrasar o roadmap existente. Implementei cerimônias ágeis adaptadas ao contexto remoto e criei um board compartilhado para visibilidade de bloqueios. Entregamos no prazo com zero incidentes P1 nos primeiros 30 dias e o NPS interno do time subiu de 62 para 78.',
-          },
-        ],
-        overallPositioning: 'Posicione-se como um engenheiro sênior com histórico comprovado de entrega em ambientes de alta pressão. Lidere com seus projetos de maior impacto e conecte-os diretamente aos desafios descritos na vaga.',
-      },
-      locale,
-    }
-  }
-
-  const body: Record<string, string> = { locale }
-  if (jobId) body.jobId = jobId
-  if (jobDescription) body.jobDescription = jobDescription
-  const { data } = await api.post<GenerateInterviewPrepResponse>(
-    `/cv/${cvId}/interview-prep`,
-    body,
-  )
-  return data
-}

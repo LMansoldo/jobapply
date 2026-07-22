@@ -1,6 +1,5 @@
 import { Grid } from 'antd'
 import {
-  ToolOutlined,
   FileSearchOutlined,
   UserOutlined,
   LogoutOutlined,
@@ -16,7 +15,7 @@ import { AppHeader as DSAppHeader } from '../../design-system/layout/AppHeader'
 import { useAuth } from '../../application/providers/AuthProvider'
 import * as styles from './AppLayout.styles'
 
-const MOBILE_NAV_KEYS = ['jobs', 'tailoring', 'linkedin', 'profile']
+const MOBILE_NAV_KEYS = ['tailoring', 'linkedin', 'profile']
 
 const { useBreakpoint } = Grid
 
@@ -46,18 +45,11 @@ export default function AppLayout() {
 
   const navItems = [
     {
-      key: 'jobs',
-      label: t('nav.jobs'),
-      icon: <ToolOutlined />,
-      href: '/',
-      active: pathname === '/',
-    },
-    {
       key: 'tailoring',
       label: t('nav.tailoring'),
       icon: <FileSearchOutlined />,
-      href: '/tailoring',
-      active: pathname === '/tailoring',
+      href: '/',
+      active: pathname === '/',
     },
     {
       key: 'linkedin',
@@ -71,7 +63,7 @@ export default function AppLayout() {
       label: t('nav.profile'),
       icon: <UserOutlined />,
       href: '/cv',
-      active: pathname === '/cv' || pathname.startsWith('/tailoring/'),
+      active: pathname === '/cv',
     },
   ]
 

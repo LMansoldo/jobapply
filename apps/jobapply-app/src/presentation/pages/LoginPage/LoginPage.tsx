@@ -73,7 +73,6 @@ export default function LoginPage() {
       </div>
 
       <div className={styles.socialBtns}>
-        <SocialLoginBtn provider="google" onClick={() => {}} />
         <SocialLoginBtn provider="linkedin" onClick={() => redirectToLinkedIn('login')} />
       </div>
 

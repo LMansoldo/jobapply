@@ -9,7 +9,6 @@ import { register as registerService } from '../../../infrastructure/repositorie
 import { redirectToLinkedIn } from '../../../domain/linkedin/linkedinOAuth'
 import { AuthLayout } from '../../../design-system/auth/AuthLayout'
 import { FeatureCard } from '../../../design-system/auth/FeatureCard'
-import { RoleCards } from '../../../design-system/auth/RoleCards'
 import { PasswordStrength } from '../../../design-system/auth/PasswordStrength'
 import { SocialLoginBtn } from '../../../design-system/auth/SocialLoginBtn'
 import { Divider } from '../../../components/Divider'
@@ -37,7 +36,6 @@ function getPasswordStrength(password: string): 0 | 1 | 2 | 3 | 4 {
 export default function RegisterPage() {
   const [loading, setLoading] = useState(false)
   const [password, setPassword] = useState('')
-  const [role, setRole] = useState('candidate')
   const navigate = useNavigate()
   const { message } = useAntApp()
   const { t } = useTranslation()
@@ -83,15 +81,6 @@ export default function RegisterPage() {
           </Link>
         </p>
       </div>
-
-      <RoleCards
-        roles={[
-          { key: 'candidate', label: t('auth.roleCandidate'), icon: '👤' },
-          { key: 'recruiter', label: t('auth.roleRecruiter'), icon: '🔍' },
-        ]}
-        value={role}
-        onChange={setRole}
-      />
 
       <div className={styles.socialBtns}>
         <SocialLoginBtn provider="linkedin" onClick={() => redirectToLinkedIn('login')} />

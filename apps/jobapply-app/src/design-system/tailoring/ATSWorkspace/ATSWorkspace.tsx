@@ -22,15 +22,12 @@ export function ATSWorkspace({
   tailoredContent,
   chosenLocale,
   onTailoredContentChange,
-  job,
   currentScore,
   projectedScore,
   onSuggestionChange,
   onInsertKeyword,
   onReplaceKeyword,
   onReanalyze,
-  onRewriteCV,
-  rewriteLoading,
   onGenerateResume,
   resumeLoading,
   onDownloadPDF,
@@ -127,11 +124,8 @@ export function ATSWorkspace({
               onInsertKeyword={handleInsertKeyword}
               onReplaceKeyword={handleReplaceKeyword}
               hasAnalysisNotification={!!panelData}
-              jobTitle={job?.title}
               onReanalyze={onReanalyze}
               reanalyzeLoading={atsLoading}
-              onRewriteCV={onRewriteCV}
-              rewriteLoading={rewriteLoading}
               onGenerateResume={onGenerateResume}
               resumeLoading={resumeLoading}
               onDownloadPDF={onDownloadPDF}

@@ -1,4 +1,3 @@
-import type { Job } from '../../domain/jobs/types'
 import type { CV } from '../../domain/cv/types'
 import type { User } from '../../domain/auth/types'
 
@@ -10,95 +9,6 @@ export const MOCK_USER: User = {
 }
 
 export const MOCK_TOKEN = 'mock-jwt-token-abc123'
-
-export const MOCK_JOBS: Job[] = [
-  {
-    _id: 'job-001',
-    title: 'Frontend Developer',
-    company: 'Tech Corp',
-    location: 'Remoto',
-    description:
-      'We are looking for a skilled Frontend Developer with experience in React and TypeScript. You will be responsible for building and maintaining high-quality web applications.',
-    tailoredDescription: undefined,
-    tags: ['react', 'typescript', 'antd'],
-    url: 'https://techcorp.com/jobs/frontend',
-    salary: 'R$ 10.000 - R$ 14.000',
-    status: 'open',
-    contractType: 'pj',
-    modality: 'remote',
-    experienceLevel: 'senior',
-    createdAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
-  },
-  {
-    _id: 'job-002',
-    title: 'Backend Engineer',
-    company: 'Acme Inc',
-    location: 'São Paulo, SP',
-    description:
-      'Build and maintain REST APIs using Node.js and MongoDB. Collaborate with frontend team to design API contracts and ensure high availability.',
-    tailoredDescription:
-      'Senior Backend Engineer role focused on Node.js microservices, MongoDB optimization, and RESTful API design for a fast-growing SaaS platform.',
-    tags: ['node', 'mongodb', 'rest-api'],
-    url: 'https://acme.com/careers',
-    salary: 'R$ 12.000 - R$ 18.000',
-    status: 'applied',
-    contractType: 'clt',
-    modality: 'hybrid',
-    experienceLevel: 'senior',
-    createdAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(),
-  },
-  {
-    _id: 'job-003',
-    title: 'Full Stack Developer',
-    company: 'Startup XYZ',
-    location: 'Híbrido – Belo Horizonte, MG',
-    description:
-      'Full Stack position working with React on the frontend and Python/FastAPI on the backend. Great opportunity to work on greenfield projects with modern architecture.',
-    tailoredDescription: undefined,
-    tags: ['react', 'python', 'fastapi', 'postgresql'],
-    url: undefined,
-    salary: 'R$ 8.000 - R$ 12.000',
-    status: 'open',
-    contractType: 'clt',
-    modality: 'hybrid',
-    experienceLevel: 'mid',
-    createdAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
-  },
-  {
-    _id: 'job-004',
-    title: 'DevOps Engineer',
-    company: 'Cloud Solutions',
-    location: 'Remoto',
-    description:
-      'Looking for a DevOps Engineer to manage CI/CD pipelines, Kubernetes clusters, and cloud infrastructure on AWS. Experience with Terraform is a plus.',
-    tailoredDescription: undefined,
-    tags: ['devops', 'kubernetes', 'aws', 'terraform', 'ci-cd'],
-    url: 'https://cloudsolutions.io/jobs',
-    salary: 'R$ 15.000 - R$ 22.000',
-    status: 'closed',
-    contractType: 'pj',
-    modality: 'remote',
-    experienceLevel: 'specialist',
-    createdAt: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000).toISOString(),
-  },
-  {
-    _id: 'job-005',
-    title: 'Mobile Developer (React Native)',
-    company: 'AppFactory',
-    location: 'Remoto',
-    description:
-      'Join our mobile team to build cross-platform apps with React Native. You will work closely with designers and backend engineers to deliver polished user experiences.',
-    tailoredDescription: undefined,
-    tags: ['react-native', 'mobile', 'typescript', 'expo'],
-    url: undefined,
-    salary: 'R$ 9.000 - R$ 13.000',
-    status: 'open',
-    contractType: 'clt',
-    modality: 'remote',
-    experienceLevel: 'mid',
-    createdAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(),
-  },
-]
 
 export const MOCK_CV: CV = {
   _id: 'cv-001',

@@ -1,6 +1,5 @@
 import { ConfigProvider, App as AntApp } from 'antd'
 import { QueryClientProvider } from '@tanstack/react-query'
-import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
 import { RouterProvider } from '@tanstack/react-router'
 import { AuthProvider, useAuth } from './application/providers/AuthProvider'
 import { router } from './router'
@@ -22,7 +21,6 @@ export default function App() {
           </AuthProvider>
         </AntApp>
       </ConfigProvider>
-      <ReactQueryDevtools initialIsOpen={false} />
     </QueryClientProvider>
   )
 }
