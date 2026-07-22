@@ -25,11 +25,11 @@ async function pollATSResult(requestId: string): Promise<unknown> {
   throw new Error('ATS analysis timed out')
 }
 
-export async function analyzeWithATS(cvMarkdown: string, jobDescription: string, locale?: string, platform?: string, jobUrl?: string): Promise<unknown> {
+export async function analyzeWithATS(cvMarkdown: string, jobDescription: string, locale?: string): Promise<unknown> {
   const response = await fetch(`${ATS_AGENT_URL}/analyze`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ cvMarkdown, jobDescription, ...(locale && { locale }), ...(platform && { platform }), ...(jobUrl && { jobUrl }) }),
+    body: JSON.stringify({ cvMarkdown, jobDescription, ...(locale && { locale }) }),
   });
 
   if (!response.ok) {

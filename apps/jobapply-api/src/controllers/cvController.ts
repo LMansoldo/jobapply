@@ -207,13 +207,11 @@ export async function analyzeCVWithATS(req: AuthRequest, res: Response, next: Ne
     if (!cv) { res.status(404).json({ message: 'CV not found' }); return; }
     if (cv.user.toString() !== req.user.id) { res.status(403).json({ message: 'Access denied' }); return; }
 
-    const { jobId, jobDescription, cvMarkdown, locale, platform, jobUrl } = req.body as {
+    const { jobId, jobDescription, cvMarkdown, locale } = req.body as {
       jobId?: string;
       jobDescription?: string;
       cvMarkdown?: string;
       locale?: string;
-      platform?: string;
-      jobUrl?: string;
     };
 
     if (!jobId && !jobDescription) { res.status(400).json({ message: 'jobId or jobDescription is required' }); return; }
@@ -230,7 +228,7 @@ export async function analyzeCVWithATS(req: AuthRequest, res: Response, next: Ne
     const sanitizedMarkdown = sanitizeUserInput(cvMarkdown);
 
     const resolvedLocale = locale ?? detectLocale(description);
-    const report = await analyzeWithATS(sanitizedMarkdown, sanitizedJD, resolvedLocale, platform, jobUrl);
+    const report = await analyzeWithATS(sanitizedMarkdown, sanitizedJD, resolvedLocale);
 
     res.json({ report, locale: resolvedLocale });
   } catch (err: unknown) {
@@ -402,12 +400,10 @@ export async function deleteCVLocaleVersion(req: AuthRequest, res: Response, nex
 
 export async function analyzeCVDirect(req: AuthRequest, res: Response, next: NextFunction): Promise<void> {
   try {
-    const { cvMarkdown, jobDescription, locale, platform, jobUrl } = req.body as {
+    const { cvMarkdown, jobDescription, locale } = req.body as {
       cvMarkdown: string;
       jobDescription: string;
       locale?: 'en' | 'pt-BR';
-      platform?: string;
-      jobUrl?: string;
     };
 
     if (!cvMarkdown || !jobDescription) {
@@ -416,7 +412,7 @@ export async function analyzeCVDirect(req: AuthRequest, res: Response, next: Nex
     }
 
     const resolvedLocale = locale ?? detectLocale(jobDescription);
-    const report = await analyzeWithATS(cvMarkdown, jobDescription, resolvedLocale, platform, jobUrl);
+    const report = await analyzeWithATS(cvMarkdown, jobDescription, resolvedLocale);
 
     res.json({ report, locale: resolvedLocale });
   } catch (err: unknown) {
