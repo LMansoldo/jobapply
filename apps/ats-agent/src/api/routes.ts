@@ -8,7 +8,7 @@ import { universalScorerNode } from '../graph/nodes/universalScorer'
 import { semanticAnalyzerNode } from '../graph/nodes/semanticAnalyzer'
 import { resumeGeneratorNode } from '../graph/nodes/resumeGenerator'
 import { interviewPrepAnalyzerNode } from '../graph/nodes/interviewPrepAnalyzer'
-import type { AgentInput, ATSReport, CV } from '../types'
+import type { AgentInput, ATSReport, CV, VerificationReport } from '../types'
 
 const SkillGroupSchema = z.object({
   label: z.string(),
@@ -94,6 +94,7 @@ interface JobResult {
   report?: ATSReport
   adaptedCV?: CV
   resume?: string
+  resumeVerification?: VerificationReport
   error?: string
   createdAt: number
   completedAt?: number
@@ -198,19 +199,21 @@ export async function registerRoutes(app: FastifyInstance): Promise<void> {
 
     try {
       const { mapped } = mapperNode({ input })
-      const { jdKeywords, weightedKeywords } = await jdKeywordExtractorNode({ input })
+      const { jdKeywords, weightedKeywords, jobTitle } = await jdKeywordExtractorNode({ input })
       const { scoreBreakdown, missingKeywords } = universalScorerNode({ mapped, weightedKeywords })
       const semantic = await semanticAnalyzerNode({ input, mapped, scoreBreakdown, missingKeywords })
       const result = await resumeGeneratorNode({
         input,
         mapped,
         jdKeywords,
+        weightedKeywords,
+        jobTitle,
         semanticGaps: semantic.semanticGaps,
         rephraseSuggestions: semantic.rephraseSuggestions,
         keywordPhrases: semantic.keywordPhrases,
         removeSuggestions: semantic.removeSuggestions,
       })
-      return reply.send(result)
+      return reply.send({ resume: result.resume, verification: result.resumeVerification })
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Internal error'
       return reply.status(502).send({ message })
