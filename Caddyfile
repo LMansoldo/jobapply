@@ -1,0 +1,4 @@
+# Substitua pelo seu domínio (ex.: jobapply-api.duckdns.org)
+api.example.com {
+	reverse_proxy api:3000
+}

@@ -1,0 +1,32 @@
+services:
+  caddy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    networks: [web]
+
+  api:
+    build: ./apps/jobapply-api
+    restart: unless-stopped
+    env_file: ./api.env
+    networks: [web, internal]
+
+  ats-agent:
+    build: ./apps/ats-agent
+    restart: unless-stopped
+    env_file: ./agent.env
+    networks: [internal]
+
+networks:
+  web:
+  internal:
+
+volumes:
+  caddy_data:
+  caddy_config:

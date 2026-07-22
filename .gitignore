@@ -11,3 +11,5 @@ coverage/
 .turbo/
 apps/**/.claude/
 packages/**/.claude/
+api.env
+agent.env
