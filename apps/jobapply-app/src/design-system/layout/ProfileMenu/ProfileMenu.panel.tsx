@@ -11,7 +11,6 @@ import * as styles from './ProfileMenu.styles'
 
 export function ProfileMenuPanel({
   user,
-  alerts,
   completionPercent,
   onLogout,
   onViewProfile,
@@ -44,24 +43,6 @@ export function ProfileMenuPanel({
           </button>
         )}
       </div>
-
-      {/* Alerts */}
-      {alerts.length > 0 && (
-        <>
-          <div className={styles.sectionHeader}>
-            <p className={styles.sectionTitle}>{t('jobs.alerts')}</p>
-          </div>
-          {alerts.map((alert) => (
-            <div key={alert.title} className={styles.alertItem}>
-              <div className={styles.alertIcon}>{alert.icon}</div>
-              <div className={styles.alertContent}>
-                <p className={styles.alertTitle}>{alert.title}</p>
-              </div>
-              <span className={styles.alertBadge}>{alert.count}</span>
-            </div>
-          ))}
-        </>
-      )}
 
       {/* Render prop slot — e.g. custom actions */}
       {renderFooter?.()}

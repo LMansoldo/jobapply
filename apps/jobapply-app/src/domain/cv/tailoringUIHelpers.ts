@@ -3,27 +3,6 @@
  * @description Pure functions for UI logic in tailoring workspace components.
  */
 
-/** Analysis status information */
-export interface AnalysisStatus {
-  isRunning: boolean
-  dotClass: string
-  labelClass: string
-  label: string
-}
-
-/** Get analysis status information for display */
-export function getAnalysisStatus(
-  isAnalysisRunning: boolean,
-  t: (key: string) => string
-): AnalysisStatus {
-  return {
-    isRunning: isAnalysisRunning,
-    dotClass: isAnalysisRunning ? 'analysisDotRunning' : 'analysisDot',
-    labelClass: isAnalysisRunning ? 'analysisLabelRunning' : 'analysisLabel',
-    label: isAnalysisRunning ? t('tailoring.analysisRunning') : t('tailoring.analysisComplete'),
-  }
-}
-
 /** Score metrics for ATS panel */
 export interface ScoreMetrics {
   suggestionsCount: number
