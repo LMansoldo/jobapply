@@ -9,12 +9,10 @@ import { useTranslation } from 'react-i18next'
 import { useAntApp } from '../../../components/AntApp'
 import { useAuth } from '../../../application/providers/AuthProvider'
 import { Spin } from '../../../components/Spin'
-import { Drawer } from '../../../components/Drawer'
 import { Empty } from '../../../components/Empty'
 import { TailoringSetupModal } from '../../../design-system/tailoring/TailoringSetupModal'
 import { TailoringContextBar } from '../../../design-system/tailoring/TailoringContextBar'
 import { ATSWorkspace } from '../../../design-system/tailoring/ATSWorkspace'
-import { ATSPanel } from '../../../design-system/ats/ATSPanel'
 import { DSButton } from '../../../design-system/primitives/DSButton'
 import { type TailoringEditorHandle } from '../../../design-system/tailoring/TailoringEditorPanel'
 import { mapATSReportToPanel, buildSuggestionsList, buildEditorKeywords } from '../../../domain/cv/tailoringHelpers'
@@ -150,27 +148,6 @@ function TailoringSession({ onRestart }: { onRestart: () => void }) {
               message.success(t('tailoring.phraseCopied'))
             }}
           />
-          <Drawer
-            title={t('tailoring.ats.title')}
-            open={ui.drawerVisible}
-            onClose={() => ui.setDrawerVisible(false)}
-            width={400}
-          >
-            <div className={styles.atsLeft}>
-              {panelData && (
-                <>
-                  <ATSPanel
-                    score={panelData.score ?? 0}
-                    categories={panelData.categories ?? []}
-                    keywords={panelData.keywords ?? []}
-                  />
-                  <div className={styles.atsScoreBadge}>
-                    {t('tailoring.improvementBadge', { delta: scoreDelta })}
-                  </div>
-                </>
-              )}
-            </div>
-          </Drawer>
         </div>
       </div>
     </>
