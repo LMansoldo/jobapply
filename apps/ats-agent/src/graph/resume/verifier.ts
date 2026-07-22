@@ -59,6 +59,18 @@ function getNgrams(text: string, n: number): Set<string> {
   return ngrams
 }
 
+function isNgramContaminated(ngram: string, jdKeywordSet: Set<string>, cvNorm: string, jdNorm: string): boolean {
+  if (!jdNorm.includes(ngram)) return false
+  // An n-gram is contamination only if at least one non-keyword content word is absent from the CV.
+  // If all non-keyword words exist in the CV individually, the n-gram is legitimate keyword integration.
+  const ngramWords = ngram.split(' ')
+  for (const w of ngramWords) {
+    if (jdKeywordSet.has(w)) continue // keyword — always allowed
+    if (!cvNorm.includes(w)) return true // non-keyword word absent from CV → contamination
+  }
+  return false
+}
+
 function checkBullet(
   generated: string,
   original: string,
@@ -68,6 +80,11 @@ function checkBullet(
   jd: string,
   jdKeywords: string[],
 ): VerificationViolation | null {
+  // low-overlap first — if the rewrite is too different, no need to check metrics
+  if (jaccardSimilarity(generated, original) < JACCARD_THRESHOLD) {
+    return { location: locationPrefix, rule: 'low-overlap', detail: `Jaccard similarity below ${JACCARD_THRESHOLD}`, action: 'reverted' }
+  }
+
   const yearPat = getYearPattern(position)
   const origMetrics = extractMetricTokens(original, yearPat)
   const genMetrics = extractMetricTokens(generated, yearPat)
@@ -86,12 +103,7 @@ function checkBullet(
     }
   }
 
-  // low-overlap
-  if (jaccardSimilarity(generated, original) < JACCARD_THRESHOLD) {
-    return { location: locationPrefix, rule: 'low-overlap', detail: `Jaccard similarity below ${JACCARD_THRESHOLD}`, action: 'reverted' }
-  }
-
-  // jd-contamination: bigrams and trigrams in generated that appear in JD but NOT in full CV
+  // jd-contamination: flag n-grams from JD whose non-keyword words are absent from the full CV
   const jdKeywordSet = new Set(jdKeywords.map(norm))
   const cvNorm = norm(fullCvText)
   const jdNorm = norm(jd)
@@ -100,8 +112,7 @@ function checkBullet(
   for (const n of [MIN_NGRAM_SIZE, 3]) {
     const genNgrams = getNgrams(genNorm, n)
     for (const ngram of genNgrams) {
-      if (jdKeywordSet.has(ngram)) continue // keyword integration is fine
-      if (!cvNorm.includes(ngram) && jdNorm.includes(ngram)) {
+      if (isNgramContaminated(ngram, jdKeywordSet, cvNorm, jdNorm)) {
         return { location: locationPrefix, rule: 'jd-contamination', detail: `n-gram "${ngram}" from JD not anchored in original CV`, action: 'reverted' }
       }
     }
@@ -190,13 +201,12 @@ export function verifyResumeDraft(
   const cvNorm = norm(fullCvText)
   const jdNorm = norm(jd)
   const sumNorm = norm(draft.summary)
-  for (const n of [MIN_NGRAM_SIZE, 3]) {
+  outer: for (const n of [MIN_NGRAM_SIZE, 3]) {
     const sumNgrams = getNgrams(sumNorm, n)
     for (const ngram of sumNgrams) {
-      if (jdKeywordSet.has(ngram)) continue
-      if (!cvNorm.includes(ngram) && jdNorm.includes(ngram)) {
+      if (isNgramContaminated(ngram, jdKeywordSet, cvNorm, jdNorm)) {
         summaryViolations.push({ location: 'summary', rule: 'jd-contamination', detail: `n-gram "${ngram}" from JD`, action: 'reverted' })
-        break
+        break outer
       }
     }
   }
