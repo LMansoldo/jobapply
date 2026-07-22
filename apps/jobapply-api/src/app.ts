@@ -16,7 +16,7 @@ app.set('trust proxy', 1);
 app.use(helmet());
 
 app.use(cors({
-  origin: (process.env.ALLOWED_ORIGINS as string).split(',').map((o) => o.trim()),
+  origin: (process.env.ALLOWED_ORIGINS ?? '').split(',').map((o) => o.trim()).filter(Boolean),
   credentials: true,
 }));
 
