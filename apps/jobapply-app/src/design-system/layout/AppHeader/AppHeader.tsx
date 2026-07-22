@@ -1,10 +1,7 @@
-import { useTranslation } from 'react-i18next'
 import type { AppHeaderProps } from './AppHeader.types'
 import { styles } from './AppHeader.styles'
 
-export function AppHeader({ navItems = [], rightSlot, onPublishJob }: AppHeaderProps) {
-  const { t } = useTranslation()
-
+export function AppHeader({ navItems = [], rightSlot }: AppHeaderProps) {
   return (
     <header style={styles.header}>
       <a href="/" style={styles.logo}>
@@ -46,9 +43,6 @@ export function AppHeader({ navItems = [], rightSlot, onPublishJob }: AppHeaderP
       )}
 
       <div style={styles.right}>
-        <button type="button" style={styles.publishBtn} onClick={onPublishJob}>
-          {t('nav.publishJob')}
-        </button>
         {rightSlot}
       </div>
     </header>

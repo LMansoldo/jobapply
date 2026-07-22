@@ -71,17 +71,4 @@ export const styles = {
     gap: Spacing.sm,
     flexShrink: 0,
   },
-  publishBtn: {
-    background: Colors.primaryDark,
-    color: Colors.white,
-    border: 'none',
-    borderRadius: '20px',
-    padding: `${Spacing.sm} ${Spacing.lg}`,
-    fontFamily: FontFamily.body,
-    fontWeight: FontWeight.semibold,
-    fontSize: '1.3rem',
-    cursor: 'pointer',
-    whiteSpace: 'nowrap' as const,
-    transition: 'background 0.15s',
-  },
 }

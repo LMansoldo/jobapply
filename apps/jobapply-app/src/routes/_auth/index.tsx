@@ -1,6 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router'
-import JobsPage from '../../presentation/pages/JobsPage'
+import CVTailoringPage from '../../presentation/pages/CVTailoringPage'
 
 export const Route = createFileRoute('/_auth/')({
-  component: JobsPage,
+  component: CVTailoringPage,
 })

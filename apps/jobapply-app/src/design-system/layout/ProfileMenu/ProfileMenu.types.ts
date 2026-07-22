@@ -1,6 +1,12 @@
 import type { ReactNode } from 'react'
 import type { User } from '../../../domain/auth/types'
-import type { JobAlert } from '../../jobs/JobAlertsCard/JobAlertsCard.types'
+
+export interface JobAlert {
+  icon: string
+  title: string
+  subtitle: string
+  count: number
+}
 
 export interface ProfileMenuProps {
   user: User

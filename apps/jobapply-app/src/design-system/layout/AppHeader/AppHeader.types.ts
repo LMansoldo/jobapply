@@ -13,5 +13,4 @@ export interface AppHeaderProps {
   navItems?: NavItem[]
   rightSlot?: ReactNode
   logoText?: string
-  onPublishJob?: () => void
 }

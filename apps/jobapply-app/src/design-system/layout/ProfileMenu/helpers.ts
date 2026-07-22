@@ -1,4 +1,4 @@
-import type { JobAlert } from '../../jobs/JobAlertsCard/JobAlertsCard.types'
+import type { JobAlert } from './ProfileMenu.types'
 
 export function getInitials(name: string): string {
   return name

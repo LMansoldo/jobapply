@@ -18,16 +18,6 @@ export * from './primitives/TipBox'
 export * from './navigation/LangTabs'
 export * from './navigation/DSPagination'
 
-// Jobs
-export * from './jobs/CompanyLogo'
-export * from './jobs/BookmarkBtn'
-export * from './jobs/DSJobCard'
-export * from './jobs/FilterPanel'
-export * from './jobs/FilterCheckbox'
-export * from './jobs/FilterTagCloud'
-export * from './jobs/HeroSearch'
-export * from './jobs/ProfileCard'
-
 // CV
 export * from './cv/WizardStepper'
 export * from './cv/WizardCard'
