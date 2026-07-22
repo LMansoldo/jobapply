@@ -61,9 +61,7 @@
       "featureCVDesc": "Crie e gerencie versões do seu CV em português e inglês.",
       "featureATSTitle": "Score ATS",
       "featureATSDesc": "Analise o match do seu CV com os requisitos da vaga em segundos.",
-      "orWithEmail": "ou entre com e-mail",
-      "roleCandidate": "Candidato",
-      "roleRecruiter": "Recrutador"
+      "orWithEmail": "ou entre com e-mail"
     },
     "nav": {
       "profile": "Perfil",
@@ -529,9 +527,7 @@
       "featureCVDesc": "Create and manage CV versions in Portuguese and English.",
       "featureATSTitle": "ATS Score",
       "featureATSDesc": "Analyze your CV's match with job requirements in seconds.",
-      "orWithEmail": "or sign in with email",
-      "roleCandidate": "Candidate",
-      "roleRecruiter": "Recruiter"
+      "orWithEmail": "or sign in with email"
     },
     "nav": {
       "profile": "Profile",

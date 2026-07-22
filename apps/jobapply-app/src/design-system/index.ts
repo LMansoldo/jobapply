@@ -35,6 +35,5 @@ export * from './ats/ATSPanel'
 // Auth
 export * from './auth/AuthLayout'
 export * from './auth/PasswordStrength'
-export * from './auth/RoleCards'
 export * from './auth/SocialLoginBtn'
 export * from './auth/FeatureCard'
