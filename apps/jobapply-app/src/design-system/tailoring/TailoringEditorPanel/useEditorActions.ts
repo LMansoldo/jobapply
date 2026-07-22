@@ -213,7 +213,7 @@ export function useEditorActions({
 
   const handleMount: OnMount = useCallback((editor) => {
     editorRef.current = editor
-    editor.onDidChangeCursorPosition((e) => {
+    editor.onDidChangeCursorPosition((e: { position: { lineNumber: number; column: number } }) => {
       setLineCol({ line: e.position.lineNumber, col: e.position.column })
     })
     setEditorReady(true)

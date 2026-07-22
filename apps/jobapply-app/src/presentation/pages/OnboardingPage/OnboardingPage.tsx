@@ -144,7 +144,7 @@ export default function OnboardingPage() {
               onPressEnter={addRole}
               filled
             />
-            <DSButton variant="secondary" onClick={addRole} disabled={!roleInput.trim()}>
+            <DSButton variant="ghost" onClick={addRole} disabled={!roleInput.trim()}>
               + {t('onboarding.rolesAdd')}
             </DSButton>
           </div>
@@ -165,7 +165,7 @@ export default function OnboardingPage() {
         <div className={S.interactionArea}>
           <div className={S.employedButtons}>
             <DSButton variant="primary" onClick={() => handleEmployed(true)}>{t('onboarding.employedYes')}</DSButton>
-            <DSButton variant="secondary" onClick={() => handleEmployed(false)}>{t('onboarding.employedNo')}</DSButton>
+            <DSButton variant="ghost" onClick={() => handleEmployed(false)}>{t('onboarding.employedNo')}</DSButton>
           </div>
         </div>
       )}

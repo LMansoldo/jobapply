@@ -210,27 +210,20 @@ export async function analyzeCV(
     await delay(1200)
     const report: ATSReport = {
       universalScore: 72,
-      platforms: [
-        { platform: 'LinkedIn', score: 75, missingPreferred: ['Docker', 'AWS'] },
-        { platform: 'Gupy', score: 68, missingPreferred: ['Scrum'] },
-      ],
+      scoreBreakdown: { keywordCoverage: 75, contentQuality: 70, format: 80 },
+      matchedKeywords: ['React', 'TypeScript'],
+      missingKeywords: ['Docker', 'AWS', 'CI/CD'],
       tips: [
-        { tip: 'Adicione mais palavras-chave técnicas ao resumo', priority: 'high' },
-        { tip: 'Inclua métricas quantitativas nas experiências', priority: 'medium' },
+        { tip: 'Add required keywords: Docker, AWS', priority: 'critical' },
+        { tip: 'Include quantitative metrics', priority: 'medium' },
       ],
       optimalTemplate: {
         keywordsToAdd: ['Docker', 'AWS', 'CI/CD'],
-        keywordPhrases: [
-          { keyword: 'Docker', phrases: ['Containerizei microsserviços com Docker, reduzindo tempo de deploy em 40%', 'Mantive ambientes de desenvolvimento consistentes via Docker Compose'] },
-          { keyword: 'CI/CD', phrases: ['Implementei pipeline CI/CD com GitHub Actions, automatizando testes e deploys', 'Reduzi falhas em produção em 60% com pipeline de integração contínua'] },
-        ],
-        keywordsToRephrase: [{ from: 'desenvolvedor', to: 'engenheiro de software' }],
-        formatFixes: ['Use bullet points instead of paragraphs in experience section'],
+        keywordPhrases: [],
+        keywordsToRephrase: [],
+        formatFixes: [],
       },
-      semanticGaps: [
-        'Familiaridade prática com Material UI (MUI): O CV indica que o candidato substituiu o Material-UI em um projeto, o que mostra conhecimento sobre a ferramenta, mas não experiência em seu uso.',
-        'Contexto da indústria laboratorial: A JD busca experiência em uma aplicação laboratorial global, enquanto o histórico do candidato é predominantemente em finanças e e-commerce.',
-      ],
+      semanticGaps: ['Lacks containerization experience'],
     }
     return { report, locale }
   }

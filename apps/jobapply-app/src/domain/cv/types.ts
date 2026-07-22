@@ -40,16 +40,16 @@ export interface RephraseEntry {
   to: string
 }
 
-export interface ATSPlatformScore {
-  platform: string
-  score: number
-  missingPreferred?: string[]
+export interface ScoreBreakdown {
+  keywordCoverage: number
+  contentQuality: number
+  format: number
 }
 
 export interface ATSTip {
   tip: string
   priority: string
-  applicableTo?: string[]
+  // applicableTo removido em v2
 }
 
 export interface KeywordPhrase {
@@ -82,7 +82,9 @@ export interface ATSOptimalTemplate {
 
 export interface ATSReport {
   universalScore: number
-  platforms: ATSPlatformScore[]
+  scoreBreakdown: ScoreBreakdown
+  matchedKeywords: string[]
+  missingKeywords: string[]
   tips: ATSTip[]
   optimalTemplate: ATSOptimalTemplate
   removeSuggestions?: RemoveSuggestion[]

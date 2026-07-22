@@ -28,13 +28,11 @@ const MAX_SCORE = 100
 const PRIORITY_ORDER: Record<string, number> = { critical: 0, high: 1, medium: 2, low: 3 }
 
 function collectRequiredMissing(report: ATSReport): string[] {
-  return report.optimalTemplate?.keywordsToAdd ?? []
+  return report.missingKeywords ?? report.optimalTemplate?.keywordsToAdd ?? []
 }
 
-function collectPreferredMissing(report: ATSReport, requiredMissing: string[]): string[] {
-  const requiredSet = new Set(requiredMissing)
-  const fromPlatforms = (report.platforms ?? []).flatMap((p) => p.missingPreferred ?? [])
-  return [...new Set(fromPlatforms)].filter((k) => !requiredSet.has(k))
+function collectPreferredMissing(_report: ATSReport, _requiredMissing: string[]): string[] {
+  return []
 }
 
 function buildKeywords(
@@ -52,7 +50,12 @@ function buildKeywords(
 }
 
 function buildCategories(report: ATSReport): ATSCategory[] {
-  return (report.platforms ?? []).map((p) => ({ name: p.platform, value: p.score }))
+  if (!report.scoreBreakdown) return []
+  return [
+    { name: 'Keywords', value: report.scoreBreakdown.keywordCoverage },
+    { name: 'Conteúdo', value: report.scoreBreakdown.contentQuality },
+    { name: 'Formato', value: report.scoreBreakdown.format },
+  ]
 }
 
 function countSuggestions(report: ATSReport): number {

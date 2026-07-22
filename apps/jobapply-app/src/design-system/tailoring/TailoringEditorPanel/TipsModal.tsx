@@ -57,13 +57,6 @@ export function TipsModal({ open, onClose, tips = [] }: TipsModalProps) {
                   </S.PriorityBadge>
                 </S.TipHeader>
                 <S.TipText>{tip.tip}</S.TipText>
-                {tip.applicableTo && tip.applicableTo.length > 0 && (
-                  <S.TipPlatforms>
-                    {tip.applicableTo.map((platform) => (
-                      <S.PlatformTag key={platform}>{platform}</S.PlatformTag>
-                    ))}
-                  </S.TipPlatforms>
-                )}
               </S.TipItem>
             ))
           ) : (
