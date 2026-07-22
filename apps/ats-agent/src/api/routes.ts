@@ -4,6 +4,7 @@ import { z } from 'zod'
 import { graph } from '../graph'
 import { mapperNode } from '../graph/nodes/mapper'
 import { jdKeywordExtractorNode } from '../graph/nodes/jdKeywordExtractor'
+import { universalScorerNode } from '../graph/nodes/universalScorer'
 import { semanticAnalyzerNode } from '../graph/nodes/semanticAnalyzer'
 import { resumeGeneratorNode } from '../graph/nodes/resumeGenerator'
 import { interviewPrepAnalyzerNode } from '../graph/nodes/interviewPrepAnalyzer'
@@ -84,8 +85,6 @@ const AnalyzeBodySchema = z.object({
   cvMarkdown: z.string().optional(),
   jobDescription: z.string().min(1, 'jobDescription must not be empty'),
   locale: z.enum(['en', 'pt-BR']).optional(),
-  platform: z.string().optional(),
-  jobUrl: z.string().optional(),
 })
 
 // ── Background job store ─────────────────────────────────────────────────────
@@ -198,19 +197,11 @@ export async function registerRoutes(app: FastifyInstance): Promise<void> {
     const input: AgentInput = parse.data
 
     try {
-      // Run the extraction + semantic analysis pipeline in sequence
       const { mapped } = mapperNode({ input })
-      const { jdKeywords } = await jdKeywordExtractorNode({ input })
-
-      const semanticState = {
-        input,
-        mapped,
-        jdKeywords,
-        platformScores: [],
-      }
-      const semantic = await semanticAnalyzerNode(semanticState as Parameters<typeof semanticAnalyzerNode>[0])
-
-      const resume = await resumeGeneratorNode({
+      const { jdKeywords, weightedKeywords } = await jdKeywordExtractorNode({ input })
+      const { scoreBreakdown, missingKeywords } = universalScorerNode({ mapped, weightedKeywords })
+      const semantic = await semanticAnalyzerNode({ input, mapped, scoreBreakdown, missingKeywords })
+      const result = await resumeGeneratorNode({
         input,
         mapped,
         jdKeywords,
@@ -219,8 +210,7 @@ export async function registerRoutes(app: FastifyInstance): Promise<void> {
         keywordPhrases: semantic.keywordPhrases,
         removeSuggestions: semantic.removeSuggestions,
       })
-
-      return reply.send(resume)
+      return reply.send(result)
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Internal error'
       return reply.status(502).send({ message })

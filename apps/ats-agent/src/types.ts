@@ -77,8 +77,6 @@ export interface AgentInput {
   cvMarkdown?: string
   jobDescription: string
   locale?: 'en' | 'pt-BR'
-  platform?: string
-  jobUrl?: string
 }
 
 export interface MappedCV {
@@ -104,16 +102,6 @@ export interface MappedCV {
   raw: CV
 }
 
-export interface PlatformScore {
-  platform: string
-  score: number
-  passed: boolean
-  missingRequired: string[]
-  missingPreferred: string[]
-  flags: string[]
-  notes: string[]
-}
-
 export interface KeywordPhrase {
   keyword: string
   phrases: string[]
@@ -137,7 +125,9 @@ export interface InterviewPrep {
 
 export interface ATSReport {
   universalScore: number
-  platforms: PlatformScore[]
+  scoreBreakdown: ScoreBreakdown
+  matchedKeywords: string[]
+  missingKeywords: string[]
   semanticGaps: string[]
   optimalTemplate: {
     sectionsOrder: string[]
@@ -146,11 +136,7 @@ export interface ATSReport {
     keywordsToRephrase: { from: string; to: string }[]
     formatFixes: string[]
   }
-  tips: {
-    priority: 'critical' | 'high' | 'medium'
-    tip: string
-    applicableTo: string[]
-  }[]
+  tips: { priority: 'critical' | 'high' | 'medium'; tip: string }[]
   removeSuggestions: RemoveSuggestion[]
 }
 
@@ -207,12 +193,11 @@ export interface GraphState {
   input: AgentInput
   mapped?: MappedCV
   jdKeywords?: string[]
-  weightedKeywords?: WeightedKeyword[]    // novo
-  jobTitle?: string                        // novo
-  scoreBreakdown?: ScoreBreakdown         // novo
-  matchedKeywords?: string[]              // novo
-  missingKeywords?: string[]              // novo
-  platformScores?: PlatformScore[]        // mantido até B4
+  weightedKeywords?: WeightedKeyword[]
+  jobTitle?: string
+  scoreBreakdown?: ScoreBreakdown
+  matchedKeywords?: string[]
+  missingKeywords?: string[]
   semanticGaps?: string[]
   rephraseSuggestions?: Array<{ from: string; to: string }>
   keywordPhrases?: KeywordPhrase[]
@@ -220,6 +205,6 @@ export interface GraphState {
   report?: ATSReport
   adaptedCV?: CV
   resume?: string
-  resumeDraft?: ResumeDraft              // novo
-  resumeVerification?: VerificationReport // novo
+  resumeDraft?: ResumeDraft
+  resumeVerification?: VerificationReport
 }

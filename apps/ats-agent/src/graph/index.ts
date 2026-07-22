@@ -1,8 +1,11 @@
 import { StateGraph, Annotation } from '@langchain/langgraph'
-import type { AgentInput, MappedCV, PlatformScore, ATSReport, KeywordPhrase, RemoveSuggestion, CV } from '../types'
+import type {
+  AgentInput, MappedCV, ATSReport, KeywordPhrase, RemoveSuggestion, CV,
+  WeightedKeyword, ScoreBreakdown, ResumeDraft, VerificationReport,
+} from '../types'
 import { mapperNode } from './nodes/mapper'
 import { jdKeywordExtractorNode } from './nodes/jdKeywordExtractor'
-import { ruleScorerNode } from './nodes/ruleScorer'
+import { universalScorerNode } from './nodes/universalScorer'
 import { semanticAnalyzerNode } from './nodes/semanticAnalyzer'
 import { cvGeneratorNode } from './nodes/cvGenerator'
 import { aggregatorNode } from './nodes/aggregator'
@@ -21,7 +24,23 @@ const GraphAnnotation = Annotation.Root({
     reducer: (_, update) => update,
     default: () => undefined,
   }),
-  platformScores: Annotation<PlatformScore[] | undefined>({
+  weightedKeywords: Annotation<WeightedKeyword[] | undefined>({
+    reducer: (_, update) => update,
+    default: () => undefined,
+  }),
+  jobTitle: Annotation<string | undefined>({
+    reducer: (_, update) => update,
+    default: () => undefined,
+  }),
+  scoreBreakdown: Annotation<ScoreBreakdown | undefined>({
+    reducer: (_, update) => update,
+    default: () => undefined,
+  }),
+  matchedKeywords: Annotation<string[] | undefined>({
+    reducer: (_, update) => update,
+    default: () => undefined,
+  }),
+  missingKeywords: Annotation<string[] | undefined>({
     reducer: (_, update) => update,
     default: () => undefined,
   }),
@@ -53,19 +72,30 @@ const GraphAnnotation = Annotation.Root({
     reducer: (_, update) => update,
     default: () => undefined,
   }),
+  resumeDraft: Annotation<ResumeDraft | undefined>({
+    reducer: (_, update) => update,
+    default: () => undefined,
+  }),
+  resumeVerification: Annotation<VerificationReport | undefined>({
+    reducer: (_, update) => update,
+    default: () => undefined,
+  }),
 })
 
 const graph = new StateGraph(GraphAnnotation)
   .addNode('mapper', mapperNode)
   .addNode('jdKeywordExtractor', jdKeywordExtractorNode)
-  .addNode('ruleScorer', ruleScorerNode)
+  .addNode('universalScorer', (state) => universalScorerNode({
+    mapped: state.mapped!,
+    weightedKeywords: state.weightedKeywords ?? [],
+  }))
   .addNode('semanticAnalyzer', semanticAnalyzerNode)
   .addNode('cvGenerator', cvGeneratorNode)
   .addNode('aggregator', aggregatorNode)
   .addEdge('__start__', 'mapper')
   .addEdge('mapper', 'jdKeywordExtractor')
-  .addEdge('jdKeywordExtractor', 'ruleScorer')
-  .addEdge('ruleScorer', 'semanticAnalyzer')
+  .addEdge('jdKeywordExtractor', 'universalScorer')
+  .addEdge('universalScorer', 'semanticAnalyzer')
   .addEdge('semanticAnalyzer', 'cvGenerator')
   .addEdge('cvGenerator', 'aggregator')
   .addEdge('aggregator', '__end__')
