@@ -250,13 +250,13 @@ export async function cvGeneratorNode(state: {
   // Convert AdaptedCVResponse to CV type
   const adaptedCV: CV = {
     ...cv, // Preserve original fields not in response
-    fullName: parsed.contact.fullName ?? cv.fullName,
-    email: parsed.contact.email ?? cv.email,
-    phone: parsed.contact.phone ?? cv.phone,
-    location: parsed.contact.location ?? cv.location,
-    linkedin: parsed.contact.linkedin ?? cv.linkedin,
-    github: parsed.contact.github ?? cv.github,
-    portfolio: parsed.contact.portfolio ?? cv.portfolio,
+    fullName: parsed.contact?.fullName ?? cv.fullName,
+    email: parsed.contact?.email ?? cv.email,
+    phone: parsed.contact?.phone ?? cv.phone,
+    location: parsed.contact?.location ?? cv.location,
+    linkedin: parsed.contact?.linkedin ?? cv.linkedin,
+    github: parsed.contact?.github ?? cv.github,
+    portfolio: parsed.contact?.portfolio ?? cv.portfolio,
     summary: parsed.summary ?? cv.summary,
     skills: parsed.skills ?? cv.skills,
     experience: parsed.experience ?? cv.experience,
