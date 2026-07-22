@@ -1,11 +1,14 @@
 import 'dotenv/config';
 import mongoose from 'mongoose';
+import { validateEnv } from './config/env';
 import { connectDB } from './config/db';
 import app from './app';
 
 const PORT = parseInt(process.env.PORT ?? '3000', 10);
 
 async function main() {
+  validateEnv();
+  mongoose.set('sanitizeFilter', true);
   await connectDB();
   const server = app.listen(PORT, '0.0.0.0', () => console.log(`Server running on port ${PORT}`));
 
