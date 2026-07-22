@@ -154,10 +154,65 @@ export interface ATSReport {
   removeSuggestions: RemoveSuggestion[]
 }
 
+// ── v2 types — adicionados em A1, velhos removidos em B4 ──────────────────────
+
+export interface ScoreBreakdown {
+  keywordCoverage: number   // 0–100
+  contentQuality: number    // 0–100
+  format: number            // 0–100
+}
+
+export interface WeightedKeyword {
+  term: string
+  weight: 'required' | 'preferred'
+}
+
+export interface ResumeDraft {
+  summary: string
+  skills: Array<{ category: string; items: string[] }>
+  experience: Array<{
+    positionIndex: number
+    include: boolean
+    context: string
+    bullets: Array<{ sourceIndex: number; text: string }>
+  }>
+}
+
+export interface VerificationViolation {
+  location: string
+  rule: 'metric-dropped' | 'metric-invented' | 'low-overlap' | 'jd-contamination' | 'invalid-source'
+  detail: string
+  action: 'reverted'
+}
+
+export interface VerificationReport {
+  violations: VerificationViolation[]
+}
+
+export interface ParsedPosition {
+  header: string
+  period: string
+  context: string
+  bullets: string[]
+}
+
+export interface ResumeSource {
+  positions: ParsedPosition[]
+  educationRaw: string
+  summaryRaw: string
+  skillsRaw: string
+}
+
 export interface GraphState {
   input: AgentInput
   mapped?: MappedCV
-  platformScores?: PlatformScore[]
+  jdKeywords?: string[]
+  weightedKeywords?: WeightedKeyword[]    // novo
+  jobTitle?: string                        // novo
+  scoreBreakdown?: ScoreBreakdown         // novo
+  matchedKeywords?: string[]              // novo
+  missingKeywords?: string[]              // novo
+  platformScores?: PlatformScore[]        // mantido até B4
   semanticGaps?: string[]
   rephraseSuggestions?: Array<{ from: string; to: string }>
   keywordPhrases?: KeywordPhrase[]
@@ -165,4 +220,6 @@ export interface GraphState {
   report?: ATSReport
   adaptedCV?: CV
   resume?: string
+  resumeDraft?: ResumeDraft              // novo
+  resumeVerification?: VerificationReport // novo
 }
