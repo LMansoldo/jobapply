@@ -246,31 +246,33 @@ export async function registerRoutes(app: FastifyInstance): Promise<void> {
     }
   })
 
-  app.post('/debug/test-nodes', async (request, reply) => {
-    const parse = AnalyzeBodySchema.safeParse(request.body)
-    if (!parse.success) {
-      return reply.status(400).send({ message: parse.error.errors[0]?.message ?? 'Invalid request body' })
-    }
+  if (process.env.NODE_ENV !== 'production') {
+    app.post('/debug/test-nodes', async (request, reply) => {
+      const parse = AnalyzeBodySchema.safeParse(request.body)
+      if (!parse.success) {
+        return reply.status(400).send({ message: parse.error.errors[0]?.message ?? 'Invalid request body' })
+      }
 
-    const input: AgentInput = parse.data
-    const results: Record<string, unknown> = {}
+      const input: AgentInput = parse.data
+      const results: Record<string, unknown> = {}
 
-    try {
-      request.log.info('debug: testing mapperNode')
-      const { mapped } = mapperNode({ input })
-      results.mapper = { ok: true, sections: Object.keys(mapped.sections), entityCounts: Object.fromEntries(Object.entries(mapped.entities).map(([k, v]) => [k, Array.isArray(v) ? v.length : (v as any[])?.length ?? 0])) }
-    } catch (err) {
-      results.mapper = { ok: false, error: err instanceof Error ? err.message : String(err) }
-    }
+      try {
+        request.log.info('debug: testing mapperNode')
+        const { mapped } = mapperNode({ input })
+        results.mapper = { ok: true, sections: Object.keys(mapped.sections), entityCounts: Object.fromEntries(Object.entries(mapped.entities).map(([k, v]) => [k, Array.isArray(v) ? v.length : (v as any[])?.length ?? 0])) }
+      } catch (err) {
+        results.mapper = { ok: false, error: err instanceof Error ? err.message : String(err) }
+      }
 
-    try {
-      request.log.info('debug: testing jdKeywordExtractorNode')
-      const { jdKeywords } = await jdKeywordExtractorNode({ input })
-      results.jdKeywordExtractor = { ok: true, count: jdKeywords.length, sample: jdKeywords.slice(0, 10) }
-    } catch (err) {
-      results.jdKeywordExtractor = { ok: false, error: err instanceof Error ? err.message : String(err) }
-    }
+      try {
+        request.log.info('debug: testing jdKeywordExtractorNode')
+        const { jdKeywords } = await jdKeywordExtractorNode({ input })
+        results.jdKeywordExtractor = { ok: true, count: jdKeywords.length, sample: jdKeywords.slice(0, 10) }
+      } catch (err) {
+        results.jdKeywordExtractor = { ok: false, error: err instanceof Error ? err.message : String(err) }
+      }
 
-    return reply.send(results)
-  })
+      return reply.send(results)
+    })
+  }
 }
