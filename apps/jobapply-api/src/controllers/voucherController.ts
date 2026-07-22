@@ -33,7 +33,11 @@ export async function createVoucher(req: AuthRequest, res: Response, next: NextF
 
 export async function redeemVoucher(req: AuthRequest, res: Response, next: NextFunction): Promise<void> {
   try {
-    const { code } = req.body as { code?: string };
+    const { code } = req.body as { code?: unknown };
+    if (typeof code !== 'string') {
+      res.status(400).json({ message: 'Invalid payload' });
+      return;
+    }
     if (!code) { res.status(400).json({ message: 'code is required' }); return; }
 
     const voucher = await Voucher.findOne({ code: code.toUpperCase() });

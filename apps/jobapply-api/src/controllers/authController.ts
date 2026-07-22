@@ -95,11 +95,16 @@ export async function linkedinCallback(req: Request, res: Response, next: NextFu
       redirect_uri,
       action = 'login',
     } = req.body as {
-      code?: string;
-      state?: string;
-      redirect_uri?: string;
+      code?: unknown;
+      state?: unknown;
+      redirect_uri?: unknown;
       action?: 'login' | 'analyze';
     };
+
+    if (typeof code !== 'string' || typeof redirect_uri !== 'string') {
+      res.status(400).json({ message: 'Invalid payload' });
+      return;
+    }
 
     if (!code || !redirect_uri) {
       res.status(400).json({ message: 'code and redirect_uri are required' });

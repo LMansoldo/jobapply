@@ -4,7 +4,11 @@ import User from '../models/User';
 
 export async function register(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
-    const { name, email, password } = req.body as { name?: string; email?: string; password?: string };
+    const { name, email, password } = req.body as { name?: unknown; email?: unknown; password?: unknown };
+    if (typeof email !== 'string' || typeof password !== 'string') {
+      res.status(400).json({ message: 'Invalid payload' });
+      return;
+    }
     if (!name || !email || !password) {
       res.status(400).json({ message: 'name, email and password are required' });
       return;
@@ -25,7 +29,11 @@ export async function register(req: Request, res: Response, next: NextFunction):
 
 export async function login(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
-    const { email, password } = req.body as { email?: string; password?: string };
+    const { email, password } = req.body as { email?: unknown; password?: unknown };
+    if (typeof email !== 'string' || typeof password !== 'string') {
+      res.status(400).json({ message: 'Invalid payload' });
+      return;
+    }
     if (!email || !password) {
       res.status(400).json({ message: 'email and password are required' });
       return;
