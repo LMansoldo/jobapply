@@ -422,6 +422,77 @@
       "callbackConnecting": "Conectando com o LinkedIn...",
       "callbackError": "Não foi possível conectar com o LinkedIn. Tente novamente."
     },
+    "landing": {
+      "nav": {
+        "howItWorks": "Como funciona",
+        "atsScore": "Score ATS",
+        "tryFree": "Testar grátis"
+      },
+      "hero": {
+        "eyebrow": "Tailoring de CV com IA",
+        "h1Part1": "Um currículo",
+        "h1Highlight": "à altura",
+        "h1Part2": "da vaga",
+        "h1Part3": "que você quer.",
+        "subtitle": "Cole a descrição da vaga e deixe a IA do dojob calibrar seu currículo com precisão — score ATS, keywords e bullets reescritos, em minutos.",
+        "ctaMain": "Tailorizar meu CV",
+        "ctaSec": "Ver como funciona",
+        "atsBadge": "Score ATS após tailoring"
+      },
+      "features": {
+        "label": "Tailoring de CV",
+        "h2Line1": "Um currículo afiado",
+        "h2Line2": "para cada vaga que você quer",
+        "sub": "O dojob compara seu CV com a descrição da vaga e mostra exatamente o que ajustar para passar pelo ATS e impressionar o recrutador.",
+        "card1Title": "Score ATS em tempo real",
+        "card1Desc": "Veja sua pontuação de aderência à vaga se atualizar conforme você edita, com um breakdown por categoria.",
+        "card1Tag": "Atualização instantânea",
+        "card2Title": "Sugestão de keywords",
+        "card2Desc": "Identifica termos da vaga que faltam no seu CV e sugere onde encaixá-los naturalmente.",
+        "card2Tag": "Extraídas da vaga",
+        "card3Title": "Reescrita de bullets com IA",
+        "card3Desc": "A IA reescreve suas experiências com verbos de impacto e métricas, mantendo sua voz.",
+        "card3Tag": "Um clique por bullet",
+        "card4Title": "Comparativo antes/depois",
+        "card4Desc": "Acompanhe a evolução do seu score a cada ajuste aplicado, com histórico das versões.",
+        "card4Tag": "Histórico de versões",
+        "card5Title": "PT-BR e English lado a lado",
+        "card5Desc": "Mantenha versões calibradas em português e inglês para vagas locais e remotas globais.",
+        "card5Tag": "Sincronizado",
+        "card6Title": "Exportação em PDF",
+        "card6Desc": "Baixe o CV tailorizado pronto para envio, formatado e livre de erros de ATS.",
+        "card6Tag": "Pronto para enviar"
+      },
+      "hiw": {
+        "label": "Como funciona",
+        "h2Line1": "Do CV genérico ao",
+        "h2Line2": "CV sob medida, em 3 passos",
+        "step1Title": "Envie seu CV e a vaga",
+        "step1Desc": "Suba seu currículo atual e cole a descrição da vaga que você quer tailorizar.",
+        "step2Title": "Veja o score e as sugestões",
+        "step2Desc": "A IA analisa aderência ao ATS e aponta keywords faltantes e bullets a melhorar.",
+        "step3Title": "Aplique e baixe o PDF",
+        "step3Desc": "Aceite as sugestões com um clique e exporte o CV já calibrado para a vaga.",
+        "atsCardTitle": "✦ Análise ATS · Senior Frontend Engineer @ Nubank",
+        "atsCardScore": "Score com otimizações",
+        "atsCardPts": "+23 pts aplicados",
+        "atsCardDownload": "Baixar PDF"
+      },
+      "cta": {
+        "h2Line1": "Pronto para tailorizar",
+        "h2Line2": "seu próximo CV?",
+        "sub": "Crie sua conta gratuitamente e rode sua primeira análise ATS hoje mesmo.",
+        "btn": "Criar conta grátis agora"
+      },
+      "footer": {
+        "about": "Sobre",
+        "blog": "Blog",
+        "privacy": "Privacidade",
+        "terms": "Termos",
+        "support": "Suporte",
+        "copyright": "© 2026 dojob. Todos os direitos reservados."
+      }
+    },
     "onboarding": {
       "progressLabel": "{{current}} de {{total}}",
       "welcomeMsg1": "Olá, {{name}}! Bem-vindo ao DoJob.",
@@ -886,6 +957,77 @@
     "linkedin": {
       "callbackConnecting": "Connecting with LinkedIn...",
       "callbackError": "Could not connect with LinkedIn. Please try again."
+    },
+    "landing": {
+      "nav": {
+        "howItWorks": "How it works",
+        "atsScore": "ATS Score",
+        "tryFree": "Try for free"
+      },
+      "hero": {
+        "eyebrow": "AI-powered CV Tailoring",
+        "h1Part1": "A resume",
+        "h1Highlight": "worthy",
+        "h1Part2": "of the job",
+        "h1Part3": "you want.",
+        "subtitle": "Paste the job description and let dojob's AI calibrate your resume with precision — ATS score, keywords, and rewritten bullets, in minutes.",
+        "ctaMain": "Tailor my CV",
+        "ctaSec": "See how it works",
+        "atsBadge": "ATS score after tailoring"
+      },
+      "features": {
+        "label": "CV Tailoring",
+        "h2Line1": "A sharp resume",
+        "h2Line2": "for every job you want",
+        "sub": "dojob compares your CV with the job description and shows you exactly what to adjust to pass the ATS and impress the recruiter.",
+        "card1Title": "Real-time ATS Score",
+        "card1Desc": "See your job fit score update as you edit, with a breakdown by category.",
+        "card1Tag": "Instant updates",
+        "card2Title": "Keyword suggestions",
+        "card2Desc": "Identifies job description terms missing from your CV and suggests where to naturally incorporate them.",
+        "card2Tag": "Extracted from the job",
+        "card3Title": "AI bullet rewriting",
+        "card3Desc": "AI rewrites your experiences with impact verbs and metrics, preserving your voice.",
+        "card3Tag": "One click per bullet",
+        "card4Title": "Before/after comparison",
+        "card4Desc": "Track your score evolution with each applied change, with version history.",
+        "card4Tag": "Version history",
+        "card5Title": "PT-BR and English side by side",
+        "card5Desc": "Keep calibrated versions in Portuguese and English for local and global remote jobs.",
+        "card5Tag": "Synced",
+        "card6Title": "PDF export",
+        "card6Desc": "Download the tailored CV ready to send, formatted and free of ATS errors.",
+        "card6Tag": "Ready to send"
+      },
+      "hiw": {
+        "label": "How it works",
+        "h2Line1": "From generic CV to",
+        "h2Line2": "tailored CV in 3 steps",
+        "step1Title": "Submit your CV and the job",
+        "step1Desc": "Upload your current resume and paste the job description you want to tailor for.",
+        "step2Title": "See the score and suggestions",
+        "step2Desc": "The AI analyzes ATS fit and highlights missing keywords and bullets to improve.",
+        "step3Title": "Apply and download the PDF",
+        "step3Desc": "Accept suggestions with one click and export the CV already calibrated for the job.",
+        "atsCardTitle": "✦ ATS Analysis · Senior Frontend Engineer @ Nubank",
+        "atsCardScore": "Score with optimizations",
+        "atsCardPts": "+23 pts applied",
+        "atsCardDownload": "Download PDF"
+      },
+      "cta": {
+        "h2Line1": "Ready to tailor",
+        "h2Line2": "your next CV?",
+        "sub": "Create your account for free and run your first ATS analysis today.",
+        "btn": "Create free account now"
+      },
+      "footer": {
+        "about": "About",
+        "blog": "Blog",
+        "privacy": "Privacy",
+        "terms": "Terms",
+        "support": "Support",
+        "copyright": "© 2026 dojob. All rights reserved."
+      }
     },
     "onboarding": {
       "progressLabel": "{{current}} of {{total}}",

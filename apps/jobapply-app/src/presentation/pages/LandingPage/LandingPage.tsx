@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { Link } from '@tanstack/react-router'
 import { css, keyframes } from '@emotion/css'
+import { useTranslation } from 'react-i18next'
 
 // ── Keyframes ───────────────────────────────────────────────
 const floatOrb = keyframes`
@@ -137,6 +138,7 @@ const footerLinkCls = css`
 `
 
 export default function LandingPage() {
+  const { t } = useTranslation()
   const [isMobile, setIsMobile] = useState(
     typeof window !== 'undefined' && window.innerWidth <= 860
   )
@@ -182,14 +184,14 @@ export default function LandingPage() {
 
         {!m && (
           <div style={{ display: 'flex', alignItems: 'center', gap: 4, marginLeft: 36 }}>
-            <a href="#como-funciona" className={navLinkCls}>Como funciona</a>
-            <a href="#score" className={navLinkCls}>Score ATS</a>
+            <a href="#como-funciona" className={navLinkCls}>{t('landing.nav.howItWorks')}</a>
+            <a href="#score" className={navLinkCls}>{t('landing.nav.atsScore')}</a>
           </div>
         )}
 
         <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 10 }}>
-          <Link to="/login" className={navEnterCls}>Entrar</Link>
-          {!m && <Link to="/register" className={navRegisterCls}>Testar grátis</Link>}
+          <Link to="/login" className={navEnterCls}>{t('auth.login')}</Link>
+          {!m && <Link to="/register" className={navRegisterCls}>{t('landing.nav.tryFree')}</Link>}
         </div>
       </nav>
 
@@ -215,22 +217,22 @@ export default function LandingPage() {
           <div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 14, marginBottom: 32, animation: `${fadeUp} .6s ease both` }}>
               <div style={{ width: 36, height: 1, background: 'rgba(255,255,255,.4)', flexShrink: 0 }} />
-              <div style={{ fontSize: 12, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '3px', color: '#c4b5fd' }}>Tailoring de CV com IA</div>
+              <div style={{ fontSize: 12, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '3px', color: '#c4b5fd' }}>{t('landing.hero.eyebrow')}</div>
             </div>
 
             <h1 style={{ fontFamily: "'Lato', sans-serif", fontSize: 'clamp(44px, 5.4vw, 76px)', fontWeight: 300, lineHeight: 1.08, color: '#fff', letterSpacing: '-1px', margin: '0 0 28px', animation: `${fadeUp} .6s ease .1s both` }}>
-              Um currículo<br />
-              <span style={{ fontWeight: 900, fontStyle: 'italic', background: 'linear-gradient(90deg, #c4b5fd, #f0abfc, #fb7185)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>à altura</span> da vaga<br />
-              que você quer.
+              {t('landing.hero.h1Part1')}<br />
+              <span style={{ fontWeight: 900, fontStyle: 'italic', background: 'linear-gradient(90deg, #c4b5fd, #f0abfc, #fb7185)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>{t('landing.hero.h1Highlight')}</span> {t('landing.hero.h1Part2')}<br />
+              {t('landing.hero.h1Part3')}
             </h1>
 
             <p style={{ fontSize: 18, color: 'rgba(255,255,255,.6)', lineHeight: 1.75, maxWidth: 460, margin: '0 0 44px', fontWeight: 300, animation: `${fadeUp} .6s ease .2s both` }}>
-              Cole a descrição da vaga e deixe a IA do dojob calibrar seu currículo com precisão — score ATS, keywords e bullets reescritos, em minutos.
+              {t('landing.hero.subtitle')}
             </p>
 
             <div style={{ display: 'flex', alignItems: 'center', gap: 20, flexWrap: 'wrap', animation: `${fadeUp} .6s ease .3s both`, marginBottom: 64 }}>
-              <Link to="/register" className={heroCTAMainCls}>Tailorizar meu CV</Link>
-              <a href="#como-funciona" className={heroCTASecCls}>Ver como funciona</a>
+              <Link to="/register" className={heroCTAMainCls}>{t('landing.hero.ctaMain')}</Link>
+              <a href="#como-funciona" className={heroCTASecCls}>{t('landing.hero.ctaSec')}</a>
             </div>
           </div>
 
@@ -256,7 +258,7 @@ export default function LandingPage() {
               maxWidth: 230,
             } as React.CSSProperties}>
               <div style={{ fontSize: 34, fontWeight: 900, color: '#7c3aed', lineHeight: 1 }}>91</div>
-              <div style={{ fontSize: 11, color: '#6b7280', textTransform: 'uppercase', letterSpacing: '.6px', marginTop: 6 }}>Score ATS após tailoring</div>
+              <div style={{ fontSize: 11, color: '#6b7280', textTransform: 'uppercase', letterSpacing: '.6px', marginTop: 6 }}>{t('landing.hero.atsBadge')}</div>
             </div>
           </div>
         </div>
@@ -269,55 +271,55 @@ export default function LandingPage() {
 
       {/* FEATURES */}
       <div id="score" style={{ padding: m ? '64px 20px' : '100px 48px', maxWidth: 1280, margin: '0 auto' }}>
-        <div style={{ fontSize: 12, fontWeight: 900, textTransform: 'uppercase', letterSpacing: '1.5px', color: '#a78bfa', marginBottom: 12 }}>Tailoring de CV</div>
+        <div style={{ fontSize: 12, fontWeight: 900, textTransform: 'uppercase', letterSpacing: '1.5px', color: '#a78bfa', marginBottom: 12 }}>{t('landing.features.label')}</div>
         <h2 style={{ fontFamily: "'Lato', sans-serif", fontSize: 'clamp(28px, 4vw, 44px)', fontWeight: 900, color: '#1e1b2e', lineHeight: 1.15, letterSpacing: '-1px', margin: '0 0 16px' }}>
-          Um currículo afiado<br />para cada vaga que você quer
+          {t('landing.features.h2Line1')}<br />{t('landing.features.h2Line2')}
         </h2>
         <p style={{ fontSize: 17, color: '#6b7280', lineHeight: 1.65, maxWidth: 540, margin: 0 }}>
-          O dojob compara seu CV com a descrição da vaga e mostra exatamente o que ajustar para passar pelo ATS e impressionar o recrutador.
+          {t('landing.features.sub')}
         </p>
 
         <div style={{ display: 'grid', gridTemplateColumns: m ? '1fr' : 'repeat(3, 1fr)', gap: 20, marginTop: 56 }}>
           <div className={featCardCls}>
             <div style={{ width: 52, height: 52, borderRadius: 14, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 22, marginBottom: 18, background: '#ede9fe' }}>✦</div>
-            <div style={{ fontSize: 17, fontWeight: 900, marginBottom: 8, color: '#1e1b2e' }}>Score ATS em tempo real</div>
-            <div style={{ fontSize: 14, color: '#6b7280', lineHeight: 1.65 }}>Veja sua pontuação de aderência à vaga se atualizar conforme você edita, com um breakdown por categoria.</div>
-            <span style={{ display: 'inline-block', marginTop: 14, background: '#ede9fe', color: '#7c3aed', borderRadius: 999, padding: '3px 12px', fontSize: 11.5, fontWeight: 700 }}>Atualização instantânea</span>
+            <div style={{ fontSize: 17, fontWeight: 900, marginBottom: 8, color: '#1e1b2e' }}>{t('landing.features.card1Title')}</div>
+            <div style={{ fontSize: 14, color: '#6b7280', lineHeight: 1.65 }}>{t('landing.features.card1Desc')}</div>
+            <span style={{ display: 'inline-block', marginTop: 14, background: '#ede9fe', color: '#7c3aed', borderRadius: 999, padding: '3px 12px', fontSize: 11.5, fontWeight: 700 }}>{t('landing.features.card1Tag')}</span>
           </div>
 
           <div className={featCardCls}>
             <div style={{ width: 52, height: 52, borderRadius: 14, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 22, marginBottom: 18, background: '#dbeafe' }}>🔑</div>
-            <div style={{ fontSize: 17, fontWeight: 900, marginBottom: 8, color: '#1e1b2e' }}>Sugestão de keywords</div>
-            <div style={{ fontSize: 14, color: '#6b7280', lineHeight: 1.65 }}>Identifica termos da vaga que faltam no seu CV e sugere onde encaixá-los naturalmente.</div>
-            <span style={{ display: 'inline-block', marginTop: 14, background: '#dbeafe', color: '#1d4ed8', borderRadius: 999, padding: '3px 12px', fontSize: 11.5, fontWeight: 700 }}>Extraídas da vaga</span>
+            <div style={{ fontSize: 17, fontWeight: 900, marginBottom: 8, color: '#1e1b2e' }}>{t('landing.features.card2Title')}</div>
+            <div style={{ fontSize: 14, color: '#6b7280', lineHeight: 1.65 }}>{t('landing.features.card2Desc')}</div>
+            <span style={{ display: 'inline-block', marginTop: 14, background: '#dbeafe', color: '#1d4ed8', borderRadius: 999, padding: '3px 12px', fontSize: 11.5, fontWeight: 700 }}>{t('landing.features.card2Tag')}</span>
           </div>
 
           <div className={featCardCls}>
             <div style={{ width: 52, height: 52, borderRadius: 14, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 22, marginBottom: 18, background: '#d1fae5' }}>✍️</div>
-            <div style={{ fontSize: 17, fontWeight: 900, marginBottom: 8, color: '#1e1b2e' }}>Reescrita de bullets com IA</div>
-            <div style={{ fontSize: 14, color: '#6b7280', lineHeight: 1.65 }}>A IA reescreve suas experiências com verbos de impacto e métricas, mantendo sua voz.</div>
-            <span style={{ display: 'inline-block', marginTop: 14, background: '#d1fae5', color: '#065f46', borderRadius: 999, padding: '3px 12px', fontSize: 11.5, fontWeight: 700 }}>Um clique por bullet</span>
+            <div style={{ fontSize: 17, fontWeight: 900, marginBottom: 8, color: '#1e1b2e' }}>{t('landing.features.card3Title')}</div>
+            <div style={{ fontSize: 14, color: '#6b7280', lineHeight: 1.65 }}>{t('landing.features.card3Desc')}</div>
+            <span style={{ display: 'inline-block', marginTop: 14, background: '#d1fae5', color: '#065f46', borderRadius: 999, padding: '3px 12px', fontSize: 11.5, fontWeight: 700 }}>{t('landing.features.card3Tag')}</span>
           </div>
 
           <div className={featCardCls}>
             <div style={{ width: 52, height: 52, borderRadius: 14, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 22, marginBottom: 18, background: '#ffedd5' }}>📊</div>
-            <div style={{ fontSize: 17, fontWeight: 900, marginBottom: 8, color: '#1e1b2e' }}>Comparativo antes/depois</div>
-            <div style={{ fontSize: 14, color: '#6b7280', lineHeight: 1.65 }}>Acompanhe a evolução do seu score a cada ajuste aplicado, com histórico das versões.</div>
-            <span style={{ display: 'inline-block', marginTop: 14, background: '#ffedd5', color: '#c2410c', borderRadius: 999, padding: '3px 12px', fontSize: 11.5, fontWeight: 700 }}>Histórico de versões</span>
+            <div style={{ fontSize: 17, fontWeight: 900, marginBottom: 8, color: '#1e1b2e' }}>{t('landing.features.card4Title')}</div>
+            <div style={{ fontSize: 14, color: '#6b7280', lineHeight: 1.65 }}>{t('landing.features.card4Desc')}</div>
+            <span style={{ display: 'inline-block', marginTop: 14, background: '#ffedd5', color: '#c2410c', borderRadius: 999, padding: '3px 12px', fontSize: 11.5, fontWeight: 700 }}>{t('landing.features.card4Tag')}</span>
           </div>
 
           <div className={featCardCls}>
             <div style={{ width: 52, height: 52, borderRadius: 14, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 22, marginBottom: 18, background: '#fce7f3' }}>🌐</div>
-            <div style={{ fontSize: 17, fontWeight: 900, marginBottom: 8, color: '#1e1b2e' }}>PT-BR e English lado a lado</div>
-            <div style={{ fontSize: 14, color: '#6b7280', lineHeight: 1.65 }}>Mantenha versões calibradas em português e inglês para vagas locais e remotas globais.</div>
-            <span style={{ display: 'inline-block', marginTop: 14, background: '#fce7f3', color: '#9d174d', borderRadius: 999, padding: '3px 12px', fontSize: 11.5, fontWeight: 700 }}>Sincronizado</span>
+            <div style={{ fontSize: 17, fontWeight: 900, marginBottom: 8, color: '#1e1b2e' }}>{t('landing.features.card5Title')}</div>
+            <div style={{ fontSize: 14, color: '#6b7280', lineHeight: 1.65 }}>{t('landing.features.card5Desc')}</div>
+            <span style={{ display: 'inline-block', marginTop: 14, background: '#fce7f3', color: '#9d174d', borderRadius: 999, padding: '3px 12px', fontSize: 11.5, fontWeight: 700 }}>{t('landing.features.card5Tag')}</span>
           </div>
 
           <div className={featCardCls}>
             <div style={{ width: 52, height: 52, borderRadius: 14, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 22, marginBottom: 18, background: '#fef3c7' }}>📄</div>
-            <div style={{ fontSize: 17, fontWeight: 900, marginBottom: 8, color: '#1e1b2e' }}>Exportação em PDF</div>
-            <div style={{ fontSize: 14, color: '#6b7280', lineHeight: 1.65 }}>Baixe o CV tailorizado pronto para envio, formatado e livre de erros de ATS.</div>
-            <span style={{ display: 'inline-block', marginTop: 14, background: '#fef3c7', color: '#92400e', borderRadius: 999, padding: '3px 12px', fontSize: 11.5, fontWeight: 700 }}>Pronto para enviar</span>
+            <div style={{ fontSize: 17, fontWeight: 900, marginBottom: 8, color: '#1e1b2e' }}>{t('landing.features.card6Title')}</div>
+            <div style={{ fontSize: 14, color: '#6b7280', lineHeight: 1.65 }}>{t('landing.features.card6Desc')}</div>
+            <span style={{ display: 'inline-block', marginTop: 14, background: '#fef3c7', color: '#92400e', borderRadius: 999, padding: '3px 12px', fontSize: 11.5, fontWeight: 700 }}>{t('landing.features.card6Tag')}</span>
           </div>
         </div>
       </div>
@@ -325,9 +327,9 @@ export default function LandingPage() {
       {/* HOW IT WORKS */}
       <div id="como-funciona" style={{ background: 'linear-gradient(180deg, #fff 0%, #f5f3ff 100%)' }}>
         <div style={{ padding: m ? '64px 20px' : '100px 48px', maxWidth: 1280, margin: '0 auto' }}>
-          <div style={{ fontSize: 12, fontWeight: 900, textTransform: 'uppercase', letterSpacing: '1.5px', color: '#a78bfa', marginBottom: 12 }}>Como funciona</div>
+          <div style={{ fontSize: 12, fontWeight: 900, textTransform: 'uppercase', letterSpacing: '1.5px', color: '#a78bfa', marginBottom: 12 }}>{t('landing.hiw.label')}</div>
           <h2 style={{ fontFamily: "'Lato', sans-serif", fontSize: 'clamp(28px, 4vw, 44px)', fontWeight: 900, color: '#1e1b2e', lineHeight: 1.15, letterSpacing: '-1px', margin: 0 }}>
-            Do CV genérico ao<br />CV sob medida, em 3 passos
+            {t('landing.hiw.h2Line1')}<br />{t('landing.hiw.h2Line2')}
           </h2>
 
           <div style={{ display: 'grid', gridTemplateColumns: m ? '1fr' : '1fr 1fr', gap: m ? 40 : 80, alignItems: 'center', marginTop: 56 }}>
@@ -336,22 +338,22 @@ export default function LandingPage() {
               <div style={{ display: 'flex', gap: 20, padding: '22px 0', borderBottom: '1px solid #e9e4fc' }}>
                 <div style={{ width: 40, height: 40, borderRadius: 12, background: '#ede9fe', color: '#7c3aed', fontSize: 16, fontWeight: 900, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>1</div>
                 <div>
-                  <div style={{ fontSize: 16, fontWeight: 900, marginBottom: 4 }}>Envie seu CV e a vaga</div>
-                  <div style={{ fontSize: 14, color: '#6b7280', lineHeight: 1.6 }}>Suba seu currículo atual e cole a descrição da vaga que você quer tailorizar.</div>
+                  <div style={{ fontSize: 16, fontWeight: 900, marginBottom: 4 }}>{t('landing.hiw.step1Title')}</div>
+                  <div style={{ fontSize: 14, color: '#6b7280', lineHeight: 1.6 }}>{t('landing.hiw.step1Desc')}</div>
                 </div>
               </div>
               <div style={{ display: 'flex', gap: 20, padding: '22px 0', borderBottom: '1px solid #e9e4fc' }}>
                 <div style={{ width: 40, height: 40, borderRadius: 12, background: '#ede9fe', color: '#7c3aed', fontSize: 16, fontWeight: 900, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>2</div>
                 <div>
-                  <div style={{ fontSize: 16, fontWeight: 900, marginBottom: 4 }}>Veja o score e as sugestões</div>
-                  <div style={{ fontSize: 14, color: '#6b7280', lineHeight: 1.6 }}>A IA analisa aderência ao ATS e aponta keywords faltantes e bullets a melhorar.</div>
+                  <div style={{ fontSize: 16, fontWeight: 900, marginBottom: 4 }}>{t('landing.hiw.step2Title')}</div>
+                  <div style={{ fontSize: 14, color: '#6b7280', lineHeight: 1.6 }}>{t('landing.hiw.step2Desc')}</div>
                 </div>
               </div>
               <div style={{ display: 'flex', gap: 20, padding: '22px 0' }}>
                 <div style={{ width: 40, height: 40, borderRadius: 12, background: '#ede9fe', color: '#7c3aed', fontSize: 16, fontWeight: 900, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>3</div>
                 <div>
-                  <div style={{ fontSize: 16, fontWeight: 900, marginBottom: 4 }}>Aplique e baixe o PDF</div>
-                  <div style={{ fontSize: 14, color: '#6b7280', lineHeight: 1.6 }}>Aceite as sugestões com um clique e exporte o CV já calibrado para a vaga.</div>
+                  <div style={{ fontSize: 16, fontWeight: 900, marginBottom: 4 }}>{t('landing.hiw.step3Title')}</div>
+                  <div style={{ fontSize: 14, color: '#6b7280', lineHeight: 1.6 }}>{t('landing.hiw.step3Desc')}</div>
                 </div>
               </div>
             </div>
@@ -365,10 +367,10 @@ export default function LandingPage() {
                 <div style={{ flex: 1, height: 20, background: '#e9e4fc', borderRadius: 999, margin: '0 10px' }} />
               </div>
               <div style={{ padding: 24 }}>
-                <div style={{ fontSize: 13, fontWeight: 900, color: '#7c3aed', marginBottom: 12 }}>✦ Análise ATS · Senior Frontend Engineer @ Nubank</div>
+                <div style={{ fontSize: 13, fontWeight: 900, color: '#7c3aed', marginBottom: 12 }}>{t('landing.hiw.atsCardTitle')}</div>
                 <div style={{ background: '#ede9fe', borderRadius: 10, padding: 14, marginBottom: 12, textAlign: 'center' }}>
                   <div style={{ fontSize: 36, fontWeight: 900, color: '#7c3aed' }}>85</div>
-                  <div style={{ fontSize: 11, color: '#6b7280' }}>Score com otimizações</div>
+                  <div style={{ fontSize: 11, color: '#6b7280' }}>{t('landing.hiw.atsCardScore')}</div>
                   <div style={{ width: '80%', height: 6, background: '#fff', borderRadius: 999, margin: '8px auto 0', overflow: 'hidden' }}>
                     <div style={{ width: '85%', height: '100%', background: 'linear-gradient(90deg,#a78bfa,#f0abfc)', borderRadius: 999 }} />
                   </div>
@@ -405,10 +407,10 @@ export default function LandingPage() {
                 </div>
                 <div style={{ marginTop: 14, display: 'flex', alignItems: 'center', gap: 8 }}>
                   <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: '#d1fae5', color: '#065f46', borderRadius: 999, padding: '5px 14px', fontSize: 12, fontWeight: 700 }}>
-                    <i className="fas fa-arrow-up" style={{ fontSize: 10 }} />+23 pts aplicados
+                    <i className="fas fa-arrow-up" style={{ fontSize: 10 }} />{t('landing.hiw.atsCardPts')}
                   </div>
                   <div style={{ background: '#ede9fe', color: '#7c3aed', borderRadius: 999, padding: '5px 14px', fontSize: 12, fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: 6 }}>
-                    <i className="fas fa-file-pdf" style={{ fontSize: 10 }} />Baixar PDF
+                    <i className="fas fa-file-pdf" style={{ fontSize: 10 }} />{t('landing.hiw.atsCardDownload')}
                   </div>
                 </div>
               </div>
@@ -421,13 +423,13 @@ export default function LandingPage() {
       <div style={{ background: 'linear-gradient(135deg, #7c3aed 0%, #4c1d95 50%, #7c3aed 100%)', padding: m ? '56px 20px' : '80px 48px', textAlign: 'center', position: 'relative', overflow: 'hidden' }}>
         <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundImage: 'linear-gradient(rgba(255,255,255,.04) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.04) 1px,transparent 1px)', backgroundSize: '60px 60px', pointerEvents: 'none' }} />
         <h2 style={{ fontFamily: "'Lato', sans-serif", fontSize: 'clamp(28px,4vw,44px)', fontWeight: 900, color: '#fff', margin: '0 0 16px', position: 'relative' }}>
-          Pronto para tailorizar<br />seu próximo CV?
+          {t('landing.cta.h2Line1')}<br />{t('landing.cta.h2Line2')}
         </h2>
         <p style={{ fontSize: 17, color: 'rgba(255,255,255,.65)', margin: '0 0 36px', position: 'relative' }}>
-          Crie sua conta gratuitamente e rode sua primeira análise ATS hoje mesmo.
+          {t('landing.cta.sub')}
         </p>
         <Link to="/register" className={ctaBandBtnCls}>
-          <i className="fas fa-rocket" />Criar conta grátis agora
+          <i className="fas fa-rocket" />{t('landing.cta.btn')}
         </Link>
       </div>
 
@@ -438,15 +440,15 @@ export default function LandingPage() {
             do<span style={{ color: '#c4b5fd' }}>job</span>
           </div>
           <div style={{ display: 'flex', gap: m ? 14 : 24, flexWrap: 'wrap', justifyContent: 'center' }}>
-            <a className={footerLinkCls}>Sobre</a>
-            <a className={footerLinkCls}>Blog</a>
-            <a className={footerLinkCls}>Privacidade</a>
-            <a className={footerLinkCls}>Termos</a>
-            <a className={footerLinkCls}>Suporte</a>
+            <a className={footerLinkCls}>{t('landing.footer.about')}</a>
+            <a className={footerLinkCls}>{t('landing.footer.blog')}</a>
+            <a className={footerLinkCls}>{t('landing.footer.privacy')}</a>
+            <a className={footerLinkCls}>{t('landing.footer.terms')}</a>
+            <a className={footerLinkCls}>{t('landing.footer.support')}</a>
           </div>
         </div>
         <div style={{ textAlign: 'center', fontSize: 12.5, color: 'rgba(255,255,255,.25)', marginTop: 24, paddingTop: 24, borderTop: '1px solid rgba(255,255,255,.08)', maxWidth: 1280, marginLeft: 'auto', marginRight: 'auto' }}>
-          © 2026 dojob. Todos os direitos reservados.
+          {t('landing.footer.copyright')}
         </div>
       </footer>
 
