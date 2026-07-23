@@ -13,3 +13,4 @@ apps/**/.claude/
 packages/**/.claude/
 api.env
 agent.env
+linkedin.env

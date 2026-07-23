@@ -16,6 +16,12 @@ services:
     env_file: ./agent.env
     networks: [internal]
 
+  linkedin-agent:
+    build: ./apps/linkedin-agent
+    restart: unless-stopped
+    env_file: ./linkedin.env
+    networks: [internal]
+
 networks:
   web:
     external: true
