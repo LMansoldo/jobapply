@@ -1,0 +1,59 @@
+name: Deploy
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: deploy
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: yarn
+
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile
+
+      - name: Build frontend
+        run: yarn workspace jobapply-app build
+        env:
+          VITE_API_URL: https://api.dojob.pro
+          VITE_USE_MOCK: "false"
+
+      - name: Setup SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.DEPLOY_SSH_KEY }}" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          ssh-keyscan -H "${{ secrets.DEPLOY_HOST }}" >> ~/.ssh/known_hosts 2>/dev/null
+
+      - name: Deploy frontend
+        run: |
+          rsync -a --delete -e "ssh -i ~/.ssh/deploy_key" \
+            apps/jobapply-app/dist/ \
+            root@${{ secrets.DEPLOY_HOST }}:/opt/caddy/sites/jobapply-app/
+
+      - name: Deploy backend
+        run: |
+          rsync -a --delete \
+            --exclude node_modules --exclude '.env' --exclude dist --exclude .git \
+            --exclude api.env --exclude agent.env --exclude linkedin.env \
+            -e "ssh -i ~/.ssh/deploy_key" \
+            ./ root@${{ secrets.DEPLOY_HOST }}:/root/jobapply/
+          ssh -i ~/.ssh/deploy_key root@${{ secrets.DEPLOY_HOST }} \
+            'cd /root/jobapply && docker compose -f docker-compose.prod.yml up -d --build'
+
+      - name: Health check
+        run: |
+          sleep 10
+          curl -sf https://api.dojob.pro/health
+          curl -sfo /dev/null https://dojob.pro/
