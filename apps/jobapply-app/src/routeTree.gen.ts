@@ -14,8 +14,8 @@ import { Route as OnboardingRouteImport } from './routes/onboarding'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as LinkedinCallbackRouteImport } from './routes/linkedin-callback'
 import { Route as AuthRouteImport } from './routes/_auth'
-import { Route as AuthIndexRouteImport } from './routes/_auth/index'
 import { Route as PublicPublicIdRouteImport } from './routes/public/$publicId'
+import { Route as AuthTailoringRouteImport } from './routes/_auth/tailoring'
 import { Route as AuthLinkedinIndexRouteImport } from './routes/_auth/linkedin/index'
 import { Route as AuthCvIndexRouteImport } from './routes/_auth/cv/index'
 
@@ -43,15 +43,15 @@ const AuthRoute = AuthRouteImport.update({
   id: '/_auth',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AuthIndexRoute = AuthIndexRouteImport.update({
-  id: '/',
-  path: '/',
-  getParentRoute: () => AuthRoute,
-} as any)
 const PublicPublicIdRoute = PublicPublicIdRouteImport.update({
   id: '/public/$publicId',
   path: '/public/$publicId',
   getParentRoute: () => rootRouteImport,
+} as any)
+const AuthTailoringRoute = AuthTailoringRouteImport.update({
+  id: '/tailoring',
+  path: '/tailoring',
+  getParentRoute: () => AuthRoute,
 } as any)
 const AuthLinkedinIndexRoute = AuthLinkedinIndexRouteImport.update({
   id: '/linkedin/',
@@ -65,22 +65,24 @@ const AuthCvIndexRoute = AuthCvIndexRouteImport.update({
 } as any)
 
 export interface FileRoutesByFullPath {
-  '/': typeof AuthIndexRoute
+  '/': typeof AuthRouteWithChildren
   '/linkedin-callback': typeof LinkedinCallbackRoute
   '/login': typeof LoginRoute
   '/onboarding': typeof OnboardingRoute
   '/register': typeof RegisterRoute
+  '/tailoring': typeof AuthTailoringRoute
   '/public/$publicId': typeof PublicPublicIdRoute
   '/cv/': typeof AuthCvIndexRoute
   '/linkedin/': typeof AuthLinkedinIndexRoute
 }
 export interface FileRoutesByTo {
+  '/': typeof AuthRouteWithChildren
   '/linkedin-callback': typeof LinkedinCallbackRoute
   '/login': typeof LoginRoute
   '/onboarding': typeof OnboardingRoute
   '/register': typeof RegisterRoute
+  '/tailoring': typeof AuthTailoringRoute
   '/public/$publicId': typeof PublicPublicIdRoute
-  '/': typeof AuthIndexRoute
   '/cv': typeof AuthCvIndexRoute
   '/linkedin': typeof AuthLinkedinIndexRoute
 }
@@ -91,8 +93,8 @@ export interface FileRoutesById {
   '/login': typeof LoginRoute
   '/onboarding': typeof OnboardingRoute
   '/register': typeof RegisterRoute
+  '/_auth/tailoring': typeof AuthTailoringRoute
   '/public/$publicId': typeof PublicPublicIdRoute
-  '/_auth/': typeof AuthIndexRoute
   '/_auth/cv/': typeof AuthCvIndexRoute
   '/_auth/linkedin/': typeof AuthLinkedinIndexRoute
 }
@@ -104,17 +106,19 @@ export interface FileRouteTypes {
     | '/login'
     | '/onboarding'
     | '/register'
+    | '/tailoring'
     | '/public/$publicId'
     | '/cv/'
     | '/linkedin/'
   fileRoutesByTo: FileRoutesByTo
   to:
+    | '/'
     | '/linkedin-callback'
     | '/login'
     | '/onboarding'
     | '/register'
+    | '/tailoring'
     | '/public/$publicId'
-    | '/'
     | '/cv'
     | '/linkedin'
   id:
@@ -124,8 +128,8 @@ export interface FileRouteTypes {
     | '/login'
     | '/onboarding'
     | '/register'
+    | '/_auth/tailoring'
     | '/public/$publicId'
-    | '/_auth/'
     | '/_auth/cv/'
     | '/_auth/linkedin/'
   fileRoutesById: FileRoutesById
@@ -176,19 +180,19 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/_auth/': {
-      id: '/_auth/'
-      path: '/'
-      fullPath: '/'
-      preLoaderRoute: typeof AuthIndexRouteImport
-      parentRoute: typeof AuthRoute
-    }
     '/public/$publicId': {
       id: '/public/$publicId'
       path: '/public/$publicId'
       fullPath: '/public/$publicId'
       preLoaderRoute: typeof PublicPublicIdRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/_auth/tailoring': {
+      id: '/_auth/tailoring'
+      path: '/tailoring'
+      fullPath: '/tailoring'
+      preLoaderRoute: typeof AuthTailoringRouteImport
+      parentRoute: typeof AuthRoute
     }
     '/_auth/linkedin/': {
       id: '/_auth/linkedin/'
@@ -208,13 +212,13 @@ declare module '@tanstack/react-router' {
 }
 
 interface AuthRouteChildren {
-  AuthIndexRoute: typeof AuthIndexRoute
+  AuthTailoringRoute: typeof AuthTailoringRoute
   AuthCvIndexRoute: typeof AuthCvIndexRoute
   AuthLinkedinIndexRoute: typeof AuthLinkedinIndexRoute
 }
 
 const AuthRouteChildren: AuthRouteChildren = {
-  AuthIndexRoute: AuthIndexRoute,
+  AuthTailoringRoute: AuthTailoringRoute,
   AuthCvIndexRoute: AuthCvIndexRoute,
   AuthLinkedinIndexRoute: AuthLinkedinIndexRoute,
 }
