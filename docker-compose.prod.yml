@@ -1,18 +1,11 @@
+# Requer a rede compartilhada criada uma única vez na VPS:
+#   docker network create web
+# O reverse proxy (Caddy) vive fora deste compose e roteia para
+# "jobapply-api" pela rede "web".
 services:
-  caddy:
-    image: caddy:2-alpine
-    restart: unless-stopped
-    ports:
-      - "80:80"
-      - "443:443"
-    volumes:
-      - ./Caddyfile:/etc/caddy/Caddyfile:ro
-      - caddy_data:/data
-      - caddy_config:/config
-    networks: [web]
-
   api:
     build: ./apps/jobapply-api
+    container_name: jobapply-api
     restart: unless-stopped
     env_file: ./api.env
     networks: [web, internal]
@@ -25,8 +18,5 @@ services:
 
 networks:
   web:
+    external: true
   internal:
-
-volumes:
-  caddy_data:
-  caddy_config:
