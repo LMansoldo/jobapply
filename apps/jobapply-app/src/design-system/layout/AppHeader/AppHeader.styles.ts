@@ -29,7 +29,7 @@ export const styles = {
     color: Colors.textMain,
   },
   logoBoard: {
-    color: Colors.primaryDark,
+    color: Colors.primaryMid,
   },
   nav: {
     display: 'flex',
