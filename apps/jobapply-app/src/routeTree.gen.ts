@@ -14,6 +14,7 @@ import { Route as OnboardingRouteImport } from './routes/onboarding'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as LinkedinCallbackRouteImport } from './routes/linkedin-callback'
 import { Route as AuthRouteImport } from './routes/_auth'
+import { Route as IndexRouteImport } from './routes/index'
 import { Route as PublicPublicIdRouteImport } from './routes/public/$publicId'
 import { Route as AuthTailoringRouteImport } from './routes/_auth/tailoring'
 import { Route as AuthLinkedinIndexRouteImport } from './routes/_auth/linkedin/index'
@@ -43,6 +44,11 @@ const AuthRoute = AuthRouteImport.update({
   id: '/_auth',
   getParentRoute: () => rootRouteImport,
 } as any)
+const IndexRoute = IndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const PublicPublicIdRoute = PublicPublicIdRouteImport.update({
   id: '/public/$publicId',
   path: '/public/$publicId',
@@ -65,7 +71,7 @@ const AuthCvIndexRoute = AuthCvIndexRouteImport.update({
 } as any)
 
 export interface FileRoutesByFullPath {
-  '/': typeof AuthRouteWithChildren
+  '/': typeof IndexRoute
   '/linkedin-callback': typeof LinkedinCallbackRoute
   '/login': typeof LoginRoute
   '/onboarding': typeof OnboardingRoute
@@ -76,7 +82,7 @@ export interface FileRoutesByFullPath {
   '/linkedin/': typeof AuthLinkedinIndexRoute
 }
 export interface FileRoutesByTo {
-  '/': typeof AuthRouteWithChildren
+  '/': typeof IndexRoute
   '/linkedin-callback': typeof LinkedinCallbackRoute
   '/login': typeof LoginRoute
   '/onboarding': typeof OnboardingRoute
@@ -88,6 +94,7 @@ export interface FileRoutesByTo {
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
+  '/': typeof IndexRoute
   '/_auth': typeof AuthRouteWithChildren
   '/linkedin-callback': typeof LinkedinCallbackRoute
   '/login': typeof LoginRoute
@@ -123,6 +130,7 @@ export interface FileRouteTypes {
     | '/linkedin'
   id:
     | '__root__'
+    | '/'
     | '/_auth'
     | '/linkedin-callback'
     | '/login'
@@ -135,6 +143,7 @@ export interface FileRouteTypes {
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
+  IndexRoute: typeof IndexRoute
   AuthRoute: typeof AuthRouteWithChildren
   LinkedinCallbackRoute: typeof LinkedinCallbackRoute
   LoginRoute: typeof LoginRoute
@@ -178,6 +187,13 @@ declare module '@tanstack/react-router' {
       path: ''
       fullPath: '/'
       preLoaderRoute: typeof AuthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/public/$publicId': {
@@ -226,6 +242,7 @@ const AuthRouteChildren: AuthRouteChildren = {
 const AuthRouteWithChildren = AuthRoute._addFileChildren(AuthRouteChildren)
 
 const rootRouteChildren: RootRouteChildren = {
+  IndexRoute: IndexRoute,
   AuthRoute: AuthRouteWithChildren,
   LinkedinCallbackRoute: LinkedinCallbackRoute,
   LoginRoute: LoginRoute,
