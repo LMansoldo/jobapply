@@ -226,16 +226,56 @@ export const tailoringItem = css({
 })
 
 export const interactionArea = css({
+  position: 'sticky',
+  bottom: 0,
+  background: '#ffffff',
+  borderTop: '1px solid #e9e4fc',
+  borderRadius: '20px 20px 0 0',
+  padding: '18px 16px calc(18px + env(safe-area-inset-bottom))',
+  boxShadow: '0 -8px 24px rgba(91,33,182,0.10)',
+  animation: `${sheetUp} 0.3s ease both`,
+  flexShrink: 0,
+})
+
+export const sheetTitle = css({
+  fontSize: '1.5rem',
+  fontWeight: FontWeight.bold,
+  color: '#1e1b2e',
+  marginBottom: '12px',
+  fontFamily: FontFamily.heading,
+})
+
+export const sheetSubtitle = css({
+  fontSize: '1.2rem',
+  color: '#888888',
+  marginBottom: '12px',
+})
+
+export const sheetSubmitBtn = (enabled: boolean) => css({
   width: '100%',
-  maxWidth: '72rem',
-  padding: `0 ${Spacing.md} ${Spacing.xl}`,
-  animation: `${fadeSlideIn} 0.35s ease both`,
+  height: '48px',
+  borderRadius: '12px',
+  border: 'none',
+  fontFamily: FontFamily.body,
+  fontWeight: FontWeight.bold,
+  fontSize: '1.45rem',
+  cursor: enabled ? 'pointer' : 'not-allowed',
+  background: enabled ? 'linear-gradient(135deg,#7c3aed,#6d28d9)' : '#e9e4fc',
+  color: enabled ? '#ffffff' : '#a0aec0',
+  boxShadow: enabled ? '0 2px 12px rgba(124,58,237,0.30)' : 'none',
+  display: 'block',
 })
 
 export const genderButtons = css({
   display: 'flex',
   gap: Spacing.sm,
   flexWrap: 'wrap',
+})
+
+export const otherInput = css({
+  marginTop: Spacing.sm,
+  display: 'flex',
+  gap: Spacing.sm,
 })
 
 export const genderBtn = (active: boolean) =>
@@ -251,12 +291,6 @@ export const genderBtn = (active: boolean) =>
     transition: 'all 0.15s ease',
     '&:hover': { borderColor: Colors.primary },
   })
-
-export const otherInput = css({
-  marginTop: Spacing.sm,
-  display: 'flex',
-  gap: Spacing.sm,
-})
 
 export const rolesRow = css({
   display: 'flex',
