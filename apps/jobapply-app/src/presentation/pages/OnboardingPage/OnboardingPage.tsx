@@ -122,7 +122,7 @@ export default function OnboardingPage() {
         {isDone && (
           <div className={S.isDoneRow}>
             <span className={S.isDoneSpinner} />
-            Abrindo o criador de perfil...
+            {t('onboarding.isDoneText')}
           </div>
         )}
         <div ref={bottomRef} />
@@ -130,7 +130,7 @@ export default function OnboardingPage() {
 
       {interaction === 'gender' && (
         <div className={S.interactionArea}>
-          <div className={S.sheetTitle}>Qual é o seu gênero?</div>
+          <div className={S.sheetTitle}>{t('onboarding.genderQuestion')}</div>
           <div className={S.genderButtons}>
             {(['M', 'F', 'O'] as const).map((g) => (
               <button key={g} type="button" className={S.genderBtn(genderSel === g)} onClick={() => setGenderSel(g)}>
@@ -152,15 +152,15 @@ export default function OnboardingPage() {
             disabled={!genderSel || (genderSel === 'O' && !genderOther.trim())}
             onClick={() => genderSel && handleGender(genderSel, genderOther || undefined)}
           >
-            Continuar
+            {t('common.next')}
           </button>
         </div>
       )}
 
       {interaction === 'roles' && (
         <div className={S.interactionArea}>
-          <div className={S.sheetTitle}>Quais cargos você está buscando?</div>
-          <div className={S.sheetSubtitle}>Adicione os cargos que você está procurando</div>
+          <div className={S.sheetTitle}>{t('onboarding.rolesQuestion')}</div>
+          <div className={S.sheetSubtitle}>{t('onboarding.rolesHint')}</div>
           <div className={S.rolesRow}>
             <input
               className={S.roleTextInput}
@@ -200,20 +200,20 @@ export default function OnboardingPage() {
             disabled={roles.length === 0}
             onClick={() => handleRoles(roles)}
           >
-            Continuar
+            {t('common.next')}
           </button>
         </div>
       )}
 
       {interaction === 'employed' && (
         <div className={S.interactionArea}>
-          <div className={S.sheetTitle}>Você está empregado atualmente?</div>
+          <div className={S.sheetTitle}>{t('onboarding.employedQuestion')}</div>
           <div className={S.employedButtons}>
             <button type="button" className={S.employedPrimaryBtn} onClick={() => handleEmployed(true)}>
-              Sim, estou empregado
+              {t('onboarding.employedYes')}
             </button>
             <button type="button" className={S.employedOutlineBtn} onClick={() => handleEmployed(false)}>
-              Não, estou disponível
+              {t('onboarding.employedNo')}
             </button>
           </div>
         </div>
