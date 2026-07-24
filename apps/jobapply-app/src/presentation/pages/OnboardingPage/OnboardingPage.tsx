@@ -27,7 +27,7 @@ export default function OnboardingPage() {
     setTimeout(() => navigate({ to: '/cv' }), 1200)
   }
 
-  const { messages, isTyping, interaction, progress, handleGender, handleRoles, handleEmployed } =
+  const { messages, isTyping, interaction, handleGender, handleRoles, handleEmployed } =
     useOnboardingChat(user?.name?.split(' ')[0] ?? '', t, handleDone)
 
   useEffect(() => {
@@ -42,8 +42,23 @@ export default function OnboardingPage() {
 
   return (
     <div className={S.root}>
-      <div className={S.progressTrack}>
-        <div className={S.progressFill(progress)} />
+      <div className={S.header}>
+        <div className={S.headerLogo}>
+          <span className={S.headerLogoText}>DoJob</span>
+          <span className={S.headerLogoDot} />
+        </div>
+        {(() => {
+          const stepNum = interaction === 'gender' ? 1 : interaction === 'roles' ? 2 : interaction === 'employed' ? 3 : 0
+          if (!stepNum) return null
+          return (
+            <div className={S.headerStepGroup}>
+              <div className={S.headerDots}>
+                {[1, 2, 3].map((n) => <span key={n} className={S.headerDot(n <= stepNum)} />)}
+              </div>
+              <span className={S.headerBadge}>Pergunta {stepNum} de 3</span>
+            </div>
+          )
+        })()}
       </div>
 
       <div className={S.chatArea}>

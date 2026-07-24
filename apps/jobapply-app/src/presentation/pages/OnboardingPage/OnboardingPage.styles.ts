@@ -13,28 +13,89 @@ const fadeSlideIn = keyframes`
   to   { opacity: 1; transform: translateY(0); }
 `
 
+const sheetUp = keyframes`
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+`
+
+const spin = keyframes`
+  to { transform: rotate(360deg); }
+`
+
 export const root = css({
+  width: '100%',
+  maxWidth: '480px',
+  margin: '0 auto',
   minHeight: '100dvh',
-  backgroundColor: Colors.pageBg,
+  backgroundColor: '#f5f3ff',
   display: 'flex',
   flexDirection: 'column',
-  alignItems: 'center',
+  position: 'relative',
+  fontFamily: FontFamily.body,
+  boxShadow: '0 0 60px rgba(91,33,182,0.12)',
 })
 
-export const progressTrack = css({
-  width: '100%',
-  height: '0.3rem',
-  backgroundColor: Colors.borderLight,
+export const header = css({
+  position: 'sticky',
+  top: 0,
+  zIndex: 20,
+  background: 'rgba(245,243,255,0.92)',
+  backdropFilter: 'blur(8px)',
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'space-between',
+  padding: '14px 18px',
+  borderBottom: '1px solid #e9e4fc',
   flexShrink: 0,
 })
 
-export const progressFill = (pct: number) =>
-  css({
-    height: '100%',
-    width: `${pct}%`,
-    background: Colors.gradientProgressBar,
-    transition: 'width 0.4s ease',
-  })
+export const headerLogo = css({
+  display: 'flex',
+  alignItems: 'center',
+  gap: '6px',
+})
+
+export const headerLogoText = css({
+  fontFamily: FontFamily.heading,
+  fontWeight: FontWeight.extrabold,
+  fontSize: '1.6rem',
+  color: '#1e1b2e',
+})
+
+export const headerLogoDot = css({
+  width: '6px',
+  height: '6px',
+  borderRadius: '50%',
+  background: '#a78bfa',
+})
+
+export const headerStepGroup = css({
+  display: 'flex',
+  alignItems: 'center',
+  gap: '8px',
+})
+
+export const headerDots = css({
+  display: 'flex',
+  gap: '4px',
+})
+
+export const headerDot = (active: boolean) => css({
+  width: '6px',
+  height: '6px',
+  borderRadius: '50%',
+  background: active ? '#7c3aed' : '#ddd6fe',
+})
+
+export const headerBadge = css({
+  fontSize: '1.1rem',
+  fontWeight: FontWeight.semibold,
+  color: '#6d28d9',
+  background: '#ede9fe',
+  padding: '4px 10px',
+  borderRadius: '9999px',
+  letterSpacing: '0.2px',
+})
 
 export const chatArea = css({
   flex: 1,
