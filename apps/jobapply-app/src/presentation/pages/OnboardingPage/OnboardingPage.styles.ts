@@ -1,7 +1,5 @@
 import { css, keyframes } from '@emotion/css'
-import { Colors } from '../../../styles/theme/colors'
-import { Spacing } from '../../../styles/theme/spacing'
-import { FontSize, FontFamily, FontWeight } from '../../../styles/theme/typography'
+import { FontFamily, FontWeight } from '../../../styles/theme/typography'
 
 const typingDot = keyframes`
   0%, 60%, 100% { opacity: 0.2; transform: translateY(0); }
@@ -13,81 +11,130 @@ const fadeSlideIn = keyframes`
   to   { opacity: 1; transform: translateY(0); }
 `
 
+const sheetUp = keyframes`
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+`
+
+const spin = keyframes`
+  to { transform: rotate(360deg); }
+`
+
 export const root = css({
+  width: '100%',
+  maxWidth: '480px',
+  margin: '0 auto',
   minHeight: '100dvh',
-  backgroundColor: Colors.pageBg,
+  backgroundColor: '#f5f3ff',
   display: 'flex',
   flexDirection: 'column',
-  alignItems: 'center',
+  position: 'relative',
+  fontFamily: FontFamily.body,
+  boxShadow: '0 0 60px rgba(91,33,182,0.12)',
 })
 
-export const progressTrack = css({
-  width: '100%',
-  height: '0.3rem',
-  backgroundColor: Colors.borderLight,
+export const header = css({
+  position: 'sticky',
+  top: 0,
+  zIndex: 20,
+  background: 'rgba(245,243,255,0.92)',
+  backdropFilter: 'blur(8px)',
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'space-between',
+  padding: '14px 18px',
+  borderBottom: '1px solid #e9e4fc',
   flexShrink: 0,
 })
 
-export const progressFill = (pct: number) =>
-  css({
-    height: '100%',
-    width: `${pct}%`,
-    background: Colors.gradientProgressBar,
-    transition: 'width 0.4s ease',
-  })
+export const headerLogo = css({
+  display: 'flex',
+  alignItems: 'center',
+  gap: '6px',
+})
+
+export const headerLogoText = css({
+  fontFamily: FontFamily.heading,
+  fontWeight: FontWeight.extrabold,
+  fontSize: '1.6rem',
+  color: '#1e1b2e',
+})
+
+export const headerLogoDot = css({
+  width: '6px',
+  height: '6px',
+  borderRadius: '50%',
+  background: '#a78bfa',
+})
+
+export const headerStepGroup = css({
+  display: 'flex',
+  alignItems: 'center',
+  gap: '8px',
+})
+
+export const headerDots = css({
+  display: 'flex',
+  gap: '4px',
+})
+
+export const headerDot = (active: boolean) => css({
+  width: '6px',
+  height: '6px',
+  borderRadius: '50%',
+  background: active ? '#7c3aed' : '#ddd6fe',
+})
+
+export const headerBadge = css({
+  fontSize: '1.1rem',
+  fontWeight: FontWeight.semibold,
+  color: '#6d28d9',
+  background: '#ede9fe',
+  padding: '4px 10px',
+  borderRadius: '9999px',
+  letterSpacing: '0.2px',
+})
 
 export const chatArea = css({
   flex: 1,
-  width: '100%',
-  maxWidth: '72rem',
-  padding: `${Spacing.xl} ${Spacing.md}`,
+  overflowY: 'auto',
+  padding: '20px 16px 24px',
   display: 'flex',
   flexDirection: 'column',
-  gap: Spacing.md,
-  overflowY: 'auto',
+  gap: '12px',
 })
 
 export const botRow = css({
   display: 'flex',
-  alignItems: 'flex-end',
-  gap: Spacing.sm,
   animation: `${fadeSlideIn} 0.3s ease both`,
 })
 
-export const botAvatar = css({
-  width: '3.2rem',
-  height: '3.2rem',
-  borderRadius: '50%',
-  background: Colors.gradientProgressBar,
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-  flexShrink: 0,
-  fontSize: FontSize.sm,
-  color: Colors.white,
-})
-
 export const botBubble = css({
-  backgroundColor: Colors.white,
-  border: `1px solid ${Colors.borderCard}`,
-  padding: `${Spacing.sm} ${Spacing.md}`,
-  maxWidth: '54rem',
-  fontSize: FontSize.base,
+  backgroundColor: '#ffffff',
+  border: '1px solid #f0f0f0',
+  color: '#1e1b2e',
+  padding: '11px 16px',
+  borderRadius: '18px 18px 18px 4px',
+  maxWidth: '88%',
+  fontSize: '1.45rem',
   fontFamily: FontFamily.body,
-  lineHeight: 1.6,
-  color: Colors.textMain,
-  boxShadow: `0 0.1rem 0.3rem ${Colors.shadowXs}`,
+  lineHeight: 1.55,
+  boxShadow: '0 1px 3px rgba(0,0,0,0.04)',
 })
 
 export const botBubbleWarning = css({
-  backgroundColor: Colors.warningBg,
-  border: `1px solid ${Colors.warning}`,
-  padding: `${Spacing.sm} ${Spacing.md}`,
-  maxWidth: '54rem',
-  fontSize: FontSize.base,
+  backgroundColor: '#fef3c7',
+  border: '1px solid #fde68a',
+  color: '#92400e',
+  padding: '11px 16px 11px 12px',
+  borderRadius: '18px 18px 18px 4px',
+  maxWidth: '88%',
+  fontSize: '1.45rem',
   fontFamily: FontFamily.body,
-  lineHeight: 1.6,
-  color: Colors.textMain,
+  lineHeight: 1.55,
+  display: 'flex',
+  gap: '8px',
+  alignItems: 'flex-start',
 })
 
 export const userRow = css({
@@ -97,147 +144,238 @@ export const userRow = css({
 })
 
 export const userBubble = css({
-  backgroundColor: Colors.primary,
-  padding: `${Spacing.sm} ${Spacing.md}`,
-  maxWidth: '54rem',
-  fontSize: FontSize.base,
+  background: 'linear-gradient(135deg,#7c3aed,#6d28d9)',
+  color: '#ffffff',
+  padding: '11px 16px',
+  borderRadius: '18px 18px 4px 18px',
+  maxWidth: '82%',
+  fontSize: '1.45rem',
   fontFamily: FontFamily.body,
-  lineHeight: 1.6,
-  color: Colors.white,
+  lineHeight: 1.5,
   fontWeight: FontWeight.medium,
 })
 
 export const typingRow = css({
   display: 'flex',
-  alignItems: 'flex-end',
-  gap: Spacing.sm,
 })
 
 export const typingBubble = css({
-  backgroundColor: Colors.white,
-  border: `1px solid ${Colors.borderCard}`,
-  padding: `${Spacing.sm} ${Spacing.md}`,
+  backgroundColor: '#ffffff',
+  border: '1px solid #f0f0f0',
+  padding: '13px 18px',
+  borderRadius: '18px 18px 18px 4px',
   display: 'flex',
-  gap: '0.5rem',
+  gap: '5px',
   alignItems: 'center',
 })
 
 export const typingDotEl = (delay: number) =>
   css({
-    width: '0.7rem',
-    height: '0.7rem',
+    width: '6px',
+    height: '6px',
     borderRadius: '50%',
-    backgroundColor: Colors.textPlaceholder,
+    backgroundColor: '#c4b5fd',
     animation: `${typingDot} 1.2s ease infinite`,
     animationDelay: `${delay}s`,
   })
 
 export const overviewCards = css({
   display: 'flex',
-  gap: Spacing.sm,
-  flexWrap: 'wrap',
-  marginTop: Spacing.xs,
+  flexDirection: 'column',
+  gap: '8px',
 })
 
 export const overviewCard = css({
-  flex: '1 1 14rem',
-  backgroundColor: Colors.surfaceHighlight,
-  border: `1px solid ${Colors.borderPurple}`,
-  padding: Spacing.md,
-  display: 'flex',
-  flexDirection: 'column',
-  gap: Spacing.xs,
+  backgroundColor: '#f5f0ff',
+  border: '1px solid #d3b8ff',
+  borderRadius: '14px',
+  padding: '14px 16px',
 })
 
 export const overviewCardTitle = css({
   fontFamily: FontFamily.heading,
-  fontWeight: FontWeight.semibold,
-  fontSize: FontSize.sm,
-  color: Colors.primaryDark,
+  fontWeight: FontWeight.bold,
+  fontSize: '1.4rem',
+  color: '#6d28d9',
+  marginBottom: '3px',
 })
 
 export const overviewCardDesc = css({
-  fontSize: FontSize.xs,
-  color: Colors.textSub,
+  fontSize: '1.25rem',
+  color: '#6b7280',
   lineHeight: 1.5,
 })
 
 export const tailoringList = css({
   display: 'flex',
   flexDirection: 'column',
-  gap: Spacing.sm,
-  marginTop: Spacing.xs,
+  gap: '8px',
 })
 
 export const tailoringItem = css({
-  backgroundColor: Colors.surfaceHighlight,
-  border: `1px solid ${Colors.borderPurple}`,
-  padding: `${Spacing.sm} ${Spacing.md}`,
-  fontSize: FontSize.sm,
-  color: Colors.textMain,
+  backgroundColor: '#f5f0ff',
+  border: '1px solid #d3b8ff',
+  borderRadius: '14px',
+  padding: '12px 16px',
+  fontSize: '1.35rem',
+  color: '#1e1b2e',
   fontFamily: FontFamily.body,
   lineHeight: 1.5,
 })
 
 export const interactionArea = css({
+  position: 'sticky',
+  bottom: 0,
+  background: '#ffffff',
+  borderTop: '1px solid #e9e4fc',
+  borderRadius: '20px 20px 0 0',
+  padding: '18px 16px calc(18px + env(safe-area-inset-bottom))',
+  boxShadow: '0 -8px 24px rgba(91,33,182,0.10)',
+  animation: `${sheetUp} 0.3s ease both`,
+  flexShrink: 0,
+})
+
+export const sheetTitle = css({
+  fontSize: '1.5rem',
+  fontWeight: FontWeight.bold,
+  color: '#1e1b2e',
+  marginBottom: '12px',
+  fontFamily: FontFamily.heading,
+})
+
+export const sheetSubtitle = css({
+  fontSize: '1.2rem',
+  color: '#888888',
+  marginBottom: '12px',
+})
+
+export const sheetSubmitBtn = (enabled: boolean) => css({
   width: '100%',
-  maxWidth: '72rem',
-  padding: `0 ${Spacing.md} ${Spacing.xl}`,
-  animation: `${fadeSlideIn} 0.35s ease both`,
+  height: '48px',
+  borderRadius: '12px',
+  border: 'none',
+  fontFamily: FontFamily.body,
+  fontWeight: FontWeight.bold,
+  fontSize: '1.45rem',
+  cursor: enabled ? 'pointer' : 'not-allowed',
+  background: enabled ? 'linear-gradient(135deg,#7c3aed,#6d28d9)' : '#e9e4fc',
+  color: enabled ? '#ffffff' : '#a0aec0',
+  boxShadow: enabled ? '0 2px 12px rgba(124,58,237,0.30)' : 'none',
+  display: 'block',
 })
 
 export const genderButtons = css({
   display: 'flex',
-  gap: Spacing.sm,
+  gap: '8px',
   flexWrap: 'wrap',
+  marginBottom: '12px',
 })
 
 export const genderBtn = (active: boolean) =>
   css({
-    padding: `${Spacing.sm} ${Spacing.lg}`,
-    border: `2px solid ${active ? Colors.primary : Colors.border}`,
-    backgroundColor: active ? Colors.primaryLight : Colors.white,
-    color: active ? Colors.primaryDark : Colors.textMain,
+    padding: '10px 18px',
+    height: '44px',
+    borderRadius: '9999px',
+    border: `1.5px solid ${active ? '#7c3aed' : '#e9e4fc'}`,
+    background: active ? '#ede9fe' : '#ffffff',
+    color: active ? '#6d28d9' : '#1e1b2e',
     fontFamily: FontFamily.body,
-    fontWeight: FontWeight.medium,
-    fontSize: FontSize.base,
+    fontWeight: FontWeight.semibold,
+    fontSize: '1.4rem',
     cursor: 'pointer',
-    transition: 'all 0.15s ease',
-    '&:hover': { borderColor: Colors.primary },
   })
 
-export const otherInput = css({
-  marginTop: Spacing.sm,
-  display: 'flex',
-  gap: Spacing.sm,
+export const genderOtherInput = css({
+  width: '100%',
+  height: '48px',
+  borderRadius: '12px',
+  border: '1px solid #e9e4fc',
+  background: '#f5f3ff',
+  padding: '0 14px',
+  fontSize: '1.45rem',
+  fontFamily: FontFamily.body,
+  marginBottom: '12px',
+  outline: 'none',
+  color: '#1e1b2e',
+  boxSizing: 'border-box',
+  display: 'block',
 })
 
 export const rolesRow = css({
-  display: 'flex',
-  gap: Spacing.sm,
-  marginBottom: Spacing.sm,
+  display: 'flex', gap: '8px', marginBottom: '10px',
+})
+
+export const roleTextInput = css({
+  flex: 1, height: '48px', borderRadius: '12px',
+  border: '1px solid #e9e4fc', background: '#f5f3ff',
+  padding: '0 14px', fontSize: '1.45rem', fontFamily: FontFamily.body,
+  outline: 'none', color: '#1e1b2e', minWidth: 0, boxSizing: 'border-box',
+})
+
+export const addRoleBtn = (enabled: boolean) => css({
+  width: '48px', height: '48px', flexShrink: 0, borderRadius: '12px',
+  border: 'none', fontSize: '2.0rem', fontWeight: FontWeight.semibold,
+  background: enabled ? '#ede9fe' : '#f5f3ff', color: '#6d28d9',
+  cursor: enabled ? 'pointer' : 'not-allowed',
+  display: 'flex', alignItems: 'center', justifyContent: 'center',
 })
 
 export const roleTagsArea = css({
-  display: 'flex',
-  flexWrap: 'wrap',
-  gap: Spacing.xs,
-  marginBottom: Spacing.sm,
-  minHeight: '3.2rem',
+  display: 'flex', flexWrap: 'wrap', gap: '6px', marginBottom: '14px',
 })
 
-export const submitBtn = css({
-  marginTop: Spacing.sm,
+export const roleTag = css({
+  display: 'flex', alignItems: 'center', gap: '6px',
+  background: '#ede9fe', color: '#6d28d9', fontSize: '1.3rem',
+  fontWeight: FontWeight.semibold, padding: '6px 8px 6px 12px',
+  borderRadius: '9999px',
+})
+
+export const roleTagRemoveBtn = css({
+  width: '16px', height: '16px', borderRadius: '50%', border: 'none',
+  background: 'rgba(124,58,237,0.15)', color: '#6d28d9', fontSize: '1.1rem',
+  lineHeight: 1, cursor: 'pointer', display: 'flex', alignItems: 'center',
+  justifyContent: 'center', padding: 0, flexShrink: 0,
 })
 
 export const employedButtons = css({
-  display: 'flex',
-  gap: Spacing.sm,
+  display: 'flex', flexDirection: 'column', gap: '10px',
 })
 
-export const hintText = css({
-  fontSize: FontSize.xs,
-  color: Colors.textPlaceholder,
-  marginBottom: Spacing.sm,
+export const employedPrimaryBtn = css({
+  height: '48px', borderRadius: '12px', border: 'none',
+  background: 'linear-gradient(135deg,#7c3aed,#6d28d9)', color: '#ffffff',
+  fontFamily: FontFamily.body, fontWeight: FontWeight.bold,
+  fontSize: '1.45rem', cursor: 'pointer',
+  boxShadow: '0 2px 12px rgba(124,58,237,0.30)',
+})
+
+export const employedOutlineBtn = css({
+  height: '48px', borderRadius: '12px', border: '1.5px solid #7c3aed',
+  background: 'transparent', color: '#6d28d9',
+  fontFamily: FontFamily.body, fontWeight: FontWeight.bold,
+  fontSize: '1.45rem', cursor: 'pointer',
+})
+
+export const isDoneRow = css({
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  gap: '8px',
+  padding: '16px 0',
+  color: '#7c3aed',
+  fontSize: '1.3rem',
+  fontWeight: FontWeight.semibold,
   fontFamily: FontFamily.body,
+})
+
+export const isDoneSpinner = css({
+  width: '16px',
+  height: '16px',
+  borderRadius: '50%',
+  border: '2px solid #ddd6fe',
+  borderTopColor: '#7c3aed',
+  animation: `${spin} 0.7s linear infinite`,
+  flexShrink: 0,
+  display: 'inline-block',
 })

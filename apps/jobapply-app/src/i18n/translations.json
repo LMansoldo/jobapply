@@ -532,7 +532,8 @@
       "employedNo": "Não, estou disponível",
       "finalMsg1": "Perfeito! Agora você está pronto para criar seu perfil profissional.",
       "finalMsg2": "Vamos lá!",
-      "redirecting": "Abrindo o criador de perfil..."
+      "redirecting": "Abrindo o criador de perfil...",
+      "isDoneText": "Abrindo o criador de perfil..."
     }
   },
   "en": {
@@ -1068,7 +1069,8 @@
       "employedNo": "No, I'm available",
       "finalMsg1": "Perfect! You're now ready to create your professional profile.",
       "finalMsg2": "Let's go!",
-      "redirecting": "Opening profile creator..."
+      "redirecting": "Opening profile creator...",
+      "isDoneText": "Opening the profile builder..."
     }
   }
 }

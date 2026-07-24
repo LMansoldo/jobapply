@@ -1,11 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from '@tanstack/react-router'
 import { useTranslation } from 'react-i18next'
-import { RobotOutlined, WarningOutlined } from '@ant-design/icons'
 import { useAuth } from '../../../application/providers/AuthProvider'
-import { Tag } from '../../../components/Tag'
-import { DSButton } from '../../../design-system/primitives/DSButton'
-import { DSInput } from '../../../design-system/primitives/DSInput'
 import type { OnboardingData } from './OnboardingPage.types'
 import { useOnboardingChat, submitOnboarding } from './helpers'
 import * as S from './OnboardingPage.styles'
@@ -20,14 +16,16 @@ export default function OnboardingPage() {
   const [genderOther, setGenderOther] = useState('')
   const [roleInput, setRoleInput] = useState('')
   const [roles, setRoles] = useState<string[]>([])
+  const [isDone, setIsDone] = useState(false)
 
   function handleDone(data: OnboardingData) {
+    setIsDone(true)
     localStorage.setItem('jobapply_onboarded', 'true')
     submitOnboarding(data).catch(() => {})
     setTimeout(() => navigate({ to: '/cv' }), 1200)
   }
 
-  const { messages, isTyping, interaction, progress, handleGender, handleRoles, handleEmployed } =
+  const { messages, isTyping, interaction, handleGender, handleRoles, handleEmployed } =
     useOnboardingChat(user?.name?.split(' ')[0] ?? '', t, handleDone)
 
   useEffect(() => {
@@ -42,8 +40,23 @@ export default function OnboardingPage() {
 
   return (
     <div className={S.root}>
-      <div className={S.progressTrack}>
-        <div className={S.progressFill(progress)} />
+      <div className={S.header}>
+        <div className={S.headerLogo}>
+          <span className={S.headerLogoText}>DoJob</span>
+          <span className={S.headerLogoDot} />
+        </div>
+        {(() => {
+          const stepNum = interaction === 'gender' ? 1 : interaction === 'roles' ? 2 : interaction === 'employed' ? 3 : 0
+          if (!stepNum) return null
+          return (
+            <div className={S.headerStepGroup}>
+              <div className={S.headerDots}>
+                {[1, 2, 3].map((n) => <span key={n} className={S.headerDot(n <= stepNum)} />)}
+              </div>
+              <span className={S.headerBadge}>Pergunta {stepNum} de 3</span>
+            </div>
+          )
+        })()}
       </div>
 
       <div className={S.chatArea}>
@@ -58,7 +71,6 @@ export default function OnboardingPage() {
           if (msg.msgType === 'overview_cards') {
             return (
               <div key={msg.id} className={S.botRow}>
-                <div className={S.botAvatar}><RobotOutlined /></div>
                 <div className={S.overviewCards}>
                   {(['1', '2', '3'] as const).map((n) => (
                     <div key={n} className={S.overviewCard}>
@@ -73,7 +85,6 @@ export default function OnboardingPage() {
           if (msg.msgType === 'tailoring_list') {
             return (
               <div key={msg.id} className={S.botRow}>
-                <div className={S.botAvatar}><RobotOutlined /></div>
                 <div className={S.tailoringList}>
                   {(['1', '2', '3'] as const).map((n) => (
                     <div key={n} className={S.tailoringItem}>{t(`onboarding.tailoringFeature${n}`)}</div>
@@ -85,20 +96,33 @@ export default function OnboardingPage() {
           const bubbleCls = msg.msgType === 'ai_warning' ? S.botBubbleWarning : S.botBubble
           return (
             <div key={msg.id} className={S.botRow}>
-              <div className={S.botAvatar}>
-                {msg.msgType === 'ai_warning' ? <WarningOutlined /> : <RobotOutlined />}
-              </div>
-              <div className={bubbleCls}>{msg.content}</div>
+              {msg.msgType === 'ai_warning' ? (
+                <div className={bubbleCls}>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" style={{ flexShrink: 0, marginTop: '2px' }}>
+                    <path d="M12 3L1 21H23L12 3Z" fill="#fbbf24"/>
+                    <path d="M12 9V14" stroke="#92400e" strokeWidth="2" strokeLinecap="round"/>
+                    <circle cx="12" cy="17.5" r="1.1" fill="#92400e"/>
+                  </svg>
+                  <span>{msg.content}</span>
+                </div>
+              ) : (
+                <div className={bubbleCls}>{msg.content}</div>
+              )}
             </div>
           )
         })}
 
         {isTyping && (
           <div className={S.typingRow}>
-            <div className={S.botAvatar}><RobotOutlined /></div>
             <div className={S.typingBubble}>
               {[0, 0.2, 0.4].map((d, i) => <span key={i} className={S.typingDotEl(d)} />)}
             </div>
+          </div>
+        )}
+        {isDone && (
+          <div className={S.isDoneRow}>
+            <span className={S.isDoneSpinner} />
+            {t('onboarding.isDoneText')}
           </div>
         )}
         <div ref={bottomRef} />
@@ -106,6 +130,7 @@ export default function OnboardingPage() {
 
       {interaction === 'gender' && (
         <div className={S.interactionArea}>
+          <div className={S.sheetTitle}>{t('onboarding.genderQuestion')}</div>
           <div className={S.genderButtons}>
             {(['M', 'F', 'O'] as const).map((g) => (
               <button key={g} type="button" className={S.genderBtn(genderSel === g)} onClick={() => setGenderSel(g)}>
@@ -114,58 +139,82 @@ export default function OnboardingPage() {
             ))}
           </div>
           {genderSel === 'O' && (
-            <div className={S.otherInput}>
-              <DSInput
-                value={genderOther}
-                onChange={(e) => setGenderOther(e.target.value)}
-                placeholder={t('onboarding.genderOtherPlaceholder')}
-                filled
-              />
-            </div>
+            <input
+              className={S.genderOtherInput}
+              value={genderOther}
+              onChange={(e) => setGenderOther(e.target.value)}
+              placeholder={t('onboarding.genderOtherPlaceholder')}
+            />
           )}
-          {genderSel && (
-            <div className={S.submitBtn}>
-              <DSButton variant="primary" onClick={() => handleGender(genderSel, genderOther || undefined)}>
-                {t('common.next')}
-              </DSButton>
-            </div>
-          )}
+          <button
+            type="button"
+            className={S.sheetSubmitBtn(!!genderSel && (genderSel !== 'O' || genderOther.trim().length > 0))}
+            disabled={!genderSel || (genderSel === 'O' && !genderOther.trim())}
+            onClick={() => genderSel && handleGender(genderSel, genderOther || undefined)}
+          >
+            {t('common.next')}
+          </button>
         </div>
       )}
 
       {interaction === 'roles' && (
         <div className={S.interactionArea}>
-          <p className={S.hintText}>{t('onboarding.rolesHint')}</p>
+          <div className={S.sheetTitle}>{t('onboarding.rolesQuestion')}</div>
+          <div className={S.sheetSubtitle}>{t('onboarding.rolesHint')}</div>
           <div className={S.rolesRow}>
-            <DSInput
+            <input
+              className={S.roleTextInput}
               value={roleInput}
               onChange={(e) => setRoleInput(e.target.value)}
+              onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); addRole() } }}
               placeholder={t('onboarding.rolesPlaceholder')}
-              onPressEnter={addRole}
-              filled
             />
-            <DSButton variant="ghost" onClick={addRole} disabled={!roleInput.trim()}>
-              + {t('onboarding.rolesAdd')}
-            </DSButton>
+            <button
+              type="button"
+              className={S.addRoleBtn(!!roleInput.trim())}
+              disabled={!roleInput.trim()}
+              onClick={addRole}
+            >
+              +
+            </button>
           </div>
-          <div className={S.roleTagsArea}>
-            {roles.map((r) => (
-              <Tag key={r} closable onClose={() => setRoles((prev) => prev.filter((x) => x !== r))}>
-                {r}
-              </Tag>
-            ))}
-          </div>
-          <DSButton variant="primary" disabled={roles.length === 0} onClick={() => handleRoles(roles)}>
+          {roles.length > 0 && (
+            <div className={S.roleTagsArea}>
+              {roles.map((r) => (
+                <div key={r} className={S.roleTag}>
+                  {r}
+                  <button
+                    type="button"
+                    className={S.roleTagRemoveBtn}
+                    onClick={() => setRoles((prev) => prev.filter((x) => x !== r))}
+                  >
+                    ✕
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+          <button
+            type="button"
+            className={S.sheetSubmitBtn(roles.length > 0)}
+            disabled={roles.length === 0}
+            onClick={() => handleRoles(roles)}
+          >
             {t('common.next')}
-          </DSButton>
+          </button>
         </div>
       )}
 
       {interaction === 'employed' && (
         <div className={S.interactionArea}>
+          <div className={S.sheetTitle}>{t('onboarding.employedQuestion')}</div>
           <div className={S.employedButtons}>
-            <DSButton variant="primary" onClick={() => handleEmployed(true)}>{t('onboarding.employedYes')}</DSButton>
-            <DSButton variant="ghost" onClick={() => handleEmployed(false)}>{t('onboarding.employedNo')}</DSButton>
+            <button type="button" className={S.employedPrimaryBtn} onClick={() => handleEmployed(true)}>
+              {t('onboarding.employedYes')}
+            </button>
+            <button type="button" className={S.employedOutlineBtn} onClick={() => handleEmployed(false)}>
+              {t('onboarding.employedNo')}
+            </button>
           </div>
         </div>
       )}
