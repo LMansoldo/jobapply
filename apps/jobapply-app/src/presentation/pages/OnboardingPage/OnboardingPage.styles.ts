@@ -1,7 +1,6 @@
 import { css, keyframes } from '@emotion/css'
-import { Colors } from '../../../styles/theme/colors'
 import { Spacing } from '../../../styles/theme/spacing'
-import { FontSize, FontFamily, FontWeight } from '../../../styles/theme/typography'
+import { FontFamily, FontWeight } from '../../../styles/theme/typography'
 
 const typingDot = keyframes`
   0%, 60%, 100% { opacity: 0.2; transform: translateY(0); }
@@ -304,30 +303,45 @@ export const genderOtherInput = css({
 })
 
 export const rolesRow = css({
-  display: 'flex',
-  gap: Spacing.sm,
-  marginBottom: Spacing.sm,
+  display: 'flex', gap: '8px', marginBottom: '10px',
+})
+
+export const roleTextInput = css({
+  flex: 1, height: '48px', borderRadius: '12px',
+  border: '1px solid #e9e4fc', background: '#f5f3ff',
+  padding: '0 14px', fontSize: '1.45rem', fontFamily: FontFamily.body,
+  outline: 'none', color: '#1e1b2e', minWidth: 0, boxSizing: 'border-box',
+})
+
+export const addRoleBtn = (enabled: boolean) => css({
+  width: '48px', height: '48px', flexShrink: 0, borderRadius: '12px',
+  border: 'none', fontSize: '2.0rem', fontWeight: FontWeight.semibold,
+  background: enabled ? '#ede9fe' : '#f5f3ff', color: '#6d28d9',
+  cursor: enabled ? 'pointer' : 'not-allowed',
+  display: 'flex', alignItems: 'center', justifyContent: 'center',
 })
 
 export const roleTagsArea = css({
-  display: 'flex',
-  flexWrap: 'wrap',
-  gap: Spacing.xs,
-  marginBottom: Spacing.sm,
-  minHeight: '3.2rem',
+  display: 'flex', flexWrap: 'wrap', gap: '6px', marginBottom: '14px',
 })
 
+export const roleTag = css({
+  display: 'flex', alignItems: 'center', gap: '6px',
+  background: '#ede9fe', color: '#6d28d9', fontSize: '1.3rem',
+  fontWeight: FontWeight.semibold, padding: '6px 8px 6px 12px',
+  borderRadius: '9999px',
+})
+
+export const roleTagRemoveBtn = css({
+  width: '16px', height: '16px', borderRadius: '50%', border: 'none',
+  background: 'rgba(124,58,237,0.15)', color: '#6d28d9', fontSize: '1.1rem',
+  lineHeight: 1, cursor: 'pointer', display: 'flex', alignItems: 'center',
+  justifyContent: 'center', padding: 0, flexShrink: 0,
+})
 
 export const employedButtons = css({
   display: 'flex',
   gap: Spacing.sm,
-})
-
-export const hintText = css({
-  fontSize: FontSize.xs,
-  color: Colors.textPlaceholder,
-  marginBottom: Spacing.sm,
-  fontFamily: FontFamily.body,
 })
 
 export const isDoneRow = css({

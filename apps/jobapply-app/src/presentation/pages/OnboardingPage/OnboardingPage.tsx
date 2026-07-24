@@ -2,9 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from '@tanstack/react-router'
 import { useTranslation } from 'react-i18next'
 import { useAuth } from '../../../application/providers/AuthProvider'
-import { Tag } from '../../../components/Tag'
 import { DSButton } from '../../../design-system/primitives/DSButton'
-import { DSInput } from '../../../design-system/primitives/DSInput'
 import type { OnboardingData } from './OnboardingPage.types'
 import { useOnboardingChat, submitOnboarding } from './helpers'
 import * as S from './OnboardingPage.styles'
@@ -162,29 +160,49 @@ export default function OnboardingPage() {
 
       {interaction === 'roles' && (
         <div className={S.interactionArea}>
-          <p className={S.hintText}>{t('onboarding.rolesHint')}</p>
+          <div className={S.sheetTitle}>Quais cargos você está buscando?</div>
+          <div className={S.sheetSubtitle}>Adicione os cargos que você está procurando</div>
           <div className={S.rolesRow}>
-            <DSInput
+            <input
+              className={S.roleTextInput}
               value={roleInput}
               onChange={(e) => setRoleInput(e.target.value)}
+              onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); addRole() } }}
               placeholder={t('onboarding.rolesPlaceholder')}
-              onPressEnter={addRole}
-              filled
             />
-            <DSButton variant="ghost" onClick={addRole} disabled={!roleInput.trim()}>
-              + {t('onboarding.rolesAdd')}
-            </DSButton>
+            <button
+              type="button"
+              className={S.addRoleBtn(!!roleInput.trim())}
+              disabled={!roleInput.trim()}
+              onClick={addRole}
+            >
+              +
+            </button>
           </div>
-          <div className={S.roleTagsArea}>
-            {roles.map((r) => (
-              <Tag key={r} closable onClose={() => setRoles((prev) => prev.filter((x) => x !== r))}>
-                {r}
-              </Tag>
-            ))}
-          </div>
-          <DSButton variant="primary" disabled={roles.length === 0} onClick={() => handleRoles(roles)}>
-            {t('common.next')}
-          </DSButton>
+          {roles.length > 0 && (
+            <div className={S.roleTagsArea}>
+              {roles.map((r) => (
+                <div key={r} className={S.roleTag}>
+                  {r}
+                  <button
+                    type="button"
+                    className={S.roleTagRemoveBtn}
+                    onClick={() => setRoles((prev) => prev.filter((x) => x !== r))}
+                  >
+                    ✕
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+          <button
+            type="button"
+            className={S.sheetSubmitBtn(roles.length > 0)}
+            disabled={roles.length === 0}
+            onClick={() => handleRoles(roles)}
+          >
+            Continuar
+          </button>
         </div>
       )}
 
