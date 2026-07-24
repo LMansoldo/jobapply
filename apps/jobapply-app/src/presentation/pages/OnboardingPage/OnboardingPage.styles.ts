@@ -99,56 +99,44 @@ export const headerBadge = css({
 
 export const chatArea = css({
   flex: 1,
-  width: '100%',
-  maxWidth: '72rem',
-  padding: `${Spacing.xl} ${Spacing.md}`,
+  overflowY: 'auto',
+  padding: '20px 16px 24px',
   display: 'flex',
   flexDirection: 'column',
-  gap: Spacing.md,
-  overflowY: 'auto',
+  gap: '12px',
 })
 
 export const botRow = css({
   display: 'flex',
-  alignItems: 'flex-end',
-  gap: Spacing.sm,
   animation: `${fadeSlideIn} 0.3s ease both`,
 })
 
-export const botAvatar = css({
-  width: '3.2rem',
-  height: '3.2rem',
-  borderRadius: '50%',
-  background: Colors.gradientProgressBar,
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-  flexShrink: 0,
-  fontSize: FontSize.sm,
-  color: Colors.white,
-})
-
 export const botBubble = css({
-  backgroundColor: Colors.white,
-  border: `1px solid ${Colors.borderCard}`,
-  padding: `${Spacing.sm} ${Spacing.md}`,
-  maxWidth: '54rem',
-  fontSize: FontSize.base,
+  backgroundColor: '#ffffff',
+  border: '1px solid #f0f0f0',
+  color: '#1e1b2e',
+  padding: '11px 16px',
+  borderRadius: '18px 18px 18px 4px',
+  maxWidth: '88%',
+  fontSize: '1.45rem',
   fontFamily: FontFamily.body,
-  lineHeight: 1.6,
-  color: Colors.textMain,
-  boxShadow: `0 0.1rem 0.3rem ${Colors.shadowXs}`,
+  lineHeight: 1.55,
+  boxShadow: '0 1px 3px rgba(0,0,0,0.04)',
 })
 
 export const botBubbleWarning = css({
-  backgroundColor: Colors.warningBg,
-  border: `1px solid ${Colors.warning}`,
-  padding: `${Spacing.sm} ${Spacing.md}`,
-  maxWidth: '54rem',
-  fontSize: FontSize.base,
+  backgroundColor: '#fef3c7',
+  border: '1px solid #fde68a',
+  color: '#92400e',
+  padding: '11px 16px 11px 12px',
+  borderRadius: '18px 18px 18px 4px',
+  maxWidth: '88%',
+  fontSize: '1.45rem',
   fontFamily: FontFamily.body,
-  lineHeight: 1.6,
-  color: Colors.textMain,
+  lineHeight: 1.55,
+  display: 'flex',
+  gap: '8px',
+  alignItems: 'flex-start',
 })
 
 export const userRow = css({
@@ -158,37 +146,37 @@ export const userRow = css({
 })
 
 export const userBubble = css({
-  backgroundColor: Colors.primary,
-  padding: `${Spacing.sm} ${Spacing.md}`,
-  maxWidth: '54rem',
-  fontSize: FontSize.base,
+  background: 'linear-gradient(135deg,#7c3aed,#6d28d9)',
+  color: '#ffffff',
+  padding: '11px 16px',
+  borderRadius: '18px 18px 4px 18px',
+  maxWidth: '82%',
+  fontSize: '1.45rem',
   fontFamily: FontFamily.body,
-  lineHeight: 1.6,
-  color: Colors.white,
+  lineHeight: 1.5,
   fontWeight: FontWeight.medium,
 })
 
 export const typingRow = css({
   display: 'flex',
-  alignItems: 'flex-end',
-  gap: Spacing.sm,
 })
 
 export const typingBubble = css({
-  backgroundColor: Colors.white,
-  border: `1px solid ${Colors.borderCard}`,
-  padding: `${Spacing.sm} ${Spacing.md}`,
+  backgroundColor: '#ffffff',
+  border: '1px solid #f0f0f0',
+  padding: '13px 18px',
+  borderRadius: '18px 18px 18px 4px',
   display: 'flex',
-  gap: '0.5rem',
+  gap: '5px',
   alignItems: 'center',
 })
 
 export const typingDotEl = (delay: number) =>
   css({
-    width: '0.7rem',
-    height: '0.7rem',
+    width: '6px',
+    height: '6px',
     borderRadius: '50%',
-    backgroundColor: Colors.textPlaceholder,
+    backgroundColor: '#c4b5fd',
     animation: `${typingDot} 1.2s ease infinite`,
     animationDelay: `${delay}s`,
   })

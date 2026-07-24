@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from '@tanstack/react-router'
 import { useTranslation } from 'react-i18next'
-import { RobotOutlined, WarningOutlined } from '@ant-design/icons'
 import { useAuth } from '../../../application/providers/AuthProvider'
 import { Tag } from '../../../components/Tag'
 import { DSButton } from '../../../design-system/primitives/DSButton'
@@ -73,7 +72,6 @@ export default function OnboardingPage() {
           if (msg.msgType === 'overview_cards') {
             return (
               <div key={msg.id} className={S.botRow}>
-                <div className={S.botAvatar}><RobotOutlined /></div>
                 <div className={S.overviewCards}>
                   {(['1', '2', '3'] as const).map((n) => (
                     <div key={n} className={S.overviewCard}>
@@ -88,7 +86,6 @@ export default function OnboardingPage() {
           if (msg.msgType === 'tailoring_list') {
             return (
               <div key={msg.id} className={S.botRow}>
-                <div className={S.botAvatar}><RobotOutlined /></div>
                 <div className={S.tailoringList}>
                   {(['1', '2', '3'] as const).map((n) => (
                     <div key={n} className={S.tailoringItem}>{t(`onboarding.tailoringFeature${n}`)}</div>
@@ -100,17 +97,24 @@ export default function OnboardingPage() {
           const bubbleCls = msg.msgType === 'ai_warning' ? S.botBubbleWarning : S.botBubble
           return (
             <div key={msg.id} className={S.botRow}>
-              <div className={S.botAvatar}>
-                {msg.msgType === 'ai_warning' ? <WarningOutlined /> : <RobotOutlined />}
-              </div>
-              <div className={bubbleCls}>{msg.content}</div>
+              {msg.msgType === 'ai_warning' ? (
+                <div className={bubbleCls}>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" style={{ flexShrink: 0, marginTop: '2px' }}>
+                    <path d="M12 3L1 21H23L12 3Z" fill="#fbbf24"/>
+                    <path d="M12 9V14" stroke="#92400e" strokeWidth="2" strokeLinecap="round"/>
+                    <circle cx="12" cy="17.5" r="1.1" fill="#92400e"/>
+                  </svg>
+                  <span>{msg.content}</span>
+                </div>
+              ) : (
+                <div className={bubbleCls}>{msg.content}</div>
+              )}
             </div>
           )
         })}
 
         {isTyping && (
           <div className={S.typingRow}>
-            <div className={S.botAvatar}><RobotOutlined /></div>
             <div className={S.typingBubble}>
               {[0, 0.2, 0.4].map((d, i) => <span key={i} className={S.typingDotEl(d)} />)}
             </div>
