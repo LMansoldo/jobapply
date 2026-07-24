@@ -4,9 +4,9 @@ import { styles } from './AppHeader.styles'
 export function AppHeader({ navItems = [], rightSlot }: AppHeaderProps) {
   return (
     <header style={styles.header}>
-      <a href="/" style={styles.logo}>
-        <span style={styles.logoJob}>job</span>
-        <span style={styles.logoBoard}>board</span>
+      <a href="/tailoring" style={styles.logo}>
+        <span style={styles.logoJob}>do</span>
+        <span style={styles.logoBoard}>job</span>
       </a>
 
       {navItems.length > 0 && (

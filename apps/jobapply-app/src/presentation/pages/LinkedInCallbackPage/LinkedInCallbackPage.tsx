@@ -39,11 +39,11 @@ export default function LinkedInCallbackPage() {
             sessionStorage.setItem('cv_prefill_from_linkedin', 'true')
             navigate({ to: '/cv' })
           } else {
-            navigate({ to: '/' })
+            navigate({ to: '/tailoring' })
           }
         } else {
           const returnPath = popReturnPath()
-          navigate({ to: returnPath as '/' })
+          navigate({ to: (returnPath || '/tailoring') as '/tailoring' })
         }
       })
       .catch(() => setError(true))
@@ -54,7 +54,7 @@ export default function LinkedInCallbackPage() {
       <div className={S.root}>
         <LinkedinOutlined className={S.icon} />
         <p className={S.message}>{t('linkedin.callbackError')}</p>
-        <button type="button" className={S.backBtn} onClick={() => navigate({ to: '/' })}>
+        <button type="button" className={S.backBtn} onClick={() => navigate({ to: '/tailoring' })}>
           {t('common.back')}
         </button>
       </div>

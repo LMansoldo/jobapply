@@ -1,19 +1,6 @@
 import { createFileRoute, redirect } from '@tanstack/react-router'
 import AppLayout from '../presentation/components/AppLayout'
-
-function isTokenExpired(token: string): boolean {
-  try {
-    const parts = token.split('.')
-    // Not a JWT (e.g. mock token) — treat as non-expired
-    if (parts.length !== 3) return false
-    const payload = JSON.parse(atob(parts[1]))
-    // No exp claim — treat as non-expired
-    if (!payload.exp) return false
-    return payload.exp * 1000 < Date.now()
-  } catch {
-    return false
-  }
-}
+import { isTokenExpired } from '../application/auth/token'
 
 export const Route = createFileRoute('/_auth')({
   beforeLoad: ({ location }) => {

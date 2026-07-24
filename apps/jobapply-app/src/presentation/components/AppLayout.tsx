@@ -48,8 +48,8 @@ export default function AppLayout() {
       key: 'tailoring',
       label: t('nav.tailoring'),
       icon: <FileSearchOutlined />,
-      href: '/',
-      active: pathname === '/',
+      href: '/tailoring',
+      active: pathname === '/tailoring',
     },
     {
       key: 'linkedin',
