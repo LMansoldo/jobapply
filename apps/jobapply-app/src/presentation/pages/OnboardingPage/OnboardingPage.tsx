@@ -133,6 +133,7 @@ export default function OnboardingPage() {
 
       {interaction === 'gender' && (
         <div className={S.interactionArea}>
+          <div className={S.sheetTitle}>Qual é o seu gênero?</div>
           <div className={S.genderButtons}>
             {(['M', 'F', 'O'] as const).map((g) => (
               <button key={g} type="button" className={S.genderBtn(genderSel === g)} onClick={() => setGenderSel(g)}>
@@ -141,22 +142,21 @@ export default function OnboardingPage() {
             ))}
           </div>
           {genderSel === 'O' && (
-            <div className={S.otherInput}>
-              <DSInput
-                value={genderOther}
-                onChange={(e) => setGenderOther(e.target.value)}
-                placeholder={t('onboarding.genderOtherPlaceholder')}
-                filled
-              />
-            </div>
+            <input
+              className={S.genderOtherInput}
+              value={genderOther}
+              onChange={(e) => setGenderOther(e.target.value)}
+              placeholder={t('onboarding.genderOtherPlaceholder')}
+            />
           )}
-          {genderSel && (
-            <div className={S.submitBtn}>
-              <DSButton variant="primary" onClick={() => handleGender(genderSel, genderOther || undefined)}>
-                {t('common.next')}
-              </DSButton>
-            </div>
-          )}
+          <button
+            type="button"
+            className={S.sheetSubmitBtn(!!genderSel && (genderSel !== 'O' || genderOther.trim().length > 0))}
+            disabled={!genderSel || (genderSel === 'O' && !genderOther.trim())}
+            onClick={() => genderSel && handleGender(genderSel, genderOther || undefined)}
+          >
+            Continuar
+          </button>
         </div>
       )}
 

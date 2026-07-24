@@ -268,29 +268,40 @@ export const sheetSubmitBtn = (enabled: boolean) => css({
 
 export const genderButtons = css({
   display: 'flex',
-  gap: Spacing.sm,
+  gap: '8px',
   flexWrap: 'wrap',
-})
-
-export const otherInput = css({
-  marginTop: Spacing.sm,
-  display: 'flex',
-  gap: Spacing.sm,
+  marginBottom: '12px',
 })
 
 export const genderBtn = (active: boolean) =>
   css({
-    padding: `${Spacing.sm} ${Spacing.lg}`,
-    border: `2px solid ${active ? Colors.primary : Colors.border}`,
-    backgroundColor: active ? Colors.primaryLight : Colors.white,
-    color: active ? Colors.primaryDark : Colors.textMain,
+    padding: '10px 18px',
+    height: '44px',
+    borderRadius: '9999px',
+    border: `1.5px solid ${active ? '#7c3aed' : '#e9e4fc'}`,
+    background: active ? '#ede9fe' : '#ffffff',
+    color: active ? '#6d28d9' : '#1e1b2e',
     fontFamily: FontFamily.body,
-    fontWeight: FontWeight.medium,
-    fontSize: FontSize.base,
+    fontWeight: FontWeight.semibold,
+    fontSize: '1.4rem',
     cursor: 'pointer',
-    transition: 'all 0.15s ease',
-    '&:hover': { borderColor: Colors.primary },
   })
+
+export const genderOtherInput = css({
+  width: '100%',
+  height: '48px',
+  borderRadius: '12px',
+  border: '1px solid #e9e4fc',
+  background: '#f5f3ff',
+  padding: '0 14px',
+  fontSize: '1.45rem',
+  fontFamily: FontFamily.body,
+  marginBottom: '12px',
+  outline: 'none',
+  color: '#1e1b2e',
+  boxSizing: 'border-box',
+  display: 'block',
+})
 
 export const rolesRow = css({
   display: 'flex',
@@ -306,9 +317,6 @@ export const roleTagsArea = css({
   minHeight: '3.2rem',
 })
 
-export const submitBtn = css({
-  marginTop: Spacing.sm,
-})
 
 export const employedButtons = css({
   display: 'flex',
