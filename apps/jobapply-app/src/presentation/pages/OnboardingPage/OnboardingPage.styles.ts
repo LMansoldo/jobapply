@@ -183,47 +183,44 @@ export const typingDotEl = (delay: number) =>
 
 export const overviewCards = css({
   display: 'flex',
-  gap: Spacing.sm,
-  flexWrap: 'wrap',
-  marginTop: Spacing.xs,
+  flexDirection: 'column',
+  gap: '8px',
 })
 
 export const overviewCard = css({
-  flex: '1 1 14rem',
-  backgroundColor: Colors.surfaceHighlight,
-  border: `1px solid ${Colors.borderPurple}`,
-  padding: Spacing.md,
-  display: 'flex',
-  flexDirection: 'column',
-  gap: Spacing.xs,
+  backgroundColor: '#f5f0ff',
+  border: '1px solid #d3b8ff',
+  borderRadius: '14px',
+  padding: '14px 16px',
 })
 
 export const overviewCardTitle = css({
   fontFamily: FontFamily.heading,
-  fontWeight: FontWeight.semibold,
-  fontSize: FontSize.sm,
-  color: Colors.primaryDark,
+  fontWeight: FontWeight.bold,
+  fontSize: '1.4rem',
+  color: '#6d28d9',
+  marginBottom: '3px',
 })
 
 export const overviewCardDesc = css({
-  fontSize: FontSize.xs,
-  color: Colors.textSub,
+  fontSize: '1.25rem',
+  color: '#6b7280',
   lineHeight: 1.5,
 })
 
 export const tailoringList = css({
   display: 'flex',
   flexDirection: 'column',
-  gap: Spacing.sm,
-  marginTop: Spacing.xs,
+  gap: '8px',
 })
 
 export const tailoringItem = css({
-  backgroundColor: Colors.surfaceHighlight,
-  border: `1px solid ${Colors.borderPurple}`,
-  padding: `${Spacing.sm} ${Spacing.md}`,
-  fontSize: FontSize.sm,
-  color: Colors.textMain,
+  backgroundColor: '#f5f0ff',
+  border: '1px solid #d3b8ff',
+  borderRadius: '14px',
+  padding: '12px 16px',
+  fontSize: '1.35rem',
+  color: '#1e1b2e',
   fontFamily: FontFamily.body,
   lineHeight: 1.5,
 })
