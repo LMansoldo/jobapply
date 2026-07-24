@@ -287,3 +287,26 @@ export const hintText = css({
   marginBottom: Spacing.sm,
   fontFamily: FontFamily.body,
 })
+
+export const isDoneRow = css({
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  gap: '8px',
+  padding: '16px 0',
+  color: '#7c3aed',
+  fontSize: '1.3rem',
+  fontWeight: FontWeight.semibold,
+  fontFamily: FontFamily.body,
+})
+
+export const isDoneSpinner = css({
+  width: '16px',
+  height: '16px',
+  borderRadius: '50%',
+  border: '2px solid #ddd6fe',
+  borderTopColor: '#7c3aed',
+  animation: `${spin} 0.7s linear infinite`,
+  flexShrink: 0,
+  display: 'inline-block',
+})

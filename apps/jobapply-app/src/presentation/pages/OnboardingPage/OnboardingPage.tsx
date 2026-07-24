@@ -19,8 +19,10 @@ export default function OnboardingPage() {
   const [genderOther, setGenderOther] = useState('')
   const [roleInput, setRoleInput] = useState('')
   const [roles, setRoles] = useState<string[]>([])
+  const [isDone, setIsDone] = useState(false)
 
   function handleDone(data: OnboardingData) {
+    setIsDone(true)
     localStorage.setItem('jobapply_onboarded', 'true')
     submitOnboarding(data).catch(() => {})
     setTimeout(() => navigate({ to: '/cv' }), 1200)
@@ -118,6 +120,12 @@ export default function OnboardingPage() {
             <div className={S.typingBubble}>
               {[0, 0.2, 0.4].map((d, i) => <span key={i} className={S.typingDotEl(d)} />)}
             </div>
+          </div>
+        )}
+        {isDone && (
+          <div className={S.isDoneRow}>
+            <span className={S.isDoneSpinner} />
+            Abrindo o criador de perfil...
           </div>
         )}
         <div ref={bottomRef} />
