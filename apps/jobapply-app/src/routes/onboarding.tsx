@@ -19,6 +19,9 @@ export const Route = createFileRoute('/onboarding')({
     if (!token || isTokenExpired(token)) {
       throw redirect({ to: '/login' })
     }
+    if (localStorage.getItem('jobapply_onboarded') === 'true') {
+      throw redirect({ to: '/cv' })
+    }
   },
   component: OnboardingPage,
 })
