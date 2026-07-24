@@ -1,5 +1,4 @@
 import { css, keyframes } from '@emotion/css'
-import { Spacing } from '../../../styles/theme/spacing'
 import { FontFamily, FontWeight } from '../../../styles/theme/typography'
 
 const typingDot = keyframes`
@@ -340,8 +339,22 @@ export const roleTagRemoveBtn = css({
 })
 
 export const employedButtons = css({
-  display: 'flex',
-  gap: Spacing.sm,
+  display: 'flex', flexDirection: 'column', gap: '10px',
+})
+
+export const employedPrimaryBtn = css({
+  height: '48px', borderRadius: '12px', border: 'none',
+  background: 'linear-gradient(135deg,#7c3aed,#6d28d9)', color: '#ffffff',
+  fontFamily: FontFamily.body, fontWeight: FontWeight.bold,
+  fontSize: '1.45rem', cursor: 'pointer',
+  boxShadow: '0 2px 12px rgba(124,58,237,0.30)',
+})
+
+export const employedOutlineBtn = css({
+  height: '48px', borderRadius: '12px', border: '1.5px solid #7c3aed',
+  background: 'transparent', color: '#6d28d9',
+  fontFamily: FontFamily.body, fontWeight: FontWeight.bold,
+  fontSize: '1.45rem', cursor: 'pointer',
 })
 
 export const isDoneRow = css({

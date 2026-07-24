@@ -2,7 +2,6 @@ import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from '@tanstack/react-router'
 import { useTranslation } from 'react-i18next'
 import { useAuth } from '../../../application/providers/AuthProvider'
-import { DSButton } from '../../../design-system/primitives/DSButton'
 import type { OnboardingData } from './OnboardingPage.types'
 import { useOnboardingChat, submitOnboarding } from './helpers'
 import * as S from './OnboardingPage.styles'
@@ -208,9 +207,14 @@ export default function OnboardingPage() {
 
       {interaction === 'employed' && (
         <div className={S.interactionArea}>
+          <div className={S.sheetTitle}>Você está empregado atualmente?</div>
           <div className={S.employedButtons}>
-            <DSButton variant="primary" onClick={() => handleEmployed(true)}>{t('onboarding.employedYes')}</DSButton>
-            <DSButton variant="ghost" onClick={() => handleEmployed(false)}>{t('onboarding.employedNo')}</DSButton>
+            <button type="button" className={S.employedPrimaryBtn} onClick={() => handleEmployed(true)}>
+              Sim, estou empregado
+            </button>
+            <button type="button" className={S.employedOutlineBtn} onClick={() => handleEmployed(false)}>
+              Não, estou disponível
+            </button>
           </div>
         </div>
       )}
