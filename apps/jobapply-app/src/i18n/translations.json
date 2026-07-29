@@ -426,71 +426,149 @@
       "nav": {
         "howItWorks": "Como funciona",
         "atsScore": "Score ATS",
+        "login": "Entrar",
         "tryFree": "Testar grátis"
       },
       "hero": {
-        "eyebrow": "Tailoring de CV com IA",
-        "h1Part1": "Um currículo",
-        "h1Highlight": "à altura",
-        "h1Part2": "da vaga",
-        "h1Part3": "que você quer.",
-        "subtitle": "Cole a descrição da vaga e deixe a IA do dojob calibrar seu currículo com precisão — score ATS, keywords e bullets reescritos, em minutos.",
+        "title1": "Um currículo",
+        "title2": "à altura da vaga",
+        "title3": "que você",
+        "titleAccent": "quer",
+        "leadPre": "Cole a descrição da vaga e deixe a IA do dojob calibrar seu currículo com precisão — ",
+        "leadHl": "score ATS, keywords e bullets reescritos",
+        "leadPost": ", em minutos.",
         "ctaMain": "Tailorizar meu CV",
-        "ctaSec": "Ver como funciona",
-        "atsBadge": "Score ATS após tailoring"
+        "ctaSec": "Ver como funciona"
       },
       "features": {
-        "label": "Tailoring de CV",
-        "h2Line1": "Um currículo afiado",
-        "h2Line2": "para cada vaga que você quer",
-        "sub": "O dojob compara seu CV com a descrição da vaga e mostra exatamente o que ajustar para passar pelo ATS e impressionar o recrutador.",
-        "card1Title": "Score ATS em tempo real",
-        "card1Desc": "Veja sua pontuação de aderência à vaga se atualizar conforme você edita, com um breakdown por categoria.",
-        "card1Tag": "Atualização instantânea",
-        "card2Title": "Sugestão de keywords",
-        "card2Desc": "Identifica termos da vaga que faltam no seu CV e sugere onde encaixá-los naturalmente.",
-        "card2Tag": "Extraídas da vaga",
-        "card3Title": "Reescrita de bullets com IA",
-        "card3Desc": "A IA reescreve suas experiências com verbos de impacto e métricas, mantendo sua voz.",
-        "card3Tag": "Um clique por bullet",
-        "card4Title": "Comparativo antes/depois",
-        "card4Desc": "Acompanhe a evolução do seu score a cada ajuste aplicado, com histórico das versões.",
-        "card4Tag": "Histórico de versões",
-        "card5Title": "PT-BR e English lado a lado",
-        "card5Desc": "Mantenha versões calibradas em português e inglês para vagas locais e remotas globais.",
-        "card5Tag": "Sincronizado",
-        "card6Title": "Exportação em PDF",
-        "card6Desc": "Baixe o CV tailorizado pronto para envio, formatado e livre de erros de ATS.",
-        "card6Tag": "Pronto para enviar"
+        "headingPre": "Onde o ATS te elimina — e como ",
+        "headingAccent": "corrigir",
+        "sub": "Cada palavra do seu CV comparada, cada bullet reescrito, cada ponto do score explicado. Você vê o que o recrutador vai ver.",
+        "items": {
+          "1": {
+            "title": "Score ATS em tempo real",
+            "desc": "Sua pontuação atualiza a cada edição — breakdown por keyword, formatação, experiência e soft skills.",
+            "tag": "+23 pts médios"
+          },
+          "2": {
+            "title": "Keywords extraídas da vaga",
+            "desc": "Descobre os termos que faltam no seu CV e sugere onde encaixar naturalmente.",
+            "tag": "< 30s por análise"
+          },
+          "3": {
+            "title": "Bullets reescritos pela IA",
+            "desc": "Verbos de impacto, métricas e clareza — mantendo sua voz. Um clique por bullet.",
+            "tag": "1-click"
+          },
+          "4": {
+            "title": "Antes e depois, versionado",
+            "desc": "Cada ajuste registrado no histórico. Volte, compare e teste variações sem medo.",
+            "tag": "Histórico ilimitado"
+          },
+          "5": {
+            "title": "Português e inglês, calibrados juntos",
+            "desc": "Versões sincronizadas para vagas locais e remotas globais.",
+            "tag": "PT · EN"
+          },
+          "6": {
+            "title": "PDF que passa no parser",
+            "desc": "Exportação limpa, sem quebras nem elementos que confundem o ATS. Pronto para o Apply.",
+            "tag": "100% ATS-safe"
+          }
+        }
       },
-      "hiw": {
-        "label": "Como funciona",
-        "h2Line1": "Do CV genérico ao",
-        "h2Line2": "CV sob medida, em 3 passos",
-        "step1Title": "Envie seu CV e a vaga",
-        "step1Desc": "Suba seu currículo atual e cole a descrição da vaga que você quer tailorizar.",
-        "step2Title": "Veja o score e as sugestões",
-        "step2Desc": "A IA analisa aderência ao ATS e aponta keywords faltantes e bullets a melhorar.",
-        "step3Title": "Aplique e baixe o PDF",
-        "step3Desc": "Aceite as sugestões com um clique e exporte o CV já calibrado para a vaga.",
-        "atsCardTitle": "✦ Análise ATS · Senior Frontend Engineer @ Nubank",
-        "atsCardScore": "Score com otimizações",
-        "atsCardPts": "+23 pts aplicados",
-        "atsCardDownload": "Baixar PDF"
+      "steps": {
+        "headingPre": "Do CV genérico ao CV ",
+        "headingAccent": "sob medida",
+        "headingPost": ", em 4 passos.",
+        "items": {
+          "1": {
+            "title": "Cadastre seu CV completo",
+            "desc": "Suba seu currículo atual — o dojob lê e estrutura todo o conteúdo em markdown editável."
+          },
+          "2": {
+            "title": "Insira a job description",
+            "desc": "Cole a descrição da vaga que você quer. A IA extrai keywords e requisitos automaticamente."
+          },
+          "3": {
+            "title": "Veja o score e sugestões",
+            "desc": "A análise ATS aponta aderência, keywords faltantes e bullets a melhorar, em tempo real."
+          },
+          "4": {
+            "title": "Aplique e baixe o PDF",
+            "desc": "Aceite as sugestões com um clique e exporte o CV já calibrado para a vaga."
+          }
+        }
       },
       "cta": {
-        "h2Line1": "Pronto para tailorizar",
-        "h2Line2": "seu próximo CV?",
-        "sub": "Crie sua conta gratuitamente e rode sua primeira análise ATS hoje mesmo.",
-        "btn": "Criar conta grátis agora"
+        "headingPre": "Pronto para tailorizar seu ",
+        "headingAccent": "próximo CV",
+        "headingPost": "?",
+        "lead": "Crie sua conta gratuitamente e rode sua primeira análise ATS hoje mesmo.",
+        "btn": "Criar conta grátis"
       },
       "footer": {
+        "copy": "© 2026 · dojob.pro",
         "about": "Sobre",
         "blog": "Blog",
         "privacy": "Privacidade",
         "terms": "Termos",
-        "support": "Suporte",
-        "copyright": "© 2026 dojob. Todos os direitos reservados."
+        "support": "Suporte"
+      },
+      "appMock": {
+        "tabTailoring": "Tailoring",
+        "tabLinkedin": "LinkedIn",
+        "tabProfile": "Perfil",
+        "newAnalysis": "Nova análise",
+        "manualTitle": "Tailoring manual",
+        "manualDesc": "Two of Us Tech Page 1 · Frontend talent for modern product teams",
+        "manualMode": "Modo manual",
+        "atsLabel": "ATS:",
+        "editorFile": "Arquivo",
+        "editorExport": "Exportar",
+        "cvObjectiveH": "## Objetivo",
+        "cvObjective": "Product Designer Sênior — produtos digitais e design systems",
+        "cvSummaryH": "## Resumo",
+        "cvSummary": "Product Designer com 7 anos em fintech e SaaS B2B, liderando design de ponta a ponta — de pesquisa e discovery a design systems escaláveis usados por times de produto inteiros. Foco em transformar problemas complexos em interfaces claras e mensuráveis.",
+        "cvSkillsH": "## Habilidades",
+        "cvSkillsDesign": "**Design:** Figma, Design Systems, Prototipagem, Design Tokens, Auto Layout",
+        "cvSkillsResearch": "**Pesquisa:** Entrevistas, Testes de Usabilidade, Discovery Contínuo, Métricas",
+        "cvSkillsCollab": "**Colaboração:** Handoff, Storybook, Acessibilidade (WCAG), Design Ops",
+        "cvExpH": "## Experiência Profissional",
+        "cvExpRole": "### Product Designer Sênior — Nubank | São Paulo, Brasil (Remoto)",
+        "cvExpDate": "**Mar 2023 – Presente**",
+        "statusWords": "842 palavras",
+        "scoreBanner": "Com sugestões: 30 → 45 pts",
+        "scoreBannerBadge": "+15 pts",
+        "scoreLabel": "Pontuação ATS",
+        "catsTitle": "Análise por categoria",
+        "catKeywords": "Keywords",
+        "catContent": "Conteúdo",
+        "catFormat": "Formato",
+        "exportTitle": "Exportar versão otimizada",
+        "exportPdf": "Baixar CV otimizado · PDF",
+        "exportMd": "Exportar Markdown",
+        "exportSave": "Salvar como nova versão"
+      },
+      "editorMock": {
+        "jdLabel": "Descrição da vaga · Senior Frontend @ Nubank",
+        "jdPre": "Buscamos engenheiro sênior com",
+        "jdMid": "para liderar iniciativas de",
+        "jdPost": ", garantindo",
+        "jdEnd": "em produtos de alto tráfego.",
+        "and": "e",
+        "cvLabel": "Seu currículo · Bullet #3",
+        "beforeTag": "Antes",
+        "beforeText": "Ajudei no desenvolvimento de features front-end no time, trabalhando com o time de produto.",
+        "afterTag": "Depois · IA",
+        "afterBadge": "+7 pts",
+        "afterPre": "Liderei a migração de",
+        "afterMid": "em",
+        "afterCut": ", reduzindo TTI em",
+        "afterEnd": "e elevando o score Lighthouse para",
+        "kwTitle": "Keywords sugeridas",
+        "sideScore": "Score ATS",
+        "downloadPdf": "Baixar PDF"
       }
     },
     "onboarding": {
@@ -963,71 +1041,149 @@
       "nav": {
         "howItWorks": "How it works",
         "atsScore": "ATS Score",
+        "login": "Log in",
         "tryFree": "Try for free"
       },
       "hero": {
-        "eyebrow": "AI-powered CV Tailoring",
-        "h1Part1": "A resume",
-        "h1Highlight": "worthy",
-        "h1Part2": "of the job",
-        "h1Part3": "you want.",
-        "subtitle": "Paste the job description and let dojob's AI calibrate your resume with precision — ATS score, keywords, and rewritten bullets, in minutes.",
-        "ctaMain": "Tailor my CV",
-        "ctaSec": "See how it works",
-        "atsBadge": "ATS score after tailoring"
+        "title1": "A resume",
+        "title2": "worthy of the job",
+        "title3": "you",
+        "titleAccent": "want",
+        "leadPre": "Paste the job description and let dojob's AI calibrate your resume with precision — ",
+        "leadHl": "ATS score, keywords and rewritten bullets",
+        "leadPost": ", in minutes.",
+        "ctaMain": "Tailor my resume",
+        "ctaSec": "See how it works"
       },
       "features": {
-        "label": "CV Tailoring",
-        "h2Line1": "A sharp resume",
-        "h2Line2": "for every job you want",
-        "sub": "dojob compares your CV with the job description and shows you exactly what to adjust to pass the ATS and impress the recruiter.",
-        "card1Title": "Real-time ATS Score",
-        "card1Desc": "See your job fit score update as you edit, with a breakdown by category.",
-        "card1Tag": "Instant updates",
-        "card2Title": "Keyword suggestions",
-        "card2Desc": "Identifies job description terms missing from your CV and suggests where to naturally incorporate them.",
-        "card2Tag": "Extracted from the job",
-        "card3Title": "AI bullet rewriting",
-        "card3Desc": "AI rewrites your experiences with impact verbs and metrics, preserving your voice.",
-        "card3Tag": "One click per bullet",
-        "card4Title": "Before/after comparison",
-        "card4Desc": "Track your score evolution with each applied change, with version history.",
-        "card4Tag": "Version history",
-        "card5Title": "PT-BR and English side by side",
-        "card5Desc": "Keep calibrated versions in Portuguese and English for local and global remote jobs.",
-        "card5Tag": "Synced",
-        "card6Title": "PDF export",
-        "card6Desc": "Download the tailored CV ready to send, formatted and free of ATS errors.",
-        "card6Tag": "Ready to send"
+        "headingPre": "Where the ATS rejects you — and how to ",
+        "headingAccent": "fix it",
+        "sub": "Every word of your resume compared, every bullet rewritten, every score point explained. You see what the recruiter will see.",
+        "items": {
+          "1": {
+            "title": "Real-time ATS score",
+            "desc": "Your score updates with every edit — breakdown by keyword, formatting, experience and soft skills.",
+            "tag": "+23 pts avg"
+          },
+          "2": {
+            "title": "Keywords pulled from the job",
+            "desc": "Finds the terms missing from your resume and suggests where to fit them naturally.",
+            "tag": "< 30s per scan"
+          },
+          "3": {
+            "title": "Bullets rewritten by AI",
+            "desc": "Impact verbs, metrics and clarity — keeping your voice. One click per bullet.",
+            "tag": "1-click"
+          },
+          "4": {
+            "title": "Before and after, versioned",
+            "desc": "Every change saved to history. Roll back, compare and test variations fearlessly.",
+            "tag": "Unlimited history"
+          },
+          "5": {
+            "title": "Portuguese and English, calibrated together",
+            "desc": "Synced versions for local jobs and global remote roles.",
+            "tag": "PT · EN"
+          },
+          "6": {
+            "title": "A PDF that passes the parser",
+            "desc": "Clean export, no breaks or elements that confuse the ATS. Ready to apply.",
+            "tag": "100% ATS-safe"
+          }
+        }
       },
-      "hiw": {
-        "label": "How it works",
-        "h2Line1": "From generic CV to",
-        "h2Line2": "tailored CV in 3 steps",
-        "step1Title": "Submit your CV and the job",
-        "step1Desc": "Upload your current resume and paste the job description you want to tailor for.",
-        "step2Title": "See the score and suggestions",
-        "step2Desc": "The AI analyzes ATS fit and highlights missing keywords and bullets to improve.",
-        "step3Title": "Apply and download the PDF",
-        "step3Desc": "Accept suggestions with one click and export the CV already calibrated for the job.",
-        "atsCardTitle": "✦ ATS Analysis · Senior Frontend Engineer @ Nubank",
-        "atsCardScore": "Score with optimizations",
-        "atsCardPts": "+23 pts applied",
-        "atsCardDownload": "Download PDF"
+      "steps": {
+        "headingPre": "From a generic resume to a resume ",
+        "headingAccent": "made to measure",
+        "headingPost": ", in 4 steps.",
+        "items": {
+          "1": {
+            "title": "Add your full resume",
+            "desc": "Upload your current resume — dojob reads and structures all the content into editable markdown."
+          },
+          "2": {
+            "title": "Paste the job description",
+            "desc": "Paste the job you want. The AI extracts keywords and requirements automatically."
+          },
+          "3": {
+            "title": "See the score and suggestions",
+            "desc": "The ATS analysis shows fit, missing keywords and bullets to improve, in real time."
+          },
+          "4": {
+            "title": "Apply and download the PDF",
+            "desc": "Accept suggestions with one click and export the resume already calibrated for the job."
+          }
+        }
       },
       "cta": {
-        "h2Line1": "Ready to tailor",
-        "h2Line2": "your next CV?",
-        "sub": "Create your account for free and run your first ATS analysis today.",
-        "btn": "Create free account now"
+        "headingPre": "Ready to tailor your ",
+        "headingAccent": "next resume",
+        "headingPost": "?",
+        "lead": "Create your account for free and run your first ATS analysis today.",
+        "btn": "Create free account"
       },
       "footer": {
+        "copy": "© 2026 · dojob.pro",
         "about": "About",
         "blog": "Blog",
         "privacy": "Privacy",
         "terms": "Terms",
-        "support": "Support",
-        "copyright": "© 2026 dojob. All rights reserved."
+        "support": "Support"
+      },
+      "appMock": {
+        "tabTailoring": "Tailoring",
+        "tabLinkedin": "LinkedIn",
+        "tabProfile": "Profile",
+        "newAnalysis": "New analysis",
+        "manualTitle": "Manual tailoring",
+        "manualDesc": "Two of Us Tech Page 1 · Frontend talent for modern product teams",
+        "manualMode": "Manual mode",
+        "atsLabel": "ATS:",
+        "editorFile": "File",
+        "editorExport": "Export",
+        "cvObjectiveH": "## Objective",
+        "cvObjective": "Senior Product Designer — digital products and design systems",
+        "cvSummaryH": "## Summary",
+        "cvSummary": "Product Designer with 7 years in fintech and B2B SaaS, leading end-to-end design — from research and discovery to scalable design systems used by entire product teams. Focused on turning complex problems into clear, measurable interfaces.",
+        "cvSkillsH": "## Skills",
+        "cvSkillsDesign": "**Design:** Figma, Design Systems, Prototyping, Design Tokens, Auto Layout",
+        "cvSkillsResearch": "**Research:** Interviews, Usability Testing, Continuous Discovery, Metrics",
+        "cvSkillsCollab": "**Collaboration:** Handoff, Storybook, Accessibility (WCAG), Design Ops",
+        "cvExpH": "## Professional Experience",
+        "cvExpRole": "### Senior Product Designer — Nubank | São Paulo, Brazil (Remote)",
+        "cvExpDate": "**Mar 2023 – Present**",
+        "statusWords": "842 words",
+        "scoreBanner": "With suggestions: 30 → 45 pts",
+        "scoreBannerBadge": "+15 pts",
+        "scoreLabel": "ATS score",
+        "catsTitle": "Category breakdown",
+        "catKeywords": "Keywords",
+        "catContent": "Content",
+        "catFormat": "Format",
+        "exportTitle": "Export optimized version",
+        "exportPdf": "Download optimized resume · PDF",
+        "exportMd": "Export Markdown",
+        "exportSave": "Save as new version"
+      },
+      "editorMock": {
+        "jdLabel": "Job description · Senior Frontend @ Nubank",
+        "jdPre": "We're looking for a senior engineer with",
+        "jdMid": "to lead",
+        "jdPost": "initiatives, ensuring",
+        "jdEnd": "in high-traffic products.",
+        "and": "and",
+        "cvLabel": "Your resume · Bullet #3",
+        "beforeTag": "Before",
+        "beforeText": "Helped develop front-end features on the team, working with the product team.",
+        "afterTag": "After · AI",
+        "afterBadge": "+7 pts",
+        "afterPre": "Led the migration of",
+        "afterMid": "in",
+        "afterCut": ", cutting TTI by",
+        "afterEnd": "and raising the Lighthouse score to",
+        "kwTitle": "Suggested keywords",
+        "sideScore": "ATS score",
+        "downloadPdf": "Download PDF"
       }
     },
     "onboarding": {
