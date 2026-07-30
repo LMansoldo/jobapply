@@ -30,8 +30,8 @@ export default function LandingPage() {
       <main>
         <Hero />
         <div id="recursos" />
-        <div id="como-funciona" />
         <FeaturesSection />
+        <div id="como-funciona" />
         <StepsSection />
         <FinalCTA />
       </main>

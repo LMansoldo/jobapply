@@ -20,7 +20,7 @@ export default function StepsSection() {
         {steps.map(s => (
           <div className={`${stepCls} ${glassCls} ${fadeInCls}`} key={s.n}>
             <div className={numCls}>{s.n}</div>
-            <h4 className={titleCls}>{t(`landing.steps.items.${s.key}.title`)}</h4>
+            <h3 className={titleCls}>{t(`landing.steps.items.${s.key}.title`)}</h3>
             <p className={descCls}>{t(`landing.steps.items.${s.key}.desc`)}</p>
           </div>
         ))}
