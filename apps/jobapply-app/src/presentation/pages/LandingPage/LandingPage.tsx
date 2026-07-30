@@ -4,6 +4,9 @@ import { useRevealOnScroll } from './useRevealOnScroll'
 import Topbar from './components/Topbar'
 import Hero from './components/Hero'
 import FeaturesSection from './components/FeaturesSection'
+import StepsSection from './components/StepsSection'
+import FinalCTA from './components/FinalCTA'
+import Footer from './components/Footer'
 
 function Aurora() {
   return (
@@ -29,9 +32,10 @@ export default function LandingPage() {
         <div id="recursos" />
         <div id="como-funciona" />
         <FeaturesSection />
-        {/* Task 7: StepsSection, FinalCTA */}
+        <StepsSection />
+        <FinalCTA />
       </main>
-      {/* Task 7: Footer */}
+      <Footer />
     </div>
   )
 }
