@@ -3,6 +3,7 @@ import { auroraCls, auroraBlob1Cls, auroraBlob2Cls, auroraBlob3Cls, auroraBlob4C
 import { useRevealOnScroll } from './useRevealOnScroll'
 import Topbar from './components/Topbar'
 import Hero from './components/Hero'
+import FeaturesSection from './components/FeaturesSection'
 
 function Aurora() {
   return (
@@ -25,7 +26,9 @@ export default function LandingPage() {
       <Topbar />
       <main>
         <Hero />
-        {/* Task 6: FeaturesSection */}
+        <div id="recursos" />
+        <div id="como-funciona" />
+        <FeaturesSection />
         {/* Task 7: StepsSection, FinalCTA */}
       </main>
       {/* Task 7: Footer */}
