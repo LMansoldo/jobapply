@@ -1,3 +1,4 @@
+import { useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { auroraCls, auroraBlob1Cls, auroraBlob2Cls, auroraBlob3Cls, auroraBlob4Cls, auroraVeilCls, tokens } from './LandingPage.styles'
 import { useRevealOnScroll } from './useRevealOnScroll'
@@ -23,6 +24,13 @@ function Aurora() {
 export default function LandingPage() {
   useTranslation()
   useRevealOnScroll()
+  useEffect(() => {
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
+    document.documentElement.style.scrollBehavior = 'smooth'
+    return () => {
+      document.documentElement.style.scrollBehavior = ''
+    }
+  }, [])
   return (
     <div style={{ position: 'relative', overflow: 'hidden', background: tokens.bg, color: tokens.ink, fontFamily: "'Lato','Verdana',sans-serif" }}>
       <Aurora />
