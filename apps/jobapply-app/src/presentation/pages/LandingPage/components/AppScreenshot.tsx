@@ -10,13 +10,12 @@ const appBrandDoCls = css`color:${tokens.ink}`
 const appBrandJobCls = css`color:${tokens.brand}`
 const appTabsCls = css`display:flex;align-items:center;gap:8px;@media (max-width:640px){display:none}`
 const appTabLabelCls = css`font-size:11px;color:rgba(10,10,18,.5)`
-const appTabIcoCls = css`width:16px;height:16px;border-radius:4px;border:1.6px solid rgba(10,10,18,.35);position:relative`
-const appTabIcoRoundCls = css`width:14px;height:14px;border-radius:999px`
-const appTabCls = css`display:flex;flex-direction:column;align-items:center;gap:2px;padding:8px 14px;border-radius:10px`
+const appTabIcoCls = css`width:16px;height:16px;display:flex;align-items:center;justify-content:center;color:rgba(10,10,18,.5)`
+const appTabCls = css`display:flex;flex-direction:column;align-items:center;gap:3px;padding:8px 14px;border-radius:10px`
 const appTabActiveCls = css`
   background:rgba(124,92,252,.1);
   & .${appTabLabelCls}{color:${tokens.brand};font-weight:700}
-  & .${appTabIcoCls}{border-color:${tokens.brand}}
+  & .${appTabIcoCls}{color:${tokens.brand}}
 `
 const appUserCls = css`display:flex;align-items:center;gap:10px;padding:5px 12px 5px 5px;border-radius:999px;border:1px solid ${tokens.line}`
 const appAvatarCls = css`width:28px;height:28px;border-radius:999px;background:linear-gradient(135deg,#7c5cfc,#a78bfa)`
@@ -103,17 +102,29 @@ export default function AppScreenshot() {
           </span>
           <div className={appTabsCls}>
             <div className={`${appTabCls} ${appTabActiveCls}`}>
-              <div className={appTabIcoCls}>
-                <div style={{ position: 'absolute', right: -2, bottom: -2, width: 6, height: 1.6, background: '#7c5cfc', transform: 'rotate(45deg)' }} />
+              <div className={appTabIcoCls} aria-hidden="true">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M12 20h9" />
+                  <path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z" />
+                </svg>
               </div>
               <span className={appTabLabelCls}>{t('landing.appMock.tabTailoring')}</span>
             </div>
             <div className={appTabCls}>
-              <div className={appTabIcoCls} />
+              <div className={appTabIcoCls} aria-hidden="true">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M4.98 3.5A2.5 2.5 0 1 0 5 8.5a2.5 2.5 0 0 0-.02-5ZM3 9h4v12H3zm6 0h3.8v1.7h.05c.53-1 1.83-2.05 3.77-2.05C20.3 8.65 21 10.9 21 14v7h-4v-6.2c0-1.48-.03-3.38-2.06-3.38-2.06 0-2.38 1.6-2.38 3.27V21H9z" />
+                </svg>
+              </div>
               <span className={appTabLabelCls}>{t('landing.appMock.tabLinkedin')}</span>
             </div>
             <div className={appTabCls}>
-              <div className={`${appTabIcoCls} ${appTabIcoRoundCls}`} />
+              <div className={appTabIcoCls} aria-hidden="true">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+                  <circle cx="12" cy="8" r="4" />
+                  <path d="M4 21c0-4 4-6 8-6s8 2 8 6" />
+                </svg>
+              </div>
               <span className={appTabLabelCls}>{t('landing.appMock.tabProfile')}</span>
             </div>
           </div>

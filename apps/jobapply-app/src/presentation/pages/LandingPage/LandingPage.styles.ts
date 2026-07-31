@@ -65,8 +65,8 @@ export const panelCls = css`background:rgba(255,255,255,.7);backdrop-filter:blur
 export const cardWhiteCls = css`background:#fff;border:1px solid ${tokens.line};box-shadow:${tokens.shLg},inset 0 1px 0 rgba(255,255,255,.9);border-radius:20px;overflow:hidden`
 export const chipCls = css`font-size:12px;padding:5px 12px;border-radius:999px;border:1px solid rgba(10,10,18,.12);color:rgba(10,10,18,.6)`
 
-export const topbarCls = css`position:fixed;top:16px;left:0;right:0;z-index:50;padding:0 24px`
-export const topbarBarCls = css`display:flex;align-items:center;justify-content:space-between;padding:14px 22px 14px 26px;max-width:1360px;margin:0 auto;border-radius:999px;background:rgba(255,255,255,.6);backdrop-filter:blur(24px) saturate(160%);-webkit-backdrop-filter:blur(24px) saturate(160%);border:1px solid rgba(255,255,255,.7);box-shadow:0 10px 30px rgba(20,20,50,.10),0 2px 8px rgba(20,20,50,.05),0 1px 0 rgba(255,255,255,.9) inset`
+export const topbarCls = css`position:fixed;top:0;left:0;right:0;z-index:50;background:rgba(255,255,255,.72);backdrop-filter:blur(24px) saturate(160%);-webkit-backdrop-filter:blur(24px) saturate(160%);border-bottom:1px solid rgba(10,10,18,.08);box-shadow:0 1px 20px rgba(20,20,50,.06)`
+export const topbarBarCls = css`display:flex;align-items:center;justify-content:space-between;gap:24px;max-width:1440px;margin:0 auto;padding:16px 48px;@media (max-width:640px){padding:14px 22px}`
 
 export const ringCls = css`position:relative;width:150px;height:150px;margin:0 auto;& svg{width:100%;height:100%;transform:rotate(-90deg)}`
 export const ringSmCls = css`position:relative;width:100%;aspect-ratio:1;max-width:150px;margin:0 auto;& svg{width:100%;height:100%;transform:rotate(-90deg)}`

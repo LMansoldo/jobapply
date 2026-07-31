@@ -3,16 +3,18 @@ import { useTranslation } from 'react-i18next'
 import { css } from '@emotion/css'
 import { topbarCls, topbarBarCls, btnDarkMdCls, tokens } from '../LandingPage.styles'
 
-const brandCls = css`font-family:'Lato','Verdana',sans-serif;font-weight:900;letter-spacing:-.02em;font-size:20px;color:${tokens.ink}`
-const navCls = css`display:flex;gap:28px;font-size:14px;color:rgba(10,10,18,.65);@media (max-width:640px){display:none}`
-const linkCls = css`white-space:nowrap;cursor:pointer;&:hover{opacity:.7}`
+const brandCls = css`font-family:'Lato','Verdana',sans-serif;font-weight:900;letter-spacing:-.02em;font-size:20px`
+const brandDoCls = css`color:${tokens.ink}`
+const brandJobCls = css`color:${tokens.brand}`
+const navCls = css`display:flex;gap:28px;font-size:14px;@media (max-width:640px){display:none}`
+const linkCls = css`white-space:nowrap;cursor:pointer;color:rgba(10,10,18,.65);text-decoration:none;&:hover{opacity:.7}`
 
 export default function Topbar() {
   const { t } = useTranslation()
   return (
     <div className={topbarCls}>
       <nav className={topbarBarCls}>
-        <span className={brandCls}>dojob</span>
+        <span className={brandCls}><span className={brandDoCls}>do</span><span className={brandJobCls}>job</span></span>
         <div className={navCls}>
           <a href="#como-funciona" className={linkCls}>{t('landing.nav.howItWorks')}</a>
           <a href="#recursos" className={linkCls}>{t('landing.nav.atsScore')}</a>
