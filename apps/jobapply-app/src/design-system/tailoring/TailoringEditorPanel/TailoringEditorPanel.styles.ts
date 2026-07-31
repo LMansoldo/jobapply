@@ -16,11 +16,14 @@ export const Root = styled.div`
   flex-direction: column;
   height: 100%;
   background: ${Colors.surfaceEditor};
+  border-bottom: 1px solid ${Colors.surfaceEditorBorder};
+  border-radius: ${BorderRadius.base};
 `
 
 export const Toolbar = styled.div`
   height: ${TOOLBAR_HEIGHT};
   background: ${Colors.surfaceDarker};
+  border-radius: ${BorderRadius.base} ${BorderRadius.base} 0 0;
   border-bottom: 1px solid ${Colors.surfaceEditorBorder};
   display: flex;
   flex-direction: column;
@@ -102,6 +105,7 @@ export const EditorWrapper = styled.div`
 export const StatusBar = styled.div`
   height: ${STATUS_HEIGHT};
   background: ${Colors.surfaceDarker};
+  border-radius: 0 0 ${BorderRadius.base} ${BorderRadius.base};
   border-top: 1px solid ${Colors.surfaceEditorBorder};
   display: flex;
   align-items: center;
