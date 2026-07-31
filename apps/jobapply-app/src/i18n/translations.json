@@ -521,7 +521,7 @@
         "tabProfile": "Perfil",
         "newAnalysis": "Nova análise",
         "manualTitle": "Tailoring manual",
-        "manualDesc": "Two of Us Tech Page 1 · Frontend talent for modern product teams",
+        "manualDesc": "Aurora Labs · Talento frontend para times de produto modernos",
         "manualMode": "Modo manual",
         "atsLabel": "ATS:",
         "editorFile": "Arquivo",
@@ -535,7 +535,7 @@
         "cvSkillsResearch": "**Pesquisa:** Entrevistas, Testes de Usabilidade, Discovery Contínuo, Métricas",
         "cvSkillsCollab": "**Colaboração:** Handoff, Storybook, Acessibilidade (WCAG), Design Ops",
         "cvExpH": "## Experiência Profissional",
-        "cvExpRole": "### Product Designer Sênior — Nubank | São Paulo, Brasil (Remoto)",
+        "cvExpRole": "### Product Designer Sênior — Lumina | São Paulo, Brasil (Remoto)",
         "cvExpDate": "**Mar 2023 – Presente**",
         "statusWords": "842 palavras",
         "scoreBanner": "Com sugestões: 30 → 45 pts",
@@ -551,7 +551,7 @@
         "exportSave": "Salvar como nova versão"
       },
       "editorMock": {
-        "jdLabel": "Descrição da vaga · Senior Frontend @ Nubank",
+        "jdLabel": "Descrição da vaga · Senior Frontend @ Lumina",
         "jdPre": "Buscamos engenheiro sênior com",
         "jdMid": "para liderar iniciativas de",
         "jdPost": ", garantindo",
@@ -1136,7 +1136,7 @@
         "tabProfile": "Profile",
         "newAnalysis": "New analysis",
         "manualTitle": "Manual tailoring",
-        "manualDesc": "Two of Us Tech Page 1 · Frontend talent for modern product teams",
+        "manualDesc": "Aurora Labs · Frontend talent for modern product teams",
         "manualMode": "Manual mode",
         "atsLabel": "ATS:",
         "editorFile": "File",
@@ -1150,7 +1150,7 @@
         "cvSkillsResearch": "**Research:** Interviews, Usability Testing, Continuous Discovery, Metrics",
         "cvSkillsCollab": "**Collaboration:** Handoff, Storybook, Accessibility (WCAG), Design Ops",
         "cvExpH": "## Professional Experience",
-        "cvExpRole": "### Senior Product Designer — Nubank | São Paulo, Brazil (Remote)",
+        "cvExpRole": "### Senior Product Designer — Lumina | São Paulo, Brazil (Remote)",
         "cvExpDate": "**Mar 2023 – Present**",
         "statusWords": "842 words",
         "scoreBanner": "With suggestions: 30 → 45 pts",
@@ -1166,7 +1166,7 @@
         "exportSave": "Save as new version"
       },
       "editorMock": {
-        "jdLabel": "Job description · Senior Frontend @ Nubank",
+        "jdLabel": "Job description · Senior Frontend @ Lumina",
         "jdPre": "We're looking for a senior engineer with",
         "jdMid": "to lead",
         "jdPost": "initiatives, ensuring",
