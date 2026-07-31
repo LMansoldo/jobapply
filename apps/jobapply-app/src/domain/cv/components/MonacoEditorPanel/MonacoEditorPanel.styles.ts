@@ -7,7 +7,6 @@ import { BorderRadius } from '../../../../styles/theme/radius'
 const BTN_SIZE = '2.6rem'
 const STATUS_HEIGHT = '2.4rem'
 
-const MOBILE = '@media (max-width: 767px)'
 const SMALL_MOBILE = '@media (max-width: 767px) and (max-height: 680px)'
 
 export const root = css({
@@ -16,9 +15,6 @@ export const root = css({
   background: Colors.surfaceEditor,
   borderRadius: BorderRadius.base,
   overflow: 'hidden',
-  [MOBILE]: {
-    borderRadius: 0,
-  },
 })
 
 export const toolbar = css({
