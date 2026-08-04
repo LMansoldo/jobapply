@@ -1,12 +1,16 @@
-import { createRouter, RouterProvider, createRootRoute, createFileRoute } from '@tanstack/react-router'
+import { createRootRoute, createRoute, createRouter, RouterProvider, Outlet } from '@tanstack/react-router'
 import './i18n'
 import LandingPage from './presentation/pages/LandingPage'
 
-// Minimal root route — no providers needed for landing
-const rootRoute = createRootRoute({ component: () => <LandingPage /> })
+const rootRoute = createRootRoute({
+  component: () => <Outlet />,
+})
 
-// Landing page route at "/"
-const indexRoute = createFileRoute('/')({ component: () => <LandingPage /> })
+const indexRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/',
+  component: () => <LandingPage />,
+})
 
 const routeTree = rootRoute.addChildren([indexRoute])
 
