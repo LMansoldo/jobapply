@@ -21,14 +21,16 @@ const mono = "'JetBrains Mono',monospace"
 const auroraDrift = keyframes`0%{transform:translate3d(-8%,-6%,0) rotate(0) scale(1.1)}33%{transform:translate3d(6%,-2%,0) rotate(40deg) scale(1.25)}66%{transform:translate3d(-4%,8%,0) rotate(-25deg) scale(1.15)}100%{transform:translate3d(-8%,-6%,0) rotate(0) scale(1.1)}`
 const auroraDrift2 = keyframes`0%{transform:translate3d(10%,8%,0) rotate(0) scale(1)}50%{transform:translate3d(-12%,-4%,0) rotate(80deg) scale(1.3)}100%{transform:translate3d(10%,8%,0) rotate(0) scale(1)}`
 const fadeUp = keyframes`from{opacity:0;transform:translateY(28px);filter:blur(6px)}to{opacity:1;transform:translateY(0);filter:blur(0)}`
+/** Hero: visible immediately, subtle slide-up only (no opacity flash) */
+const heroSlideUp = keyframes`from{transform:translateY(28px);filter:blur(6px)}to{transform:translateY(0);filter:blur(0)}`
 export const scoreCountKeyframe = keyframes`from{stroke-dashoffset:283}to{stroke-dashoffset:26}`
 
 const mm = '@media (prefers-reduced-motion: no-preference)'
 
 export const revealInClass = 'in'
 export const fadeInCls = css`opacity:0;&.in{${mm}{animation:${fadeUp} 1.1s cubic-bezier(.2,.7,.2,1) forwards}}@media (prefers-reduced-motion: reduce){opacity:1}`
-/** Hero elements: visible immediately (opacity:1), animate only when .in is added */
-export const heroFadeInCls = css`opacity:1;&.in{${mm}{animation:${fadeUp} 1.1s cubic-bezier(.2,.7,.2,1) forwards}}`
+/** Hero elements: visible immediately (opacity:1), animate slide-up only when .in is added */
+export const heroFadeInCls = css`opacity:1;&.in{${mm}{animation:${heroSlideUp} 1.1s cubic-bezier(.2,.7,.2,1) forwards}}`
 
 export const auroraCls = css`position:absolute;top:0;left:0;right:0;height:100%;overflow:hidden;pointer-events:none;z-index:0`
 const blob = `position:absolute;border-radius:50%`
