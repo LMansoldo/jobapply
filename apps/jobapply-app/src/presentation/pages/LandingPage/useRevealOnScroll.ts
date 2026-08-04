@@ -1,12 +1,14 @@
 import { useEffect } from 'react'
-import { fadeInCls, revealInClass } from './LandingPage.styles'
+import { fadeInCls, heroFadeInCls, revealInClass } from './LandingPage.styles'
 
 export function useRevealOnScroll(): void {
   useEffect(() => {
     const els = Array.from(document.querySelectorAll<HTMLElement>(`.${fadeInCls}`))
+    const heroEls = Array.from(document.querySelectorAll<HTMLElement>(`.${heroFadeInCls}`))
     const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches
     if (reduce) {
       els.forEach(el => el.classList.add(revealInClass))
+      heroEls.forEach(el => el.classList.add(revealInClass))
       return
     }
     const check = () => {
@@ -17,6 +19,11 @@ export function useRevealOnScroll(): void {
         if (r.top < vh - 60 && r.bottom > 0) el.classList.add(revealInClass)
       })
     }
+    // Hero elements: add .in immediately with stagger for animation
+    heroEls.forEach((el, i) => {
+      setTimeout(() => el.classList.add(revealInClass), i * 120)
+    })
+    // Below-fold elements: reveal on scroll
     els.forEach((el, i) => {
       const r = el.getBoundingClientRect()
       if (r.top < window.innerHeight) setTimeout(() => el.classList.add(revealInClass), Math.min(i, 8) * 90)

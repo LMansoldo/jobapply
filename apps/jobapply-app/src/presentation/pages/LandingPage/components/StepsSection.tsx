@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next'
 import { css } from '@emotion/css'
-import { sectionStepsCls, headingCls, accentPinkCls, glassCls, fadeInCls, tokens } from '../LandingPage.styles'
+import { sectionStepsBelowFoldCls, headingCls, accentPinkCls, glassCls, fadeInCls, tokens } from '../LandingPage.styles'
 import { steps } from '../data'
 
 const gridCls = css`display:grid;grid-template-columns:repeat(4,1fr);gap:24px;@media (max-width:1040px){grid-template-columns:repeat(2,1fr)}@media (max-width:560px){grid-template-columns:1fr}`
@@ -12,7 +12,7 @@ const descCls = css`font-size:15px;line-height:1.55;color:rgba(10,10,18,.6);marg
 export default function StepsSection() {
   const { t } = useTranslation()
   return (
-    <section className={sectionStepsCls}>
+    <section className={sectionStepsBelowFoldCls}>
       <div className={fadeInCls} style={{ maxWidth: 900, marginBottom: 80 }}>
         <h2 className={headingCls}>{t('landing.steps.headingPre')}<span className={accentPinkCls}>{t('landing.steps.headingAccent')}</span>{t('landing.steps.headingPost')}</h2>
       </div>

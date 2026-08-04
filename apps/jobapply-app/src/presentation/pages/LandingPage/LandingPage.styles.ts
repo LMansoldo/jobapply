@@ -27,6 +27,8 @@ const mm = '@media (prefers-reduced-motion: no-preference)'
 
 export const revealInClass = 'in'
 export const fadeInCls = css`opacity:0;&.in{${mm}{animation:${fadeUp} 1.1s cubic-bezier(.2,.7,.2,1) forwards}}@media (prefers-reduced-motion: reduce){opacity:1}`
+/** Hero elements: visible immediately (opacity:1), animate only when .in is added */
+export const heroFadeInCls = css`opacity:1;&.in{${mm}{animation:${fadeUp} 1.1s cubic-bezier(.2,.7,.2,1) forwards}}`
 
 export const auroraCls = css`position:absolute;top:0;left:0;right:0;height:100%;overflow:hidden;pointer-events:none;z-index:0`
 const blob = `position:absolute;border-radius:50%`
@@ -40,6 +42,10 @@ export const sectionCls = css`position:relative;z-index:5;max-width:1440px;margi
 export const sectionHeroCls = css`${sectionCls};padding:150px 48px 100px;@media (max-width:640px){padding-left:22px;padding-right:22px}`
 export const sectionStepsCls = css`${sectionCls};padding:120px 48px 100px;@media (max-width:640px){padding-left:22px;padding-right:22px}`
 export const sectionCtaCls = css`${sectionCls};padding:60px 48px 160px;@media (max-width:640px){padding-left:22px;padding-right:22px}`
+/** Below-fold sections: defer rendering until scrolled into view */
+export const sectionBelowFoldCls = css`${sectionCls};content-visibility:auto;contain-intrinsic-size:auto 600px`
+export const sectionStepsBelowFoldCls = css`${sectionStepsCls};content-visibility:auto;contain-intrinsic-size:auto 500px`
+export const sectionCtaBelowFoldCls = css`${sectionCtaCls};content-visibility:auto;contain-intrinsic-size:auto 400px`
 
 export const monoCls = css`font-family:${mono}`
 

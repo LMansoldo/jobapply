@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next'
 import { css } from '@emotion/css'
-import { sectionCls, headingCls, accentCyanCls, leadSmCls, fadeInCls, tokens } from '../LandingPage.styles'
+import { sectionBelowFoldCls, headingCls, accentCyanCls, leadSmCls, fadeInCls, tokens } from '../LandingPage.styles'
 import { features } from '../data'
 import EditorMock from './EditorMock'
 
@@ -15,7 +15,7 @@ const tagCls = css`display:inline-flex;align-items:center;gap:6px;font-size:11px
 export default function FeaturesSection() {
   const { t } = useTranslation()
   return (
-    <section className={sectionCls}>
+    <section className={sectionBelowFoldCls}>
       <div className={fadeInCls} style={{ maxWidth: 900 }}>
         <h2 className={headingCls}>{t('landing.features.headingPre')}<span className={accentCyanCls}>{t('landing.features.headingAccent')}</span>.</h2>
         <p className={leadSmCls} style={{ marginTop: 28 }}>{t('landing.features.sub')}</p>
