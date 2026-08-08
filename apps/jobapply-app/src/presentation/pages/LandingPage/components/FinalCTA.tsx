@@ -1,4 +1,3 @@
-import { Link } from '@tanstack/react-router'
 import { useTranslation } from 'react-i18next'
 import { css, keyframes } from '@emotion/css'
 import { sectionCtaBelowFoldCls, headingCtaCls, accentCyanCls, panelCls, btnDarkXlCls, fadeInCls, tokens } from '../LandingPage.styles'
@@ -22,7 +21,7 @@ export default function FinalCTA() {
           <h2 className={headingCtaCls}>{t('landing.cta.headingPre')}<span className={accentCyanCls}>{t('landing.cta.headingAccent')}</span>{t('landing.cta.headingPost')}</h2>
           <p className={leadCtaCls}>{t('landing.cta.lead')}</p>
           <div className={actionsCls}>
-            <Link to="/register" className={btnDarkXlCls}>{t('landing.cta.btn')} →</Link>
+            <a href="/register" className={btnDarkXlCls}>{t('landing.cta.btn')} →</a>
           </div>
         </div>
       </div>

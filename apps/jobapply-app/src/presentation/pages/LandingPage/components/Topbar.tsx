@@ -1,4 +1,3 @@
-import { Link } from '@tanstack/react-router'
 import { useTranslation } from 'react-i18next'
 import { css } from '@emotion/css'
 import { topbarCls, topbarBarCls, btnDarkMdCls, tokens } from '../LandingPage.styles'
@@ -20,8 +19,8 @@ export default function Topbar() {
           <a href="#recursos" className={linkCls}>{t('landing.nav.atsScore')}</a>
         </div>
         <div style={{ display: 'flex', gap: 12, alignItems: 'center', flexShrink: 0 }}>
-          <Link to="/login" className={linkCls} style={{ fontSize: 14 }}>{t('landing.nav.login')}</Link>
-          <Link to="/register" className={btnDarkMdCls}>{t('landing.nav.tryFree')}</Link>
+          <a href="/login" className={linkCls} style={{ fontSize: 14 }}>{t('landing.nav.login')}</a>
+          <a href="/register" className={btnDarkMdCls}>{t('landing.nav.tryFree')}</a>
         </div>
       </nav>
     </div>

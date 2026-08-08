@@ -1,4 +1,3 @@
-import { Link } from '@tanstack/react-router'
 import { useTranslation } from 'react-i18next'
 import { css } from '@emotion/css'
 import { sectionHeroCls, displayCls, accentCls, leadCls, btnDarkLgCls, btnGhostLgCls, heroFadeInCls, tokens } from '../LandingPage.styles'
@@ -22,7 +21,7 @@ export default function Hero() {
           {t('landing.hero.leadPre')}<span className={hlCls}>{t('landing.hero.leadHl')}</span>{t('landing.hero.leadPost')}
         </p>
         <div className={actionsCls}>
-          <Link to="/register" className={btnDarkLgCls}>{t('landing.hero.ctaMain')} →</Link>
+          <a href="/register" className={btnDarkLgCls}>{t('landing.hero.ctaMain')} →</a>
           <a href="#como-funciona" className={btnGhostLgCls}>{t('landing.hero.ctaSec')}</a>
         </div>
       </div>
