@@ -1,7 +1,7 @@
 import { genAI } from '../../lib/gemini'
 import type { ResumeSource, ResumeDraft, WeightedKeyword, KeywordPhrase, RemoveSuggestion } from '../../types'
 
-const model = genAI.getGenerativeModel({ model: 'gemini-3-flash-preview' })
+const model = genAI.getGenerativeModel({ model: 'gemini-3.5-flash' })
 
 const LOCALE_LABEL: Record<string, string> = {
   'en': 'English',
@@ -51,8 +51,8 @@ ${jobTitle || 'Not specified'}
 </target_role>
 
 <keywords>
-Required (must integrate): ${requiredKw.join(', ')}
-Preferred (integrate if relevant): ${preferredKw.join(', ')}
+Required (integrate ONLY where the source CV provides supporting evidence; if no evidence exists, omit the keyword): ${requiredKw.join(', ')}
+Preferred (integrate if relevant and supported by the CV): ${preferredKw.join(', ')}
 </keywords>
 
 <keyword_phrases>
@@ -86,9 +86,9 @@ Generate the JSON output following these rules:
 2. BULLETS: Each bullet must reference a sourceIndex from the position's bullet list above. You may rewrite to integrate keywords — keep all facts and numbers. Max 5 bullets per position.
 3. METRICS: Never drop or invent numbers. If a bullet has "40%", keep "40%" in the rewrite.
 4. SKILLS: Keep only categories relevant to the role. Reorder so most relevant appears first.
-5. SUMMARY: 2-3 sentences integrating required keywords. Based on the existing summary.
+5. SUMMARY: 2-3 sentences integrating required keywords that are supported by the CV. Based on the existing summary.
 6. CONTEXT: Rewrite the context paragraph to integrate keywords — keep all facts.
-7. HONESTY: Never add skills or claims not in the original CV.
+7. HONESTY: Never add skills, tools, or claims not present in the original CV. This rule overrides any keyword integration request — if a required keyword has no supporting evidence in the CV, leave it out.
 8. OMIT: Remove items from items_to_omit.
 </instructions>
 

@@ -1,7 +1,7 @@
 import type { MappedCV, WeightedKeyword, ScoreBreakdown } from '../../types'
 
 // Thresholds — named for calibration
-const SECTION_WEIGHTS: Record<string, number> = { experience: 1.0, skills: 0.7, summary: 0.4 }
+const SECTION_WEIGHTS: Record<string, number> = { experience: 1.0, skills: 0.7, summary: 0.4, objective: 0.3 }
 const GENERIC_PHRASES = [
   'responsável por', 'auxiliava', 'atuava em', 'trabalhava com', 'participava de',
   'contribuía para', 'ajudava', 'suportava', 'apoiava', 'colaborava',
@@ -11,7 +11,7 @@ const GENERIC_PHRASES = [
 const METRICS_PATTERN = /\d+\s*(%|R\$|\$|reais|mil|milhão|k\b|x\b|vezes|usuários|users|requests|deploys|horas|dias|ms|s\b)/i
 
 function norm(s: string): string {
-  return s.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/\s+/g, ' ').trim()
+  return s.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/\s+/g, ' ').trim()
 }
 
 function matchesWordBoundary(text: string, term: string): boolean {
@@ -95,9 +95,8 @@ function scoreFormat(cv: MappedCV): number {
   let score = 100
   const requiredSections: Array<keyof typeof cv.sections> = ['summary', 'skills', 'experience', 'education']
   for (const s of requiredSections) {
-    if (!cv.sections[s]?.trim()) score -= 15
+    if (!cv.sections[s]?.trim()) score -= 12
   }
-  if (!/\S+@\S+/.test(cv.sections.contact ?? '')) score -= 15
   if (cv.entities.experiencePeriods.some((p) => !p.period?.trim())) score -= 10
   return Math.max(0, score)
 }
