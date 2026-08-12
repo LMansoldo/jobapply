@@ -508,7 +508,7 @@ export async function downloadMarkdownAsPdf(
 
     const docDefinition: any = {
       pageSize: 'A4' as const,
-      pageMargins: [54, 18, 54, 18] as [number, number, number, number],
+      pageMargins: [43.2, 14.4, 43.2, 14.4] as [number, number, number, number],
       defaultStyle: {
         font: 'Arimo',
         fontSize: 8.5,
@@ -520,32 +520,32 @@ export async function downloadMarkdownAsPdf(
           fontSize: 14,
           bold: true,
           color: PdfColors.headerBlue,
-          margin: [0, 0, 0, 2],
+          margin: [0, 0, 0, 1.6],
         },
         contact: {
           fontSize: 8,
           color: PdfColors.textMuted,
-          margin: [0, 1, 0, 1],
+          margin: [0, 0.8, 0, 0.8],
         },
         subheader: {
           fontSize: 9,
           bold: true,
           color: PdfColors.textBase,
-          margin: [0, 8, 0, 1],
+          margin: [0, 6.4, 0, 0.8],
         },
         sectionTitle: {
           fontSize: 10,
           bold: true,
           color: PdfColors.headerBlue,
-          margin: [0, 10, 0, 0],
+          margin: [0, 8, 0, 0],
         },
         normal: {
           fontSize: 8.5,
           color: PdfColors.textBody,
-          margin: [0, 1, 0, 1],
+          margin: [0, 0.8, 0, 0.8],
         },
         list: {
-          margin: [0, 0, 0, 2],
+          margin: [0, 0, 0, 1.6],
         },
         listItem: {
           fontSize: 8.5,
@@ -630,7 +630,7 @@ function convertMarkdownToPdfMake(
   function flushPendingTitle() {
     if (!pendingTitleRuns) return
     const props: any = { text: pendingTitleRuns, style: 'subheader' }
-    if (pendingTitleJustAfterSectionTitle) props.margin = [0, 0, 0, 1]
+    if (pendingTitleJustAfterSectionTitle) props.margin = [0, 0, 0, 0.8]
     content.push(props)
     pendingTitleRuns = null
     pendingTitleJustAfterSectionTitle = false
@@ -650,7 +650,7 @@ function convertMarkdownToPdfMake(
         inList = false
       }
       flushPendingTitle()
-      content.push({ text: '', fontSize: 4, margin: [0, 0, 0, 0] })
+      content.push({ text: '', fontSize: 3.2, margin: [0, 0, 0, 0] })
       lastWasHeading = false
       continue
     }
@@ -748,7 +748,7 @@ function convertMarkdownToPdfMake(
           text: [...pendingTitleRuns, { text: ' | ', bold: false, color: PdfColors.textMuted }, { text: inner, italics: true, bold: false, color: PdfColors.textMuted }],
           style: 'subheader',
         }
-        if (pendingTitleJustAfterSectionTitle) props.margin = [0, 0, 0, 1]
+        if (pendingTitleJustAfterSectionTitle) props.margin = [0, 0, 0, 0.8]
         content.push(props)
         pendingTitleRuns = null
         pendingTitleJustAfterSectionTitle = false
