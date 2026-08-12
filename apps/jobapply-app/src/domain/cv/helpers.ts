@@ -740,13 +740,12 @@ function convertMarkdownToPdfMake(
       // italic-gray — matching the reference template's "role ... date" single-line layout.
       const isPeriodLine = lastWasHeading && /^\*\*(.+)\*\*$/.test(trimmed)
       if (isPeriodLine && pendingTitleRuns) {
+        // Keep the date on the same flowed text line as the title (not a separate pdfMake
+        // "columns" block) so ATS text extractors read "Role | Company – Location | Date" in
+        // one continuous line instead of two spatially-positioned, independently-ordered blocks.
         const inner = trimmed.slice(2, -2)
         const props: any = {
-          columns: [
-            { text: pendingTitleRuns, width: '*' },
-            { text: inner, italics: true, color: PdfColors.textMuted, bold: false, alignment: 'right', width: 130 },
-          ],
-          columnGap: 8,
+          text: [...pendingTitleRuns, { text: ' | ', bold: false, color: PdfColors.textMuted }, { text: inner, italics: true, bold: false, color: PdfColors.textMuted }],
           style: 'subheader',
         }
         if (pendingTitleJustAfterSectionTitle) props.margin = [0, 0, 0, 1]
