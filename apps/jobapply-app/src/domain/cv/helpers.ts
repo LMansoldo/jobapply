@@ -508,7 +508,7 @@ export async function downloadMarkdownAsPdf(
 
     const docDefinition: any = {
       pageSize: 'A4' as const,
-      pageMargins: [54, 36, 54, 36] as [number, number, number, number],
+      pageMargins: [54, 18, 54, 18] as [number, number, number, number],
       defaultStyle: {
         font: 'Arimo',
         fontSize: 10.5,
