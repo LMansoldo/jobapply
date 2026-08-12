@@ -10,7 +10,6 @@
  *   ## Certifications  — bullet list: Name — Org — Date
  *   ## Languages       — bullet list: Language: Level
  */
-import { Colors } from '../../styles/theme/colors'
 import type { CV, CVCreatePayload, CVLocalePayload, CVLocaleVersion } from './types'
 
 // ─── Parse Result ────────────────────────────────────────────────────────────
@@ -644,17 +643,17 @@ function convertMarkdownToPdfMake(
       // H1 - already handled in header
       continue
     } else if (trimmed.startsWith('## ')) {
-      // H2 - section title with underline
+      // H2 - section title, uppercase, with blue underline
       if (inList && listItems.length > 0) {
         content.push({ ul: listItems, style: 'list' })
         listItems = []
         inList = false
       }
-      const title = trimmed.substring(3).trim()
+      const title = trimmed.substring(3).trim().toUpperCase()
       content.push({ text: title, style: 'sectionTitle' })
       content.push({
-        canvas: [{ type: 'line', x1: 0, y1: 0, x2: 523, y2: 0, lineWidth: 1.5, lineColor: Colors.primaryDeeper }],
-        margin: [0, 1, 0, 3],
+        canvas: [{ type: 'line', x1: 0, y1: 0, x2: 523, y2: 0, lineWidth: 0.75, lineColor: PdfColors.headerBlue }],
+        margin: [0, 1, 0, 4],
       })
     } else if (trimmed.startsWith('### ')) {
       // H3 - subsection
