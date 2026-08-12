@@ -458,26 +458,22 @@ export function exportPDF(cv: CV): void {
 
 import * as pdfMake from 'pdfmake/build/pdfmake'
 
-// Initialize pdfMake with fonts
+// Initialize pdfMake with the embedded Arimo font (ATS-safe, Arial-metric-compatible)
 async function initializePdfMake(): Promise<void> {
   if (typeof window === 'undefined') return
 
   try {
-    // Load pdfMake and vfs_fonts (contains Roboto fonts)
     const pdfMakeModule = await import('pdfmake/build/pdfmake')
-    const vfsFonts = await import('pdfmake/build/vfs_fonts')
+    const { arimoVfs } = await import('./pdfFonts/arimoVfs.generated')
 
-    // Assign vfs to pdfMake
-    ;(pdfMakeModule.default as any).vfs = vfsFonts.default
-
-    // Register Roboto fonts from vfs_fonts (available fonts)
+    ;(pdfMakeModule.default as any).vfs = arimoVfs
     ;(pdfMakeModule.default as any).fonts = {
-      Roboto: {
-        normal: 'Roboto-Regular.ttf',
-        bold: 'Roboto-Medium.ttf',
-        italics: 'Roboto-Italic.ttf',
-        bolditalics: 'Roboto-MediumItalic.ttf'
-      }
+      Arimo: {
+        normal: 'Arimo-Regular.ttf',
+        bold: 'Arimo-Bold.ttf',
+        italics: 'Arimo-Italic.ttf',
+        bolditalics: 'Arimo-BoldItalic.ttf',
+      },
     }
   } catch (error) {
     console.warn('Failed to initialize pdfMake:', error)
