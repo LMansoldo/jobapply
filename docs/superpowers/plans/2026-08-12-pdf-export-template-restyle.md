@@ -592,7 +592,45 @@ In the H1 branch, add `lastWasHeading = false` before `continue`:
 
 In the H2 branch (from Task 3), add `lastWasHeading = false` right after pushing the divider canvas (end of that `else if` block).
 
-In the list-item and ordered-list-item branches, add `lastWasHeading = false` at the start of each branch (before the existing `inList = true` line).
+In the list-item and ordered-list-item branches, add `lastWasHeading = false` at the start of each branch (before the existing `inList = true` line). Find:
+
+```ts
+    } else if (trimmed.match(/^[-*+]\s/)) {
+      // List item
+      inList = true
+      const itemText = trimmed.substring(2).trim()
+      // Parse bold/italic in list items
+      const parsedText = parseInlineFormatting(itemText)
+      listItems.push({ text: parsedText, style: 'listItem' })
+    } else if (trimmed.match(/^\d+\.\s/)) {
+      // Ordered list item
+      inList = true
+      const itemText = trimmed.replace(/^\d+\.\s/, '').trim()
+      const parsedText = parseInlineFormatting(itemText)
+      listItems.push({ text: parsedText, style: 'listItem' })
+    } else {
+```
+
+Replace with:
+
+```ts
+    } else if (trimmed.match(/^[-*+]\s/)) {
+      // List item
+      lastWasHeading = false
+      inList = true
+      const itemText = trimmed.substring(2).trim()
+      // Parse bold/italic in list items
+      const parsedText = parseInlineFormatting(itemText)
+      listItems.push({ text: parsedText, style: 'listItem' })
+    } else if (trimmed.match(/^\d+\.\s/)) {
+      // Ordered list item
+      lastWasHeading = false
+      inList = true
+      const itemText = trimmed.replace(/^\d+\.\s/, '').trim()
+      const parsedText = parseInlineFormatting(itemText)
+      listItems.push({ text: parsedText, style: 'listItem' })
+    } else {
+```
 
 - [ ] **Step 3: Rewrite the H3 branch to split role/company**
 
