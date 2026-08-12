@@ -689,12 +689,14 @@ function convertMarkdownToPdfMake(
       }
       const title = trimmed.substring(4).trim()
       const sepIdx = title.indexOf(' | ')
+      // "Role | Company | Location" -> role stays split off by " | "; any further " | "
+      // (company/location separator) reads as " – " instead, matching "Role | Company – Location".
       const titleRuns =
         sepIdx === -1
           ? [{ text: title, bold: true, color: PdfColors.textBase }]
           : [
               { text: title.slice(0, sepIdx), bold: true, color: PdfColors.textBase },
-              { text: title.slice(sepIdx), bold: false, color: PdfColors.textMuted },
+              { text: ' | ' + title.slice(sepIdx + 3).replace(/ \| /g, ' – '), bold: false, color: PdfColors.textMuted },
             ]
       pendingTitleRuns = titleRuns
       // The subheader style's top margin separates one experience/education entry from the
