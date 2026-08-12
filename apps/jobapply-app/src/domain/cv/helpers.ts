@@ -620,6 +620,7 @@ function convertMarkdownToPdfMake(
   const lines = markdownContent.split('\n')
   let inList = false
   let listItems: any[] = []
+  let lastWasHeading = false
 
   for (const line of lines) {
     const trimmed = line.trim()
@@ -635,12 +636,14 @@ function convertMarkdownToPdfMake(
         inList = false
       }
       content.push({ text: '', margin: [0, 0, 0, 0] })
+      lastWasHeading = false
       continue
     }
 
     // Check for headers
     if (trimmed.startsWith('# ')) {
       // H1 - already handled in header
+      lastWasHeading = false
       continue
     } else if (trimmed.startsWith('## ')) {
       // H2 - section title, uppercase, with blue underline
@@ -655,8 +658,11 @@ function convertMarkdownToPdfMake(
         canvas: [{ type: 'line', x1: 0, y1: 0, x2: 523, y2: 0, lineWidth: 0.75, lineColor: PdfColors.headerBlue }],
         margin: [0, 1, 0, 4],
       })
+      lastWasHeading = false
     } else if (trimmed.startsWith('### ')) {
-      // H3 - subsection
+      // H3 - subsection (experience/education role line). Split "Role | Company ..." so the
+      // role reads bold black and the rest (company/location) reads regular gray, matching
+      // the reference template.
       if (inList && listItems.length > 0) {
         content.push({
           ul: listItems,
@@ -666,9 +672,19 @@ function convertMarkdownToPdfMake(
         inList = false
       }
       const title = trimmed.substring(4).trim()
-      content.push({ text: title, style: 'subheader' })
+      const sepIdx = title.indexOf(' | ')
+      const titleRuns =
+        sepIdx === -1
+          ? [{ text: title, bold: true, color: PdfColors.textBase }]
+          : [
+              { text: title.slice(0, sepIdx), bold: true, color: PdfColors.textBase },
+              { text: title.slice(sepIdx), bold: false, color: PdfColors.textMuted },
+            ]
+      content.push({ text: titleRuns, style: 'subheader' })
+      lastWasHeading = true
     } else if (trimmed.match(/^[-*+]\s/)) {
       // List item
+      lastWasHeading = false
       inList = true
       const itemText = trimmed.substring(2).trim()
       // Parse bold/italic in list items
@@ -676,6 +692,7 @@ function convertMarkdownToPdfMake(
       listItems.push({ text: parsedText, style: 'listItem' })
     } else if (trimmed.match(/^\d+\.\s/)) {
       // Ordered list item
+      lastWasHeading = false
       inList = true
       const itemText = trimmed.replace(/^\d+\.\s/, '').trim()
       const parsedText = parseInlineFormatting(itemText)
@@ -691,9 +708,19 @@ function convertMarkdownToPdfMake(
         inList = false
       }
 
-      // Parse inline formatting (bold, italic, etc.)
-      const parsedText = parseInlineFormatting(trimmed)
-      content.push({ text: parsedText, style: 'normal' })
+      // The line right after an experience/education H3 is the "**Period**" (or
+      // "**Location | Period**") line. Render it italic-gray instead of bold, matching
+      // the reference template's location/period styling.
+      const isPeriodLine = lastWasHeading && /^\*\*(.+)\*\*$/.test(trimmed)
+      if (isPeriodLine) {
+        const inner = trimmed.slice(2, -2)
+        content.push({ text: inner, italics: true, color: PdfColors.textMuted, style: 'normal' })
+      } else {
+        // Parse inline formatting (bold, italic, etc.)
+        const parsedText = parseInlineFormatting(trimmed)
+        content.push({ text: parsedText, style: 'normal' })
+      }
+      lastWasHeading = false
     }
   }
 
