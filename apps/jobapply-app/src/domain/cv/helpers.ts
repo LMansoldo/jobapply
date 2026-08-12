@@ -635,7 +635,7 @@ function convertMarkdownToPdfMake(
         listItems = []
         inList = false
       }
-      content.push({ text: '', margin: [0, 0, 0, 0] })
+      content.push({ text: '', fontSize: 4, margin: [0, 0, 0, 0] })
       lastWasHeading = false
       continue
     }
