@@ -511,36 +511,36 @@ export async function downloadMarkdownAsPdf(
       pageMargins: [54, 18, 54, 18] as [number, number, number, number],
       defaultStyle: {
         font: 'Arimo',
-        fontSize: 10.5,
+        fontSize: 8.5,
         lineHeight: 1.25,
         color: PdfColors.textBody,
       },
       styles: {
         header: {
-          fontSize: 16,
+          fontSize: 14,
           bold: true,
           color: PdfColors.headerBlue,
           margin: [0, 0, 0, 2],
         },
         contact: {
-          fontSize: 10,
+          fontSize: 8,
           color: PdfColors.textMuted,
           margin: [0, 1, 0, 1],
         },
         subheader: {
-          fontSize: 11,
+          fontSize: 9,
           bold: true,
           color: PdfColors.textBase,
           margin: [0, 8, 0, 1],
         },
         sectionTitle: {
-          fontSize: 12,
+          fontSize: 10,
           bold: true,
           color: PdfColors.headerBlue,
           margin: [0, 10, 0, 0],
         },
         normal: {
-          fontSize: 10.5,
+          fontSize: 8.5,
           color: PdfColors.textBody,
           margin: [0, 1, 0, 1],
         },
@@ -548,7 +548,7 @@ export async function downloadMarkdownAsPdf(
           margin: [0, 0, 0, 2],
         },
         listItem: {
-          fontSize: 10.5,
+          fontSize: 8.5,
           color: PdfColors.textBody,
         },
       },
