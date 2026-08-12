@@ -537,7 +537,7 @@ export async function downloadMarkdownAsPdf(
           fontSize: 12,
           bold: true,
           color: PdfColors.headerBlue,
-          margin: [0, 12, 0, 2],
+          margin: [0, 10, 0, 0],
         },
         normal: {
           fontSize: 10.5,
@@ -646,7 +646,7 @@ function convertMarkdownToPdfMake(
       lastWasHeading = false
       continue
     } else if (trimmed.startsWith('## ')) {
-      // H2 - section title, uppercase, with blue underline
+      // H2 - section title, uppercase
       if (inList && listItems.length > 0) {
         content.push({ ul: listItems, style: 'list' })
         listItems = []
@@ -654,10 +654,6 @@ function convertMarkdownToPdfMake(
       }
       const title = trimmed.substring(3).trim().toUpperCase()
       content.push({ text: title, style: 'sectionTitle' })
-      content.push({
-        canvas: [{ type: 'line', x1: 0, y1: 0, x2: 523, y2: 0, lineWidth: 0.75, lineColor: PdfColors.headerBlue }],
-        margin: [0, 1, 0, 4],
-      })
       lastWasHeading = false
     } else if (trimmed.startsWith('### ')) {
       // H3 - subsection (experience/education role line). Split "Role | Company ..." so the
