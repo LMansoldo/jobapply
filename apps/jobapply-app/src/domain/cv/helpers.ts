@@ -621,6 +621,7 @@ function convertMarkdownToPdfMake(
   let inList = false
   let listItems: any[] = []
   let lastWasHeading = false
+  let justAfterSectionTitle = false
 
   for (const line of lines) {
     const trimmed = line.trim()
@@ -655,6 +656,7 @@ function convertMarkdownToPdfMake(
       const title = trimmed.substring(3).trim().toUpperCase()
       content.push({ text: title, style: 'sectionTitle' })
       lastWasHeading = false
+      justAfterSectionTitle = true
     } else if (trimmed.startsWith('### ')) {
       // H3 - subsection (experience/education role line). Split "Role | Company ..." so the
       // role reads bold black and the rest (company/location) reads regular gray, matching
@@ -676,11 +678,18 @@ function convertMarkdownToPdfMake(
               { text: title.slice(0, sepIdx), bold: true, color: PdfColors.textBase },
               { text: title.slice(sepIdx), bold: false, color: PdfColors.textMuted },
             ]
-      content.push({ text: titleRuns, style: 'subheader' })
+      // The subheader style's top margin separates one experience/education entry from the
+      // next. Skip it when this is the first entry right after a section title — the section
+      // title's own spacing already provides that separation.
+      const subheaderProps: any = { text: titleRuns, style: 'subheader' }
+      if (justAfterSectionTitle) subheaderProps.margin = [0, 0, 0, 1]
+      content.push(subheaderProps)
       lastWasHeading = true
+      justAfterSectionTitle = false
     } else if (trimmed.match(/^[-*+]\s/)) {
       // List item
       lastWasHeading = false
+      justAfterSectionTitle = false
       inList = true
       const itemText = trimmed.substring(2).trim()
       // Parse bold/italic in list items
@@ -689,6 +698,7 @@ function convertMarkdownToPdfMake(
     } else if (trimmed.match(/^\d+\.\s/)) {
       // Ordered list item
       lastWasHeading = false
+      justAfterSectionTitle = false
       inList = true
       const itemText = trimmed.replace(/^\d+\.\s/, '').trim()
       const parsedText = parseInlineFormatting(itemText)
@@ -717,6 +727,7 @@ function convertMarkdownToPdfMake(
         content.push({ text: parsedText, style: 'normal' })
       }
       lastWasHeading = false
+      justAfterSectionTitle = false
     }
   }
 
