@@ -622,6 +622,19 @@ function convertMarkdownToPdfMake(
   let listItems: any[] = []
   let lastWasHeading = false
   let justAfterSectionTitle = false
+  // Holds a role/company title line while we wait to see whether the next line is its
+  // "**Period**" line — if so, both are merged onto one row (title left, date right).
+  let pendingTitleRuns: any[] | null = null
+  let pendingTitleJustAfterSectionTitle = false
+
+  function flushPendingTitle() {
+    if (!pendingTitleRuns) return
+    const props: any = { text: pendingTitleRuns, style: 'subheader' }
+    if (pendingTitleJustAfterSectionTitle) props.margin = [0, 0, 0, 1]
+    content.push(props)
+    pendingTitleRuns = null
+    pendingTitleJustAfterSectionTitle = false
+  }
 
   for (const line of lines) {
     const trimmed = line.trim()
@@ -636,6 +649,7 @@ function convertMarkdownToPdfMake(
         listItems = []
         inList = false
       }
+      flushPendingTitle()
       content.push({ text: '', fontSize: 4, margin: [0, 0, 0, 0] })
       lastWasHeading = false
       continue
@@ -644,10 +658,12 @@ function convertMarkdownToPdfMake(
     // Check for headers
     if (trimmed.startsWith('# ')) {
       // H1 - already handled in header
+      flushPendingTitle()
       lastWasHeading = false
       continue
     } else if (trimmed.startsWith('## ')) {
       // H2 - section title, uppercase
+      flushPendingTitle()
       if (inList && listItems.length > 0) {
         content.push({ ul: listItems, style: 'list' })
         listItems = []
@@ -660,7 +676,9 @@ function convertMarkdownToPdfMake(
     } else if (trimmed.startsWith('### ')) {
       // H3 - subsection (experience/education role line). Split "Role | Company ..." so the
       // role reads bold black and the rest (company/location) reads regular gray, matching
-      // the reference template.
+      // the reference template. Held pending: if the next line is a "**Period**" line, it's
+      // merged onto this same row instead of being pushed now.
+      flushPendingTitle()
       if (inList && listItems.length > 0) {
         content.push({
           ul: listItems,
@@ -678,16 +696,16 @@ function convertMarkdownToPdfMake(
               { text: title.slice(0, sepIdx), bold: true, color: PdfColors.textBase },
               { text: title.slice(sepIdx), bold: false, color: PdfColors.textMuted },
             ]
+      pendingTitleRuns = titleRuns
       // The subheader style's top margin separates one experience/education entry from the
       // next. Skip it when this is the first entry right after a section title — the section
       // title's own spacing already provides that separation.
-      const subheaderProps: any = { text: titleRuns, style: 'subheader' }
-      if (justAfterSectionTitle) subheaderProps.margin = [0, 0, 0, 1]
-      content.push(subheaderProps)
+      pendingTitleJustAfterSectionTitle = justAfterSectionTitle
       lastWasHeading = true
       justAfterSectionTitle = false
     } else if (trimmed.match(/^[-*+]\s/)) {
       // List item
+      flushPendingTitle()
       lastWasHeading = false
       justAfterSectionTitle = false
       inList = true
@@ -697,6 +715,7 @@ function convertMarkdownToPdfMake(
       listItems.push({ text: parsedText, style: 'listItem' })
     } else if (trimmed.match(/^\d+\.\s/)) {
       // Ordered list item
+      flushPendingTitle()
       lastWasHeading = false
       justAfterSectionTitle = false
       inList = true
@@ -715,13 +734,25 @@ function convertMarkdownToPdfMake(
       }
 
       // The line right after an experience/education H3 is the "**Period**" (or
-      // "**Location | Period**") line. Render it italic-gray instead of bold, matching
-      // the reference template's location/period styling.
+      // "**Location | Period**") line. Merge it onto the pending title's row, right-aligned,
+      // italic-gray — matching the reference template's "role ... date" single-line layout.
       const isPeriodLine = lastWasHeading && /^\*\*(.+)\*\*$/.test(trimmed)
-      if (isPeriodLine) {
+      if (isPeriodLine && pendingTitleRuns) {
         const inner = trimmed.slice(2, -2)
-        content.push({ text: inner, italics: true, color: PdfColors.textMuted, style: 'normal' })
+        const props: any = {
+          columns: [
+            { text: pendingTitleRuns, width: '*' },
+            { text: inner, italics: true, color: PdfColors.textMuted, bold: false, alignment: 'right', width: 130 },
+          ],
+          columnGap: 8,
+          style: 'subheader',
+        }
+        if (pendingTitleJustAfterSectionTitle) props.margin = [0, 0, 0, 1]
+        content.push(props)
+        pendingTitleRuns = null
+        pendingTitleJustAfterSectionTitle = false
       } else {
+        flushPendingTitle()
         // Parse inline formatting (bold, italic, etc.)
         const parsedText = parseInlineFormatting(trimmed)
         content.push({ text: parsedText, style: 'normal' })
@@ -730,6 +761,7 @@ function convertMarkdownToPdfMake(
       justAfterSectionTitle = false
     }
   }
+  flushPendingTitle()
 
   // Close any open list
   if (inList && listItems.length > 0) {
