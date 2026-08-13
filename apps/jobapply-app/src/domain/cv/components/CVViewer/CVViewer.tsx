@@ -51,7 +51,7 @@ export function CVViewer({ cv, onEdit, onDelete, isMobile, onPublish, publishLoa
     try {
       message.loading(t('tailoring.generatingPDF'), 0)
       const markdown = localeVersionToMarkdown(activeVersion)
-      await downloadMarkdownAsPdf(markdown, cv, activeLocale, cv.objective ?? '')
+      await downloadMarkdownAsPdf(markdown, cv, activeLocale, '')
       message.destroy()
       message.success(t('tailoring.downloadPDFSuccess'))
     } catch {
