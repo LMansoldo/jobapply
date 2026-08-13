@@ -13,7 +13,6 @@ export const PanelRoot = styled.div`
   flex-direction: column;
   height: 100%;
   overflow: hidden;
-  border-left: 1px solid ${Colors.surfaceBorder};
 `
 
 // Scrollable area that holds the ATSPanel — keeps export buttons always visible
@@ -25,6 +24,8 @@ export const ScrollableContent = styled.div`
 
 export const ScoreRow = styled.div`
   background: ${Colors.successBg};
+  border-radius: ${BorderRadius.base};
+  margin-bottom: ${Spacing.sm};
   border-bottom: 1px solid ${Colors.surfaceBorder};
   padding: ${Spacing.sm} ${Spacing.lg};
   display: flex;

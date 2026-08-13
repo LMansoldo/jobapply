@@ -13,6 +13,7 @@ export const atsGrid = css({
   flex: 1,
   minHeight: 0,
   overflow: 'hidden',
+  padding: '1rem',
 
   '@media (max-width: 768px)': {
     display: 'flex',
@@ -25,6 +26,8 @@ export const atsGrid = css({
 
 export const atsCenter = css({
   background: Colors.surfaceEditor,
+  border: '1px solid rgba(124, 58, 237, 0.18)',
+  borderRadius: BorderRadius.base,
   display: 'flex',
   flexDirection: 'column',
   overflow: 'hidden',
@@ -36,6 +39,8 @@ export const atsCenter = css({
     overflow: 'visible',
     minHeight: 'auto',
     height: 'auto',
+    border: '1px solid rgba(124, 58, 237, 0.18)',
+    borderRadius: BorderRadius.base,
   },
 })
 
