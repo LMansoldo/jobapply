@@ -1,4 +1,5 @@
 import type { ResumeDraft, ResumeSource, VerificationViolation, VerificationReport } from '../../types'
+import { sanitizeStyle } from './styleSanitizer'
 
 // Thresholds — named for calibration
 const JACCARD_THRESHOLD = 0.2
@@ -101,6 +102,12 @@ function checkBullet(
     if (!origMetrics.has(m)) {
       return { location: locationPrefix, rule: 'metric-invented', detail: `"${m}" appears in rewrite but not in original`, action: 'reverted' }
     }
+  }
+
+  // generic-phrase: AI-smell / hollow impact language introduced by the rewrite
+  const genericHits = sanitizeStyle(generated).genericPhraseHits
+  if (genericHits.length > 0) {
+    return { location: locationPrefix, rule: 'generic-phrase', detail: `generic phrasing: ${genericHits.join(', ')}`, action: 'reverted' }
   }
 
   // jd-contamination: flag n-grams from JD whose non-keyword words are absent from the full CV
@@ -210,11 +217,32 @@ export function verifyResumeDraft(
       }
     }
   }
+  if (sanitizeStyle(draft.summary).genericPhraseHits.length > 0) {
+    summaryViolations.push({ location: 'summary', rule: 'generic-phrase', detail: 'generic phrasing in summary', action: 'reverted' })
+  }
   const verifiedSummary = summaryViolations.length > 0 ? source.summaryRaw : draft.summary
   violations.push(...summaryViolations)
 
+  // skills: every generated skill item must be anchored in the source CV (blocks fabricated keywords)
+  const cvNormFull = norm(fullCvText)
+  const verifiedSkills = draft.skills
+    .map((group) => {
+      const kept: string[] = []
+      for (const item of group.items) {
+        const words = contentWords(item)
+        const anchored = words.length === 0 || words.every((w) => cvNormFull.includes(w))
+        if (anchored) {
+          kept.push(item)
+        } else {
+          violations.push({ location: `skills.${group.category}`, rule: 'unverified-skill', detail: `"${item}" not anchored in the source CV`, action: 'removed' })
+        }
+      }
+      return { ...group, items: kept }
+    })
+    .filter((g) => g.items.length > 0)
+
   return {
-    draft: { ...draft, summary: verifiedSummary, experience: verifiedExperience },
+    draft: { ...draft, summary: verifiedSummary, experience: verifiedExperience, skills: verifiedSkills },
     report: { violations },
   }
 }
