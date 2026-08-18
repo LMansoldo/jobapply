@@ -138,14 +138,54 @@ export interface ATSReport {
   }
   tips: { priority: 'critical' | 'high' | 'medium'; tip: string }[]
   removeSuggestions: RemoveSuggestion[]
+  // v3 (aditivo)
+  requirementMatches?: RequirementMatch[]
+  recruiterReview?: RecruiterReview
 }
 
 // ── v2 types — adicionados em A1, velhos removidos em B4 ──────────────────────
 
 export interface ScoreBreakdown {
-  keywordCoverage: number   // 0–100
+  keywordCoverage: number   // 0–100 (legado; = literalCoverage após migração)
   contentQuality: number    // 0–100
   format: number            // 0–100
+  // v3 — redesign semântico (aditivo; ver specs SPEC-0..5)
+  literalCoverage?: number   // 0–100 cobertura literal (deflação corrigida)
+  semanticCoverage?: number  // 0–100 cobertura considerando matches semânticos
+  niceToHaveBonus?: number   // 0–100 só soma, nunca penaliza
+  recruiterScore?: number    // 0–100 média ponderada do RecruiterReview
+}
+
+// ── v3 — redesign análise semântica + recruiter (SPEC-0) ─────────────────────
+
+export interface JDRequirement {
+  term: string
+  tier: 'must-have' | 'important' | 'nice-to-have'
+  category: 'skill' | 'tool' | 'domain' | 'credential' | 'soft'
+  aliases: string[]          // termos equivalentes p/ match literal
+}
+
+export interface JDIntentSignal {
+  text: string               // frase que repondera um requisito/área
+  effect: 'downweight' | 'upweight'
+  target: string             // requisito/área afetada
+}
+
+export type MatchKind = 'exact' | 'semantic' | 'transferable' | 'missing'
+
+export interface RequirementMatch {
+  term: string
+  tier: JDRequirement['tier']
+  kind: MatchKind
+  confidence: number         // 0–1
+  evidence: string           // trecho do CV que sustenta; '' se missing
+}
+
+export interface RecruiterReview {
+  narrativeScore: number     // 0–100 storytelling/coerência dos bullets
+  seniorityScore: number     // 0–100 sinal de senioridade vs JD
+  domainFitScore: number     // 0–100 aderência de domínio/indústria
+  notes: string[]            // observações qualitativas acionáveis, tom sóbrio
 }
 
 export interface WeightedKeyword {
@@ -166,9 +206,9 @@ export interface ResumeDraft {
 
 export interface VerificationViolation {
   location: string
-  rule: 'metric-dropped' | 'metric-invented' | 'low-overlap' | 'jd-contamination' | 'invalid-source'
+  rule: 'metric-dropped' | 'metric-invented' | 'low-overlap' | 'jd-contamination' | 'invalid-source' | 'unverified-skill' | 'generic-phrase'
   detail: string
-  action: 'reverted'
+  action: 'reverted' | 'removed'
 }
 
 export interface VerificationReport {
@@ -192,10 +232,17 @@ export interface ResumeSource {
 export interface GraphState {
   input: AgentInput
   mapped?: MappedCV
-  jdKeywords?: string[]
-  weightedKeywords?: WeightedKeyword[]
+  requirements?: JDRequirement[]
+  intentSignals?: JDIntentSignal[]
   jobTitle?: string
+  literalCoverage?: number
+  matched?: RequirementMatch[]
+  unmatched?: JDRequirement[]
+  semanticMatches?: RequirementMatch[]
+  recruiterReview?: RecruiterReview
+  universalScore?: number
   scoreBreakdown?: ScoreBreakdown
+  requirementMatches?: RequirementMatch[]
   matchedKeywords?: string[]
   missingKeywords?: string[]
   semanticGaps?: string[]
@@ -203,8 +250,6 @@ export interface GraphState {
   keywordPhrases?: KeywordPhrase[]
   removeSuggestions?: RemoveSuggestion[]
   report?: ATSReport
-  adaptedCV?: CV
-  resume?: string
   resumeDraft?: ResumeDraft
   resumeVerification?: VerificationReport
 }

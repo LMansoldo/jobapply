@@ -3,8 +3,11 @@ import type { FastifyInstance } from 'fastify'
 import { z } from 'zod'
 import { graph } from '../graph'
 import { mapperNode } from '../graph/nodes/mapper'
-import { jdKeywordExtractorNode } from '../graph/nodes/jdKeywordExtractor'
-import { universalScorerNode } from '../graph/nodes/universalScorer'
+import { requirementExtractorNode } from '../graph/nodes/requirementExtractor'
+import { literalScorerNode } from '../graph/nodes/literalScorer'
+import { semanticMatcherNode } from '../graph/nodes/semanticMatcher'
+import { recruiterReviewerNode } from '../graph/nodes/recruiterReviewer'
+import { scoreComposerNode } from '../graph/nodes/scoreComposer'
 import { semanticAnalyzerNode } from '../graph/nodes/semanticAnalyzer'
 import { resumeGeneratorNode } from '../graph/nodes/resumeGenerator'
 import { interviewPrepAnalyzerNode } from '../graph/nodes/interviewPrepAnalyzer'
@@ -143,15 +146,13 @@ export async function registerRoutes(app: FastifyInstance): Promise<void> {
     try {
       request.log.info({ requestId, hasCv: !!input.cv, hasMd: !!input.cvMarkdown, jdLen: input.jobDescription.length }, 'analyze: starting graph.invoke')
       const result = await graph.invoke({ input })
-      request.log.info({ requestId, hasReport: !!result.report, hasAdaptedCV: !!result.adaptedCV, hasResume: !!result.resume }, 'analyze: graph.invoke completed')
+      request.log.info({ requestId, hasReport: !!result.report }, 'analyze: graph.invoke completed')
       if (!result.report) {
         job.status = 'error'
         job.error = 'Graph completed without producing a report'
       } else {
         job.status = 'done'
         job.report = result.report
-        job.adaptedCV = result.adaptedCV
-        job.resume = result.resume
       }
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Internal error'
@@ -199,21 +200,30 @@ export async function registerRoutes(app: FastifyInstance): Promise<void> {
 
     try {
       const { mapped } = mapperNode({ input })
-      const { jdKeywords, weightedKeywords, jobTitle } = await jdKeywordExtractorNode({ input })
-      const { scoreBreakdown, missingKeywords } = universalScorerNode({ mapped, weightedKeywords })
-      const semantic = await semanticAnalyzerNode({ input, mapped, scoreBreakdown, missingKeywords })
+      const { requirements, intentSignals, jobTitle } = await requirementExtractorNode({ input })
+      const { literalCoverage, matched, unmatched } = literalScorerNode({ mapped, requirements })
+      const { semanticMatches } = await semanticMatcherNode({ mapped, unmatched })
+      const { recruiterReview } = await recruiterReviewerNode({ mapped, jobDescription: input.jobDescription, intentSignals, locale: input.locale })
+      const composed = scoreComposerNode({ mapped, requirements, matched, semanticMatches, literalCoverage, recruiterReview })
+      const semantic = await semanticAnalyzerNode({ input, mapped, scoreBreakdown: composed.scoreBreakdown, missingKeywords: composed.missingKeywords })
       const result = await resumeGeneratorNode({
         input,
         mapped,
-        jdKeywords,
-        weightedKeywords,
+        requirements,
+        intentSignals,
         jobTitle,
-        semanticGaps: semantic.semanticGaps,
-        rephraseSuggestions: semantic.rephraseSuggestions,
+        scoreBefore: composed.universalScore,
+        recruiterReview,
         keywordPhrases: semantic.keywordPhrases,
         removeSuggestions: semantic.removeSuggestions,
+        rephraseSuggestions: semantic.rephraseSuggestions,
       })
-      return reply.send({ resume: result.resume, verification: result.resumeVerification })
+      return reply.send({
+        resume: result.resume,
+        verification: result.resumeVerification,
+        scoreBefore: result.scoreBefore,
+        scoreAfter: result.scoreAfter,
+      })
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Internal error'
       return reply.status(502).send({ message })
@@ -233,13 +243,7 @@ export async function registerRoutes(app: FastifyInstance): Promise<void> {
       if (!result.report) {
         return reply.status(500).send({ message: 'Graph completed without producing a report' })
       }
-      if (!result.adaptedCV) {
-        return reply.status(500).send({ message: 'Graph completed without producing an adapted CV' })
-      }
-      return reply.send({
-        report: result.report,
-        adaptedCV: result.adaptedCV,
-      })
+      return reply.send({ report: result.report })
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Internal error'
       return reply.status(502).send({ message })
@@ -265,11 +269,11 @@ export async function registerRoutes(app: FastifyInstance): Promise<void> {
       }
 
       try {
-        request.log.info('debug: testing jdKeywordExtractorNode')
-        const { jdKeywords } = await jdKeywordExtractorNode({ input })
-        results.jdKeywordExtractor = { ok: true, count: jdKeywords.length, sample: jdKeywords.slice(0, 10) }
+        request.log.info('debug: testing requirementExtractorNode')
+        const { requirements } = await requirementExtractorNode({ input })
+        results.requirementExtractor = { ok: true, count: requirements.length, sample: requirements.slice(0, 10) }
       } catch (err) {
-        results.jdKeywordExtractor = { ok: false, error: err instanceof Error ? err.message : String(err) }
+        results.requirementExtractor = { ok: false, error: err instanceof Error ? err.message : String(err) }
       }
 
       return reply.send(results)
