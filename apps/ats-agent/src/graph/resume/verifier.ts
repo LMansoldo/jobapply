@@ -223,26 +223,11 @@ export function verifyResumeDraft(
   const verifiedSummary = summaryViolations.length > 0 ? source.summaryRaw : draft.summary
   violations.push(...summaryViolations)
 
-  // skills: every generated skill item must be anchored in the source CV (blocks fabricated keywords)
-  const cvNormFull = norm(fullCvText)
-  const verifiedSkills = draft.skills
-    .map((group) => {
-      const kept: string[] = []
-      for (const item of group.items) {
-        const words = contentWords(item)
-        const anchored = words.length === 0 || words.every((w) => cvNormFull.includes(w))
-        if (anchored) {
-          kept.push(item)
-        } else {
-          violations.push({ location: `skills.${group.category}`, rule: 'unverified-skill', detail: `"${item}" not anchored in the source CV`, action: 'removed' })
-        }
-      }
-      return { ...group, items: kept }
-    })
-    .filter((g) => g.items.length > 0)
-
+  // Skills are intentionally NOT anchored to the source CV: the resume generator
+  // injects JD keywords here on purpose (this is a score-conference tool). Bullet
+  // integrity (metrics, contamination) is still enforced above.
   return {
-    draft: { ...draft, summary: verifiedSummary, experience: verifiedExperience, skills: verifiedSkills },
+    draft: { ...draft, summary: verifiedSummary, experience: verifiedExperience },
     report: { violations },
   }
 }
