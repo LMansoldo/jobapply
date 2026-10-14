@@ -1,4 +1,5 @@
 import { Response, NextFunction } from 'express';
+import { Readable } from 'stream';
 import mongoose from 'mongoose';
 import { AuthRequest } from '../types';
 import CV, { CVLocale } from '../models/CV';
@@ -6,7 +7,7 @@ import Job from '../models/Job';
 import User from '../models/User';
 import PublishedCV from '../models/PublishedCV';
 import { tailorCV as tailorCVService, generateCoverLetter as generateCoverLetterLLM, generateVideoScript as generateVideoScriptLLM } from '../services/llmService';
-import { analyzeWithATS, generateCVWithATS, generateResumeWithATS, analyzeLinkedInWithLinkedInAgent, getLinkedInJobResult } from '../services/atsService'
+import { analyzeWithATS, startATSAnalysis, openATSResultStream, STREAM_DEADLINE_MS, generateCVWithATS, generateResumeWithATS, analyzeLinkedInWithLinkedInAgent, getLinkedInJobResult } from '../services/atsService'
 import { sanitizeUserInput } from '../utils/sanitize'
 import { generateInterviewPrep } from '../services/interviewPrepService';
 
@@ -412,9 +413,9 @@ export async function analyzeCVDirect(req: AuthRequest, res: Response, next: Nex
     }
 
     const resolvedLocale = locale ?? detectLocale(jobDescription);
-    const report = await analyzeWithATS(cvMarkdown, jobDescription, resolvedLocale);
+    const { requestId } = await startATSAnalysis(sanitizeUserInput(cvMarkdown), sanitizeUserInput(jobDescription), resolvedLocale);
 
-    res.json({ report, locale: resolvedLocale });
+    res.status(202).json({ requestId, status: 'pending' });
   } catch (err: unknown) {
     const e = err as { name?: string; status?: number; message?: string };
     if (e.status) {
@@ -422,6 +423,35 @@ export async function analyzeCVDirect(req: AuthRequest, res: Response, next: Nex
       return;
     }
     next(err);
+  }
+}
+
+export async function analyzeCVDirectStream(req: AuthRequest, res: Response, next: NextFunction): Promise<void> {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), STREAM_DEADLINE_MS);
+  req.on('close', () => controller.abort());
+
+  try {
+    const agentRes = await openATSResultStream(req.params.requestId, controller.signal);
+
+    res.writeHead(200, {
+      'Content-Type': 'text/event-stream',
+      'Cache-Control': 'no-cache',
+      Connection: 'keep-alive',
+      'X-Accel-Buffering': 'no',
+    });
+    const pipeline = Readable.fromWeb(agentRes.body as import('stream/web').ReadableStream).pipe(res);
+    pipeline.on('finish', () => clearTimeout(timer));
+  } catch (err: unknown) {
+    clearTimeout(timer);
+    const e = err as { name?: string; status?: number; message?: string };
+    if (e.name === 'AbortError') { res.end(); return; }
+    if (!res.headersSent) {
+      if (e.status) { res.status(502).json({ message: 'ATS agent error', detail: e.message }); return; }
+      next(err);
+      return;
+    }
+    res.end();
   }
 }
 

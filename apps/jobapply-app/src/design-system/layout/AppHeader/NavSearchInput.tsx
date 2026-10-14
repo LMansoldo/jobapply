@@ -1,19 +1,18 @@
 /** Presentational: compact global search input for the app header. */
-import { SearchOutlined } from '@ant-design/icons'
-import { Input } from '../../../components/Input'
+import { Input } from '../../wrappers/Input'
 import type { NavSearchInputProps } from './NavSearchInput.types'
-import * as S from './NavSearchInput.styles'
+import { Wrapper, PrefixIcon } from './NavSearchInput.styles'
 
 export function NavSearchInput({ value, onChange, placeholder }: NavSearchInputProps) {
   return (
-    <S.Wrapper>
+    <Wrapper>
       <Input
-        prefix={<SearchOutlined className={S.prefixIcon} />}
+        prefix={<PrefixIcon />}
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
         allowClear
       />
-    </S.Wrapper>
+    </Wrapper>
   )
 }

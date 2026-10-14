@@ -14,3 +14,4 @@ packages/**/.claude/
 api.env
 agent.env
 linkedin.env
+apps/ats-agent/data/

@@ -1,12 +1,20 @@
 import React from 'react'
-import { Steps, Button, Input, Upload, Typography, Space, Tag } from 'antd'
+import { useTranslation } from 'react-i18next'
+import { Button, Input, Upload, Typography, Space, Tag } from 'antd'
 import { UploadOutlined } from '@ant-design/icons'
-import type { useLinkedInOnboarding } from '../../../domain/linkedin/hooks/useLinkedInOnboarding'
+import type { useLinkedInOnboarding } from '../../hooks/useLinkedInOnboarding'
 import { parsePDFToLinkedInProfile } from '../../../domain/linkedin/pdfParser'
+import * as styles from './LinkedInOptimizerPage.styles'
 
 const { Title, Paragraph } = Typography
 
-const POSITIONING_OPTIONS = ['executor', 'estrategista', 'líder', 'técnico', 'visionário']
+const POSITIONING_OPTIONS = [
+  { value: 'executor', labelKey: 'linkedin.positioning.executor' },
+  { value: 'estrategista', labelKey: 'linkedin.positioning.strategist' },
+  { value: 'líder', labelKey: 'linkedin.positioning.leader' },
+  { value: 'técnico', labelKey: 'linkedin.positioning.technical' },
+  { value: 'visionário', labelKey: 'linkedin.positioning.visionary' },
+] as const
 
 type OnboardingProps = {
   onboarding: ReturnType<typeof useLinkedInOnboarding>
@@ -14,6 +22,7 @@ type OnboardingProps = {
 }
 
 export function OnboardingFlow({ onboarding, onSubmit }: OnboardingProps) {
+  const { t } = useTranslation()
   const { state, setProfile, setStep1, setStep2, setStep3, setStep4, goBack } = onboarding
   const [targetRole, setTargetRole] = React.useState('')
   const [targetSector, setTargetSector] = React.useState('')
@@ -25,11 +34,11 @@ export function OnboardingFlow({ onboarding, onSubmit }: OnboardingProps) {
   const [uploading, setUploading] = React.useState(false)
 
   const steps = [
-    { title: 'Perfil' },
-    { title: 'Cargo alvo' },
-    { title: 'Posicionamento' },
-    { title: 'Evidência' },
-    { title: 'Vaga' },
+    { title: t('linkedin.onboarding.stepProfile') },
+    { title: t('linkedin.onboarding.stepRole') },
+    { title: t('linkedin.onboarding.stepPositioning') },
+    { title: t('linkedin.onboarding.stepEvidence') },
+    { title: t('linkedin.onboarding.stepJob') },
   ]
 
   async function handleFileUpload(file: File) {
@@ -43,9 +52,9 @@ export function OnboardingFlow({ onboarding, onSubmit }: OnboardingProps) {
     return false
   }
 
-  function togglePositioning(opt: string) {
+  function togglePositioning(value: string) {
     setPositioning(prev =>
-      prev.includes(opt) ? prev.filter(p => p !== opt) : [...prev, opt]
+      prev.includes(value) ? prev.filter(p => p !== value) : [...prev, value]
     )
   }
 
@@ -53,18 +62,18 @@ export function OnboardingFlow({ onboarding, onSubmit }: OnboardingProps) {
 
   return (
     <div>
-      <Steps current={state.step} items={steps} style={{ marginBottom: 32 }} />
+      <styles.OnboardingSteps current={state.step} items={steps} />
 
       {state.step === 0 && (
         <div>
-          <Title level={4}>Faça upload do seu perfil LinkedIn em PDF</Title>
+          <Title level={4}>{t('linkedin.onboarding.uploadTitle')}</Title>
           <Upload
             accept=".pdf"
             showUploadList={false}
             beforeUpload={handleFileUpload}
           >
             <Button icon={<UploadOutlined />} loading={uploading}>
-              Selecionar PDF
+              {t('linkedin.onboarding.selectPdf')}
             </Button>
           </Upload>
         </div>
@@ -72,51 +81,51 @@ export function OnboardingFlow({ onboarding, onSubmit }: OnboardingProps) {
 
       {state.step === 1 && (
         <div>
-          <Title level={4}>Qual é o seu cargo alvo?</Title>
-          <Space direction="vertical" style={{ width: '100%' }}>
+          <Title level={4}>{t('linkedin.onboarding.roleTitle')}</Title>
+          <styles.FullWidthSpace direction="vertical">
             <Input
-              placeholder="Ex: Senior Frontend Engineer"
+              placeholder={t('linkedin.onboarding.rolePlaceholder')}
               value={targetRole}
               onChange={e => setTargetRole(e.target.value)}
             />
             <Input
-              placeholder="Setor (ex: fintech, saúde, SaaS)"
+              placeholder={t('linkedin.onboarding.sectorPlaceholder')}
               value={targetSector}
               onChange={e => setTargetSector(e.target.value)}
             />
             <Space>
-              <Button onClick={goBack}>Voltar</Button>
+              <Button onClick={goBack}>{t('common.back')}</Button>
               <Button
                 type="primary"
                 disabled={!targetRole.trim()}
                 onClick={() => setStep1(targetRole.trim(), targetSector.trim() ? [targetSector.trim()] : [])}
               >
-                Continuar
+                {t('common.next')}
               </Button>
             </Space>
-          </Space>
+          </styles.FullWidthSpace>
         </div>
       )}
 
       {state.step === 2 && (
         <div>
-          <Title level={4}>Como você se posiciona?</Title>
-          <Paragraph>Selecione um ou mais arquétipos:</Paragraph>
-          <Space wrap style={{ marginBottom: 16 }}>
+          <Title level={4}>{t('linkedin.onboarding.positioningTitle')}</Title>
+          <Paragraph>{t('linkedin.onboarding.positioningSubtitle')}</Paragraph>
+          <styles.TagRowSpace wrap>
             {POSITIONING_OPTIONS.map(opt => (
               <Tag.CheckableTag
-                key={opt}
-                checked={positioning.includes(opt)}
-                onChange={() => togglePositioning(opt)}
+                key={opt.value}
+                checked={positioning.includes(opt.value)}
+                onChange={() => togglePositioning(opt.value)}
               >
-                {opt}
+                {t(opt.labelKey)}
               </Tag.CheckableTag>
             ))}
-          </Space>
+          </styles.TagRowSpace>
           <Space>
-            <Button onClick={goBack}>Voltar</Button>
+            <Button onClick={goBack}>{t('common.back')}</Button>
             <Button type="primary" onClick={() => setStep2(positioning)}>
-              Continuar
+              {t('common.next')}
             </Button>
           </Space>
         </div>
@@ -124,58 +133,58 @@ export function OnboardingFlow({ onboarding, onSubmit }: OnboardingProps) {
 
       {state.step === 3 && (
         <div>
-          <Title level={4}>Qual é sua evidência âncora?</Title>
-          <Paragraph>Um resultado concreto que define sua carreira.</Paragraph>
-          <Space direction="vertical" style={{ width: '100%' }}>
+          <Title level={4}>{t('linkedin.onboarding.evidenceTitle')}</Title>
+          <Paragraph>{t('linkedin.onboarding.evidenceSubtitle')}</Paragraph>
+          <styles.FullWidthSpace direction="vertical">
             <Input
-              placeholder="Métrica (ex: 40% de redução de latência)"
+              placeholder={t('linkedin.onboarding.metricPlaceholder')}
               value={metric}
               onChange={e => setMetric(e.target.value)}
             />
             <Input
-              placeholder="Prazo (ex: em 3 meses)"
+              placeholder={t('linkedin.onboarding.timeframePlaceholder')}
               value={timeframe}
               onChange={e => setTimeframe(e.target.value)}
             />
             <Input
-              placeholder="Ação (ex: migração da infraestrutura de pagamentos)"
+              placeholder={t('linkedin.onboarding.actionPlaceholder')}
               value={action}
               onChange={e => setAction(e.target.value)}
             />
             <Space>
-              <Button onClick={goBack}>Voltar</Button>
+              <Button onClick={goBack}>{t('common.back')}</Button>
               <Button
                 type="primary"
                 disabled={!anchorValid}
                 onClick={() => setStep3({ metric: metric.trim(), timeframe: timeframe.trim(), action: action.trim() })}
               >
-                Continuar
+                {t('common.next')}
               </Button>
             </Space>
-          </Space>
+          </styles.FullWidthSpace>
         </div>
       )}
 
       {state.step === 4 && (
         <div>
-          <Title level={4}>Tem uma vaga em mente? (opcional)</Title>
-          <Space direction="vertical" style={{ width: '100%' }}>
+          <Title level={4}>{t('linkedin.onboarding.jobTitle')} ({t('common.optional')})</Title>
+          <styles.FullWidthSpace direction="vertical">
             <Input.TextArea
               rows={6}
-              placeholder="Cole a descrição da vaga ou URL aqui..."
+              placeholder={t('linkedin.onboarding.jobPlaceholder')}
               value={jobDescription}
               onChange={e => setJobDescription(e.target.value)}
             />
             <Space>
-              <Button onClick={goBack}>Voltar</Button>
+              <Button onClick={goBack}>{t('common.back')}</Button>
               <Button
                 type="primary"
                 onClick={() => { setStep4(jobDescription); onSubmit() }}
               >
-                Analisar perfil
+                {t('linkedin.onboarding.analyzeProfile')}
               </Button>
             </Space>
-          </Space>
+          </styles.FullWidthSpace>
         </div>
       )}
     </div>

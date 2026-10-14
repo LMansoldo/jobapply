@@ -130,5 +130,5 @@ const result = await linkedinAnalyzerNode({
 
 ## Dependências
 
-- Google Generative AI (Gemini Flash Lite)
-- Variável de ambiente: `GEMINI_API_KEY`
+- GLM Flash via API compatível da Z.ai
+- Variável de ambiente: `ZAI_API_KEY`

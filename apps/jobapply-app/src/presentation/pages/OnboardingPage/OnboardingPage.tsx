@@ -39,185 +39,182 @@ export default function OnboardingPage() {
   }
 
   return (
-    <div className={S.root}>
-      <div className={S.header}>
-        <div className={S.headerLogo}>
-          <span className={S.headerLogoText}>DoJob</span>
-          <span className={S.headerLogoDot} />
-        </div>
+    <S.Root>
+      <S.Header>
+        <S.HeaderLogo>
+          <S.HeaderLogoText>DoJob</S.HeaderLogoText>
+          <S.HeaderLogoDot />
+        </S.HeaderLogo>
         {(() => {
           const stepNum = interaction === 'gender' ? 1 : interaction === 'roles' ? 2 : interaction === 'employed' ? 3 : 0
           if (!stepNum) return null
           return (
-            <div className={S.headerStepGroup}>
-              <div className={S.headerDots}>
-                {[1, 2, 3].map((n) => <span key={n} className={S.headerDot(n <= stepNum)} />)}
-              </div>
-              <span className={S.headerBadge}>Pergunta {stepNum} de 3</span>
-            </div>
+            <S.HeaderStepGroup>
+              <S.HeaderDots>
+                {[1, 2, 3].map((n) => <S.HeaderDot key={n} $active={n <= stepNum} />)}
+              </S.HeaderDots>
+              <S.HeaderBadge>Pergunta {stepNum} de 3</S.HeaderBadge>
+            </S.HeaderStepGroup>
           )
         })()}
-      </div>
+      </S.Header>
 
-      <div className={S.chatArea}>
+      <S.ChatArea>
         {messages.map((msg) => {
           if (msg.sender === 'user') {
             return (
-              <div key={msg.id} className={S.userRow}>
-                <div className={S.userBubble}>{msg.content}</div>
-              </div>
+              <S.UserRow key={msg.id}>
+                <S.UserBubble>{msg.content}</S.UserBubble>
+              </S.UserRow>
             )
           }
           if (msg.msgType === 'overview_cards') {
             return (
-              <div key={msg.id} className={S.botRow}>
-                <div className={S.overviewCards}>
+              <S.BotRow key={msg.id}>
+                <S.OverviewCards>
                   {(['1', '2', '3'] as const).map((n) => (
-                    <div key={n} className={S.overviewCard}>
-                      <div className={S.overviewCardTitle}>{t(`onboarding.overviewFeature${n}Title`)}</div>
-                      <div className={S.overviewCardDesc}>{t(`onboarding.overviewFeature${n}Desc`)}</div>
-                    </div>
+                    <S.OverviewCard key={n}>
+                      <S.OverviewCardTitle>{t(`onboarding.overviewFeature${n}Title`)}</S.OverviewCardTitle>
+                      <S.OverviewCardDesc>{t(`onboarding.overviewFeature${n}Desc`)}</S.OverviewCardDesc>
+                    </S.OverviewCard>
                   ))}
-                </div>
-              </div>
+                </S.OverviewCards>
+              </S.BotRow>
             )
           }
           if (msg.msgType === 'tailoring_list') {
             return (
-              <div key={msg.id} className={S.botRow}>
-                <div className={S.tailoringList}>
+              <S.BotRow key={msg.id}>
+                <S.TailoringList>
                   {(['1', '2', '3'] as const).map((n) => (
-                    <div key={n} className={S.tailoringItem}>{t(`onboarding.tailoringFeature${n}`)}</div>
+                    <S.TailoringItem key={n}>{t(`onboarding.tailoringFeature${n}`)}</S.TailoringItem>
                   ))}
-                </div>
-              </div>
+                </S.TailoringList>
+              </S.BotRow>
             )
           }
-          const bubbleCls = msg.msgType === 'ai_warning' ? S.botBubbleWarning : S.botBubble
+          const Bubble = msg.msgType === 'ai_warning' ? S.BotBubbleWarning : S.BotBubble
           return (
-            <div key={msg.id} className={S.botRow}>
+            <S.BotRow key={msg.id}>
               {msg.msgType === 'ai_warning' ? (
-                <div className={bubbleCls}>
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" style={{ flexShrink: 0, marginTop: '2px' }}>
+                <Bubble>
+                  <S.WarningIcon width="16" height="16" viewBox="0 0 24 24" fill="none">
                     <path d="M12 3L1 21H23L12 3Z" fill="#fbbf24"/>
                     <path d="M12 9V14" stroke="#92400e" strokeWidth="2" strokeLinecap="round"/>
                     <circle cx="12" cy="17.5" r="1.1" fill="#92400e"/>
-                  </svg>
+                  </S.WarningIcon>
                   <span>{msg.content}</span>
-                </div>
+                </Bubble>
               ) : (
-                <div className={bubbleCls}>{msg.content}</div>
+                <Bubble>{msg.content}</Bubble>
               )}
-            </div>
+            </S.BotRow>
           )
         })}
 
         {isTyping && (
-          <div className={S.typingRow}>
-            <div className={S.typingBubble}>
-              {[0, 0.2, 0.4].map((d, i) => <span key={i} className={S.typingDotEl(d)} />)}
-            </div>
-          </div>
+          <S.TypingRow>
+            <S.TypingBubble>
+              {[0, 0.2, 0.4].map((d, i) => <S.TypingDotEl key={i} $delay={d} />)}
+            </S.TypingBubble>
+          </S.TypingRow>
         )}
         {isDone && (
-          <div className={S.isDoneRow}>
-            <span className={S.isDoneSpinner} />
+          <S.IsDoneRow>
+            <S.IsDoneSpinner />
             {t('onboarding.isDoneText')}
-          </div>
+          </S.IsDoneRow>
         )}
         <div ref={bottomRef} />
-      </div>
+      </S.ChatArea>
 
       {interaction === 'gender' && (
-        <div className={S.interactionArea}>
-          <div className={S.sheetTitle}>{t('onboarding.genderQuestion')}</div>
-          <div className={S.genderButtons}>
+        <S.InteractionArea>
+          <S.SheetTitle>{t('onboarding.genderQuestion')}</S.SheetTitle>
+          <S.GenderButtons>
             {(['M', 'F', 'O'] as const).map((g) => (
-              <button key={g} type="button" className={S.genderBtn(genderSel === g)} onClick={() => setGenderSel(g)}>
+              <S.GenderBtn key={g} type="button" $active={genderSel === g} onClick={() => setGenderSel(g)}>
                 {t(`onboarding.gender${g === 'M' ? 'Male' : g === 'F' ? 'Female' : 'Other'}`)}
-              </button>
+              </S.GenderBtn>
             ))}
-          </div>
+          </S.GenderButtons>
           {genderSel === 'O' && (
-            <input
-              className={S.genderOtherInput}
+            <S.GenderOtherInput
               value={genderOther}
               onChange={(e) => setGenderOther(e.target.value)}
               placeholder={t('onboarding.genderOtherPlaceholder')}
             />
           )}
-          <button
+          <S.SheetSubmitBtn
             type="button"
-            className={S.sheetSubmitBtn(!!genderSel && (genderSel !== 'O' || genderOther.trim().length > 0))}
+            $enabled={!!genderSel && (genderSel !== 'O' || genderOther.trim().length > 0)}
             disabled={!genderSel || (genderSel === 'O' && !genderOther.trim())}
             onClick={() => genderSel && handleGender(genderSel, genderOther || undefined)}
           >
             {t('common.next')}
-          </button>
-        </div>
+          </S.SheetSubmitBtn>
+        </S.InteractionArea>
       )}
 
       {interaction === 'roles' && (
-        <div className={S.interactionArea}>
-          <div className={S.sheetTitle}>{t('onboarding.rolesQuestion')}</div>
-          <div className={S.sheetSubtitle}>{t('onboarding.rolesHint')}</div>
-          <div className={S.rolesRow}>
-            <input
-              className={S.roleTextInput}
+        <S.InteractionArea>
+          <S.SheetTitle>{t('onboarding.rolesQuestion')}</S.SheetTitle>
+          <S.SheetSubtitle>{t('onboarding.rolesHint')}</S.SheetSubtitle>
+          <S.RolesRow>
+            <S.RoleTextInput
               value={roleInput}
               onChange={(e) => setRoleInput(e.target.value)}
               onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); addRole() } }}
               placeholder={t('onboarding.rolesPlaceholder')}
             />
-            <button
+            <S.AddRoleBtn
               type="button"
-              className={S.addRoleBtn(!!roleInput.trim())}
+              $enabled={!!roleInput.trim()}
               disabled={!roleInput.trim()}
               onClick={addRole}
             >
               +
-            </button>
-          </div>
+            </S.AddRoleBtn>
+          </S.RolesRow>
           {roles.length > 0 && (
-            <div className={S.roleTagsArea}>
+            <S.RoleTagsArea>
               {roles.map((r) => (
-                <div key={r} className={S.roleTag}>
+                <S.RoleTag key={r}>
                   {r}
-                  <button
+                  <S.RoleTagRemoveBtn
                     type="button"
-                    className={S.roleTagRemoveBtn}
                     onClick={() => setRoles((prev) => prev.filter((x) => x !== r))}
                   >
                     ✕
-                  </button>
-                </div>
+                  </S.RoleTagRemoveBtn>
+                </S.RoleTag>
               ))}
-            </div>
+            </S.RoleTagsArea>
           )}
-          <button
+          <S.SheetSubmitBtn
             type="button"
-            className={S.sheetSubmitBtn(roles.length > 0)}
+            $enabled={roles.length > 0}
             disabled={roles.length === 0}
             onClick={() => handleRoles(roles)}
           >
             {t('common.next')}
-          </button>
-        </div>
+          </S.SheetSubmitBtn>
+        </S.InteractionArea>
       )}
 
       {interaction === 'employed' && (
-        <div className={S.interactionArea}>
-          <div className={S.sheetTitle}>{t('onboarding.employedQuestion')}</div>
-          <div className={S.employedButtons}>
-            <button type="button" className={S.employedPrimaryBtn} onClick={() => handleEmployed(true)}>
+        <S.InteractionArea>
+          <S.SheetTitle>{t('onboarding.employedQuestion')}</S.SheetTitle>
+          <S.EmployedButtons>
+            <S.EmployedPrimaryBtn type="button" onClick={() => handleEmployed(true)}>
               {t('onboarding.employedYes')}
-            </button>
-            <button type="button" className={S.employedOutlineBtn} onClick={() => handleEmployed(false)}>
+            </S.EmployedPrimaryBtn>
+            <S.EmployedOutlineBtn type="button" onClick={() => handleEmployed(false)}>
               {t('onboarding.employedNo')}
-            </button>
-          </div>
-        </div>
+            </S.EmployedOutlineBtn>
+          </S.EmployedButtons>
+        </S.InteractionArea>
       )}
-    </div>
+    </S.Root>
   )
 }

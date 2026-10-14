@@ -1,50 +1,35 @@
 import type { AppHeaderProps } from './AppHeader.types'
-import { styles } from './AppHeader.styles'
+import { Header, Logo, LogoJob, LogoBoard, Nav, NavLink, NavLinkButton, NavIcon, Right } from './AppHeader.styles'
 
 export function AppHeader({ navItems = [], rightSlot }: AppHeaderProps) {
   return (
-    <header style={styles.header}>
-      <a href="/tailoring" style={styles.logo}>
-        <span style={styles.logoJob}>do</span>
-        <span style={styles.logoBoard}>job</span>
-      </a>
+    <Header>
+      <Logo href="/tailoring">
+        <LogoJob>do</LogoJob>
+        <LogoBoard>job</LogoBoard>
+      </Logo>
 
       {navItems.length > 0 && (
-        <nav style={styles.nav}>
+        <Nav>
           {navItems.map((item) =>
             item.href ? (
-              <a
-                key={item.key}
-                href={item.href}
-                style={{
-                  ...styles.navLink,
-                  ...(item.active ? styles.navLinkActive : {}),
-                }}
-              >
-                {item.icon && <span style={styles.navIcon}>{item.icon}</span>}
+              <NavLink key={item.key} href={item.href} $active={!!item.active}>
+                {item.icon && <NavIcon>{item.icon}</NavIcon>}
                 {item.label}
-              </a>
+              </NavLink>
             ) : (
-              <button
-                key={item.key}
-                type="button"
-                onClick={item.onClick}
-                style={{
-                  ...styles.navLink,
-                  ...(item.active ? styles.navLinkActive : {}),
-                }}
-              >
-                {item.icon && <span style={styles.navIcon}>{item.icon}</span>}
+              <NavLinkButton key={item.key} type="button" onClick={item.onClick} $active={!!item.active}>
+                {item.icon && <NavIcon>{item.icon}</NavIcon>}
                 {item.label}
-              </button>
+              </NavLinkButton>
             ),
           )}
-        </nav>
+        </Nav>
       )}
 
-      <div style={styles.right}>
+      <Right>
         {rightSlot}
-      </div>
-    </header>
+      </Right>
+    </Header>
   )
 }

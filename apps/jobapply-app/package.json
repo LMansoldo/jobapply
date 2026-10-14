@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
+    "test": "vitest run",
     "preview": "vite preview --host",
     "lint": "eslint src",
     "lint:fix": "eslint src --fix",
@@ -37,9 +38,11 @@
   },
   "dependencies": {
     "@ant-design/icons": "^5.3.7",
-    "@emotion/css": "^11.13.5",
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.0",
+    "@jobapply/ats-ui": "^0.1.0",
+    "@jobapply/editor": "^0.1.0",
+    "@jobapply/ui": "^0.1.0",
     "@monaco-editor/react": "^4.7.0",
     "@tanstack/react-query": "^5.99.1",
     "@tanstack/react-query-devtools": "^5.99.1",
@@ -62,6 +65,7 @@
     "*.css": "stylelint --max-warnings 0"
   },
   "devDependencies": {
+    "@emotion/babel-plugin": "^11.13.5",
     "@storybook/addon-a11y": "^8.6.18",
     "@storybook/addon-essentials": "^8.6.14",
     "@storybook/addon-interactions": "^8.6.14",
@@ -79,6 +83,7 @@
     "eslint-plugin-react": "^7.37.5",
     "eslint-plugin-react-hooks": "^7.0.1",
     "husky": "^9.1.7",
+    "jsdom": "^30.1.1",
     "lint-staged": "^16.4.0",
     "prettier": "^3.8.1",
     "react-snap": "^1.23.0",
@@ -86,6 +91,7 @@
     "stylelint": "^17.6.0",
     "stylelint-config-standard": "^40.0.0",
     "typescript": "^5.4.5",
-    "vite": "^5.2.12"
+    "vite": "^5.2.12",
+    "vitest": "^3"
   }
 }

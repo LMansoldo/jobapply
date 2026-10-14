@@ -1,14 +1,17 @@
 import React from 'react'
-import { Spin, Alert, Button, Typography } from 'antd'
-import { useLinkedInOnboarding } from '../../../domain/linkedin/hooks/useLinkedInOnboarding'
+import { useTranslation } from 'react-i18next'
+import { Spin, Button, Typography } from 'antd'
+import { useLinkedInOnboarding } from '../../hooks/useLinkedInOnboarding'
 import { useLinkedInAnalysis } from '../../../domain/linkedin/hooks/useLinkedInAnalysis'
 import { OnboardingFlow } from './OnboardingFlow'
 import { Dashboard } from './Dashboard'
 import { GenerationResults } from './GenerationResults'
+import * as styles from './LinkedInOptimizerPage.styles'
 
 const { Title } = Typography
 
 export function LinkedInOptimizerPage() {
+  const { t } = useTranslation()
   const onboarding = useLinkedInOnboarding()
   const { result, loading, error, analyze, reset } = useLinkedInAnalysis()
 
@@ -20,27 +23,27 @@ export function LinkedInOptimizerPage() {
 
   if (loading) {
     return (
-      <div style={{ textAlign: 'center', padding: 80 }}>
-        <Spin size="large" tip="Analyzing your profile..." />
-      </div>
+      <styles.LoadingWrap>
+        <Spin size="large" tip={t("linkedin.analyzing")} />
+      </styles.LoadingWrap>
     )
   }
 
   if (result) {
     return (
-      <div style={{ maxWidth: 900, margin: '0 auto', padding: '24px 16px' }}>
-        <Title level={2}>LinkedIn Optimizer</Title>
+      <styles.ResultsWrap>
+        <Title level={2}>{t("linkedin.optimizerTitle")}</Title>
         <Dashboard seo={result.seo} />
         <GenerationResults generation={result.generation} />
-        <Button onClick={reset}>Analyze another profile</Button>
-      </div>
+        <Button onClick={reset}>{t("linkedin.analyzeAnother")}</Button>
+      </styles.ResultsWrap>
     )
   }
 
   return (
-    <div style={{ maxWidth: 700, margin: '0 auto', padding: '24px 16px' }}>
-      {error && <Alert type="error" message={error} style={{ marginBottom: 16 }} />}
+    <styles.OnboardingWrap>
+      {error && <styles.ErrorAlert type="error" message={error} />}
       <OnboardingFlow onboarding={onboarding} onSubmit={handleSubmit} />
-    </div>
+    </styles.OnboardingWrap>
   )
 }

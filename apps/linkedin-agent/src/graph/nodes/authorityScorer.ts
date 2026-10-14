@@ -1,7 +1,5 @@
-import { genAI } from '../../lib/gemini'
+import { generate } from '../../lib/glm'
 import type { GraphState } from '../../types'
-
-const model = genAI.getGenerativeModel({ model: 'gemini-3-flash-preview' })
 
 export async function authorityScorerNode(
   state: Pick<GraphState, 'normalizedProfile' | 'input'>
@@ -30,8 +28,7 @@ ${experience.slice(0, 2000)}
 Respond ONLY with a single integer from 0 to 100.`
 
   try {
-    const result = await model.generateContent(prompt)
-    const raw = result.response.text().trim()
+    const raw = (await generate(prompt)).trim()
     const score = parseInt(raw, 10)
     return { authorityScore: isNaN(score) ? 0 : Math.min(100, Math.max(0, score)) }
   } catch {

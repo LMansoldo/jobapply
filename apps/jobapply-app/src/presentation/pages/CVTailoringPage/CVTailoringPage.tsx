@@ -4,25 +4,24 @@
  * Remount-based reset: bumping sessionKey clears all workspace state and
  * re-opens the setup modal for a fresh analysis.
  */
-import { useCallback, useRef, useState } from 'react'
+import { useCallback, useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { useAntApp } from '../../../components/AntApp'
+import { useAntApp } from '../../../design-system/wrappers/AntApp'
 import { useAuth } from '../../../application/providers/AuthProvider'
-import { Spin } from '../../../components/Spin'
-import { Empty } from '../../../components/Empty'
-import { TailoringSetupModal } from '../../../design-system/tailoring/TailoringSetupModal'
-import { TailoringContextBar } from '../../../design-system/tailoring/TailoringContextBar'
-import { ATSWorkspace } from '../../../design-system/tailoring/ATSWorkspace'
-import { DSButton } from '../../../design-system/primitives/DSButton'
-import { type TailoringEditorHandle } from '../../../design-system/tailoring/TailoringEditorPanel'
+import { Spin } from '../../../design-system/wrappers/Spin'
+import { Empty } from '../../../design-system/wrappers/Empty'
+import { TailoringSetupModal } from '../../components/tailoring/TailoringSetupModal'
+import { TailoringContextBar } from '../../components/tailoring/TailoringContextBar'
+import { ATSWorkspace } from '../../components/tailoring/ATSWorkspace'
+import { DSButton } from '@jobapply/ui'
+import { type TailoringEditorHandle } from '../../components/tailoring/TailoringEditorPanel'
 import { mapATSReportToPanel, buildSuggestionsList, buildEditorKeywords } from '../../../domain/cv/tailoringHelpers'
-import { useTailoringWorkspace } from '../../../domain/cv/hooks/useTailoringWorkspace'
-import { useSetupFlow } from '../../../domain/cv/hooks/useSetupFlow'
+import { useTailoringWorkspace } from '../../hooks/useTailoringWorkspace'
+import { useSetupFlow } from '../../hooks/useSetupFlow'
 import { useTailoringPageData } from '../../../domain/cv/hooks/useTailoringPageData'
-import { useTailoringPageUI } from '../../../domain/cv/hooks/useTailoringPageUI'
-import { useTailoringExport } from '../../../domain/cv/hooks/useTailoringExport'
-import { calculateScoreMetrics } from '../../../domain/cv/tailoringUIHelpers'
-import { AtsPlatformSelector } from '../../../domain/cv/components/AtsPlatformSelector'
+import { useTailoringPageUI } from '../../hooks/useTailoringPageUI'
+import { useTailoringExport } from '../../hooks/useTailoringExport'
+import { calculateScoreMetrics } from './tailoringUIHelpers'
 import * as styles from './CVTailoringPage.styles'
 
 export default function CVTailoringPage() {
@@ -72,13 +71,46 @@ function TailoringSession({ onRestart }: { onRestart: () => void }) {
 
   const editorRef = useRef<TailoringEditorHandle>(null)
 
-  const panelData = workspace.atsReport ? mapATSReportToPanel(workspace.atsReport) : undefined
+  // Derived data depends only on the report — memoizing keeps keystrokes in the
+  // editor from rebuilding arrays and preserves prop identity for child memoization.
+  const panelData = useMemo(
+    () => (workspace.atsReport ? mapATSReportToPanel(workspace.atsReport) : undefined),
+    [workspace.atsReport],
+  )
+  const scoreMetrics = useMemo(() => calculateScoreMetrics(panelData ?? null), [panelData])
+  const allSuggestions = useMemo(
+    () => (workspace.atsReport ? buildSuggestionsList(workspace.atsReport) : []),
+    [workspace.atsReport],
+  )
+  const editorKeywords = useMemo(
+    () => (workspace.atsReport ? buildEditorKeywords(workspace.atsReport) : undefined),
+    [workspace.atsReport],
+  )
+  const keywordPhrases = useMemo(
+    () => workspace.atsReport?.optimalTemplate?.keywordPhrases ?? [],
+    [workspace.atsReport],
+  )
+  const removeSuggestions = useMemo(
+    () => workspace.atsReport?.removeSuggestions ?? [],
+    [workspace.atsReport],
+  )
+  const { suggestionsCount, currentScore, projectedScore, scoreDelta } = scoreMetrics
 
-  const { suggestionsCount, currentScore, projectedScore, scoreDelta } = calculateScoreMetrics(panelData ?? null)
-  const allSuggestions = workspace.atsReport ? buildSuggestionsList(workspace.atsReport) : []
-  const editorKeywords = workspace.atsReport ? buildEditorKeywords(workspace.atsReport) : undefined
-  const keywordPhrases = workspace.atsReport?.optimalTemplate?.keywordPhrases ?? []
-  const removeSuggestions = workspace.atsReport?.removeSuggestions ?? []
+  const handleInsertKeyword = useCallback(
+    (keyword: string) => editorRef.current?.insertAtCursor(keyword),
+    [],
+  )
+  const handleReplaceKeyword = useCallback(
+    (from: string, to: string) => editorRef.current?.findAndReplace(from, to),
+    [],
+  )
+  const handleCopyPhrase = useCallback(
+    (phrase: string) => {
+      navigator.clipboard.writeText(phrase)
+      message.success(t('tailoring.phraseCopied'))
+    },
+    [message, t],
+  )
 
   const setupModal = <TailoringSetupModal {...setupModalProps} />
 
@@ -86,38 +118,34 @@ function TailoringSession({ onRestart }: { onRestart: () => void }) {
     return (
       <>
         {setupModal}
-        <div className={styles.spinWrapper}><Spin size="large" /></div>
+        <styles.SpinWrapper><Spin size="large" /></styles.SpinWrapper>
       </>
     )
   }
 
   if (setupCancelled) {
     return (
-      <div className={styles.spinWrapper}>
+      <styles.SpinWrapper>
         <Empty description={t('tailoring.noAnalysisYet')}>
           <DSButton variant="primary" onClick={onRestart}>
             {t('tailoring.startAnalysis')}
           </DSButton>
         </Empty>
-      </div>
+      </styles.SpinWrapper>
     )
   }
 
   return (
     <>
       {setupModal}
-      <div className={styles.pageRoot}>
+      <styles.PageRoot>
         <TailoringContextBar
           manualDescription={manualDescription}
           isAnalysisRunning={workspace.atsLoading}
           onNewAnalysis={workspace.atsReport ? onRestart : undefined}
           currentScore={currentScore}
         />
-        <div className={styles.workspaceContainer}>
-          <AtsPlatformSelector
-            value={atsPlatform}
-            onChange={setAtsPlatform}
-          />
+        <styles.WorkspaceContainer>
           <ATSWorkspace
             atsLoading={workspace.atsLoading}
             panelData={panelData}
@@ -136,20 +164,17 @@ function TailoringSession({ onRestart }: { onRestart: () => void }) {
             onReanalyze={workspace.handleReanalyze}
             onGenerateResume={workspace.handleGenerateResume}
             resumeLoading={workspace.resumeLoading}
-            onInsertKeyword={(keyword) => editorRef.current?.insertAtCursor(keyword)}
-            onReplaceKeyword={(from, to) => editorRef.current?.findAndReplace(from, to)}
+            onInsertKeyword={handleInsertKeyword}
+            onReplaceKeyword={handleReplaceKeyword}
             onDownloadPDF={handleDownloadPDF}
             onExportMarkdown={handleExportMarkdown}
             onSaveAsVersion={handleSaveAsVersion}
             keywordPhrases={keywordPhrases}
             removeSuggestions={removeSuggestions}
-            onCopyPhrase={(phrase) => {
-              navigator.clipboard.writeText(phrase)
-              message.success(t('tailoring.phraseCopied'))
-            }}
+            onCopyPhrase={handleCopyPhrase}
           />
-        </div>
-      </div>
+        </styles.WorkspaceContainer>
+      </styles.PageRoot>
     </>
   )
 }

@@ -1,0 +1,53 @@
+import { useTheme } from '@emotion/react'
+import type { ScoreRingProps } from './ScoreRing.types'
+import {
+  ScoreRingLabel,
+  ScoreRingProgress,
+  ScoreRingSublabel,
+  ScoreRingTextGroup,
+  ScoreRingTrack,
+  ScoreRingValue,
+  ScoreRingSvgWrapper,
+  ScoreRingWrapper,
+} from './ScoreRing.styles'
+
+export function ScoreRing({ value, size = 120, label, sublabel }: ScoreRingProps) {
+  const { colors } = useTheme()
+  const clamped = Math.min(100, Math.max(0, value))
+  const radius = (size - 16) / 2
+  const circumference = 2 * Math.PI * radius
+  const offset = circumference - (clamped / 100) * circumference
+  const gradientId = `scoreRingGrad-${size}`
+
+  return (
+    <ScoreRingWrapper>
+      <ScoreRingSvgWrapper $size={size}>
+        <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
+          <defs>
+            <linearGradient id={gradientId} x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stopColor={colors.primary} />
+              <stop offset="100%" stopColor={colors.accent} />
+            </linearGradient>
+          </defs>
+          <ScoreRingTrack cx={size / 2} cy={size / 2} r={radius} strokeWidth={6} />
+          <ScoreRingProgress
+            cx={size / 2}
+            cy={size / 2}
+            r={radius}
+            strokeWidth={6}
+            stroke={`url(#${gradientId})`}
+            strokeLinecap="round"
+            strokeDasharray={circumference}
+            strokeDashoffset={offset}
+            transform={`rotate(-90 ${size / 2} ${size / 2})`}
+          />
+        </svg>
+        <ScoreRingTextGroup>
+          <ScoreRingValue $size={size}>{clamped}</ScoreRingValue>
+          {sublabel && <ScoreRingSublabel>{sublabel}</ScoreRingSublabel>}
+        </ScoreRingTextGroup>
+      </ScoreRingSvgWrapper>
+      {label && <ScoreRingLabel>{label}</ScoreRingLabel>}
+    </ScoreRingWrapper>
+  )
+}

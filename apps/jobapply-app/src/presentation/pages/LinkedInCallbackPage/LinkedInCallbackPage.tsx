@@ -10,7 +10,7 @@ import { LinkedinOutlined } from '@ant-design/icons'
 import { useAuth } from '../../../application/providers/AuthProvider'
 import { handleLinkedInCallback } from '../../../infrastructure/repositories/linkedinRepository'
 import { popReturnPath } from '../../../domain/linkedin/linkedinOAuth'
-import * as S from './LinkedInCallbackPage.styles'
+import { Root, Icon, Message, BackBtn } from './LinkedInCallbackPage.styles'
 
 export default function LinkedInCallbackPage() {
   const navigate = useNavigate()
@@ -51,20 +51,20 @@ export default function LinkedInCallbackPage() {
 
   if (error) {
     return (
-      <div className={S.root}>
-        <LinkedinOutlined className={S.icon} />
-        <p className={S.message}>{t('linkedin.callbackError')}</p>
-        <button type="button" className={S.backBtn} onClick={() => navigate({ to: '/tailoring' })}>
+      <Root>
+        <Icon><LinkedinOutlined /></Icon>
+        <Message>{t('linkedin.callbackError')}</Message>
+        <BackBtn type="button" onClick={() => navigate({ to: '/tailoring' })}>
           {t('common.back')}
-        </button>
-      </div>
+        </BackBtn>
+      </Root>
     )
   }
 
   return (
-    <div className={S.root}>
-      <LinkedinOutlined className={S.icon} />
-      <p className={S.message}>{t('linkedin.callbackConnecting')}</p>
-    </div>
+    <Root>
+      <Icon><LinkedinOutlined /></Icon>
+      <Message>{t('linkedin.callbackConnecting')}</Message>
+    </Root>
   )
 }

@@ -1,14 +1,16 @@
 import { randomUUID } from 'node:crypto'
 import type { FastifyInstance } from 'fastify'
 import { z } from 'zod'
-import { graph } from '../graph'
+import { graph, missingOf } from '../graph'
 import { mapperNode } from '../graph/nodes/mapper'
-import { requirementExtractorNode } from '../graph/nodes/requirementExtractor'
-import { literalScorerNode } from '../graph/nodes/literalScorer'
-import { semanticMatcherNode } from '../graph/nodes/semanticMatcher'
-import { recruiterReviewerNode } from '../graph/nodes/recruiterReviewer'
+import { jdExtractorNode } from '../graph/nodes/jdExtractor'
+import { cvExtractorNode, buildCvText } from '../graph/nodes/cvExtractor'
+import { keywordComposerNode } from '../graph/nodes/keywordComposer'
+import { keywordClassifierNode } from '../graph/nodes/keywordClassifier'
+import { booleanMatcherNode } from '../graph/nodes/booleanMatcher'
+import { bulletAdvisorNode } from '../graph/nodes/bulletAdvisor'
 import { scoreComposerNode } from '../graph/nodes/scoreComposer'
-import { semanticAnalyzerNode } from '../graph/nodes/semanticAnalyzer'
+import { gapAdvisorNode } from '../graph/nodes/gapAdvisor'
 import { resumeGeneratorNode } from '../graph/nodes/resumeGenerator'
 import { interviewPrepAnalyzerNode } from '../graph/nodes/interviewPrepAnalyzer'
 import type { AgentInput, ATSReport, CV, VerificationReport } from '../types'
@@ -105,6 +107,15 @@ interface JobResult {
 
 const jobs = new Map<string, JobResult>()
 
+// SSE subscribers waiting for a job to reach a terminal status
+const subscribers = new Map<string, Set<(job: JobResult) => void>>()
+
+function notifySubscribers(requestId: string, job: JobResult): void {
+  const subs = subscribers.get(requestId)
+  if (!subs) return
+  for (const notify of subs) notify(job)
+}
+
 // Clean up old jobs every 10 minutes
 setInterval(() => {
   const cutoff = Date.now() - 1000 * 60 * 30 // 30 min TTL
@@ -121,6 +132,58 @@ export async function registerRoutes(app: FastifyInstance): Promise<void> {
     const job = jobs.get(requestId)
     if (!job) return reply.status(404).send({ message: 'Request not found' })
     return reply.send(job)
+  })
+
+  app.get('/result/:requestId/stream', (request, reply) => {
+    const { requestId } = request.params as { requestId: string }
+    const job = jobs.get(requestId)
+    if (!job) return reply.status(404).send({ message: 'Request not found' })
+
+    reply.raw.writeHead(200, {
+      'Content-Type': 'text/event-stream',
+      'Cache-Control': 'no-cache',
+      Connection: 'keep-alive',
+    })
+
+    const send = (snapshot: JobResult) => {
+      reply.raw.write(`data: ${JSON.stringify(snapshot)}\n\n`)
+    }
+
+    // Terminal state already reached: emit and close
+    if (job.status === 'done' || job.status === 'error') {
+      send(job)
+      reply.raw.end()
+      return reply
+    }
+
+    send(job)
+
+    const onNotify = (updated: JobResult): void => {
+      send(updated)
+      if (updated.status === 'done' || updated.status === 'error') {
+        cleanup()
+        reply.raw.end()
+      }
+    }
+
+    function cleanup(): void {
+      clearInterval(heartbeat)
+      subscribers.get(requestId)?.delete(onNotify)
+      if (subscribers.get(requestId)?.size === 0) subscribers.delete(requestId)
+    }
+
+    let subs = subscribers.get(requestId)
+    if (!subs) {
+      subs = new Set()
+      subscribers.set(requestId, subs)
+    }
+    subs.add(onNotify)
+
+    // Keep intermediaries from closing an idle stream
+    const heartbeat = setInterval(() => reply.raw.write(': ping\n\n'), 15_000)
+    request.raw.on('close', cleanup)
+
+    return reply
   })
 
   app.post('/analyze', async (request, reply) => {
@@ -143,6 +206,7 @@ export async function registerRoutes(app: FastifyInstance): Promise<void> {
 
     // Process in background
     job.status = 'running'
+    notifySubscribers(requestId, job)
     try {
       request.log.info({ requestId, hasCv: !!input.cv, hasMd: !!input.cvMarkdown, jdLen: input.jobDescription.length }, 'analyze: starting graph.invoke')
       const result = await graph.invoke({ input })
@@ -161,6 +225,7 @@ export async function registerRoutes(app: FastifyInstance): Promise<void> {
       job.error = message
     } finally {
       job.completedAt = Date.now()
+      notifySubscribers(requestId, job)
     }
   })
 
@@ -200,23 +265,28 @@ export async function registerRoutes(app: FastifyInstance): Promise<void> {
 
     try {
       const { mapped } = mapperNode({ input })
-      const { requirements, intentSignals, jobTitle } = await requirementExtractorNode({ input })
-      const { literalCoverage, matched, unmatched } = literalScorerNode({ mapped, requirements })
-      const { semanticMatches } = await semanticMatcherNode({ mapped, unmatched })
-      const { recruiterReview } = await recruiterReviewerNode({ mapped, jobDescription: input.jobDescription, intentSignals, locale: input.locale })
-      const composed = scoreComposerNode({ mapped, requirements, matched, semanticMatches, literalCoverage, recruiterReview })
-      const semantic = await semanticAnalyzerNode({ input, mapped, scoreBreakdown: composed.scoreBreakdown, missingKeywords: composed.missingKeywords })
+      const { jdChunks, jobTitle } = await jdExtractorNode({ input })
+      const { cvChunks } = await cvExtractorNode({ cvText: buildCvText(mapped) })
+      const { keywords } = await keywordComposerNode({ jdChunks, cvChunks })
+      const { keywords: classified } = await keywordClassifierNode({ keywords, jdChunks })
+      const { keywordMatches } = booleanMatcherNode({ mapped, keywords: classified })
+      // insights guide the writer; the deterministic score (heuristic insights on
+      // both sides) decides the loop — same ruler for scoreBefore and scoreAfter
+      const { bulletInsights } = await bulletAdvisorNode({ mapped, keywords: classified, jobTitle, locale: input.locale })
+      const composed = scoreComposerNode({ mapped, keywords: classified, keywordMatches })
+      const { gapAnalysis } = await gapAdvisorNode({
+        missingKeywords: missingOf(classified, keywordMatches),
+        cvChunks,
+        locale: input.locale,
+      })
       const result = await resumeGeneratorNode({
         input,
         mapped,
-        requirements,
-        intentSignals,
         jobTitle,
+        keywords: classified,
+        gapAnalysis,
         scoreBefore: composed.universalScore,
-        recruiterReview,
-        keywordPhrases: semantic.keywordPhrases,
-        removeSuggestions: semantic.removeSuggestions,
-        rephraseSuggestions: semantic.rephraseSuggestions,
+        bulletInsights,
       })
       return reply.send({
         resume: result.resume,
@@ -269,11 +339,11 @@ export async function registerRoutes(app: FastifyInstance): Promise<void> {
       }
 
       try {
-        request.log.info('debug: testing requirementExtractorNode')
-        const { requirements } = await requirementExtractorNode({ input })
-        results.requirementExtractor = { ok: true, count: requirements.length, sample: requirements.slice(0, 10) }
+        request.log.info('debug: testing jdExtractorNode')
+        const { jdChunks, jobTitle } = await jdExtractorNode({ input })
+        results.jdExtractor = { ok: true, jobTitle, count: jdChunks.length, sample: jdChunks.slice(0, 10) }
       } catch (err) {
-        results.requirementExtractor = { ok: false, error: err instanceof Error ? err.message : String(err) }
+        results.jdExtractor = { ok: false, error: err instanceof Error ? err.message : String(err) }
       }
 
       return reply.send(results)

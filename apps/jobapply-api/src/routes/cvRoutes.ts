@@ -1,13 +1,14 @@
 import { Router, RequestHandler } from 'express';
 import { authMiddleware } from '../middleware/auth';
 import { usageLimit } from '../middleware/usageLimit';
-import { createCV, getCV, updateCV, deleteCV, tailorCV, publishCV, upsertCVLocaleVersion, deleteCVLocaleVersion, analyzeCVWithATS, coverLetterCV, videoScriptCV, interviewPrepCV, analyzeCVDirect, generateCVDirect, analyzeLinkedInDirect, generateResumeDirect, generateResumeWithCV } from '../controllers/cvController';
+import { createCV, getCV, updateCV, deleteCV, tailorCV, publishCV, upsertCVLocaleVersion, deleteCVLocaleVersion, analyzeCVWithATS, coverLetterCV, videoScriptCV, interviewPrepCV, analyzeCVDirect, analyzeCVDirectStream, generateCVDirect, analyzeLinkedInDirect, generateResumeDirect, generateResumeWithCV } from '../controllers/cvController';
 
 const router = Router();
 
 router.use(authMiddleware);
 
 router.post('/analyze', usageLimit as unknown as RequestHandler, analyzeCVDirect as unknown as RequestHandler);
+router.get('/analyze/:requestId/stream', analyzeCVDirectStream as unknown as RequestHandler);
 router.post('/generate', usageLimit as unknown as RequestHandler, generateCVDirect as unknown as RequestHandler);
 router.post('/generate-resume/direct', usageLimit as unknown as RequestHandler, generateResumeDirect as unknown as RequestHandler);
 router.post('/linkedin/analyze', usageLimit as unknown as RequestHandler, analyzeLinkedInDirect as unknown as RequestHandler);

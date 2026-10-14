@@ -1,8 +1,6 @@
-import { genAI } from '../../lib/gemini'
+import { generate } from '../../lib/glm'
 import type { MappedCV, InterviewPrep } from '../../types'
 import { parseJobDescription } from '../../lib/jd'
-
-const model = genAI.getGenerativeModel({ model: 'gemini-flash-lite-latest' })
 
 const LOCALE_LABEL: Record<string, string> = {
   'en': 'English',
@@ -61,15 +59,14 @@ export async function interviewPrepAnalyzerNode(input: {
 }): Promise<InterviewPrep> {
   const prompt = buildPrompt(input.cv, parseJobDescription(input.jobDescription), input.locale)
 
-  const result = await model.generateContent(prompt)
-  const raw = result.response.text()
+  const raw = await generate(prompt)
 
   let parsed: InterviewPrep
   try {
     const clean = raw.replace(/^```json\s*/i, '').replace(/```\s*$/, '').trim()
     parsed = JSON.parse(clean) as InterviewPrep
   } catch {
-    throw new Error(`Failed to parse Gemini response as JSON: ${raw.slice(0, 200)}`)
+    throw new Error(`Failed to parse GLM response as JSON: ${raw.slice(0, 200)}`)
   }
 
   return {

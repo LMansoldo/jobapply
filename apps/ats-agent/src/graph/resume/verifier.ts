@@ -3,7 +3,6 @@ import { sanitizeStyle } from './styleSanitizer'
 
 // Thresholds — named for calibration
 const JACCARD_THRESHOLD = 0.2
-const MIN_NGRAM_SIZE = 2
 
 const STOPWORDS = new Set([
   'a', 'an', 'the', 'and', 'or', 'but', 'in', 'on', 'at', 'to', 'for', 'of', 'with', 'by',
@@ -16,10 +15,6 @@ const STOPWORDS = new Set([
 
 const METRIC_RE = /\d+(?:[.,]\d+)?\s*(?:%|R\$|\$|k|x|mil|milh[oõ]es?|pp)?/g
 const YEAR_RE = /\b(19|20)\d{2}\b/g
-
-function norm(s: string): string {
-  return s.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().trim()
-}
 
 function extractMetricTokens(text: string, yearPattern: RegExp): Set<string> {
   const tokens = new Set<string>()
@@ -39,7 +34,12 @@ function getYearPattern(position: ResumeSource['positions'][number]): RegExp {
 }
 
 function contentWords(text: string): string[] {
-  return norm(text).split(/\s+/).filter((w) => w.length > 2 && !STOPWORDS.has(w))
+  return text
+    .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .trim()
+    .split(/\s+/)
+    .filter((w) => w.length > 2 && !STOPWORDS.has(w))
 }
 
 function jaccardSimilarity(a: string, b: string): number {
@@ -51,25 +51,21 @@ function jaccardSimilarity(a: string, b: string): number {
   return intersection.size / union.size
 }
 
-function getNgrams(text: string, n: number): Set<string> {
-  const words = contentWords(text)
-  const ngrams = new Set<string>()
-  for (let i = 0; i <= words.length - n; i++) {
-    ngrams.add(words.slice(i, i + n).join(' '))
+// Fidelity of a rewrite vs its original: metrics preserved both ways (years
+// excluded), content overlap sane. Returns a violation detail or null.
+export function rewriteFidelityViolation(original: string, rewrite: string, yearPattern: RegExp = /^never$/): string | null {
+  if (jaccardSimilarity(rewrite, original) < JACCARD_THRESHOLD) {
+    return `Jaccard similarity below ${JACCARD_THRESHOLD}`
   }
-  return ngrams
-}
-
-function isNgramContaminated(ngram: string, jdKeywordSet: Set<string>, cvNorm: string, jdNorm: string): boolean {
-  if (!jdNorm.includes(ngram)) return false
-  // An n-gram is contamination only if at least one non-keyword content word is absent from the CV.
-  // If all non-keyword words exist in the CV individually, the n-gram is legitimate keyword integration.
-  const ngramWords = ngram.split(' ')
-  for (const w of ngramWords) {
-    if (jdKeywordSet.has(w)) continue // keyword — always allowed
-    if (!cvNorm.includes(w)) return true // non-keyword word absent from CV → contamination
+  const origMetrics = extractMetricTokens(original, yearPattern)
+  const genMetrics = extractMetricTokens(rewrite, yearPattern)
+  for (const m of origMetrics) {
+    if (!genMetrics.has(m)) return `"${m}" present in original but missing in rewrite`
   }
-  return false
+  for (const m of genMetrics) {
+    if (!origMetrics.has(m)) return `"${m}" appears in rewrite but not in original`
+  }
+  return null
 }
 
 function checkBullet(
@@ -77,31 +73,17 @@ function checkBullet(
   original: string,
   locationPrefix: string,
   position: ResumeSource['positions'][number],
-  fullCvText: string,
-  jd: string,
-  jdKeywords: string[],
 ): VerificationViolation | null {
   // low-overlap first — if the rewrite is too different, no need to check metrics
-  if (jaccardSimilarity(generated, original) < JACCARD_THRESHOLD) {
+  const overlap = jaccardSimilarity(generated, original)
+  if (overlap < JACCARD_THRESHOLD) {
     return { location: locationPrefix, rule: 'low-overlap', detail: `Jaccard similarity below ${JACCARD_THRESHOLD}`, action: 'reverted' }
   }
 
-  const yearPat = getYearPattern(position)
-  const origMetrics = extractMetricTokens(original, yearPat)
-  const genMetrics = extractMetricTokens(generated, yearPat)
-
-  // metric-dropped
-  for (const m of origMetrics) {
-    if (!genMetrics.has(m)) {
-      return { location: locationPrefix, rule: 'metric-dropped', detail: `"${m}" present in original but missing in rewrite`, action: 'reverted' }
-    }
-  }
-
-  // metric-invented
-  for (const m of genMetrics) {
-    if (!origMetrics.has(m)) {
-      return { location: locationPrefix, rule: 'metric-invented', detail: `"${m}" appears in rewrite but not in original`, action: 'reverted' }
-    }
+  const fidelity = rewriteFidelityViolation(original, generated, getYearPattern(position))
+  if (fidelity) {
+    const dropped = fidelity.includes('missing in rewrite')
+    return { location: locationPrefix, rule: dropped ? 'metric-dropped' : 'metric-invented', detail: fidelity, action: 'reverted' }
   }
 
   // generic-phrase: AI-smell / hollow impact language introduced by the rewrite
@@ -110,19 +92,14 @@ function checkBullet(
     return { location: locationPrefix, rule: 'generic-phrase', detail: `generic phrasing: ${genericHits.join(', ')}`, action: 'reverted' }
   }
 
-  // jd-contamination: flag n-grams from JD whose non-keyword words are absent from the full CV
-  const jdKeywordSet = new Set(jdKeywords.map(norm))
-  const cvNorm = norm(fullCvText)
-  const jdNorm = norm(jd)
-  const genNorm = norm(generated)
-
-  for (const n of [MIN_NGRAM_SIZE, 3]) {
-    const genNgrams = getNgrams(genNorm, n)
-    for (const ngram of genNgrams) {
-      if (isNgramContaminated(ngram, jdKeywordSet, cvNorm, jdNorm)) {
-        return { location: locationPrefix, rule: 'jd-contamination', detail: `n-gram "${ngram}" from JD not anchored in original CV`, action: 'reverted' }
-      }
-    }
+  // weak-clarity: a rewrite must stay a scannable, impersonal fact — same
+  // thresholds the readability score penalizes; reverting to the original is a safe floor
+  const words = generated.trim().split(/\s+/).length
+  if (words < 6 || words > 32) {
+    return { location: locationPrefix, rule: 'weak-clarity', detail: `${words} words (healthy range: 6-32)`, action: 'reverted' }
+  }
+  if (/\b(i|me|my|we|our)\b/i.test(generated)) {
+    return { location: locationPrefix, rule: 'weak-clarity', detail: 'first-person pronoun', action: 'reverted' }
   }
 
   return null
@@ -131,16 +108,8 @@ function checkBullet(
 export function verifyResumeDraft(
   draft: ResumeDraft,
   source: ResumeSource,
-  jd: string,
-  jdKeywords: string[],
 ): { draft: ResumeDraft; report: VerificationReport } {
   const violations: VerificationViolation[] = []
-  const fullCvText = [
-    source.summaryRaw,
-    source.skillsRaw,
-    ...source.positions.flatMap((p) => [p.context, ...p.bullets]),
-    source.educationRaw,
-  ].join(' ')
 
   const verifiedExperience = draft.experience.map((entry) => {
     const pos = source.positions[entry.positionIndex]
@@ -175,7 +144,7 @@ export function verifyResumeDraft(
       seenSourceIndices.add(bullet.sourceIndex)
 
       const original = pos.bullets[bullet.sourceIndex]
-      const violation = checkBullet(bullet.text, original, loc, pos, fullCvText, jd, jdKeywords)
+      const violation = checkBullet(bullet.text, original, loc, pos)
 
       if (violation) {
         violations.push(violation)
@@ -187,13 +156,13 @@ export function verifyResumeDraft(
 
     // Check context
     const contextLoc = `experience[${entry.positionIndex}].context`
-    const ctxViolation = checkBullet(entry.context, pos.context, contextLoc, pos, fullCvText, jd, jdKeywords)
+    const ctxViolation = checkBullet(entry.context, pos.context, contextLoc, pos)
     const verifiedContext = ctxViolation ? (violations.push(ctxViolation), pos.context) : entry.context
 
     return { ...entry, context: verifiedContext, bullets: verifiedBullets }
   })
 
-  // Check summary (metric and contamination checks only)
+  // Check summary (metric checks only)
   const summaryViolations: VerificationViolation[] = []
   const yearPat = /^never$/
   const origMetrics = extractMetricTokens(source.summaryRaw, yearPat)
@@ -204,19 +173,6 @@ export function verifyResumeDraft(
   for (const m of genMetrics) {
     if (!origMetrics.has(m)) summaryViolations.push({ location: 'summary', rule: 'metric-invented', detail: `"${m}" invented`, action: 'reverted' })
   }
-  const jdKeywordSet = new Set(jdKeywords.map(norm))
-  const cvNorm = norm(fullCvText)
-  const jdNorm = norm(jd)
-  const sumNorm = norm(draft.summary)
-  outer: for (const n of [MIN_NGRAM_SIZE, 3]) {
-    const sumNgrams = getNgrams(sumNorm, n)
-    for (const ngram of sumNgrams) {
-      if (isNgramContaminated(ngram, jdKeywordSet, cvNorm, jdNorm)) {
-        summaryViolations.push({ location: 'summary', rule: 'jd-contamination', detail: `n-gram "${ngram}" from JD`, action: 'reverted' })
-        break outer
-      }
-    }
-  }
   if (sanitizeStyle(draft.summary).genericPhraseHits.length > 0) {
     summaryViolations.push({ location: 'summary', rule: 'generic-phrase', detail: 'generic phrasing in summary', action: 'reverted' })
   }
@@ -225,7 +181,7 @@ export function verifyResumeDraft(
 
   // Skills are intentionally NOT anchored to the source CV: the resume generator
   // injects JD keywords here on purpose (this is a score-conference tool). Bullet
-  // integrity (metrics, contamination) is still enforced above.
+  // integrity (metrics, overlap) is still enforced above.
   return {
     draft: { ...draft, summary: verifiedSummary, experience: verifiedExperience },
     report: { violations },

@@ -1,7 +1,5 @@
-import { genAI } from '../../lib/gemini'
+import { generate } from '../../lib/glm'
 import type { GraphState } from '../../types'
-
-const model = genAI.getGenerativeModel({ model: 'gemini-3-flash-preview' })
 
 // ── Pure scoring functions ────────────────────────────────────────────────────
 
@@ -107,8 +105,7 @@ Consider: does the headline mention relevant skills/domain? Do recent experience
 Respond ONLY with a single integer from 0 to 100. No explanation.`
 
   try {
-    const result = await model.generateContent(prompt)
-    const raw = result.response.text().trim()
+    const raw = (await generate(prompt)).trim()
     const score = parseInt(raw, 10)
     return isNaN(score) ? 0 : Math.min(100, Math.max(0, score))
   } catch {

@@ -1,38 +1,38 @@
-import { css } from '@emotion/css'
-import { Colors } from '../../../styles/theme/colors'
-import { FontSize, FontWeight, FontFamily } from '../../../styles/theme/typography'
-import { Spacing } from '../../../styles/theme/spacing'
+import styled from '@emotion/styled'
 
-export const root = css({
-  minHeight: '100vh',
-  display: 'flex',
-  flexDirection: 'column',
-  alignItems: 'center',
-  justifyContent: 'center',
-  gap: Spacing.lg,
-  background: Colors.pageBg,
-})
+export const Root = styled.div`
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: ${({ theme }) => theme.spacing.lg};
+  background: ${({ theme }) => theme.colors.pageBg};
+`
 
-export const icon = css({
-  fontSize: '4.8rem',
-  color: Colors.socialLinkedin,
-})
+export const Icon = styled.span`
+  font-size: 4.8rem;
+  color: ${({ theme }) => theme.colors.socialLinkedin};
+`
 
-export const message = css({
-  margin: 0,
-  fontSize: FontSize.base,
-  fontFamily: FontFamily.body,
-  color: Colors.textMain,
-  fontWeight: FontWeight.medium,
-})
+export const Message = styled.p`
+  margin: 0;
+  font-size: ${({ theme }) => theme.typography.size.base};
+  font-family: ${({ theme }) => theme.typography.family.body};
+  color: ${({ theme }) => theme.colors.textMain};
+  font-weight: ${({ theme }) => theme.typography.weight.medium};
+`
 
-export const backBtn = css({
-  padding: `${Spacing.sm} ${Spacing.xl}`,
-  background: Colors.primaryDark,
-  color: Colors.white,
-  border: 'none',
-  fontFamily: FontFamily.body,
-  fontSize: FontSize.sm,
-  cursor: 'pointer',
-  '&:hover': { opacity: 0.88 },
-})
+export const BackBtn = styled.button`
+  padding: ${({ theme }) => `${theme.spacing.sm} ${theme.spacing.xl}`};
+  background: ${({ theme }) => theme.colors.primaryDark};
+  color: ${({ theme }) => theme.colors.white};
+  border: none;
+  font-family: ${({ theme }) => theme.typography.family.body};
+  font-size: ${({ theme }) => theme.typography.size.sm};
+  cursor: pointer;
+
+  &:hover {
+    opacity: 0.88;
+  }
+`

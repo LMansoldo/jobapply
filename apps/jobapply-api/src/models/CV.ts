@@ -80,6 +80,7 @@ export interface ICV extends Document {
   projects: IProject[];
   tailoredVersions: ITailoredVersion[];
   localeVersions: ICVLocaleVersion[];
+  markdown?: string;
   updatedAt: Date;
 }
 
@@ -167,6 +168,7 @@ const cvSchema = new Schema<ICV>({
   projects: { type: [projectSchema], default: [] },
   tailoredVersions: { type: [tailoredVersionSchema], default: [] },
   localeVersions: { type: [localeVersionSchema], default: [] },
+  markdown: String,
   updatedAt: { type: Date, default: Date.now },
 });
 

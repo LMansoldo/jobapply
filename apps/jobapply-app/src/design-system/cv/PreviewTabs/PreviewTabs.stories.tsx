@@ -10,9 +10,11 @@ const meta: Meta<typeof PreviewTabs> = {
 export default meta
 type Story = StoryObj<typeof PreviewTabs>
 
+function InteractivePreview() {
+  const [tab, setTab] = useState<'editor' | 'preview'>('editor')
+  return <PreviewTabs activeTab={tab} onChange={setTab} />
+}
+
 export const Default: Story = {
-  render: () => {
-    const [tab, setTab] = useState<'editor' | 'preview'>('editor')
-    return <PreviewTabs activeTab={tab} onChange={setTab} />
-  },
+  render: () => <InteractivePreview />,
 }

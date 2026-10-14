@@ -1,4 +1,4 @@
-import { Pagination } from '../../../components/Pagination'
+import { Pagination } from '../../wrappers/Pagination'
 import type { DSPaginationProps } from './DSPagination.types'
 import { PaginationContainer } from './DSPagination.styles'
 

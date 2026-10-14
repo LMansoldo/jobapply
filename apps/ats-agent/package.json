@@ -12,20 +12,20 @@
     "test": "vitest run"
   },
   "dependencies": {
-    "@google/generative-ai": "^0.24.1",
     "@langchain/core": "0.3",
     "@langchain/langgraph": "^0.2.36",
     "dotenv": "^16.4.5",
     "fastify": "^4.28.0",
+    "openai": "^4.104.0",
     "zod": "^3.23.8"
   },
   "devDependencies": {
-    "@types/node": "^20.14.0",
+    "@types/node": "^25",
     "@typescript-eslint/eslint-plugin": "^7.0.0",
     "@typescript-eslint/parser": "^7.0.0",
     "eslint": "^8.57.0",
     "ts-node": "^10.9.2",
     "typescript": "^5.4.5",
-    "vitest": "^2.0.0"
+    "vitest": "^3"
   }
 }

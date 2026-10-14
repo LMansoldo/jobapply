@@ -1,0 +1,29 @@
+{
+  "name": "@jobapply/ats-ui",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Componentes visuais ATS/tailoring (ATSPanel, KeywordItem, KeywordsPanel, modais de sugestões) em @emotion/styled. Consumido via fonte pelo app e pela extensão, sem build.",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "scripts": {
+    "lint": "echo 'no lint yet'",
+    "typecheck": "tsc --noEmit",
+    "build": "echo 'no build yet'"
+  },
+  "dependencies": {
+    "@ant-design/icons": "^5.3.7",
+    "@jobapply/contracts": "^0.1.0",
+    "@jobapply/ui": "^0.1.0",
+    "antd": "^5.17.0"
+  },
+  "peerDependencies": {
+    "@emotion/react": "^11",
+    "@emotion/styled": "^11",
+    "react": "^18",
+    "react-i18next": "^17"
+  },
+  "devDependencies": {
+    "@types/react": "^18.3.3",
+    "typescript": "^5.4.5"
+  }
+}

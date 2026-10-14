@@ -1,7 +1,5 @@
-import { genAI } from '../../lib/gemini'
+import { generate } from '../../lib/glm'
 import type { GraphState } from '../../types'
-
-const model = genAI.getGenerativeModel({ model: 'gemini-flash-lite-latest' })
 
 function buildPrompt(jd: string): string {
   return `You are a LinkedIn recruiter keyword specialist. Extract the most important keywords from this job description for LinkedIn profile SEO.
@@ -33,8 +31,7 @@ export async function jdKeywordExtractorNode(
   }
 
   try {
-    const result = await model.generateContent(buildPrompt(jd))
-    const raw = result.response.text()
+    const raw = await generate(buildPrompt(jd))
     const clean = raw.replace(/^```json\s*/i, '').replace(/```\s*$/, '').trim()
     const parsed = JSON.parse(clean) as { required?: string[]; preferred?: string[]; inferred?: string[] }
     const all = [

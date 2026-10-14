@@ -1,5 +1,5 @@
 import type { EditorToolbarProps } from './EditorToolbar.types'
-import { styles } from './EditorToolbar.styles'
+import { Toolbar, ToolBtn, Divider } from './EditorToolbar.styles'
 
 export function EditorToolbar({ items, onAction }: EditorToolbarProps) {
   const groups: Record<string, typeof items> = {}
@@ -23,29 +23,26 @@ export function EditorToolbar({ items, onAction }: EditorToolbarProps) {
   ]
 
   return (
-    <div style={styles.toolbar}>
+    <Toolbar>
       {sections.map((entry, idx) => {
         if (entry.type === 'divider') {
-          return <div key={entry.key} style={styles.divider} />
+          return <Divider key={entry.key} />
         }
         const { item } = entry
         return (
-          <button
+          <ToolBtn
             key={item.key}
             type="button"
             title={item.label}
-            style={{
-              ...styles.btn,
-              ...(item.active ? styles.btnActive : {}),
-              ...(item.wide ? styles.btnWide : {}),
-            }}
+            $active={!!item.active}
+            $wide={!!item.wide}
             onClick={() => onAction(item.key)}
           >
             {item.icon}
             {item.wide && item.label && <span>{item.label}</span>}
-          </button>
+          </ToolBtn>
         )
       })}
-    </div>
+    </Toolbar>
   )
 }

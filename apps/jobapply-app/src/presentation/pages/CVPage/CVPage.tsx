@@ -4,22 +4,22 @@
  */
 import { useState, useEffect, useRef } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { Grid } from '../../../components/Grid'
+import { Grid } from '../../../design-system/wrappers/Grid'
 import { CheckOutlined } from '@ant-design/icons'
 import { useTranslation } from 'react-i18next'
 import { useAuth } from '../../../application/providers/AuthProvider'
-import { useAntApp } from '../../../components/AntApp'
-import { Button } from '../../../components/Button'
-import { Form } from '../../../components/Form'
-import { Space } from '../../../components/Space'
-import { Spin } from '../../../components/Spin'
-import { CVViewer } from '../../../domain/cv/components/CVViewer'
-import { CVBaseForm } from '../../../domain/cv/components/CVBaseForm'
-import { MonacoEditorPanel } from '../../../domain/cv/components/MonacoEditorPanel'
+import { useAntApp } from '../../../design-system/wrappers/AntApp'
+import { Button } from '../../../design-system/wrappers/Button'
+import { Form } from '../../../design-system/wrappers/Form'
+import { Space } from '../../../design-system/wrappers/Space'
+import { Spin } from '../../../design-system/wrappers/Spin'
+import { CVViewer } from '../../components/CVViewer'
+import { CVBaseForm } from '../../components/CVBaseForm'
+import { MonacoEditorPanel } from '../../components/MonacoEditorPanel'
 import { EN_TEMPLATE, PT_BR_TEMPLATE } from '../../../domain/cv/constants'
 import { localeVersionToMarkdown, parseMarkdownToLocale } from '../../../domain/cv/helpers'
 import type { CV, CVCreatePayload } from '../../../domain/cv/types'
-import type { CVBaseFormValues } from '../../../domain/cv/components/CVBaseForm/CVBaseForm.types'
+import type { CVBaseFormValues } from '../../components/CVBaseForm/CVBaseForm.types'
 import {
   createCV,
   deleteCV,
@@ -243,11 +243,11 @@ export default function CVPage() {
       modal.info({
         title: t('cv.publishLinkTitle'),
         content: (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '1.2rem', marginTop: '1.2rem' }}>
-            <span style={{ fontFamily: 'monospace', fontSize: '1.3rem', wordBreak: 'break-all', background: '#f5f5f5', padding: '0.8rem', borderRadius: '0.4rem' }}>
+          <styles.PublishLinkContent>
+            <styles.PublishLinkUrl>
               {publicUrl}
-            </span>
-          </div>
+            </styles.PublishLinkUrl>
+          </styles.PublishLinkContent>
         ),
         okText: t('cv.copyLink'),
         onOk: () => {
@@ -304,9 +304,9 @@ export default function CVPage() {
 
   if (cvQuery.isLoading) {
     return (
-      <div className={styles.spinWrapper}>
+      <styles.SpinWrapper>
         <Spin size="large" tip={t('cv.loadingCV')} />
-      </div>
+      </styles.SpinWrapper>
     )
   }
 
@@ -316,7 +316,7 @@ export default function CVPage() {
   if (cv && !editMode) {
     return (
       <>
-        <div className={styles.viewerRoot}>
+        <styles.ViewerRoot>
           <CVViewer
             cv={cv}
             onEdit={() => { setCurrentStep(0); setEditMode(true) }}
@@ -325,7 +325,7 @@ export default function CVPage() {
             publishLoading={publishMutation.isPending}
             isMobile={isMobile}
           />
-        </div>
+        </styles.ViewerRoot>
         {previewCssTag}
       </>
     )
@@ -340,37 +340,35 @@ export default function CVPage() {
 
   // ── Mobile bottom nav bar ─────────────────────────────────────────────────
   const mobileBottomNav = isMobile && (
-    <div className={styles.mobileBottomNav}>
+    <styles.MobileBottomNav>
       {currentStep === 2 && (
-        <button
+        <styles.MobileSkipBtn
           onClick={handleSkipEn}
           disabled={saving}
-          className={styles.mobileSkipBtn}
         >
           {t('cv.editor.skipStep')}
-        </button>
+        </styles.MobileSkipBtn>
       )}
-      <button
+      <styles.MobileNavBtn
         onClick={currentStep === 0 ? handleStep1Next : currentStep === 1 ? handleStep2Next : handleStep3Finish}
         disabled={saving}
-        className={styles.mobileNavBtn}
       >
-        {saving && <CheckOutlined className={styles.savingIcon} />}
+        {saving && <styles.SavingIcon><CheckOutlined /></styles.SavingIcon>}
         {currentStep === 2 ? t('cv.mobile.finish') : t('cv.mobile.save')}
-      </button>
-    </div>
+      </styles.MobileNavBtn>
+    </styles.MobileBottomNav>
   )
 
   return (
     <>
-      <div className={styles.wizardRoot}>
+      <styles.WizardRoot>
         <HorizontalStepper
           steps={WIZARD_STEPS}
           current={currentStep}
           onStepClick={cv ? (step) => setCurrentStep(step) : undefined}
         />
 
-        <div className={styles.stepContent(isMobile)}>
+        <styles.StepContent $mobile={isMobile}>
           {currentStep === 0 && (
             <CVBaseForm
               form={baseForm}
@@ -391,10 +389,10 @@ export default function CVPage() {
                 locale="pt-BR"
               />
               {!isMobile && (
-                <div className={styles.editorFooter}>
+                <styles.EditorFooter>
                   <Button onClick={() => setCurrentStep(0)}>{t('common.back')}</Button>
                   <Button type="primary" onClick={handleStep2Next} loading={saving}>{t('cv.editor.validateAndContinue')}</Button>
-                </div>
+                </styles.EditorFooter>
               )}
             </div>
           )}
@@ -414,7 +412,7 @@ export default function CVPage() {
                 }}
               />
               {!isMobile && (
-                <div className={styles.editorFooter}>
+                <styles.EditorFooter>
                   <Button onClick={() => setCurrentStep(1)}>{t('common.back')}</Button>
                   <Space>
                     <Button onClick={handleSkipEn}>{t('cv.editor.skipStep')}</Button>
@@ -422,12 +420,12 @@ export default function CVPage() {
                       {t('cv.editor.validateAndFinish')}
                     </Button>
                   </Space>
-                </div>
+                </styles.EditorFooter>
               )}
             </div>
           )}
-        </div>
-      </div>
+        </styles.StepContent>
+      </styles.WizardRoot>
       {mobileBottomNav}
       {previewCssTag}
     </>

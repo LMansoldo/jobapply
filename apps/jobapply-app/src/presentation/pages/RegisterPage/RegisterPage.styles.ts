@@ -1,94 +1,93 @@
-import { css } from '@emotion/css'
-import { Colors } from '../../../styles/theme/colors'
-import { FontFamily, FontWeight, FontSize } from '../../../styles/theme/typography'
-import { Spacing } from '../../../styles/theme/spacing'
-// BorderRadius not yet needed but imported for future consistency
+import styled from '@emotion/styled'
+import { Link } from '@tanstack/react-router'
+import { FormItem } from '../../../design-system/wrappers/Form'
+import { Divider } from '../../../design-system/wrappers/Divider'
 
-export const leftPanelRoot = css({
-  display: 'flex',
-  flexDirection: 'column',
-  gap: Spacing.lg,
-})
+export const LeftPanelRoot = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: ${({ theme }) => theme.spacing.lg};
+`
 
-export const leftHeadline = css({
-  fontFamily: FontFamily.heading,
-  color: Colors.white,
-  fontSize: FontSize.h3,
-  margin: `0 0 ${Spacing.sm}`,
-  fontWeight: FontWeight.bold,
-  lineHeight: 1.15,
-})
+export const LeftHeadline = styled.h1`
+  font-family: ${({ theme }) => theme.typography.family.heading};
+  color: ${({ theme }) => theme.colors.white};
+  font-size: ${({ theme }) => theme.typography.size.h3};
+  margin: 0 0 ${({ theme }) => theme.spacing.sm};
+  font-weight: ${({ theme }) => theme.typography.weight.bold};
+  line-height: 1.15;
+`
 
-export const leftSubtitle = css({
-  color: 'rgba(255,255,255,0.65)',
-  fontSize: FontSize.base,
-  margin: 0,
-  lineHeight: 1.6,
-})
+export const LeftSubtitle = styled.p`
+  color: rgba(255,255,255,0.65);
+  font-size: ${({ theme }) => theme.typography.size.base};
+  margin: 0;
+  line-height: 1.6;
+`
 
-export const leftFeatures = css({
-  display: 'flex',
-  flexDirection: 'column',
-  gap: Spacing.sm,
-})
+export const LeftFeatures = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: ${({ theme }) => theme.spacing.sm};
+`
 
-export const rightPanelRoot = css({
-  display: 'flex',
-  flexDirection: 'column',
-  gap: Spacing.md,
-})
+export const RightPanelRoot = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: ${({ theme }) => theme.spacing.md};
+`
 
-export const rightHeadingRow = css({
-  marginBottom: Spacing.xs,
-})
+export const RightHeadingRow = styled.div`
+  margin-bottom: ${({ theme }) => theme.spacing.xs};
+`
 
-export const rightTitle = css({
-  fontFamily: FontFamily.heading,
-  fontSize: FontSize.xxl,
-  color: Colors.textMain,
-  margin: `0 0 ${Spacing.xs}`,
-  fontWeight: FontWeight.bold,
-})
+export const RightTitle = styled.h2`
+  font-family: ${({ theme }) => theme.typography.family.heading};
+  font-size: ${({ theme }) => theme.typography.size.xxl};
+  color: ${({ theme }) => theme.colors.textMain};
+  margin: 0 0 ${({ theme }) => theme.spacing.xs};
+  font-weight: ${({ theme }) => theme.typography.weight.bold};
+`
 
-export const formItemSpacing = css({
-  '&.ant-form-item': {
-    marginTop: Spacing.sm,
-  },
-})
+export const FormItemSpacing = styled(FormItem)`
+  &.ant-form-item {
+    margin-top: ${({ theme }) => theme.spacing.sm};
+  }
+`
 
-export const formItemSubmit = css({
-  '&.ant-form-item': {
-    marginBottom: Spacing.xs,
-    marginTop: Spacing.sm,
-  },
-})
+export const FormItemSubmit = styled(FormItem)`
+  &.ant-form-item {
+    margin-bottom: ${({ theme }) => theme.spacing.xs};
+    margin-top: ${({ theme }) => theme.spacing.sm};
+  }
+`
 
-export const fullWidthBtn = css({
-  '& button': {
-    width: '100%',
-  },
-})
+export const FullWidthBtn = styled.div`
+  & button {
+    width: 100%;
+  }
+`
 
-export const rightSubtitle = css({
-  color: Colors.textSub,
-  fontSize: FontSize.base,
-  margin: 0,
-})
+export const RightSubtitle = styled.p`
+  color: ${({ theme }) => theme.colors.textSub};
+  font-size: ${({ theme }) => theme.typography.size.base};
+  margin: 0;
+`
 
-export const loginLink = css({
-  color: Colors.primaryDark,
-  fontWeight: FontWeight.semibold,
-})
+export const LoginLink = styled(Link)`
+  color: ${({ theme }) => theme.colors.primaryDark};
+  font-weight: ${({ theme }) => theme.typography.weight.semibold};
+`
 
-export const socialBtns = css({
-  display: 'flex',
-  flexDirection: 'column',
-  gap: Spacing.sm,
-})
+export const SocialBtns = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: ${({ theme }) => theme.spacing.sm};
+`
 
-export const dividerOr = css({
-  '& .ant-divider-inner-text': {
-    color: Colors.textSub,
-    fontSize: FontSize.sm,
-  },
-})
+export const DividerOr = styled(Divider)`
+  & .ant-divider-inner-text {
+    color: ${({ theme }) => theme.colors.textSub};
+    font-size: ${({ theme }) => theme.typography.size.sm};
+  }
+`

@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react'
-import { AIsuggestionBar } from './AIsuggestionBar'
+import { AIsuggestionBar } from '@jobapply/ats-ui'
 
 const meta: Meta<typeof AIsuggestionBar> = {
   title: 'Design System/ATS/AIsuggestionBar',

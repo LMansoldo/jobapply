@@ -1,11 +1,11 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { useQuery } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
-import { Grid } from '../../components/Grid'
+import { Grid } from '../../design-system/wrappers/Grid'
 import { getPublicCV } from '../../infrastructure/repositories/voucherRepository'
-import { CVPublicViewer } from '../../domain/cv/components/CVPublicViewer'
-import { Spin } from '../../components/Spin'
-import { Empty } from '../../components/Empty'
+import { CVPublicViewer } from '../../presentation/components/CVPublicViewer'
+import { Spin } from '../../design-system/wrappers/Spin'
+import { Empty } from '../../design-system/wrappers/Empty'
 
 const { useBreakpoint } = Grid
 

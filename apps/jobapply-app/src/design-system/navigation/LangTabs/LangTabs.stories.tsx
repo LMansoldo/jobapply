@@ -10,18 +10,20 @@ const meta: Meta<typeof LangTabs> = {
 export default meta
 type Story = StoryObj<typeof LangTabs>
 
+function InteractiveLangTabs() {
+  const [active, setActive] = useState('pt-BR')
+  return (
+    <LangTabs
+      tabs={[
+        { key: 'pt-BR', label: 'PT-BR' },
+        { key: 'en', label: 'EN' },
+      ]}
+      activeKey={active}
+      onChange={setActive}
+    />
+  )
+}
+
 export const Default: Story = {
-  render: () => {
-    const [active, setActive] = useState('pt-BR')
-    return (
-      <LangTabs
-        tabs={[
-          { key: 'pt-BR', label: 'PT-BR' },
-          { key: 'en', label: 'EN' },
-        ]}
-        activeKey={active}
-        onChange={setActive}
-      />
-    )
-  },
+  render: () => <InteractiveLangTabs />,
 }

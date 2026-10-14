@@ -1,12 +1,7 @@
-import { css } from '@emotion/css'
 import styled from '@emotion/styled'
+import { Spacing } from '../../../styles/theme/spacing'
 import { Colors } from '../../../styles/theme/colors'
 import { FontSize, FontWeight, FontFamily } from '../../../styles/theme/typography'
-import { Spacing } from '../../../styles/theme/spacing'
-import { BorderRadius } from '../../../styles/theme/radius'
-
-// ── Constants ──────────────────────────────────────────────
-const LOCALE_BTN_BORDER_WIDTH = '1.5px'
 
 export const Root = styled.div`
   display: flex;
@@ -20,23 +15,23 @@ export const LocaleRow = styled.div`
 `
 
 export interface LocaleBtnProps {
-  active: boolean
-  enabled: boolean
+  $active: boolean
+  $enabled: boolean
 }
 
 export const LocaleBtn = styled.button<LocaleBtnProps>`
   flex: 1;
   padding: ${Spacing.sm} ${Spacing.md};
-  border: ${LOCALE_BTN_BORDER_WIDTH} solid
-    ${({ active }) => (active ? Colors.primaryDark : Colors.surfaceBorder)};
-  border-radius: ${BorderRadius.base};
-  background: ${({ active }) => (active ? Colors.primaryDark : Colors.white)};
-  color: ${({ active, enabled }) =>
-    active ? Colors.white : enabled ? Colors.textMain : Colors.textDisabled};
+  border: 1.5px solid
+    ${({ $active }) => ($active ? Colors.primaryDark : Colors.surfaceBorder)};
+  border-radius: ${({ theme }) => theme.radius.base};
+  background: ${({ $active }) => ($active ? Colors.primaryDark : Colors.white)};
+  color: ${({ $active, $enabled }) =>
+    $active ? Colors.white : $enabled ? Colors.textMain : Colors.textDisabled};
   font-family: ${FontFamily.body};
   font-size: ${FontSize.sm};
   font-weight: ${FontWeight.semibold};
-  cursor: ${({ enabled }) => (enabled ? 'pointer' : 'not-allowed')};
+  cursor: ${({ $enabled }) => ($enabled ? 'pointer' : 'not-allowed')};
   transition: all 0.15s;
 `
 
@@ -107,7 +102,7 @@ export const VisibilityValue = styled.span`
   font-family: ${FontFamily.heading};
 `
 
-export const completionIcon = (color: string) => css({
-  color,
-  fontSize: FontSize.base,
-})
+export const CompletionIcon = styled.span<{ $color: string }>`
+  color: ${({ $color }) => $color};
+  font-size: ${FontSize.base};
+`

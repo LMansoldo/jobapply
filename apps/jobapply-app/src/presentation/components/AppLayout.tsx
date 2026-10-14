@@ -7,13 +7,14 @@ import {
 } from '@ant-design/icons'
 import { useNavigate, useRouterState, Outlet } from '@tanstack/react-router'
 import { useTranslation } from 'react-i18next'
-import { Avatar } from '../../components/Avatar'
-import { Dropdown } from '../../components/Dropdown'
-import { AppContent } from '../../components/Layout'
-import { Space } from '../../components/Space'
+import { Avatar } from '../../design-system/wrappers/Avatar'
+import { Dropdown } from '../../design-system/wrappers/Dropdown'
+import { AppContent } from '../../design-system/wrappers/Layout'
+import { Space } from '../../design-system/wrappers/Space'
 import { AppHeader as DSAppHeader } from '../../design-system/layout/AppHeader'
 import { useAuth } from '../../application/providers/AuthProvider'
 import * as styles from './AppLayout.styles'
+
 
 const MOBILE_NAV_KEYS = ['tailoring', 'linkedin', 'profile']
 
@@ -81,12 +82,12 @@ export default function AppLayout() {
   const mobileNavItems = navItems.filter((item) => MOBILE_NAV_KEYS.includes(item.key))
 
   return (
-    <div className={styles.pageRoot}>
+    <styles.PageRoot>
       <DSAppHeader
         navItems={isMobile ? [] : navItems}
         rightSlot={rightSlot}
       />
-      <styles.AppContentStyled isMobile={isMobile}>
+      <styles.AppContentStyled $isMobile={isMobile}>
         <Outlet />
       </styles.AppContentStyled>
       {isMobile && (
@@ -94,7 +95,7 @@ export default function AppLayout() {
           {mobileNavItems.map((item) => (
             <styles.BottomNavItem
               key={item.key}
-              active={item.active}
+              $active={item.active}
               type="button"
               onClick={() => item.href && item.href !== '#' && navigate({ to: item.href as '/' })}
             >
@@ -103,7 +104,7 @@ export default function AppLayout() {
             </styles.BottomNavItem>
           ))}
           <styles.BottomNavItem
-            active={false}
+            $active={false}
             type="button"
             onClick={handleLogout}
           >
@@ -112,6 +113,6 @@ export default function AppLayout() {
           </styles.BottomNavItem>
         </styles.BottomNav>
       )}
-    </div>
+    </styles.PageRoot>
   )
 }

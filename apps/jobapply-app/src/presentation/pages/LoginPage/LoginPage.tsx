@@ -1,20 +1,34 @@
 import { useState } from 'react'
 import { MailOutlined, LockOutlined, RocketOutlined, FileTextOutlined, ThunderboltOutlined } from '@ant-design/icons'
-import { Link, useNavigate } from '@tanstack/react-router'
+import { useNavigate } from '@tanstack/react-router'
 import { useTranslation } from 'react-i18next'
-import { useAntApp } from '../../../components/AntApp'
-import { Form, FormItem } from '../../../components/Form'
-import { InputPassword } from '../../../components/Input'
-import { Divider } from '../../../components/Divider'
+import { useAntApp } from '../../../design-system/wrappers/AntApp'
+import { Form, FormItem } from '../../../design-system/wrappers/Form'
+import { InputPassword } from '../../../design-system/wrappers/Input'
 import { useAuth } from '../../../application/providers/AuthProvider'
 import { login as loginService } from '../../../infrastructure/repositories/authRepository'
 import { redirectToLinkedIn } from '../../../domain/linkedin/linkedinOAuth'
 import { AuthLayout } from '../../../design-system/auth/AuthLayout'
 import { FeatureCard } from '../../../design-system/auth/FeatureCard'
 import { SocialLoginBtn } from '../../../design-system/auth/SocialLoginBtn'
-import { DSButton } from '../../../design-system/primitives/DSButton'
-import { DSInput } from '../../../design-system/primitives/DSInput'
-import * as styles from './LoginPage.styles'
+import { DSButton } from '@jobapply/ui'
+import { DSInput } from '@jobapply/ui'
+import {
+  LeftPanelRoot,
+  LeftHeadline,
+  LeftSubtitle,
+  LeftFeatures,
+  RightPanelRoot,
+  RightHeadingRow,
+  RightTitle,
+  RightSubtitle,
+  RegisterLink,
+  SocialBtns,
+  FullWidthBtn,
+  FormItemSpacing,
+  FormItemSmSpacing,
+  DividerOr,
+} from './LoginPage.styles'
 
 interface LoginForm {
   email: string
@@ -47,36 +61,36 @@ export default function LoginPage() {
   }
 
   const leftPanel = (
-    <div className={styles.leftPanelRoot}>
+    <LeftPanelRoot>
       <div>
-        <h1 className={styles.leftHeadline}>{t('auth.loginHero')}</h1>
-        <p className={styles.leftSubtitle}>{t('auth.loginHeroSub')}</p>
+        <LeftHeadline>{t('auth.loginHero')}</LeftHeadline>
+        <LeftSubtitle>{t('auth.loginHeroSub')}</LeftSubtitle>
       </div>
-      <div className={styles.leftFeatures}>
+      <LeftFeatures>
         <FeatureCard icon={<RocketOutlined />} title={t('auth.featureAITitle')} description={t('auth.featureAIDesc')} />
         <FeatureCard icon={<FileTextOutlined />} title={t('auth.featureCVTitle')} description={t('auth.featureCVDesc')} />
         <FeatureCard icon={<ThunderboltOutlined />} title={t('auth.featureATSTitle')} description={t('auth.featureATSDesc')} />
-      </div>
-    </div>
+      </LeftFeatures>
+    </LeftPanelRoot>
   )
 
   const rightPanel = (
-    <div className={styles.rightPanelRoot}>
-      <div className={styles.rightHeadingRow}>
-        <h2 className={styles.rightTitle}>{t('auth.loginTitle')}</h2>
-        <p className={styles.rightSubtitle}>
+    <RightPanelRoot>
+      <RightHeadingRow>
+        <RightTitle>{t('auth.loginTitle')}</RightTitle>
+        <RightSubtitle>
           {t('auth.noAccount')}{' '}
-          <Link to="/register" className={styles.registerLink}>
+          <RegisterLink to="/register">
             {t('auth.register')}
-          </Link>
-        </p>
-      </div>
+          </RegisterLink>
+        </RightSubtitle>
+      </RightHeadingRow>
 
-      <div className={styles.socialBtns}>
+      <SocialBtns>
         <SocialLoginBtn provider="linkedin" onClick={() => redirectToLinkedIn('login')} />
-      </div>
+      </SocialBtns>
 
-      <Divider plain className={styles.dividerOr}>{t('auth.orWithEmail')}</Divider>
+      <DividerOr plain>{t('auth.orWithEmail')}</DividerOr>
 
       <Form layout="vertical" onFinish={handleSubmit} autoComplete="off">
         <FormItem
@@ -90,25 +104,24 @@ export default function LoginPage() {
           <DSInput leftIcon={<MailOutlined />} placeholder={t('auth.emailPlaceholder')} filled />
         </FormItem>
 
-        <FormItem
+        <FormItemSpacing
           name="password"
           label={t('auth.password')}
-          className={styles.formItemSpacing}
           rules={[{ required: true, message: t('auth.requiredPassword') }]}
         >
           <InputPassword prefix={<LockOutlined />} placeholder={t('auth.passwordPlaceholder')} size="large" />
-        </FormItem>
+        </FormItemSpacing>
 
-        <FormItem className={styles.formItemSmSpacing}>
-          <div className={styles.fullWidthBtn}>
+        <FormItemSmSpacing>
+          <FullWidthBtn>
             <DSButton variant="primary" htmlType="submit" loading={loading} block>
               {t('auth.login')}
             </DSButton>
-          </div>
-        </FormItem>
+          </FullWidthBtn>
+        </FormItemSmSpacing>
       </Form>
 
-    </div>
+    </RightPanelRoot>
   )
 
   return <AuthLayout left={leftPanel} right={rightPanel} />

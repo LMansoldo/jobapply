@@ -22,6 +22,8 @@ routes/ → controllers/ → services/ + models/
 ## Convenções
 
 - `atsService.ts` é o **único** ponto de contato com o ats-agent
+- O resultado de `analyzeWithATS` é consumido por SSE (`GET /result/:requestId/stream` do ats-agent) com deadline de 5 min via AbortController — sem polling
+- `POST /cv/analyze` (usado pela extensão) é async: responde 202 `{requestId}` e a entrega é feita por `GET /cv/analyze/:requestId/stream`, que proxya o stream do agente (mesmo deadline; aborta quando o cliente desconecta)
 - `llmService.ts` é o **único** lugar onde Gemini é chamado diretamente
 - `sanitizeUserInput()` de `utils/sanitize.ts` é obrigatório antes de passar dados do usuário para LLM
 - Auth middleware em `middleware/auth.ts` — usar em todas as rotas protegidas

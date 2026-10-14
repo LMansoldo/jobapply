@@ -9,13 +9,11 @@ import {
 } from '@ant-design/icons'
 import { useTranslation } from 'react-i18next'
 import type { CVViewerSidebarProps } from './CVViewerSidebar.types'
-import { DSCard } from '../../primitives/DSCard'
-import { DSButton } from '../../primitives/DSButton'
-import { ScoreRing } from '../../primitives/ScoreRing'
+import { DSCard } from '@jobapply/ui'
+import { DSButton } from '@jobapply/ui'
+import { ScoreRing } from '@jobapply/ui'
 import { Colors } from '../../../styles/theme/colors'
-import { FontSize, FontWeight, FontFamily } from '../../../styles/theme/typography'
-import { Spacing } from '../../../styles/theme/spacing'
-import { BorderRadius } from '../../../styles/theme/radius'
+import * as styles from './CVViewerSidebar.styles'
 
 export function CVViewerSidebar({
   activeLocale,
@@ -39,121 +37,115 @@ export function CVViewerSidebar({
   const localeBtn = (locale: 'pt-BR' | 'en', label: string, enabled: boolean) => {
     const active = activeLocale === locale
     return (
-      <button
+      <styles.LocaleBtn
         type="button"
         disabled={!enabled}
+        $active={active}
+        $enabled={enabled}
         onClick={() => enabled && onLocaleChange(locale)}
-        style={{
-          flex: 1,
-          padding: `${Spacing.sm} ${Spacing.md}`,
-          border: `1.5px solid ${active ? Colors.primaryDark : Colors.surfaceBorder}`,
-          borderRadius: BorderRadius.base,
-          background: active ? Colors.primaryDark : Colors.white,
-          color: active ? Colors.white : enabled ? Colors.textMain : Colors.textDisabled,
-          fontFamily: FontFamily.body,
-          fontSize: FontSize.sm,
-          fontWeight: FontWeight.semibold,
-          cursor: enabled ? 'pointer' : 'not-allowed',
-          transition: 'all 0.15s',
-        }}
       >
         {label}
-      </button>
+      </styles.LocaleBtn>
     )
   }
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: Spacing.md }}>
+    <styles.Root>
       {/* Versões */}
       <DSCard title={t('cv.versions')}>
-        <div style={{ display: 'flex', gap: Spacing.sm }}>
+        <styles.LocaleRow>
           {localeBtn('pt-BR', '🇧🇷 PT-BR', hasPtBr)}
           {localeBtn('en', '🇺🇸 English', hasEn)}
-        </div>
+        </styles.LocaleRow>
       </DSCard>
 
       {/* Actions */}
       <DSCard>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: Spacing.sm }}>
-          <DSButton variant="primary" onClick={onEdit} style={{ width: '100%', justifyContent: 'center' }}>
-            <EditOutlined /> {t('cv.editCV')}
-          </DSButton>
-          <DSButton variant="ghost" onClick={onExportPDF} style={{ width: '100%', justifyContent: 'center' }}>
-            <DownloadOutlined /> {t('cv.exportPDF')}
-          </DSButton>
-          <DSButton variant="ghost" onClick={onExportMarkdown} style={{ width: '100%', justifyContent: 'center' }}>
-            <DownloadOutlined /> {t('cv.exportMarkdown')}
-          </DSButton>
-          {onPublish && (
-            <DSButton
-              variant="ghost"
-              onClick={onPublish}
-              loading={publishLoading}
-              style={{ width: '100%', justifyContent: 'center' }}
-            >
-              <GlobalOutlined /> {t('cv.publishCV')}
+        <styles.ActionList>
+          <styles.FullWidthBtn>
+            <DSButton variant="primary" onClick={onEdit}>
+              <EditOutlined /> {t('cv.editCV')}
             </DSButton>
+          </styles.FullWidthBtn>
+          <styles.FullWidthBtn>
+            <DSButton variant="ghost" onClick={onExportPDF}>
+              <DownloadOutlined /> {t('cv.exportPDF')}
+            </DSButton>
+          </styles.FullWidthBtn>
+          <styles.FullWidthBtn>
+            <DSButton variant="ghost" onClick={onExportMarkdown}>
+              <DownloadOutlined /> {t('cv.exportMarkdown')}
+            </DSButton>
+          </styles.FullWidthBtn>
+          {onPublish && (
+            <styles.FullWidthBtn>
+              <DSButton variant="ghost" onClick={onPublish} loading={publishLoading}>
+                <GlobalOutlined /> {t('cv.publishCV')}
+              </DSButton>
+            </styles.FullWidthBtn>
           )}
           {onShare && (
-            <DSButton variant="ghost" onClick={onShare} style={{ width: '100%', justifyContent: 'center' }}>
-              <ShareAltOutlined /> {t('cv.shareLink')}
-            </DSButton>
+            <styles.FullWidthBtn>
+              <DSButton variant="ghost" onClick={onShare}>
+                <ShareAltOutlined /> {t('cv.shareLink')}
+              </DSButton>
+            </styles.FullWidthBtn>
           )}
           {onDeleteVersion && (
-            <DSButton
-              variant="ghost"
-              onClick={onDeleteVersion}
-              style={{ width: '100%', justifyContent: 'center', color: Colors.danger, borderColor: Colors.danger }}
-            >
-              <DeleteOutlined /> {t('cv.deleteVersion')}
-            </DSButton>
+            <styles.DangerBtn>
+              <DSButton variant="ghost" onClick={onDeleteVersion}>
+                <DeleteOutlined /> {t('cv.deleteVersion')}
+              </DSButton>
+            </styles.DangerBtn>
           )}
-          <DSButton
-            variant="ghost"
-            onClick={onDelete}
-            style={{ width: '100%', justifyContent: 'center', color: Colors.danger, borderColor: Colors.danger }}
-          >
-            <DeleteOutlined /> {t('cv.deleteCV')}
-          </DSButton>
-        </div>
+          <styles.DangerBtn>
+            <DSButton variant="ghost" onClick={onDelete}>
+              <DeleteOutlined /> {t('cv.deleteCV')}
+            </DSButton>
+          </styles.DangerBtn>
+        </styles.ActionList>
       </DSCard>
 
       {/* Score */}
       <DSCard title={t('cv.profileScore')}>
-        <div style={{ display: 'flex', justifyContent: 'center', marginBottom: Spacing.md }}>
+        <styles.ScoreCenter>
           <ScoreRing value={score} size={120} label={t('cv.atsScore')} sublabel="/100" />
-        </div>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: Spacing.sm }}>
+        </styles.ScoreCenter>
+        <styles.CompletionList>
           {completionItems.map((item) => (
-            <div key={item.label} style={{ display: 'flex', alignItems: 'center', gap: Spacing.sm, fontSize: FontSize.sm, color: Colors.textMain }}>
+            <styles.CompletionItem key={item.label}>
               {item.done ? (
-                <CheckCircleFilled style={{ color: Colors.success, fontSize: FontSize.base }} />
+                <styles.CompletionIcon $color={Colors.success}>
+                  <CheckCircleFilled />
+                </styles.CompletionIcon>
               ) : (
-                <PlusCircleFilled style={{ color: item.color ?? Colors.orange, fontSize: FontSize.base }} />
+                <styles.CompletionIcon $color={item.color ?? Colors.orange}>
+                  <PlusCircleFilled />
+                </styles.CompletionIcon>
               )}
               {item.label}
-            </div>
+            </styles.CompletionItem>
           ))}
-        </div>
+        </styles.CompletionList>
       </DSCard>
 
       {/* Visibilidade */}
       <DSCard title={t('cv.visibility').toUpperCase()}>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: Spacing.sm }}>
+        <styles.VisibilityList>
           {[
             { label: t('cv.views'), value: visibility.views },
             { label: t('cv.searchAppearances'), value: visibility.searches },
             { label: t('cv.recruitersSaved'), value: visibility.saved },
           ].map((row) => (
-            <div key={row.label} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: FontSize.sm }}>
-              <span style={{ color: Colors.textSub }}>{row.label}</span>
-              <span style={{ fontWeight: FontWeight.bold, color: Colors.primaryDark, fontFamily: FontFamily.heading }}>
+            <styles.VisibilityRow key={row.label}>
+              <styles.VisibilityLabel>{row.label}</styles.VisibilityLabel>
+              <styles.VisibilityValue>
                 {row.value}
-              </span>
-            </div>
+              </styles.VisibilityValue>
+            </styles.VisibilityRow>
           ))}
-        </div>
+        </styles.VisibilityList>
       </DSCard>
-    </div>
+    </styles.Root>
   )
 }

@@ -1,0 +1,879 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>JobApply — System Design Whiteboard (full stack)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;600;700&family=Kalam:wght@300;400;700&family=Gochi+Hand&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#1f2333;
+    --paper:#f6f5ef;
+    --blue:#0984e3;
+    --red:#d63031;
+    --green:#00947a;
+    --orange:#e17055;
+    --purple:#6c5ce7;
+    --yellow:#fff3a3;
+    --pink:#ffd7de;
+    --mint:#d9f2e6;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{
+    font-family:'Kalam',cursive;
+    color:var(--ink);
+    background-color:var(--paper);
+    background-image:
+      linear-gradient(rgba(30,40,80,.055) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(30,40,80,.055) 1px, transparent 1px);
+    background-size:28px 28px;
+    padding:36px 28px 80px;
+    font-size:16px;
+    line-height:1.45;
+  }
+  .board{max-width:1500px;margin:0 auto}
+
+  h1{font-family:'Caveat',cursive;font-size:56px;font-weight:700;letter-spacing:.5px}
+  h2{font-family:'Caveat',cursive;font-size:38px;font-weight:700;margin:6px 0 18px;
+     border-bottom:3px solid var(--ink);display:inline-block;padding:0 14px 2px 4px;
+     border-radius:0 0 12px 3px;}
+  h3{font-family:'Caveat',cursive;font-size:26px;font-weight:700;margin-bottom:8px}
+  .subtitle{font-family:'Gochi Hand',cursive;font-size:19px;color:#555;max-width:1000px;margin:8px 0 6px}
+
+  /* ---------- sketchy boxes ---------- */
+  .box{
+    background:#fff;
+    border:2.5px solid var(--ink);
+    border-radius:255px 15px 225px 15px / 15px 225px 15px 255px;
+    padding:14px 18px;
+    box-shadow:3px 4px 0 rgba(31,35,51,.16);
+  }
+  .box.alt{border-radius:15px 225px 15px 255px / 255px 15px 225px 15px}
+  .box.third{border-radius:225px 15px 255px 15px / 15px 255px 15px 225px}
+
+  .tag{display:inline-block;font-family:'Gochi Hand',cursive;font-size:13px;
+       border:1.8px solid var(--ink);border-radius:12px 4px 10px 5px;padding:1px 9px;margin:2px 3px 2px 0;background:#fffdf4}
+  .tag.blue{border-color:var(--blue);color:var(--blue)}
+  .tag.red{border-color:var(--red);color:var(--red)}
+  .tag.green{border-color:var(--green);color:var(--green)}
+  .tag.purple{border-color:var(--purple);color:var(--purple)}
+  .tag.orange{border-color:var(--orange);color:var(--orange)}
+
+  .small{font-size:13.5px;color:#444}
+  .tiny{font-size:12.5px;color:#555}
+  .mono{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:13px}
+
+  header{margin-bottom:34px;position:relative}
+  .tape{
+    position:absolute;top:-14px;left:38px;width:130px;height:30px;
+    background:rgba(255,220,90,.55);transform:rotate(-3deg);
+    border-left:2px dashed rgba(0,0,0,.12);border-right:2px dashed rgba(0,0,0,.12);
+  }
+
+  /* ---------- arrows ---------- */
+  .harrow{flex:1;min-width:70px;position:relative;height:26px;display:flex;align-items:center;justify-content:center}
+  .harrow .line{position:absolute;left:0;right:10px;top:50%;height:0;border-top:2.5px solid var(--ink)}
+  .harrow.right .line{left:10px;right:0}
+  .harrow.right::after{content:'';position:absolute;right:0;top:50%;transform:translateY(-50%);
+    border-left:11px solid var(--ink);border-top:6.5px solid transparent;border-bottom:6.5px solid transparent}
+  .harrow .lbl{position:relative;z-index:1;background:var(--paper);padding:0 6px;font-family:'Gochi Hand',cursive;
+    font-size:13px;text-align:center;line-height:1.15;max-width:200px}
+  .harrow.dashed .line{border-top-style:dashed}
+
+  .varrow{width:0;height:26px;border-left:2.5px solid var(--ink);margin:0 auto;position:relative}
+  .varrow::after{content:'';position:absolute;bottom:-2px;left:-7px;
+    border-top:10px solid var(--ink);border-left:6px solid transparent;border-right:6px solid transparent}
+  .varrow.dashed{border-left-style:dashed}
+
+  section{margin-bottom:52px}
+  .frame{background:rgba(255,255,255,.6);border:2.5px dashed #9aa0b5;border-radius:18px;padding:22px 24px;position:relative}
+  .frame > .corner{position:absolute;top:-13px;left:26px;background:var(--paper);padding:0 10px;
+    font-family:'Caveat',cursive;font-size:22px;font-weight:700}
+
+  /* ---------- big picture ---------- */
+  .pipeline{display:flex;align-items:stretch;gap:6px;flex-wrap:nowrap}
+  .svc{min-width:210px;flex:0 0 auto}
+  .svc .name{font-family:'Caveat',cursive;font-size:23px;font-weight:700;line-height:1.1}
+  .svc .port{font-family:'Gochi Hand',cursive;font-size:13px;color:var(--blue)}
+  .svc ul{list-style:none;margin-top:6px}
+  .svc li{font-size:13px;padding-left:14px;position:relative}
+  .svc li::before{content:'–';position:absolute;left:2px}
+  .attachments{display:flex;gap:18px;margin-top:10px;flex-wrap:wrap}
+  .attach{flex:1;min-width:230px}
+  .attach .box{padding:10px 14px}
+  .dashed-note{
+    margin-top:14px;border:2px dashed var(--red);border-radius:14px 4px 16px 5px;
+    background:#fff5f5;padding:8px 14px;font-family:'Gochi Hand',cursive;font-size:15px;color:var(--red);
+    display:inline-block;transform:rotate(-.6deg)
+  }
+
+  /* ---------- layer rows (front/back) ---------- */
+  .layers{display:flex;flex-direction:column;gap:14px;margin-top:8px}
+  .layer{display:flex;gap:16px;align-items:stretch;flex-wrap:wrap}
+  .layer .box{flex:1;min-width:250px;padding:10px 14px}
+  .layer-badge{flex:0 0 120px;display:flex;align-items:center;justify-content:center;
+    font-family:'Caveat',cursive;font-size:19px;font-weight:700;text-align:center;line-height:1.1;
+    border:2.5px solid var(--ink);border-radius:14px 4px 14px 5px;background:#fdf9e3;padding:8px}
+
+  /* ---------- sequence ---------- */
+  .seq{min-width:1080px}
+  .seq-grid{display:grid;grid-template-columns:1.1fr 1.3fr 1.3fr 1fr;position:relative}
+  .actor{border:2.5px solid var(--ink);background:#fff;border-radius:14px 4px 14px 5px;
+    padding:8px 10px;text-align:center;font-family:'Caveat',cursive;font-size:21px;font-weight:700;
+    margin:0 14px;position:relative;z-index:2}
+  .seq-row{grid-column:1/-1;display:grid;grid-template-columns:1.1fr 1.3fr 1.3fr 1fr;align-items:center;min-height:44px;padding:4px 0}
+  .msg{position:relative;height:0;border-top:2.5px solid var(--ink);align-self:center}
+  .msg::after{content:'';position:absolute;top:-7px;border-top:6.5px solid transparent;border-bottom:6.5px solid transparent}
+  .msg.to-r::after{right:-2px;border-left:11px solid var(--ink)}
+  .msg.to-l::after{left:-2px;border-right:11px solid var(--ink)}
+  .msg .mlbl{position:absolute;top:-34px;left:50%;transform:translateX(-50%);white-space:nowrap;
+    font-family:'Gochi Hand',cursive;font-size:13.5px;background:rgba(246,245,239,.95);padding:1px 8px;border-radius:6px}
+  .msg.dashed{border-top-style:dashed}
+  .selfnote{margin:0 18px;border:2px dashed var(--purple);border-radius:12px 4px 12px 5px;
+    background:#f4f1ff;padding:5px 12px;font-size:13.5px;color:#43309a;transform:rotate(-.4deg)}
+  .selfnote.g{border-color:var(--green);background:#effcf6;color:#0a6b58}
+  .seq-spacer{height:10px;grid-column:1/-1}
+
+  /* ---------- langgraph chain ---------- */
+  .chain{display:flex;gap:4px;align-items:stretch;overflow-x:auto;padding:14px 2px 20px}
+  .node{min-width:150px;flex:0 0 auto;text-align:center;padding:10px 10px 8px;position:relative}
+  .node .t{font-family:'Caveat',cursive;font-size:19px;font-weight:700;line-height:1.05}
+  .node .d{font-size:11.5px;color:#555;margin-top:3px;line-height:1.25}
+  .node.llm{background:#f1edff;border-color:var(--purple)}
+  .node.llm .t{color:var(--purple)}
+  .node.det{background:#e8f3fd;border-color:var(--blue)}
+  .node.det .t{color:var(--blue)}
+  .node .cache{position:absolute;top:-14px;right:-8px;font-size:11px;background:var(--yellow);
+    border:1.8px solid #8a7500;border-radius:10px 3px 10px 4px;padding:0 6px;transform:rotate(3deg);
+    font-family:'Gochi Hand',cursive}
+  .chain-arrow{flex:0 0 34px;display:flex;align-items:center;justify-content:center;position:relative;min-width:26px}
+  .chain-arrow::before{content:'';width:100%;height:0;border-top:2.5px solid var(--ink)}
+  .chain-arrow::after{content:'';position:absolute;right:2px;top:50%;transform:translateY(-50%);
+    border-left:9px solid var(--ink);border-top:5.5px solid transparent;border-bottom:5.5px solid transparent}
+  .legend{display:flex;gap:16px;flex-wrap:wrap;margin-top:4px;font-family:'Gochi Hand',cursive;font-size:14px}
+  .legend span{display:inline-flex;align-items:center;gap:6px}
+  .swatch{width:20px;height:14px;border:2px solid;border-radius:8px 3px 8px 3px;display:inline-block}
+
+  .formula{
+    margin-top:14px;display:inline-block;background:var(--yellow);border:2.5px solid var(--ink);
+    border-radius:6px 22px 8px 24px/24px 8px 22px 6px;padding:10px 20px;transform:rotate(-.5deg);
+    font-family:'Gochi Hand',cursive;font-size:17px;box-shadow:3px 4px 0 rgba(31,35,51,.15)
+  }
+  .callout{border-left:5px solid var(--orange);padding:4px 0 4px 12px;margin-top:10px;font-size:14.5px}
+
+  /* ---------- data chain (contracts) ---------- */
+  .flow{display:flex;align-items:stretch;gap:4px;overflow-x:auto;padding:10px 2px}
+
+  /* ---------- trade-offs ---------- */
+  .grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(430px,1fr));gap:20px}
+  .tcard{padding:14px 18px}
+  .tcard h3{font-size:22px}
+  .vs{font-family:'Gochi Hand',cursive;font-size:13px;color:#777;margin-bottom:8px}
+  .pros,.cons{list-style:none;font-size:14px}
+  .pros li::before{content:'✔ ';color:var(--green);font-weight:700}
+  .cons li::before{content:'✘ ';color:var(--red);font-weight:700}
+  .pros li,.cons li{padding:1.5px 0}
+  .divider{border-top:2px dashed #c8ccda;margin:8px 0}
+  .layer-tag{float:right;font-family:'Gochi Hand',cursive;font-size:12px;border:1.8px dashed #888;
+    border-radius:10px 3px 10px 4px;padding:0 8px;color:#666}
+
+  /* ---------- stickies ---------- */
+  .stickies{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:22px}
+  .sticky{padding:16px 16px 20px;font-size:14.5px;transform:rotate(-1deg);position:relative;
+    box-shadow:4px 6px 10px rgba(0,0,0,.16);border:none}
+  .sticky:nth-child(2n){transform:rotate(1.2deg)}
+  .sticky:nth-child(3n){transform:rotate(-.6deg)}
+  .sticky.red{background:var(--pink)}
+  .sticky.yellow{background:var(--yellow)}
+  .sticky.mint{background:var(--mint)}
+  .sticky h3{font-size:20px;margin-bottom:6px}
+
+  table{border-collapse:collapse;width:100%;font-size:13.5px;background:rgba(255,255,255,.7)}
+  th,td{border:2px solid var(--ink);padding:5px 10px;text-align:left;vertical-align:top}
+  th{font-family:'Caveat',cursive;font-size:19px;background:#fdf9e3}
+  td .mono{font-size:12px}
+
+  footer{margin-top:60px;text-align:center;font-family:'Gochi Hand',cursive;color:#777;font-size:14px}
+  .scrollwrap{overflow-x:auto;padding-bottom:6px}
+  @media (max-width:1100px){ .pipeline{flex-direction:column} .harrow{min-height:40px;width:60%;margin:0 auto} .harrow .line{left:50%;right:auto;top:0;bottom:10px;border-top:none;border-left:2.5px solid var(--ink)} .harrow.right::after{border-left:6.5px solid transparent;border-right:6.5px solid transparent;border-top:11px solid var(--ink);right:calc(50% - 6.5px);top:auto;bottom:-2px} }
+</style>
+</head>
+<body>
+<div class="board">
+
+<!-- ============================ HEADER ============================ -->
+<header>
+  <div class="tape"></div>
+  <h1>JobApply — System Design Whiteboard</h1>
+  <p class="subtitle">Arquitetura completa: <b>front</b> (Vite/React + packages via fonte) · <b>API</b> (Express/MongoDB) · <b>ats-agent</b> (Fastify/LangGraph/GLM) · trade-offs de cada camada · desenhado do código-fonte · <b>out/2026</b></p>
+  <div>
+    <span class="tag green">React 18 + TanStack Router/Query</span>
+    <span class="tag">TipTap 3.31 (pinned)</span>
+    <span class="tag blue">Express 4 :3000 · Mongoose 8</span>
+    <span class="tag purple">Fastify 4 :3001 · LangGraph 0.2</span>
+    <span class="tag orange">GLM glm-5.3-flash</span>
+    <span class="tag orange">Gemini flash-lite</span>
+    <span class="tag green">MongoDB Atlas</span>
+    <span class="tag">node:sqlite · WAL</span>
+    <span class="tag red">JWT 7d · jobs TTL 30min</span>
+    <span class="tag purple">entrega por SSE (analyze)</span>
+    <span class="tag orange">extensão MV3 no mesmo fluxo</span>
+    <span class="tag">Caddy + docker compose na VPS</span>
+  </div>
+</header>
+
+<!-- ============================ 1. BIG PICTURE ============================ -->
+<section>
+  <h2>1 · Big Picture — a stack inteira</h2>
+  <div class="frame">
+    <span class="corner">visão macro</span>
+
+    <div class="scrollwrap">
+    <div class="pipeline" style="margin-top:14px">
+      <!-- CLIENTES -->
+      <div style="display:flex;flex-direction:column;gap:12px;min-width:250px;flex:0 0 auto">
+        <!-- FRONT -->
+        <div class="box alt svc" style="border-color:var(--green)">
+          <div class="name">🌐 jobapply-app :5173</div>
+          <div class="port">Vite 5 + React 18 + TS</div>
+          <ul>
+            <li>TanStack Router (file-based) + Query</li>
+            <li>antd 5 + Emotion · theme como contrato</li>
+            <li>axios + interceptors (Bearer / 401→login)</li>
+            <li>packages via fonte: ui · editor · ats-ui · contracts</li>
+          </ul>
+        </div>
+        <!-- EXTENSÃO -->
+        <div class="box svc" style="border-color:var(--orange)">
+          <div class="name">🧩 jobapply-extension</div>
+          <div class="port">Chrome MV3 · Vite + crxjs · React 18</div>
+          <ul>
+            <li>sem popup: overlay full-screen (Shadow DOM + iframe)</li>
+            <li>context menu captura JD em <b>qualquer site</b></li>
+            <li>mesmos packages via fonte (ui/editor/ats-ui/contracts)</li>
+            <li>analyze async + SSE — mesmo caminho do app (origem chrome-extension://*)</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="harrow right">
+        <div class="line"></div>
+        <div class="lbl">REST + JWT Bearer<br>app: axios · ext: fetch<br>CORS allowlist + chrome-extension://*</div>
+      </div>
+
+      <!-- API -->
+      <div class="box svc" style="border-color:var(--blue)">
+        <div class="name">⚙️ jobapply-api :3000</div>
+        <div class="port">Express 4 · Mongoose 8 · JWT</div>
+        <ul>
+          <li>helmet · CORS allowlist (+chrome-ext)</li>
+          <li>auth → usageLimit (5/50/∞ dia) → controller</li>
+          <li>LLM isolado: atsService + llmService</li>
+          <li>sanitizeUserInput (anti-injection, 24k)</li>
+        </ul>
+      </div>
+
+      <div class="harrow right">
+        <div class="line"></div>
+        <div class="lbl">HTTP + SSE<br>atsService.ts (único ponto)</div>
+      </div>
+
+      <!-- AGENT -->
+      <div class="box third svc" style="border-color:var(--purple)">
+        <div class="name">🤖 ats-agent :3001</div>
+        <div class="port">Fastify 4 · LangGraph 0.2 · Zod</div>
+        <ul>
+          <li>grafo linear de 9 nós (4 LLM + 5 det.)</li>
+          <li>/analyze async (job Map TTL 30min)</li>
+          <li>score boolean matchmaking determinístico</li>
+          <li>resume com verifier anti-fabricação</li>
+        </ul>
+      </div>
+
+      <div class="harrow right dashed">
+        <div class="line"></div>
+        <div class="lbl">SDK openai<br>baseURL z.ai · reasoning low</div>
+      </div>
+
+      <!-- GLM -->
+      <div class="box alt svc" style="border-color:var(--orange);background:#fff8f2">
+        <div class="name">✨ GLM API (Z.ai)</div>
+        <div class="port">glm-5.3-flash</div>
+        <ul>
+          <li>JSON via prompt (sem json mode)</li>
+          <li>3–5 chamadas por /analyze (3 warm)</li>
+          <li>fallback determinístico por nó</li>
+        </ul>
+      </div>
+    </div>
+    </div>
+
+    <!-- row 2: stores -->
+    <div class="attachments">
+      <div class="attach">
+        <div class="varrow"></div>
+        <div class="box" style="border-color:var(--green)">
+          <b>🍃 MongoDB Atlas</b>
+          <div class="tiny mono">users · cvs · jobs · publishedcvs · vouchers</div>
+          <div class="tiny">sanitizeFilter global · sem migrations · 1 CV por usuário (unique)</div>
+        </div>
+      </div>
+      <div class="attach">
+        <div class="varrow"></div>
+        <div class="box" style="border-color:var(--blue)">
+          <b>🗂️ SQLite — chunks.db (agent)</b>
+          <div class="tiny mono">node:sqlite · WAL · :memory: em testes</div>
+          <div class="tiny">cache por sha256 do conteúdo — sem TTL, reconstrível</div>
+        </div>
+      </div>
+      <div class="attach">
+        <div class="varrow dashed"></div>
+        <div class="box" style="border-color:var(--orange)">
+          <b>✦ Gemini — direto da API</b>
+          <div class="tiny mono">gemini-flash-lite-latest</div>
+          <div class="tiny">cover letter · tailor CV/JD · video script — contorno do agent de propósito</div>
+        </div>
+      </div>
+      <div class="attach">
+        <div class="varrow dashed"></div>
+        <div class="box" style="border-color:var(--purple)">
+          <b>💼 linkedin-agent</b>
+          <div class="tiny">análise de perfil · poll no controller (1.5s · deadline 120s)</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- deploy strip -->
+    <div class="flow" style="margin-top:16px">
+      <div class="box" style="border-color:var(--green);flex:0 0 auto;padding:8px 14px"><b>GitHub Actions</b><div class="tiny">push em main</div></div>
+      <div class="chain-arrow" style="flex:0 0 34px"></div>
+      <div class="box" style="flex:0 0 auto;padding:8px 14px"><b>Caddy (VPS)</b><div class="tiny">serve dist/ estático · dojob.pro</div></div>
+      <div class="chain-arrow" style="flex:0 0 34px"></div>
+      <div class="box" style="flex:0 0 auto;padding:8px 14px"><b>docker compose prod</b><div class="tiny mono">api + ats-agent + linkedin-agent · api.dojob.pro · rsync + up -d --build + healthchecks</div></div>
+    </div>
+
+    <div class="dashed-note">⛔ regra de ouro: ats-agent NÃO acessa MongoDB — stateless de negócio · controllers nunca chamam o agent direto: sempre via atsService.ts</div>
+  </div>
+</section>
+
+<!-- ============================ 2. FRONT ============================ -->
+<section>
+  <h2>2 · Front — jobapply-app & packages</h2>
+  <div class="frame">
+    <span class="corner">clean architecture + design system como contrato</span>
+
+    <div class="layers">
+      <div class="layer">
+        <div class="layer-badge">camadas<br>rígidas</div>
+        <div class="box" style="border-color:var(--green)">
+          <b>presentation/</b> — pages + components acoplados a domain · hooks de orquestração de UI
+        </div>
+        <div class="box" style="border-color:var(--blue)">
+          <b>design-system/</b> — wrappers AntD + layout · <b>proibido</b> importar domain/
+        </div>
+        <div class="box" style="border-color:var(--purple)">
+          <b>domain/</b> — tipos (= contracts) + interfaces de repository + helpers puros
+        </div>
+        <div class="box" style="border-color:var(--orange)">
+          <b>infrastructure/</b> — axios client + repositories (+ mock/data.ts) · <b>application/</b> — AuthProvider
+        </div>
+      </div>
+    </div>
+
+    <div class="grid2" style="margin-top:18px">
+      <div class="box tcard" style="border-color:var(--green)">
+        <h3>🧭 Roteamento & auth no client</h3>
+        <ul class="small" style="list-style:none">
+          <li>• TanStack Router <b>file-based</b>: / · /login · /register · /onboarding · /linkedin-callback · /public/$publicId · _auth: /cv · /tailoring · /linkedin</li>
+          <li>• guard em <span class="mono">beforeLoad</span> lê localStorage direto (evita stale state) + <span class="mono">isTokenExpired()</span> decodificando o JWT</li>
+          <li>• AuthProvider = Context puro {user, token, cvId} — cvId é <b>derivado</b> de user.cv</li>
+          <li>• axios: request → Bearer de localStorage · response → <b>401 limpa storage e redireciona /login</b></li>
+          <li>• ⚠️ <span class="mono">USE_MOCK = VITE_USE_MOCK !== 'false'</span> — mock é o <b>default</b></li>
+        </ul>
+      </div>
+      <div class="box alt tcard" style="border-color:var(--blue)">
+        <h3>🗄️ Dados de servidor = TanStack Query</h3>
+        <ul class="small" style="list-style:none">
+          <li>• zero Redux/Zustand — Context só p/ auth</li>
+          <li>• <span class="mono">['cv', id]</span> staleTime 5min · <span class="mono">['atsReport', cvId, locale, jd]</span> <b>staleTime 30min</b> (não re-dispara ao digitar no editor) · CV público 1h</li>
+          <li>• reanálise / generate-resume = useMutation on-demand</li>
+          <li>• save sincroniza via <span class="mono">queryClient.setQueryData</span> + skipApplyRef (anti-loop)</li>
+          <li>• remount reset: sessionKey bumpa ⟹ &lt;TailoringSession key&gt; zera o workspace</li>
+        </ul>
+      </div>
+    </div>
+
+    <h3 style="margin-top:20px">🔗 A cadeia de dados ATS — do report à tela</h3>
+    <div class="scrollwrap">
+    <div class="flow">
+      <div class="box" style="flex:0 0 auto;padding:8px 12px;border-color:var(--purple)"><b>ATSReport</b><div class="tiny mono">@jobapply/contracts</div></div>
+      <div class="chain-arrow" style="flex:0 0 34px"></div>
+      <div class="box" style="flex:0 0 auto;padding:8px 12px;border-color:var(--purple)"><b>mapATSReportToPanel</b><div class="tiny">@jobapply/ats-ui · score + projectedScore = score + 1.5×sugestões (cap 100)</div></div>
+      <div class="chain-arrow" style="flex:0 0 34px"></div>
+      <div class="box" style="flex:0 0 auto;padding:8px 12px;border-color:var(--purple)"><b>buildEditorKeywords</b><div class="tiny mono">EditorKeywords {toAdd, toRephrase, phrases…}</div></div>
+      <div class="chain-arrow" style="flex:0 0 34px"></div>
+      <div class="box" style="flex:0 0 auto;padding:8px 12px;border-color:var(--green)"><b>TipTap buildSuggestions</b><div class="tiny">Suggestion[] {insert|replace|remove} + dedupe</div></div>
+      <div class="chain-arrow" style="flex:0 0 34px"></div>
+      <div class="box" style="flex:0 0 auto;padding:8px 12px;border-color:var(--green)"><b>ProseMirror Decorations</b><div class="tiny">inline marks rs-mark-* · clique → popover · diff view vs diffBase · flash verde/âmbar</div></div>
+    </div>
+    </div>
+
+    <div class="attachments" style="margin-top:14px">
+      <div class="attach"><div class="box" style="padding:8px 14px"><b>📦 via fonte (sem build)</b><div class="tiny">@jobapply/ui (9 primitives styled(AntD), tema é <b>interface</b> — app dono dos tokens) · @jobapply/editor (TipTap, Markdown ext, gfm off, sync value↔doc via lastEmittedRef) · @jobapply/ats-ui · @jobapply/contracts — <span class="mono">main: ./src/index.ts</span></div></div></div>
+      <div class="attach"><div class="box" style="padding:8px 14px"><b>✍️ Editor duplo</b><div class="tiny">rich = TipTap (default, flag localStorage) · fallback = Monaco lazy com diff via ViewZones · ações: insertAtCursor, findAndReplace, toggleDiff</div></div></div>
+      <div class="attach"><div class="box" style="padding:8px 14px"><b>📤 Export & publish</b><div class="tiny">PDF client-side (md-to-pdf) · .md · salvar versão → PUT /cv/:id/version/:locale (parseMarkdownToLocale valida) · publish → POST /cv/:id/publish → /public/:publicId (OG dinâmico, staleTime 1h)</div></div></div>
+    </div>
+
+    <h3 style="margin-top:20px">🧩 Extensão Chrome (MV3) — captura + análise em qualquer site</h3>
+    <div class="scrollwrap">
+    <div class="flow">
+      <div class="box" style="flex:0 0 auto;padding:8px 12px;border-color:var(--orange)"><b>1 · context menu</b><div class="tiny">seleciona texto → "Copy Job Description" (onInstalled, contexts: selection) · service worker executa getSelection() → salva em chrome.storage.session</div></div>
+      <div class="chain-arrow" style="flex:0 0 30px"></div>
+      <div class="box" style="flex:0 0 auto;padding:8px 12px;border-color:var(--purple)"><b>2 · OPEN_OVERLAY</b><div class="tiny">tabs.sendMessage → content script passivo monta host + Shadow DOM + iframe full-screen (z-index máx, body overflow travado) · chrome:// → fallback abre overlay.html em nova aba</div></div>
+      <div class="chain-arrow" style="flex:0 0 30px"></div>
+      <div class="box" style="flex:0 0 auto;padding:8px 12px;border-color:var(--green)"><b>3 · overlay (React)</b><div class="tiny">views: login | register | ats | cv · RichMarkdownEditor + ATSPanel + 5 modais · PDF via pdfmake (Arimo base64) com fallback print · mensagens tipadas CLOSE_OVERLAY relayadas pelo background</div></div>
+      <div class="chain-arrow" style="flex:0 0 30px"></div>
+      <div class="box" style="flex:0 0 auto;padding:8px 12px;border-color:var(--blue)"><b>4 · async + SSE (igual ao app)</b><div class="tiny mono">POST /cv/analyze → 202 {requestId} → GET /cv/analyze/:id/stream (SSE · Bearer de chrome.storage.session) · + generate-resume/direct · GET/POST/PUT /cv · 401 → clearAuth + reset p/ login</div></div>
+    </div>
+    </div>
+    <div class="callout">✏️ A extensão usa o <b>mesmo fluxo async + SSE do app</b>: <span class="mono">POST /cv/analyze</span> devolve 202 <span class="mono">{requestId}</span> (cota debitada aqui, no usageLimit) e o resultado chega por <span class="mono">GET /cv/analyze/:requestId/stream</span> — a API <b>proxya o stream do agente</b> com o mesmo deadline de 5min e aborta no disconnect do cliente. UI imune ao CSS da página hospedeira (iframe de origem chrome-extension:// dentro de Shadow DOM). Storage: <b>auth em chrome.storage.local com TTL de 24h</b>; cvId e JD capturada em <span class="mono">chrome.storage.session</span> (efêmeros de propósito).</div>
+  </div>
+</section>
+
+<!-- ============================ 3. BACKEND ============================ -->
+<section>
+  <h2>3 · Backend — jobapply-api</h2>
+  <div class="frame">
+    <span class="corner">gateway de negócio: auth, cotas, orquestração</span>
+
+    <div class="scrollwrap">
+    <div class="flow">
+      <div class="box" style="flex:0 0 auto;padding:8px 12px"><b>helmet</b><div class="tiny">security headers</div></div>
+      <div class="chain-arrow" style="flex:0 0 30px"></div>
+      <div class="box" style="flex:0 0 auto;padding:8px 12px"><b>CORS</b><div class="tiny">allowlist env + chrome-extension://* · credentials</div></div>
+      <div class="chain-arrow" style="flex:0 0 30px"></div>
+      <div class="box" style="flex:0 0 auto;padding:8px 12px"><b>rate limit</b><div class="tiny">20 req/15min só em /users · trust proxy (Railway)</div></div>
+      <div class="chain-arrow" style="flex:0 0 30px"></div>
+      <div class="box" style="flex:0 0 auto;padding:8px 12px;border-color:var(--red)"><b>auth</b><div class="tiny">jwt.verify → req.user.id · sem DB check</div></div>
+      <div class="chain-arrow" style="flex:0 0 30px"></div>
+      <div class="box" style="flex:0 0 auto;padding:8px 12px;border-color:var(--orange)"><b>usageLimit</b><div class="tiny">free 5 · premium 50 · ultimate ∞ · incrementa ANTES · 429</div></div>
+      <div class="chain-arrow" style="flex:0 0 30px"></div>
+      <div class="box" style="flex:0 0 auto;padding:8px 12px;border-color:var(--green)"><b>controller</b><div class="tiny">ownership 403 · sanitize · delega</div></div>
+    </div>
+    </div>
+
+    <div class="grid2" style="margin-top:16px">
+      <div class="box tcard" style="border-color:var(--blue)">
+        <h3>🗺️ Superfície REST (resumo)</h3>
+        <ul class="small" style="list-style:none">
+          <li>• <b>/users</b> register/login · <b>/auth/linkedin</b> OAuth (code→token→perfil; vincula por linkedinId→email)</li>
+          <li>• <b>/cv</b>: create (1 por user) · get/put/delete (dono only, localeVersions sobrepostas) · publish → PublishedCV</li>
+          <li>• <b>/cv IA</b>: analyze · generate-resume (direto e :id) · generate · cover-letter · video-script · tailor · interview-prep · linkedin/analyze</li>
+          <li>• <b>/jobs</b>: CRUD + bulk (ordered:false, 201 parcial) + filtros regex/paginação · tailor-description</li>
+          <li>• <b>/vouchers</b>: adminOnly CRUD + redeem (expirado→410, seta access_type) · <b>/public/:public_id</b></li>
+        </ul>
+      </div>
+      <div class="box alt tcard" style="border-color:var(--orange)">
+        <h3>🧠 Cérebro duplo de LLM</h3>
+        <ul class="small" style="list-style:none">
+          <li>• <span class="mono">atsService.ts</span> — <b>único</b> ponto HTTP pro ats-agent: /analyze async + consumo por <b>SSE</b> (deadline 5min · AbortController) · demais sync · erro → propaga com err.status (502)</li>
+          <li>• <span class="mono">llmService.ts</span> — Gemini direto p/ textos criativos (cover letter com prompt anti "AI-smell" + integridade, tailor, video script)</li>
+          <li>• <span class="mono">interviewPrepService.ts</span> — repassa /interview-prep</li>
+          <li>• <span class="mono">sanitizeUserInput</span> — trunca 24k, remove tags &lt;system&gt; e padrões de injeção antes de qualquer LLM</li>
+          <li>• detectLocale: heurística pt-BR (palavras-sinal + acentos) · report <b>não é persistido</b></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================ 4. ATS-AGENT ============================ -->
+<section>
+  <h2>4 · ats-agent — o cérebro da análise</h2>
+  <div class="frame">
+    <span class="corner">Fastify :3001 · 4 LLM + 5 determinísticos · score auditável</span>
+    <div class="scrollwrap">
+    <div class="chain" style="margin-top:10px">
+      <div class="box node det"><div class="t">mapper</div><div class="d">achata cv estruturado (merge localeVersions) ou parseia markdown ## com aliases pt/en</div></div>
+      <div class="chain-arrow"></div>
+      <div class="box node llm"><span class="cache">💾 cache</span><div class="t">jdExtractor</div><div class="d">JD limpa (lib/jd.ts remove benefícios) → sha256 → 15–40 chunks {type, tier} + jobTitle</div></div>
+      <div class="chain-arrow"></div>
+      <div class="box node llm"><span class="cache">💾 cache</span><div class="t">cvExtractor</div><div class="d">20–60 chunks de evidência por seção — wording do CV, sem inventar</div></div>
+      <div class="chain-arrow"></div>
+      <div class="box node llm"><div class="t">keywordComposer</div><div class="d">5–30 keywords {term, tier, variants} — variantes só superfícies literais</div></div>
+      <div class="chain-arrow"></div>
+      <div class="box node llm"><div class="t">keywordClassifier</div><div class="d">mergeOrGroups determinístico primeiro · LLM só verdicts: merge/strip/reclassify</div></div>
+      <div class="chain-arrow"></div>
+      <div class="box node det"><div class="t">booleanMatcher</div><div class="d">word-boundary + plural/singular · ordem exp→skills→summary→edu→lang · evidence ±40 chars</div></div>
+      <div class="chain-arrow"></div>
+      <div class="box node det"><div class="t">scoreComposer</div><div class="d">coverage ponderada + content + format</div></div>
+      <div class="chain-arrow"></div>
+      <div class="box node llm"><div class="t">gapAdvisor</div><div class="d">só missing: rephrase vs absent · guarda looksFabricated · removeSuggestions ≤5</div></div>
+      <div class="chain-arrow"></div>
+      <div class="box node det"><div class="t">aggregator</div><div class="d">ATSReport: tips critical→high→medium · gaps ≤12 · keywordsToAdd ≤20</div></div>
+    </div>
+    </div>
+    <div class="legend">
+      <span><span class="swatch" style="background:#f1edff;border-color:var(--purple)"></span> chama GLM (fallback determinístico — pipeline nunca bloqueia)</span>
+      <span><span class="swatch" style="background:#e8f3fd;border-color:var(--blue)"></span> determinístico/auditável</span>
+      <span><span class="swatch" style="background:var(--yellow);border-color:#8a7500"></span> cache SQLite</span>
+    </div>
+
+    <h3 style="margin-top:18px">🧬 Estratégia composer + classifier — determinístico → LLM → determinístico</h3>
+    <div class="scrollwrap">
+    <div class="flow">
+      <div class="box" style="flex:0 0 auto;padding:8px 12px;border-color:var(--blue)"><b>1 · mergeOrGroups (det.)</b><div class="tiny">funde atoms com "or" na <b>ordem da JD</b> → EITHER-OR ("jest or vitest") resolvido sem gastar token de LLM</div></div>
+      <div class="chain-arrow" style="flex:0 0 30px"></div>
+      <div class="box" style="flex:0 0 auto;padding:8px 12px;border-color:var(--purple)"><b>2 · keywordComposer (LLM)</b><div class="tiny">jd_atoms × cv_chunks → 5–30 keywords {term, tier, variants} · guard <span class="mono">isPlausibleVariant</span> descarta variante não-literal <b>antes</b> de virar promessa de match</div></div>
+      <div class="chain-arrow" style="flex:0 0 30px"></div>
+      <div class="box" style="flex:0 0 auto;padding:8px 12px;border-color:var(--purple)"><b>3 · keywordClassifier (LLM, payload pequeno)</b><div class="tiny">verdicts <b>só</b> p/ keywords problemáticas: <span class="mono">merge_into</span> (OR quebrado em must-haves independentes) · <span class="mono">strip_variant</span> (variante que engole o token diferenciador) · <span class="mono">reclassify</span> (skill | eligibility | credential | seniority)</div></div>
+      <div class="chain-arrow" style="flex:0 0 30px"></div>
+      <div class="box" style="flex:0 0 auto;padding:8px 12px;border-color:var(--blue)"><b>4 · applyKeywordVerdicts (det.)</b><div class="tiny">aplica os vereditos por pós-processamento · LLM nunca inventa/drop/troca tier · falha do LLM → segue com mergeOrGroups puro</div></div>
+    </div>
+    </div>
+    <div class="grid2" style="margin-top:12px">
+      <div class="box alt" style="padding:10px 14px;border-color:var(--purple)">
+        <b>🛂 isPlausibleVariant — variante só se for superfície literal do termo</b>
+        <ul class="tiny" style="list-style:none;margin-top:4px">
+          <li>• concatenação dos tokens: <span class="mono">nodejs ← node js</span></li>
+          <li>• tokens compartilhados ≥4 chars ou abrevs ≤3 chars fora de {web, app, dev, and, for, the}: <span class="mono">ci cd ← continuous integration</span></li>
+          <li>• termo de 1 token + sufixo ≤3 chars: <span class="mono">reactjs ← react · apis ← api</span></li>
+          <li>• rejeita: variante com mais tokens que o termo · qualquer sinônimo conceitual (semântica não credita score)</li>
+        </ul>
+      </div>
+      <div class="box" style="padding:10px 14px;border-color:var(--green)">
+        <b>🎯 Por que esse desenho</b>
+        <ul class="tiny" style="list-style:none;margin-top:4px">
+          <li>• casos óbvios (OR explícito) resolvidos de graça — LLM entra só nos ambíguos, com payload pequeno</li>
+          <li>• variante literal é o contrato com o booleanMatcher: se o composer promete a variante, a busca word-boundary <b>garante</b> casar (zero falso prometido)</li>
+          <li>• LLM no papel de <b>juiz</b> (verdicts pontuais), não de autor — saída limitada, validável e com fallback</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="formula">
+      <b>universalScore</b> = min(100, 0.70·coverage + 0.15·content + 0.15·format + 0.05·niceBonus)<br>
+      <span class="tiny">must ×3 · important ×2 · nice ×0 (fora do denominador, bônus cap +5) · −8/bullet genérico (cap −40) · −5/10% sem métrica (cap −30) · −12/seção vazia</span>
+    </div>
+
+    <div class="callout">✏️ <b>/generate-resume</b> (sync): re-executa extract→compose→gap no cache → draft GLM → <b>verifier anti-fabricação</b> (métricas rastreadas, Jaccard ≥0.2, frases genéricas → revert) → renderer + styleSanitizer → <b>re-score; se piorar, 2ª draft</b> e fica com a melhor. <b>Jobs /analyze:</b> Map em memória, 202 imediato, entrega por <b>SSE</b> (<span class="mono">/result/:requestId/stream</span> · heartbeat 15s · notificação por subscriber, fecha no terminal), sweeper 10min × TTL 30min. <b>Cache:</b> hash do conteúdo limpo → sem TTL/invalidação; warm = 3 LLM vs 5 frio.</div>
+  </div>
+</section>
+
+<!-- ============================ 5. DATA ============================ -->
+<section>
+  <h2>5 · Camada de dados — 3 stores + browser</h2>
+  <div class="frame">
+    <span class="corner">onde cada byte mora</span>
+    <div class="scrollwrap">
+    <table>
+      <tr><th>Store</th><th>Coleção/Tabela</th><th>Índices/chaves</th><th>Notas</th></tr>
+      <tr><td rowspan="5"><b>🍃 MongoDB</b><br><span class="tiny">fonte da verdade de negócio</span></td>
+        <td class="mono">users</td><td>email unique · linkedinId unique sparse · public_id unique</td><td>bcrypt salt 10 · password select:false · daily_usage{count,date}</td></tr>
+      <tr><td class="mono">cvs</td><td>user <b>unique</b> → 1 CV/usuário</td><td>tailoredVersions[] + localeVersions[] (en/pt-BR) embutidos — doc pode crescer sem limite</td></tr>
+      <tr><td class="mono">jobs</td><td>text index (title, company, description)</td><td>status open/closed/applied · bulk ordered:false</td></tr>
+      <tr><td class="mono">publishedcvs</td><td>user unique · public_id indexado</td><td>cópia <b>desnormalizada</b> do CV p/ página pública (sem markdown/versões)</td></tr>
+      <tr><td class="mono">vouchers</td><td>code unique (A-Z0-9 ≤8)</td><td>redeem troca user.access_type</td></tr>
+      <tr><td rowspan="2"><b>🗂️ SQLite</b><br><span class="tiny">cache derivado do agent</span></td>
+        <td class="mono">jd_chunks · jd_meta</td><td class="mono">PK (jd_id, id) · id = sha256(norm(type)::attr)</td><td rowspan="2">hash sobre a JD <b>limpa</b> → mesmo input = mesmo cache · INSERT OR IGNORE em transação · 212 jd / 651 cv chunks hoje</td></tr>
+      <tr><td class="mono">cv_chunks</td><td class="mono">PK (cv_id, id) · section de origem</td></tr>
+      <tr><td><b>🧠 Memória (agent)</b></td><td class="mono">Map&lt;requestId, JobResult&gt;</td><td>sweeper 10min · TTL 30min pós-conclusão</td><td>⚠️ pending/running nunca expiram · restart perde tudo</td></tr>
+      <tr><td><b>💻 Browser</b></td><td class="mono">localStorage</td><td>token · user · cvId · jobapply_onboarded · dojob:richEditor</td><td>JWT em localStorage (não cookie) · base do guard de rota</td></tr>
+      <tr><td rowspan="2"><b>🧩 Extensão</b></td><td class="mono">chrome.storage.local</td><td>jobapply:auth {token, user, authAt}</td><td>JWT persiste entre sessões com <b>TTL de 24h</b> (checado na leitura; server revoga antes via 401)</td></tr>
+      <tr><td class="mono">chrome.storage.session</td><td>jobapply:cvId · jobapply:capturedJob</td><td>some ao fechar o navegador (CV selecionado e JD capturada são efêmeros de propósito)</td></tr>
+    </table>
+    </div>
+    <div class="callout">✏️ <b>Contratos duplicados (por enquanto):</b> front e packages usam <span class="mono">@jobapply/contracts</span>; api tem os seus e o agent usa <span class="mono">ats-agent/src/types.ts</span> — sincronização é <b>manual</b> (regra do CLAUDE.md: mudou um lado, muda o outro). Fluxo do front envia <b>cvMarkdown</b>, não o CV estrutural.</div>
+  </div>
+</section>
+
+<!-- ============================ 6. SEQUENCE ============================ -->
+<section>
+  <h2>6 · Fluxo principal — POST /cv/:id/analyze (ponta a ponta)</h2>
+  <div class="frame">
+    <span class="corner">sequence diagram</span>
+    <div class="scrollwrap">
+    <div class="seq-grid seq">
+      <div class="actor" style="border-color:var(--green)">📱 App (TipTap)</div>
+      <div class="actor" style="border-color:var(--blue)">⚙️ jobapply-api</div>
+      <div class="actor" style="border-color:var(--purple)">🤖 ats-agent</div>
+      <div class="actor" style="border-color:var(--orange)">✨ GLM / SQLite</div>
+
+      <div class="seq-spacer"></div>
+
+      <div class="seq-row">
+        <div class="msg to-r" style="grid-column:1/2">
+          <div class="mlbl">mutation analyzeCV<br>{cvMarkdown, jobId|JD, locale}</div>
+        </div>
+      </div>
+      <div class="seq-row"><div></div><div class="selfnote">auth (JWT) → usageLimit (5/50/∞, incrementa antes) → ownership 403 → sanitizeUserInput 24k → detectLocale</div></div>
+
+      <div class="seq-row">
+        <div></div>
+        <div class="msg to-r" style="grid-column:2/3"><div class="mlbl">POST /analyze (Zod)</div></div>
+      </div>
+      <div class="seq-row">
+        <div></div><div></div>
+        <div class="msg to-l dashed" style="grid-column:3/4"><div class="mlbl">{requestId, pending} <b>na hora</b></div></div>
+      </div>
+      <div class="seq-row"><div></div><div></div><div class="selfnote g">grafo roda em background — job 'running' no Map</div></div>
+
+      <div class="seq-row">
+        <div></div><div></div><div></div>
+        <div class="msg to-r" style="grid-column:4/5"><div class="mlbl">sha256 → cache miss? → indexa JD/CV</div></div>
+      </div>
+      <div class="seq-row">
+        <div></div><div></div>
+        <div class="msg to-r dashed" style="grid-column:4/5"><div class="mlbl">3–5 chamadas GLM (extractors, composer, classifier, gapAdvisor)</div></div>
+      </div>
+      <div class="seq-row"><div></div><div></div><div class="selfnote g">booleanMatcher + scoreComposer + aggregator = 0 LLM</div></div>
+
+      <div class="seq-row">
+        <div></div>
+        <div class="msg to-r" style="grid-column:2/3"><div class="mlbl">GET /result/:requestId/stream <b>(SSE)</b> — 1 conexão · deadline 5min via AbortController</div></div>
+      </div>
+      <div class="seq-row"><div></div><div></div><div class="selfnote">abre o stream: snapshot {running} imediato · heartbeat <span class="mono">: ping</span> 15s · subscriber notificado no estado terminal</div></div>
+      <div class="seq-row"><div></div><div class="selfnote g" style="border-color:var(--red);background:#fff2f2;color:#a33">conexão do cliente presa até o terminal (mesma UX de antes, sem re-request) · estourou 5min → abort → 'ATS analysis timed out'</div></div>
+
+      <div class="seq-row">
+        <div></div><div></div>
+        <div class="msg to-l dashed" style="grid-column:3/4"><div class="mlbl"><b>push</b>: data {status: done, report: ATSReport} → stream fecha</div></div>
+      </div>
+      <div class="seq-row">
+        <div class="msg to-l" style="grid-column:1/2"><div class="mlbl">200 {report, locale}</div></div>
+      </div>
+      <div class="seq-row"><div class="selfnote g" style="margin-left:18px">Query cacheia 30min → buildEditorKeywords → decorações no TipTap · projectedScore atualiza o painel</div></div>
+    </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================ 7. TRADE-OFFS ============================ -->
+<section>
+  <h2>7 · Trade-offs por camada</h2>
+  <div class="grid2">
+
+    <div class="box tcard" style="border-color:var(--green)">
+      <h3>📦 Packages via fonte <span class="layer-tag">FRONT</span><span class="vs">vs build/publicação de versões</span></h3>
+      <ul class="pros">
+        <li>Mutation instantânea: edita o package, o app já vê (HMR atravessa)</li>
+        <li>Zero overhead de build/registry no monorepo</li>
+      </ul>
+      <div class="divider"></div>
+      <ul class="cons">
+        <li>Sem versionamento/semver — quebra silenciosa entre packages</li>
+        <li>TipTap <b>pinnado exato</b> (3.31.3) pra conter drift de peerDeps</li>
+      </ul>
+    </div>
+
+    <div class="box alt tcard" style="border-color:var(--green)">
+      <h3>🗄️ Query como fonte de verdade <span class="layer-tag">FRONT</span><span class="vs">vs store global (Redux)</span></h3>
+      <ul class="pros">
+        <li>staleTime por domínio (CV 5min, ATS 30min, público 1h) mata refetch em loop de digitação</li>
+        <li>Chave inclui locale+JD → cache automático por combinação</li>
+      </ul>
+      <div class="divider"></div>
+      <ul class="cons">
+        <li>ATS 30min pode servir report velho depois de editar o CV</li>
+        <li>Guard de rota lê localStorage (fonte paralela ao Context)</li>
+      </ul>
+    </div>
+
+    <div class="box third tcard" style="border-color:var(--purple)">
+      <h3>✍️ TipTap + Decorations <span class="layer-tag">FRONT</span><span class="vs">vs textarea/Monaco diff</span></h3>
+      <ul class="pros">
+        <li>Sugestões inline clicáveis (insert/replace/remove) nativas do doc</li>
+        <li>Diff visual vs diffBase + flashes — UX de code review no CV</li>
+      </ul>
+      <div class="divider"></div>
+      <ul class="cons">
+        <li>Serialização markdown↔ProseMirror é ponto frágil (normalização própria)</li>
+        <li>Duas experiências de editor mantidas (rich + Monaco fallback)</li>
+      </ul>
+    </div>
+
+    <div class="box tcard">
+      <h3>🔑 JWT stateless em localStorage <span class="layer-tag">API</span><span class="vs">vs sessões/httpOnly cookie</span></h3>
+      <ul class="pros">
+        <li>Verify O(1) sem I/O · serve web e chrome-extension igual</li>
+        <li>Logout client-side trivial (limpa storage no 401)</li>
+      </ul>
+      <div class="divider"></div>
+      <ul class="cons">
+        <li>Revogação impossível por 7d (sem blacklist/refresh)</li>
+        <li>Token exposto a XSS (mitigado por helmet, sem sanitização de HTML)</li>
+      </ul>
+    </div>
+
+    <div class="box alt tcard">
+      <h3>💰 Cota debitada na tentativa <span class="layer-tag">API</span><span class="vs">vs cobrar só sucesso</span></h3>
+      <ul class="pros">
+        <li>Imune a flood: erro 502 não vira análise infinita grátis</li>
+        <li>Uma escrita no User por request — sem lock/atomicidade extra</li>
+      </ul>
+      <div class="divider"></div>
+      <ul class="cons">
+        <li>Falha do agent consome cota do usuário (5/dia no free doem)</li>
+        <li>Reset à meia-noite no tz do servidor (UTC na VPS)</li>
+      </ul>
+    </div>
+
+    <div class="box third tcard" style="border-color:var(--orange)">
+      <h3>🧭 Dois cérebros de LLM <span class="layer-tag">API</span><span class="vs">— GLM no agent, Gemini na API</span></h3>
+      <ul class="pros">
+        <li>Agente especializado em análise auditável; API cuida de prosa criativa com prompts ricos</li>
+        <li>Boundary claro: LLM só em llmService/atsService</li>
+      </ul>
+      <div class="divider"></div>
+      <ul class="cons">
+        <li>Duas chaves, dois provedores, dois caminhos de custo/falha</li>
+        <li>linkedin-agent é um 3º caminho com poll diferente (no controller)</li>
+      </ul>
+    </div>
+
+    <div class="box tcard" style="border-color:var(--purple)">
+      <h3>🧠 Jobs em Map + TTL <span class="layer-tag">AGENT</span><span class="vs">vs Redis/BullMQ</span></h3>
+      <ul class="pros">
+        <li>Zero infra; 202 imediato desacopla caller de grafo de minutos</li>
+        <li>Entrega por SSE: 1 conexão, push no terminal — sem re-request de poll</li>
+      </ul>
+      <div class="divider"></div>
+      <ul class="cons">
+        <li>Restart = jobs somem (API fica no stream aberto até 404/deadline)</li>
+        <li>Sem réplicas: job gruda numa instância · pending/running nunca expiram (leak)</li>
+      </ul>
+    </div>
+
+    <div class="box alt tcard" style="border-color:var(--purple)">
+      <h3>🎯 Boolean matchmaking <span class="layer-tag">AGENT</span><span class="vs">vs embeddings semânticos</span></h3>
+      <ul class="pros">
+        <li>Score reprodutível e auditável — toda keyword tem evidence literal</li>
+        <li>Espelha o ATS real (busca literal) · zero custo de embedding</li>
+      </ul>
+      <div class="divider"></div>
+      <ul class="cons">
+        <li>Sinônimo conceitual não credita — depende do composer/classifier</li>
+        <li>Mitigação: gapAdvisor converte gap semântico em rephrase acionável</li>
+      </ul>
+    </div>
+
+    <div class="box third tcard" style="border-color:var(--purple)">
+      <h3>🗂️ SQLite content-hash <span class="layer-tag">AGENT</span><span class="vs">vs Redis / sem cache</span></h3>
+      <ul class="pros">
+        <li>Invalidação por construção (hash do conteúdo limpo) — sem TTL</li>
+        <li>5 → 3 chamadas LLM no warm (−40% custo/latência)</li>
+      </ul>
+      <div class="divider"></div>
+      <ul class="cons">
+        <li>Local: não compartilha entre réplicas · WAL exige volume no Docker</li>
+        <li>Cresce sem eviction (reconstrível, mas ninguém reconstrói)</li>
+      </ul>
+    </div>
+
+    <div class="box tcard" style="border-color:var(--green)">
+      <h3>🛡️ Fallback determinístico por nó <span class="layer-tag">AGENT</span><span class="vs">fail-fast</span></h3>
+      <ul class="pros">
+        <li>JSON quebrado do LLM nunca derruba o pipeline — sempre há report</li>
+        <li>Verifier anti-fabricação + re-score protege o resume gerado</li>
+      </ul>
+      <div class="divider"></div>
+      <ul class="cons">
+        <li>Degradação silenciosa: gapAdvisor falho → tudo "absent" sem alarme</li>
+        <li>interviewPrep foge ao padrão (throwa → 502)</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ============================ 8. RISCOS ============================ -->
+<section>
+  <h2>8 · Riscos & dívida técnica (post-its honestos)</h2>
+  <div class="stickies">
+    <div class="sticky red">
+      <h3>🚨 Memory leak no agent</h3>
+      Jobs pending/running sem completedAt escapam do sweeper pra sempre. Um nó LLM travado (sem timeout) alimenta o leak.
+    </div>
+    <div class="sticky yellow">
+      <h3>⏰ Timeouts parciais</h3>
+      O stream api→agent agora tem deadline (AbortController, 5min) — mas Fastify e cliente OpenAI seguem no default (~10min). Nó LLM travado segura o stream aberto até o deadline.
+    </div>
+    <div class="sticky red">
+      <h3>💥 Report efêmero</h3>
+      ATSReport vive 30min no Map e não é persistido. Usuário fecha a aba = análise perdida (e cota debitada). Query do front cacheia, mas o cache é volátil.
+    </div>
+    <div class="sticky yellow">
+      <h3>🧬 Contratos costurados à mão</h3>
+      contracts (front) ≠ types.ts (agent) ≠ tipos da api. Drift é questão de tempo — a Opção C (todos importarem @jobapply/contracts) é o fix.
+    </div>
+    <div class="sticky red">
+      <h3>📐 Single-instance por design</h3>
+      Map de jobs + SQLite local impedem réplicas do agent. API escala, o cérebro não.
+    </div>
+    <div class="sticky yellow">
+      <h3>🧪 Testes assimétricos</h3>
+      Agent tem vitest por nó; api não tem teste nenhum (auth/limit/polling no escuro). Front testa painéis e helpers do editor.
+    </div>
+    <div class="sticky mint">
+      <h3>🎭 Mock ligado por padrão</h3>
+      <span class="mono">USE_MOCK !== 'false'</span>: qualquer dev esquece o .env e testa contra dados fake. O CI seta false, mas local engana.
+    </div>
+    <div class="sticky yellow">
+      <h3>📚 Resíduos legados</h3>
+      dist/ do agent com build antigo, swagger sem endpoints novos, docs/examples descrevendo arquitetura morta (gemini, platforms/).
+    </div>
+    <div class="sticky mint">
+      <h3>📄 1 CV por usuário</h3>
+      unique em cvs.user; versões só via arrays embutidos (localeVersions/tailoredVersions) — doc cresce sem limite.
+    </div>
+    <div class="sticky red">
+      <h3>🧩 Extensão fora do repositório</h3>
+      apps/jobapply-extension não está commitada nem no CI (sem lint/testes); usa @jobapply/ui por hoisting <b>sem declarar</b> no package.json; host_permissions e fetch de auth com porta/portais hardcoded (3030).
+    </div>
+  </div>
+</section>
+
+<!-- ============================ 9. NÚMEROS ============================ -->
+<section>
+  <h2>9 · Números que importam & evolução</h2>
+  <div class="grid2">
+    <div class="box tcard">
+      <table>
+        <tr><th>Métrica</th><th>Valor</th></tr>
+        <tr><td>LLM por /analyze</td><td><b>5 frio / 3 warm</b></td></tr>
+        <tr><td>LLM por /generate-resume</td><td><b>6 frio / 4 warm</b> (+1 draft se score cair)</td></tr>
+        <tr><td>Entrega /analyze</td><td><b>SSE stream</b> · heartbeat 15s · deadline 5min (abort)</td></tr>
+        <tr><td>Poll linkedin</td><td>1.5s de intervalo · deadline 2min</td></tr>
+        <tr><td>Jobs</td><td>TTL 30min · sweeper 10min</td></tr>
+        <tr><td>Cota diária</td><td>free 5 · premium 50 · ultimate ∞</td></tr>
+        <tr><td>Rate limit auth</td><td>20 req/15min</td></tr>
+        <tr><td>JWT</td><td>7d · secret ≥32 chars (exit no boot)</td></tr>
+        <tr><td>Sanitização</td><td>24k chars + anti-injection</td></tr>
+        <tr><td>Score</td><td>0.70 cov + 0.15 content + 0.15 format + nice ≤5</td></tr>
+        <tr><td>Cache front</td><td>CV 5min · ATS 30min · público 1h</td></tr>
+      </table>
+    </div>
+    <div class="box alt tcard" style="border-color:var(--green)">
+      <h3>🧭 Roadmap de maior alavancagem</h3>
+      <ul class="small" style="list-style:none;line-height:1.7">
+        <li>1️⃣ <b>@jobapply/contracts everywhere</b> — api + agent importam os tipos do front (mata o drift, passo 1 da Opção C)</li>
+        <li>2️⃣ <b>Timeout no cliente OpenAI</b> (o stream da api já tem AbortController) + retry idempotente</li>
+        <li>3️⃣ <b>Persistir ATSReport</b> (cv.analyses[]) → histórico + débito de cota só no sucesso</li>
+        <li>4️⃣ <b>Job store compartilhado</b> (Redis/Mongo) → destrava réplicas do agent e mata o leak</li>
+        <li>5️⃣ <b>Testes na api</b> (auth, usageLimit, consumo SSE) — a camada de dinheiro</li>
+        <li>6️⃣ turbo.json + limpeza dos legados (dist/, swagger, docs)</li>
+        <li>7️⃣ <b>Versionar a extensão</b> (git + CI com build/zip), declarar @jobapply/ui e alinhar host_permissions com a API de produção</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<footer>
+  ✏️ desenhado a partir da leitura do código-fonte (src/ de app, api, agent e packages — não docs/) · JobApply full stack
+</footer>
+
+</div>
+</body>
+</html>

@@ -1,63 +1,46 @@
+import styled from '@emotion/styled'
+import { CheckOutlined } from '@ant-design/icons'
 import { Colors } from '../../../styles/theme/colors'
-import { BorderRadius } from '../../../styles/theme/radius'
-import { FontFamily, FontWeight } from '../../../styles/theme/typography'
-import { Spacing } from '../../../styles/theme/spacing'
 
-export const styles = {
-  stepper: {
-    display: 'flex',
-    flexDirection: 'column' as const,
-    gap: Spacing.xs,
-  },
-  step: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: Spacing.sm,
-    padding: `${Spacing.sm} ${Spacing.md}`,
-    borderRadius: BorderRadius.md,
-    cursor: 'default',
-    transition: 'background 0.15s',
-  },
-  stepDefault: {
-    background: 'transparent',
-  },
-  stepActive: {
-    background: Colors.primaryLight,
-  },
-  circle: {
-    width: '2.8rem',
-    height: '2.8rem',
-    borderRadius: BorderRadius.avatar,
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    fontFamily: FontFamily.heading,
-    fontWeight: FontWeight.semibold,
-    fontSize: '1.3rem',
-    flexShrink: 0,
-    transition: 'background 0.15s, color 0.15s',
-  },
-  circleDefault: {
-    background: Colors.surfaceBorder,
-    color: Colors.textSub,
-  },
-  circleActive: {
-    background: Colors.primaryDark,
-    color: Colors.white,
-  },
-  circleDone: {
-    background: Colors.success,
-    color: Colors.white,
-  },
-  label: {
-    fontSize: '1.3rem',
-    fontWeight: FontWeight.medium,
-  },
-  labelDefault: {
-    color: Colors.textSub,
-  },
-  labelActive: {
-    color: Colors.primaryDark,
-    fontWeight: FontWeight.semibold,
-  },
-}
+export const Stepper = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: ${({ theme }) => theme.spacing.xs};
+`
+
+export const Step = styled.div<{ $active: boolean }>`
+  display: flex;
+  align-items: center;
+  gap: ${({ theme }) => theme.spacing.sm};
+  padding: ${({ theme }) => `${theme.spacing.sm} ${theme.spacing.md}`};
+  border-radius: ${({ theme }) => theme.radius.md};
+  cursor: default;
+  transition: background 0.15s;
+  background: ${({ $active }) => ($active ? Colors.primaryLight : 'transparent')};
+`
+
+export const StepCircle = styled.div<{ $done: boolean; $active: boolean }>`
+  width: 2.8rem;
+  height: 2.8rem;
+  border-radius: ${({ theme }) => theme.radius.avatar};
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: ${({ theme }) => theme.typography.family.heading};
+  font-weight: ${({ theme }) => theme.typography.weight.semibold};
+  font-size: 1.3rem;
+  flex-shrink: 0;
+  transition: background 0.15s, color 0.15s;
+  background: ${({ $done, $active }) => ($done ? Colors.success : $active ? Colors.primaryDark : Colors.surfaceBorder)};
+  color: ${({ $done, $active }) => ($done || $active ? Colors.white : Colors.textSub)};
+`
+
+export const StepCheckIcon = styled(CheckOutlined)`
+  font-size: 1.2rem;
+`
+
+export const StepLabel = styled.span<{ $active: boolean }>`
+  font-size: 1.3rem;
+  font-weight: ${({ theme, $active }) => ($active ? theme.typography.weight.semibold : theme.typography.weight.medium)};
+  color: ${({ $active }) => ($active ? Colors.primaryDark : Colors.textSub)};
+`

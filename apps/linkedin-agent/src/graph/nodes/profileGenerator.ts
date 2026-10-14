@@ -1,7 +1,5 @@
-import { genAI } from '../../lib/gemini'
+import { generate } from '../../lib/glm'
 import type { GraphState, GenerationOutput } from '../../types'
-
-const model = genAI.getGenerativeModel({ model: 'gemini-flash-lite-latest' })
 
 const LOCALE_LABEL: Record<string, string> = {
   'en': 'English',
@@ -229,16 +227,15 @@ Respond with this exact JSON shape:
   }
 }`
 
-  const result = await model.generateContent(prompt)
-  const raw = result.response.text()
+  const raw = await generate(prompt)
 
   let parsed: GenerationOutput
   try {
     const clean = raw.replace(/^```json\s*/i, '').replace(/```\s*$/, '').trim()
     parsed = JSON.parse(clean) as GenerationOutput
   } catch (error) {
-    console.error('profileGeneratorNode: failed to parse Gemini response:', raw.slice(0, 200))
-    throw new Error(`Failed to parse Gemini response as JSON: ${error instanceof Error ? error.message : 'Unknown error'}`)
+    console.error('profileGeneratorNode: failed to parse GLM response:', raw.slice(0, 200))
+    throw new Error(`Failed to parse GLM response as JSON: ${error instanceof Error ? error.message : 'Unknown error'}`)
   }
 
   if (!parsed.headlineAnalysis || !parsed.aboutAudit || !parsed.overallScore) {

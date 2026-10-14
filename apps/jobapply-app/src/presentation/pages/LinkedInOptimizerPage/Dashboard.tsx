@@ -1,6 +1,7 @@
 import React from 'react'
 import { Card, Row, Col, Typography, Progress, Tag, List } from 'antd'
 import type { LinkedInResult } from '../../../domain/linkedin/types'
+import * as styles from './LinkedInOptimizerPage.styles'
 
 const { Title, Text } = Typography
 
@@ -16,7 +17,7 @@ export function Dashboard({ seo }: Props) {
   const { before, after, delta } = seo
 
   return (
-    <div style={{ marginBottom: 32 }}>
+    <styles.DashboardWrap>
       <Title level={3}>Dashboard SEO</Title>
       <Row gutter={[16, 16]}>
         <Col xs={24} sm={12}>
@@ -39,17 +40,17 @@ export function Dashboard({ seo }: Props) {
         </Col>
       </Row>
 
-      <Card title="Dimensões" style={{ marginTop: 16 }}>
+      <styles.SectionCard title="Dimensões">
         {(['keyword_density_score', 'completeness_score', 'specificity_score', 'role_alignment_score', 'authority_score'] as const).map(key => (
-          <div key={key} style={{ marginBottom: 8 }}>
+          <styles.DimensionRow key={key}>
             <Text>{key.replace(/_score$/, '').replace(/_/g, ' ')}</Text>
             <Progress percent={before[key]} strokeColor={scoreColor(before[key])} />
-          </div>
+          </styles.DimensionRow>
         ))}
-      </Card>
+      </styles.SectionCard>
 
       {before.action_items.length > 0 && (
-        <Card title="Plano de ação" style={{ marginTop: 16 }}>
+        <styles.SectionCard title="Plano de ação">
           <List
             dataSource={before.action_items}
             renderItem={item => (
@@ -65,8 +66,8 @@ export function Dashboard({ seo }: Props) {
               </List.Item>
             )}
           />
-        </Card>
+        </styles.SectionCard>
       )}
-    </div>
+    </styles.DashboardWrap>
   )
 }

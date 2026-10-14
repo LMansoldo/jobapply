@@ -1,6 +1,6 @@
 import { GithubOutlined, LinkedinOutlined, GoogleOutlined } from '@ant-design/icons'
 import type { SocialLoginBtnProps } from './SocialLoginBtn.types'
-import { styles, providerColors, providerLabels } from './SocialLoginBtn.styles'
+import { providerColors, providerLabels, Btn, ProviderIcon } from './SocialLoginBtn.styles'
 
 const icons = {
   google: <GoogleOutlined />,
@@ -10,15 +10,11 @@ const icons = {
 
 export function SocialLoginBtn({ provider, onClick }: SocialLoginBtnProps) {
   return (
-    <button
-      type="button"
-      style={styles.btn}
-      onClick={onClick}
-    >
-      <span style={{ color: providerColors[provider], fontSize: '1.8rem' }}>
+    <Btn type="button" onClick={onClick}>
+      <ProviderIcon $color={providerColors[provider]}>
         {icons[provider]}
-      </span>
+      </ProviderIcon>
       {providerLabels[provider]}
-    </button>
+    </Btn>
   )
 }

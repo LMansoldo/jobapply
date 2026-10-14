@@ -1,22 +1,19 @@
 import type { LangTabsProps } from './LangTabs.types'
-import { styles } from './LangTabs.styles'
+import { Container, Tab } from './LangTabs.styles'
 
 export function LangTabs({ tabs, activeKey, onChange }: LangTabsProps) {
   return (
-    <div style={styles.container}>
+    <Container>
       {tabs.map((tab) => (
-        <button
+        <Tab
           key={tab.key}
           type="button"
-          style={{
-            ...styles.tab,
-            ...(tab.key === activeKey ? styles.tabActive : {}),
-          }}
+          $active={tab.key === activeKey}
           onClick={() => onChange(tab.key)}
         >
           {tab.label}
-        </button>
+        </Tab>
       ))}
-    </div>
+    </Container>
   )
 }

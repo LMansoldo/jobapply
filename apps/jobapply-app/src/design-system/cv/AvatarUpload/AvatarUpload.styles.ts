@@ -1,56 +1,57 @@
+import styled from '@emotion/styled'
 import { Colors } from '../../../styles/theme/colors'
-import { BorderRadius } from '../../../styles/theme/radius'
-import { Shadows } from '../../../styles/theme/shadows'
-import { FontFamily, FontWeight } from '../../../styles/theme/typography'
 
-export const styles = {
-  wrapper: {
-    position: 'relative' as const,
-    display: 'inline-flex',
-    flexDirection: 'column' as const,
-    alignItems: 'center',
-    gap: '0.8rem',
-  },
-  avatar: {
-    width: '9.6rem',
-    height: '9.6rem',
-    borderRadius: BorderRadius.avatar,
-    background: Colors.primaryLight,
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    fontFamily: FontFamily.heading,
-    fontWeight: FontWeight.bold,
-    fontSize: '3.2rem',
-    color: Colors.primaryDark,
-    overflow: 'hidden',
-    boxShadow: Shadows.avatar,
-    cursor: 'pointer',
-    position: 'relative' as const,
-  },
-  img: {
-    width: '100%',
-    height: '100%',
-    objectFit: 'cover' as const,
-  },
-  overlay: {
-    position: 'absolute' as const,
-    inset: 0,
-    background: 'rgba(0,0,0,0.4)',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderRadius: BorderRadius.avatar,
-    opacity: 0,
-    transition: 'opacity 0.2s',
-    color: Colors.white,
-    fontSize: '2rem',
-  },
-  input: {
-    display: 'none',
-  },
-  hint: {
-    fontSize: '1.2rem',
-    color: Colors.textSub,
-  },
-}
+export const Wrapper = styled.div`
+  position: relative;
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.8rem;
+`
+
+export const Avatar = styled.div`
+  width: 9.6rem;
+  height: 9.6rem;
+  border-radius: ${({ theme }) => theme.radius.avatar};
+  background: ${({ theme }) => theme.colors.primaryLight};
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: ${({ theme }) => theme.typography.family.heading};
+  font-weight: ${({ theme }) => theme.typography.weight.bold};
+  font-size: 3.2rem;
+  color: ${({ theme }) => theme.colors.primaryDark};
+  overflow: hidden;
+  box-shadow: ${({ theme }) => theme.shadows.avatar};
+  cursor: pointer;
+  position: relative;
+`
+
+export const Img = styled.img`
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+`
+
+export const Overlay = styled.div<{ $visible: boolean }>`
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: ${({ theme }) => theme.radius.avatar};
+  opacity: ${({ $visible }) => ($visible ? 1 : 0)};
+  transition: opacity 0.2s;
+  color: ${({ theme }) => theme.colors.white};
+  font-size: 2rem;
+`
+
+export const HiddenInput = styled.input`
+  display: none;
+`
+
+export const Hint = styled.span`
+  font-size: 1.2rem;
+  color: ${({ theme }) => theme.colors.textSub};
+`

@@ -1,59 +1,55 @@
-import { css } from '@emotion/css'
-import { Colors } from '../../../styles/theme/colors'
-import { Shadows } from '../../../styles/theme/shadows'
-import { Spacing } from '../../../styles/theme/spacing'
-import { mediaQueries } from '../../../styles/theme/breakpoints'
+import styled from '@emotion/styled'
 
-export const page = css({
-  display: 'flex',
-  flexDirection: 'column',
-  minHeight: '100vh',
-  background: Colors.pageBg,
+export const Page = styled.div`
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background: ${({ theme }) => theme.colors.pageBg};
 
-  [mediaQueries.md]: {
-    flexDirection: 'row',
-  },
-})
+  @media ${({ theme }) => theme.mediaQueries.md} {
+    flex-direction: row;
+  }
+`
 
-export const leftPanel = css({
-  display: 'none',
+export const LeftPanel = styled.div`
+  display: none;
 
-  [mediaQueries.md]: {
-    display: 'flex',
-    flex: '0 0 45%',
-    background: Colors.gradientHeroDark,
-    padding: Spacing.xxl,
-    flexDirection: 'column',
-    justifyContent: 'center',
-    boxShadow: Shadows.auth,
-    overflow: 'hidden',
-    position: 'relative',
-  },
-})
+  @media ${({ theme }) => theme.mediaQueries.md} {
+    display: flex;
+    flex: 0 0 45%;
+    background: ${({ theme }) => theme.colors.gradientHeroDark};
+    padding: ${({ theme }) => theme.spacing.xxl};
+    flex-direction: column;
+    justify-content: center;
+    box-shadow: ${({ theme }) => theme.shadows.auth};
+    overflow: hidden;
+    position: relative;
+  }
+`
 
-export const rightPanel = css({
-  flex: 1,
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-  padding: `${Spacing.xl} ${Spacing.md}`,
-  minHeight: '100vh',
+export const RightPanel = styled.div`
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: ${({ theme }) => `${theme.spacing.xl} ${theme.spacing.md}`};
+  min-height: 100vh;
 
-  [mediaQueries.md]: {
-    padding: Spacing.xxl,
-    minHeight: 'auto',
-  },
-})
+  @media ${({ theme }) => theme.mediaQueries.md} {
+    padding: ${({ theme }) => theme.spacing.xxl};
+    min-height: auto;
+  }
+`
 
-export const formCard = css({
-  background: Colors.white,
-  borderRadius: '1.6rem',
-  boxShadow: Shadows.lg,
-  padding: `${Spacing.xl} ${Spacing.lg}`,
-  width: '100%',
-  maxWidth: '42rem',
+export const FormCard = styled.div`
+  background: ${({ theme }) => theme.colors.white};
+  border-radius: 1.6rem;
+  box-shadow: ${({ theme }) => theme.shadows.lg};
+  padding: ${({ theme }) => `${theme.spacing.xl} ${theme.spacing.lg}`};
+  width: 100%;
+  max-width: 42rem;
 
-  [mediaQueries.md]: {
-    padding: Spacing.xxl,
-  },
-})
+  @media ${({ theme }) => theme.mediaQueries.md} {
+    padding: ${({ theme }) => theme.spacing.xxl};
+  }
+`

@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react'
-import { KeywordItem } from './KeywordItem'
+import { KeywordItem } from '@jobapply/ats-ui'
 
 const meta: Meta<typeof KeywordItem> = {
   title: 'Design System/ATS/KeywordItem',

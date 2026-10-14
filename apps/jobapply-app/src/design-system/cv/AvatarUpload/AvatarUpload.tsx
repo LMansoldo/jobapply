@@ -2,7 +2,7 @@ import { useRef, useState } from 'react'
 import { CameraOutlined } from '@ant-design/icons'
 import { useTranslation } from 'react-i18next'
 import type { AvatarUploadProps } from './AvatarUpload.types'
-import { styles } from './AvatarUpload.styles'
+import { Wrapper, Avatar, Img, Overlay, HiddenInput, Hint } from './AvatarUpload.styles'
 
 export function AvatarUpload({ value, onChange, name }: AvatarUploadProps) {
   const { t } = useTranslation()
@@ -26,20 +26,19 @@ export function AvatarUpload({ value, onChange, name }: AvatarUploadProps) {
   }
 
   return (
-    <div style={styles.wrapper}>
-      <div
-        style={styles.avatar}
+    <Wrapper>
+      <Avatar
         onClick={() => inputRef.current?.click()}
         onMouseEnter={() => setHovered(true)}
         onMouseLeave={() => setHovered(false)}
       >
-        {value ? <img src={value} alt={name} style={styles.img} /> : initials}
-        <div style={{ ...styles.overlay, opacity: hovered ? 1 : 0 }}>
+        {value ? <Img src={value} alt={name} /> : initials}
+        <Overlay $visible={hovered}>
           <CameraOutlined />
-        </div>
-      </div>
-      <span style={styles.hint}>{t('cv.uploadPhoto')}</span>
-      <input ref={inputRef} type="file" accept="image/*" style={styles.input} onChange={handleFile} />
-    </div>
+        </Overlay>
+      </Avatar>
+      <Hint>{t('cv.uploadPhoto')}</Hint>
+      <HiddenInput ref={inputRef} type="file" accept="image/*" onChange={handleFile} />
+    </Wrapper>
   )
 }

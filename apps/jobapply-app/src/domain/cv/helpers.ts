@@ -11,6 +11,7 @@
  *   ## Languages       — bullet list: Language: Level
  */
 import type { CV, CVCreatePayload, CVLocalePayload, CVLocaleVersion } from './types'
+import type { Content, ContentText, TDocumentDefinitions, TVirtualFileSystem } from 'pdfmake/interfaces'
 
 // ─── Parse Result ────────────────────────────────────────────────────────────
 
@@ -457,6 +458,8 @@ export function exportPDF(cv: CV): void {
 
 import * as pdfMake from 'pdfmake/build/pdfmake'
 
+type PdfMakeGlobal = typeof import('pdfmake/build/pdfmake') & { vfs: TVirtualFileSystem }
+
 // Initialize pdfMake with the embedded Arimo font (ATS-safe, Arial-metric-compatible)
 async function initializePdfMake(): Promise<void> {
   if (typeof window === 'undefined') return
@@ -465,8 +468,8 @@ async function initializePdfMake(): Promise<void> {
     const pdfMakeModule = await import('pdfmake/build/pdfmake')
     const { arimoVfs } = await import('./pdfFonts/arimoVfs.generated')
 
-    ;(pdfMakeModule.default as any).vfs = arimoVfs
-    ;(pdfMakeModule.default as any).fonts = {
+    ;(pdfMakeModule.default as PdfMakeGlobal).vfs = arimoVfs
+    ;(pdfMakeModule.default as PdfMakeGlobal).fonts = {
       Arimo: {
         normal: 'Arimo-Regular.ttf',
         bold: 'Arimo-Bold.ttf',
@@ -506,7 +509,7 @@ export async function downloadMarkdownAsPdf(
     // Convert markdown to pdfMake content with CV contact info
     const content = convertMarkdownToPdfMake(markdownContent, cv, jobTitle)
 
-    const docDefinition: any = {
+    const docDefinition: TDocumentDefinitions = {
       pageSize: 'A4' as const,
       pageMargins: [43.2, 14.4, 43.2, 14.4] as [number, number, number, number],
       defaultStyle: {
@@ -579,7 +582,7 @@ function ensureHttps(url: string): string {
 }
 
 // Interleaves "  |  " separators between pdfMake text runs (used for the header contact rows).
-function withPipes(runs: any[]): any[] {
+function withPipes(runs: ContentText[]): ContentText[] {
   return runs.flatMap((run, i) => (i === 0 ? [run] : [{ text: '   |   ', color: PdfColors.textMuted }, run]))
 }
 
@@ -590,8 +593,8 @@ function convertMarkdownToPdfMake(
   markdownContent: string,
   cv: CV,
   jobTitle: string
-): any[] {
-  const content: any[] = []
+): Content[] {
+  const content: Content[] = []
 
   // ── Header ────────────────────────────────────────────────────────────────
   content.push({ text: cv.fullName, style: 'header', alignment: 'center' })
@@ -619,17 +622,17 @@ function convertMarkdownToPdfMake(
   // Parse markdown lines
   const lines = markdownContent.split('\n')
   let inList = false
-  let listItems: any[] = []
+  let listItems: ContentText[] = []
   let lastWasHeading = false
   let justAfterSectionTitle = false
   // Holds a role/company title line while we wait to see whether the next line is its
   // "**Period**" line — if so, both are merged onto one row (title left, date right).
-  let pendingTitleRuns: any[] | null = null
+  let pendingTitleRuns: ContentText[] | null = null
   let pendingTitleJustAfterSectionTitle = false
 
   function flushPendingTitle() {
     if (!pendingTitleRuns) return
-    const props: any = { text: pendingTitleRuns, style: 'subheader' }
+    const props: ContentText = { text: pendingTitleRuns, style: 'subheader' }
     if (pendingTitleJustAfterSectionTitle) props.margin = [0, 0, 0, 0.8]
     content.push(props)
     pendingTitleRuns = null
@@ -744,7 +747,7 @@ function convertMarkdownToPdfMake(
         // "columns" block) so ATS text extractors read "Role | Company – Location | Date" in
         // one continuous line instead of two spatially-positioned, independently-ordered blocks.
         const inner = trimmed.slice(2, -2)
-        const props: any = {
+        const props: ContentText = {
           text: [...pendingTitleRuns, { text: ' | ', bold: false, color: PdfColors.textMuted }, { text: inner, italics: true, bold: false, color: PdfColors.textMuted }],
           style: 'subheader',
         }
@@ -778,9 +781,9 @@ function convertMarkdownToPdfMake(
 /**
  * Parse inline markdown formatting (bold, italic) for pdfMake
  */
-function parseInlineFormatting(text: string): any {
+function parseInlineFormatting(text: string): Content {
   // Simple parsing for **bold** and *italic*
-  const parts: any[] = []
+  const parts: ContentText[] = []
   let currentText = ''
   let i = 0
 

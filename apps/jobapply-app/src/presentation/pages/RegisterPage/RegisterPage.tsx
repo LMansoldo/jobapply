@@ -1,20 +1,34 @@
 import { useState } from 'react'
 import { UserOutlined, MailOutlined, LockOutlined, RocketOutlined, FileTextOutlined, ThunderboltOutlined } from '@ant-design/icons'
-import { Link, useNavigate } from '@tanstack/react-router'
+import { useNavigate } from '@tanstack/react-router'
 import { useTranslation } from 'react-i18next'
-import { useAntApp } from '../../../components/AntApp'
-import { Form, FormItem } from '../../../components/Form'
-import { InputPassword } from '../../../components/Input'
+import { useAntApp } from '../../../design-system/wrappers/AntApp'
+import { Form, FormItem } from '../../../design-system/wrappers/Form'
+import { InputPassword } from '../../../design-system/wrappers/Input'
 import { register as registerService } from '../../../infrastructure/repositories/authRepository'
 import { redirectToLinkedIn } from '../../../domain/linkedin/linkedinOAuth'
 import { AuthLayout } from '../../../design-system/auth/AuthLayout'
 import { FeatureCard } from '../../../design-system/auth/FeatureCard'
 import { PasswordStrength } from '../../../design-system/auth/PasswordStrength'
 import { SocialLoginBtn } from '../../../design-system/auth/SocialLoginBtn'
-import { Divider } from '../../../components/Divider'
-import { DSButton } from '../../../design-system/primitives/DSButton'
-import { DSInput } from '../../../design-system/primitives/DSInput'
-import * as styles from './RegisterPage.styles'
+import { DSButton } from '@jobapply/ui'
+import { DSInput } from '@jobapply/ui'
+import {
+  LeftPanelRoot,
+  LeftHeadline,
+  LeftSubtitle,
+  LeftFeatures,
+  RightPanelRoot,
+  RightHeadingRow,
+  RightTitle,
+  RightSubtitle,
+  LoginLink,
+  SocialBtns,
+  FullWidthBtn,
+  FormItemSpacing,
+  FormItemSubmit,
+  DividerOr,
+} from './RegisterPage.styles'
 
 interface RegisterForm {
   name: string
@@ -57,36 +71,36 @@ export default function RegisterPage() {
   }
 
   const leftPanel = (
-    <div className={styles.leftPanelRoot}>
+    <LeftPanelRoot>
       <div>
-        <h1 className={styles.leftHeadline}>{t('auth.registerHero')}</h1>
-        <p className={styles.leftSubtitle}>{t('auth.registerHeroSub')}</p>
+        <LeftHeadline>{t('auth.registerHero')}</LeftHeadline>
+        <LeftSubtitle>{t('auth.registerHeroSub')}</LeftSubtitle>
       </div>
-      <div className={styles.leftFeatures}>
+      <LeftFeatures>
         <FeatureCard icon={<RocketOutlined />} title={t('auth.featureAITitle')} description={t('auth.featureAIDesc')} />
         <FeatureCard icon={<FileTextOutlined />} title={t('auth.featureCVTitle')} description={t('auth.featureCVDesc')} />
         <FeatureCard icon={<ThunderboltOutlined />} title={t('auth.featureATSTitle')} description={t('auth.featureATSDesc')} />
-      </div>
-    </div>
+      </LeftFeatures>
+    </LeftPanelRoot>
   )
 
   const rightPanel = (
-    <div className={styles.rightPanelRoot}>
-      <div className={styles.rightHeadingRow}>
-        <h2 className={styles.rightTitle}>{t('auth.registerTitle')}</h2>
-        <p className={styles.rightSubtitle}>
+    <RightPanelRoot>
+      <RightHeadingRow>
+        <RightTitle>{t('auth.registerTitle')}</RightTitle>
+        <RightSubtitle>
           {t('auth.hasAccount')}{' '}
-          <Link to="/login" className={styles.loginLink}>
+          <LoginLink to="/login">
             {t('auth.login')}
-          </Link>
-        </p>
-      </div>
+          </LoginLink>
+        </RightSubtitle>
+      </RightHeadingRow>
 
-      <div className={styles.socialBtns}>
+      <SocialBtns>
         <SocialLoginBtn provider="linkedin" onClick={() => redirectToLinkedIn('login')} />
-      </div>
+      </SocialBtns>
 
-      <Divider plain className={styles.dividerOr}>{t('auth.orWithEmail')}</Divider>
+      <DividerOr plain>{t('auth.orWithEmail')}</DividerOr>
 
       <Form layout="vertical" onFinish={handleSubmit} autoComplete="off">
         <FormItem
@@ -126,10 +140,9 @@ export default function RegisterPage() {
 
         <PasswordStrength value={getPasswordStrength(password)} />
 
-        <FormItem
+        <FormItemSpacing
           name="confirmPassword"
           label={t('auth.confirmPassword')}
-          className={styles.formItemSpacing}
           dependencies={['password']}
           rules={[
             { required: true, message: t('auth.requiredConfirm') },
@@ -144,17 +157,17 @@ export default function RegisterPage() {
           ]}
         >
           <InputPassword prefix={<LockOutlined />} placeholder={t('auth.confirmPasswordPlaceholder')} size="large" />
-        </FormItem>
+        </FormItemSpacing>
 
-        <FormItem className={styles.formItemSubmit}>
-          <div className={styles.fullWidthBtn}>
+        <FormItemSubmit>
+          <FullWidthBtn>
             <DSButton variant="primary" htmlType="submit" loading={loading} block>
               {t('auth.register')}
             </DSButton>
-          </div>
-        </FormItem>
+          </FullWidthBtn>
+        </FormItemSubmit>
       </Form>
-    </div>
+    </RightPanelRoot>
   )
 
   return <AuthLayout left={leftPanel} right={rightPanel} />

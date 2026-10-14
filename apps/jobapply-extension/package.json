@@ -1,0 +1,36 @@
+{
+  "name": "jobapply-extension",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@ant-design/icons": "^5.3.7",
+    "@emotion/react": "^11.14.0",
+    "@emotion/styled": "^11.14.0",
+    "@jobapply/ats-ui": "^0.1.0",
+    "@jobapply/contracts": "^0.1.0",
+    "@jobapply/editor": "^0.1.0",
+    "@tanstack/react-query": "^5.104.1",
+    "antd": "^5.17.0",
+    "i18next": "^26.0.3",
+    "pdfmake": "0.2.23",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-i18next": "^17.0.2"
+  },
+  "devDependencies": {
+    "@crxjs/vite-plugin": "2.0.0-beta.32",
+    "@types/chrome": "^0.0.268",
+    "@types/pdfmake": "^0.3.2",
+    "@types/react": "^18.3.3",
+    "@types/react-dom": "^18.3.0",
+    "@vitejs/plugin-react": "^4.3.0",
+    "typescript": "^5.4.5",
+    "vite": "^5.2.12"
+  }
+}

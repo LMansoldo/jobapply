@@ -1,22 +1,19 @@
 import type { SectionBarProps } from './SectionBar.types'
-import { styles } from './SectionBar.styles'
+import { Bar, Chip } from './SectionBar.styles'
 
 export function SectionBar({ sections, activeKey, onChange }: SectionBarProps) {
   return (
-    <div style={styles.bar}>
+    <Bar>
       {sections.map((section) => (
-        <button
+        <Chip
           key={section.key}
           type="button"
-          style={{
-            ...styles.chip,
-            ...(section.key === activeKey ? styles.chipActive : {}),
-          }}
+          $active={section.key === activeKey}
           onClick={() => onChange(section.key)}
         >
           {section.label}
-        </button>
+        </Chip>
       ))}
-    </div>
+    </Bar>
   )
 }

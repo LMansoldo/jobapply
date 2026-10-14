@@ -10,20 +10,22 @@ const meta: Meta<typeof SectionBar> = {
 export default meta
 type Story = StoryObj<typeof SectionBar>
 
+function InteractiveSectionBar() {
+  const [active, setActive] = useState('personal')
+  return (
+    <SectionBar
+      sections={[
+        { key: 'personal', label: 'Dados Pessoais' },
+        { key: 'experience', label: 'Experiência' },
+        { key: 'education', label: 'Educação' },
+        { key: 'skills', label: 'Habilidades' },
+      ]}
+      activeKey={active}
+      onChange={setActive}
+    />
+  )
+}
+
 export const Default: Story = {
-  render: () => {
-    const [active, setActive] = useState('personal')
-    return (
-      <SectionBar
-        sections={[
-          { key: 'personal', label: 'Dados Pessoais' },
-          { key: 'experience', label: 'Experiência' },
-          { key: 'education', label: 'Educação' },
-          { key: 'skills', label: 'Habilidades' },
-        ]}
-        activeKey={active}
-        onChange={setActive}
-      />
-    )
-  },
+  render: () => <InteractiveSectionBar />,
 }

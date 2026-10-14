@@ -126,6 +126,8 @@ export interface InterviewPrep {
 export interface ATSReport {
   universalScore: number
   scoreBreakdown: ScoreBreakdown
+  bulletInsights: BulletInsight[]
+  aiSmellFixes: AiSmellFix[]
   matchedKeywords: string[]
   missingKeywords: string[]
   semanticGaps: string[]
@@ -138,59 +140,36 @@ export interface ATSReport {
   }
   tips: { priority: 'critical' | 'high' | 'medium'; tip: string }[]
   removeSuggestions: RemoveSuggestion[]
-  // v3 (aditivo)
-  requirementMatches?: RequirementMatch[]
-  recruiterReview?: RecruiterReview
 }
-
-// ── v2 types — adicionados em A1, velhos removidos em B4 ──────────────────────
 
 export interface ScoreBreakdown {
-  keywordCoverage: number   // 0–100 (legado; = literalCoverage após migração)
-  contentQuality: number    // 0–100
-  format: number            // 0–100
-  // v3 — redesign semântico (aditivo; ver specs SPEC-0..5)
-  literalCoverage?: number   // 0–100 cobertura literal (deflação corrigida)
-  semanticCoverage?: number  // 0–100 cobertura considerando matches semânticos
-  niceToHaveBonus?: number   // 0–100 só soma, nunca penaliza
-  recruiterScore?: number    // 0–100 média ponderada do RecruiterReview
+  factClarity: number       // 0–100 — bullets expressam fatos concretos e compreensíveis isolados
+  jdAdherence: number       // 0–100 — aderência dos bullets ao que a JD pede
+  humanReadability: number  // 0–100 — escaneabilidade humana (comprimento, densidade, estrutura)
+  prominence: number        // 0–100 — feitos mais fortes posicionados onde os olhos batem primeiro
+  keywordCoverage: number   // 0–100 — cobertura booleana ponderada por tier; INFORMATIVO, não entra no score
 }
 
-// ── v3 — redesign análise semântica + recruiter (SPEC-0) ─────────────────────
+// ── Bullet advisor — análise por bullet (clareza, aderência à JD) ─────────────
 
-export interface JDRequirement {
-  term: string
-  tier: 'must-have' | 'important' | 'nice-to-have'
-  category: 'skill' | 'tool' | 'domain' | 'credential' | 'soft'
-  aliases: string[]          // termos equivalentes p/ match literal
+export interface BulletInsight {
+  positionIndex: number     // índice da experiência em mapped.raw.experience (0 = mais recente)
+  bulletIndex: number       // índice do highlight dentro da posição
+  role: string              // cargo da posição a que o bullet pertence
+  text: string              // texto do bullet
+  clarity: number           // 0–100 — fato único, concreto e compreensível isolado
+  jdRelevance: number       // 0–100 — quanto este fato prova algo que a JD exige
+  issue?: string            // o que enfraquece o bullet (locale do request)
+  suggestion?: string       // reescrita fiel ao fato original (nada inventado)
 }
 
-export interface JDIntentSignal {
-  text: string               // frase que repondera um requisito/área
-  effect: 'downweight' | 'upweight'
-  target: string             // requisito/área afetada
-}
+// ── AI smell — padrões de escrita de LLM detectados no texto do CV ───────────
 
-export type MatchKind = 'exact' | 'semantic' | 'transferable' | 'missing'
-
-export interface RequirementMatch {
-  term: string
-  tier: JDRequirement['tier']
-  kind: MatchKind
-  confidence: number         // 0–1
-  evidence: string           // trecho do CV que sustenta; '' se missing
-}
-
-export interface RecruiterReview {
-  narrativeScore: number     // 0–100 storytelling/coerência dos bullets
-  seniorityScore: number     // 0–100 sinal de senioridade vs JD
-  domainFitScore: number     // 0–100 aderência de domínio/indústria
-  notes: string[]            // observações qualitativas acionáveis, tom sóbrio
-}
-
-export interface WeightedKeyword {
-  term: string
-  weight: 'required' | 'preferred'
+export interface AiSmellFix {
+  location: string          // 'summary' | 'p{positionIndex}.b{bulletIndex}'
+  original: string          // texto original
+  rewrite: string           // reescrita validada (fidelidade de fatos); '' quando o LLM falhou
+  issues: string[]          // detectores que marcaram (em-dash, banned:delve, triad, ...)
 }
 
 export interface ResumeDraft {
@@ -206,7 +185,7 @@ export interface ResumeDraft {
 
 export interface VerificationViolation {
   location: string
-  rule: 'metric-dropped' | 'metric-invented' | 'low-overlap' | 'jd-contamination' | 'invalid-source' | 'unverified-skill' | 'generic-phrase'
+  rule: 'metric-dropped' | 'metric-invented' | 'low-overlap' | 'invalid-source' | 'generic-phrase' | 'weak-clarity'
   detail: string
   action: 'reverted' | 'removed'
 }
@@ -229,27 +208,97 @@ export interface ResumeSource {
   skillsRaw: string
 }
 
+// ── Chunk index (SQLite; ver src/db/chunks.ts) ────────────────────────────────
+
+export type ChunkType = 'skill' | 'tool' | 'domain' | 'credential' | 'soft' | 'req'
+export type ChunkTier = 'must-have' | 'important' | 'nice-to-have'
+export type CvSection =
+  | 'summary' | 'skills' | 'experience' | 'education'
+  | 'languages' | 'projects' | 'certifications'
+
+export interface JdChunkInput {
+  type: ChunkType
+  attr: string
+  tier: ChunkTier
+}
+
+export interface JdChunk extends JdChunkInput {
+  id: string
+  jdId: string
+  createdAt: number
+}
+
+export interface CvChunkInput {
+  type: ChunkType
+  attr: string
+  section: CvSection
+}
+
+export interface CvChunk extends CvChunkInput {
+  id: string
+  cvId: string
+  createdAt: number
+}
+
+// ── Keyword composition (jd_chunks × cv_chunks) ──────────────────────────────
+
+export type KeywordClass = 'skill' | 'eligibility' | 'credential' | 'seniority'
+
+export interface ComposedKeyword {
+  term: string              // forma canônica, wording da JD, lowercase
+  tier: ChunkTier           // tier mais forte entre os chunks agrupados
+  variants: string[]        // superfícies literais equivalentes (ortografia, abreviação, plural)
+  keywordClass?: KeywordClass // atribuída pelo keywordClassifier
+}
+
+export interface KeywordVerdict {
+  term: string
+  action: 'keep' | 'merge_into' | 'strip_variant' | 'reclassify'
+  mergeInto?: string        // action=merge_into: term alvo da fusão
+  stripVariants?: string[]  // action=strip_variant: variantes a remover
+  keywordClass?: KeywordClass
+}
+
+export interface KeywordMatch {
+  term: string
+  tier: ChunkTier
+  matched: boolean
+  section: string           // seção do CV onde casou; '' quando não casou
+  evidence: string          // trecho normalizado do CV que sustenta o match; '' quando não casou
+}
+
+// ── Gap advisor — "mesma coisa, palavras diferentes" ──────────────────────────
+
+export interface RephraseGap {
+  keyword: string           // keyword da JD que não casou literalmente
+  cvPhrase: string          // wording atual do CV que expressa o mesmo conceito
+  suggestedRewrite: string  // como reescrever usando o termo exato da JD
+}
+
+export interface GapAnalysis {
+  rephraseGaps: RephraseGap[]
+  absentKeywords: string[]              // sem evidência no CV
+  keywordPhrases: KeywordPhrase[]       // frases prontas só p/ absent com evidência parcial
+  removeSuggestions: RemoveSuggestion[]
+}
+
 export interface GraphState {
   input: AgentInput
-  mapped?: MappedCV
-  requirements?: JDRequirement[]
-  intentSignals?: JDIntentSignal[]
+  jdId?: string
+  jdChunks?: JdChunkInput[]
   jobTitle?: string
-  literalCoverage?: number
-  matched?: RequirementMatch[]
-  unmatched?: JDRequirement[]
-  semanticMatches?: RequirementMatch[]
-  recruiterReview?: RecruiterReview
+  cvId?: string
+  cvChunks?: CvChunkInput[]
+  keywords?: ComposedKeyword[]
+  keywordMatches?: KeywordMatch[]
+  bulletInsights?: BulletInsight[]
+  aiSmellFixes?: AiSmellFix[]
+  gapAnalysis?: GapAnalysis
+  mapped?: MappedCV
   universalScore?: number
   scoreBreakdown?: ScoreBreakdown
-  requirementMatches?: RequirementMatch[]
   matchedKeywords?: string[]
   missingKeywords?: string[]
-  semanticGaps?: string[]
-  rephraseSuggestions?: Array<{ from: string; to: string }>
-  keywordPhrases?: KeywordPhrase[]
-  removeSuggestions?: RemoveSuggestion[]
   report?: ATSReport
-  resumeDraft?: ResumeDraft
   resumeVerification?: VerificationReport
 }

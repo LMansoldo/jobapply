@@ -1,33 +1,30 @@
-import { css } from '@emotion/css'
 import styled from '@emotion/styled'
-import { Space } from '../../components/Space'
-import { Avatar } from '../../components/Avatar'
-import { AppContent } from '../../components/Layout'
-import { Colors } from '../../styles/theme/colors'
-import { Spacing } from '../../styles/theme/spacing'
+import { Space } from '../../design-system/wrappers/Space'
+import { Avatar } from '../../design-system/wrappers/Avatar'
+import { AppContent } from '../../design-system/wrappers/Layout'
 
-export const pageRoot = css({
-  minHeight: '100vh',
-  background: Colors.pageBg,
-})
+export const PageRoot = styled.div`
+  min-height: 100vh;
+  background: ${({ theme }) => theme.colors.pageBg};
+`
 
 export const UserSpace = styled(Space)`
   cursor: pointer;
 `
 
 export const UserAvatar = styled(Avatar)`
-  background: ${Colors.primaryDark};
+  background: ${({ theme }) => theme.colors.primaryDark};
 `
 
 export const UserName = styled.span`
-  color: ${Colors.textMain};
+  color: ${({ theme }) => theme.colors.textMain};
   font-size: 1.4rem;
 `
 
-export const AppContentStyled = styled(AppContent)<{ isMobile: boolean }>`
+export const AppContentStyled = styled(AppContent)<{ $isMobile: boolean }>`
   padding: 0;
   min-height: calc(100vh - 6.4rem);
-  padding-bottom: ${({ isMobile }) => (isMobile ? '6.4rem' : '0')};
+  padding-bottom: ${({ $isMobile }) => ($isMobile ? '6.4rem' : '0')};
 `
 
 export const BottomNav = styled.nav`
@@ -37,13 +34,13 @@ export const BottomNav = styled.nav`
   right: 0;
   z-index: 100;
   height: 6.4rem;
-  background: ${Colors.white};
-  border-top: 1px solid ${Colors.border ?? '#e8e8e8'};
+  background: ${({ theme }) => theme.colors.white};
+  border-top: 1px solid ${({ theme }) => theme.colors.border ?? '#e8e8e8'};
   display: flex;
   align-items: stretch;
 `
 
-export const BottomNavItem = styled.button<{ active: boolean }>`
+export const BottomNavItem = styled.button<{ $active: boolean }>`
   flex: 1;
   display: flex;
   flex-direction: column;
@@ -53,10 +50,10 @@ export const BottomNavItem = styled.button<{ active: boolean }>`
   border: none;
   background: none;
   cursor: pointer;
-  color: ${({ active }) => (active ? Colors.primaryDark : Colors.textSub)};
+  color: ${({ $active, theme }) => ($active ? theme.colors.primaryDark : theme.colors.textSub)};
   font-size: 1.0rem;
   font-weight: 500;
-  padding: ${Spacing.xs} 0;
+  padding: ${({ theme }) => theme.spacing.xs} 0;
   transition: color 0.15s;
 
   svg {

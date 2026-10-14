@@ -1,29 +1,30 @@
+import styled from '@emotion/styled'
 import { Colors } from '../../../styles/theme/colors'
-import { BorderRadius } from '../../../styles/theme/radius'
-import { Spacing } from '../../../styles/theme/spacing'
 
 export const strengthColors = ['transparent', Colors.danger, Colors.orange, Colors.warning, Colors.green]
 export const strengthLabels = ['', 'Muito fraca', 'Fraca', 'Média', 'Forte']
 
-export const styles = {
-  wrapper: {
-    display: 'flex',
-    flexDirection: 'column' as const,
-    gap: Spacing.xxs,
-  },
-  bars: {
-    display: 'flex',
-    gap: Spacing.xs,
-  },
-  bar: {
-    flex: 1,
-    height: '4px',
-    borderRadius: BorderRadius.full,
-    background: Colors.surfaceBorder,
-    transition: 'background 0.3s',
-  },
-  label: {
-    fontSize: '1.2rem',
-    transition: 'color 0.3s',
-  },
-}
+export const Wrapper = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: ${({ theme }) => theme.spacing.xxs};
+`
+
+export const Bars = styled.div`
+  display: flex;
+  gap: ${({ theme }) => theme.spacing.xs};
+`
+
+export const Bar = styled.div<{ $color?: string }>`
+  flex: 1;
+  height: 4px;
+  border-radius: ${({ theme }) => theme.radius.full};
+  background: ${({ theme, $color }) => $color ?? theme.colors.surfaceBorder};
+  transition: background 0.3s;
+`
+
+export const Label = styled.span<{ $color: string }>`
+  font-size: 1.2rem;
+  transition: color 0.3s;
+  color: ${({ $color }) => $color};
+`

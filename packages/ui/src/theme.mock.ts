@@ -1,0 +1,50 @@
+import type { UITheme } from './theme'
+
+export const mockTheme: UITheme = {
+  colors: {
+    primary: '#a78bfa',
+    primaryDark: '#7c3aed',
+    primaryLight: '#ede9fe',
+    accent: '#f0abfc',
+    orange: '#fb923c',
+    orangeBg: '#ffedd5',
+    green: '#34d399',
+    greenBg: '#d1fae5',
+    blue: '#60a5fa',
+    blueBg: '#dbeafe',
+    warning: '#fbbf24',
+    warningBg: '#fef3c7',
+    white: '#ffffff',
+    surfacePage: '#f5f3ff',
+    surfaceBorder: '#e9e4fc',
+    textSub: '#6b7280',
+    gradientTailorBtn: 'linear-gradient(135deg, #7c3aed, #6d28d9)',
+    gradientProgressBar: 'linear-gradient(90deg, #a78bfa, #f0abfc)',
+  },
+  spacing: {
+    xxs: '0.2rem',
+    xs: '0.4rem',
+    sm: '0.8rem',
+    md: '1.6rem',
+    lg: '2.4rem',
+  },
+  typography: {
+    family: { heading: "'Sora', sans-serif", body: "'DM Sans', sans-serif" },
+    size: { xs: '1.1rem', sm: '1.2rem', md: '1.4rem' },
+    weight: { medium: 500, semibold: 600, bold: 700 },
+    lineHeight: { normal: 1.4 },
+    letterSpacing: { badge: '0.6px', label: '0.8px' },
+  },
+  radius: { sm: '8px', base: '14px', full: '9999px' },
+  shadows: {
+    sm: '0 2px 16px rgba(124, 58, 237, 0.08)',
+    md: '0 4px 32px rgba(124, 58, 237, 0.14)',
+    cta: '0 2px 12px rgba(124, 58, 237, 0.30)',
+  },
+  breakpoints: { sm: '576px', md: '768px', lg: '992px' },
+  mediaQueries: {
+    sm: '@media (min-width: 576px)',
+    md: '@media (min-width: 768px)',
+    lg: '@media (min-width: 992px)',
+  },
+}

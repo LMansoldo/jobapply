@@ -1,10 +1,13 @@
 import { useEffect } from 'react'
-import { fadeInCls, heroFadeInCls, revealInClass } from './LandingPage.styles'
+import { revealInClass } from './LandingPage.styles'
+
+const FADE_SELECTOR = '[data-reveal="fade"]'
+const HERO_SELECTOR = '[data-reveal="hero"]'
 
 export function useRevealOnScroll(): void {
   useEffect(() => {
-    const els = Array.from(document.querySelectorAll<HTMLElement>(`.${fadeInCls}`))
-    const heroEls = Array.from(document.querySelectorAll<HTMLElement>(`.${heroFadeInCls}`))
+    const els = Array.from(document.querySelectorAll<HTMLElement>(FADE_SELECTOR))
+    const heroEls = Array.from(document.querySelectorAll<HTMLElement>(HERO_SELECTOR))
     const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches
     if (reduce) {
       els.forEach(el => el.classList.add(revealInClass))

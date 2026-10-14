@@ -193,11 +193,33 @@ export async function analyzeCV(
     await delay(1200)
     const report: ATSReport = {
       universalScore: 72,
-      scoreBreakdown: { keywordCoverage: 75, contentQuality: 70, format: 80 },
+      scoreBreakdown: { factClarity: 70, jdAdherence: 65, humanReadability: 80, prominence: 55, keywordCoverage: 75 },
+      bulletInsights: [
+        {
+          positionIndex: 0,
+          bulletIndex: 0,
+          role: 'Full Stack Developer',
+          text: 'Reduced API latency by 40% introducing Redis caching',
+          clarity: 85,
+          jdRelevance: 80,
+        },
+        {
+          positionIndex: 0,
+          bulletIndex: 1,
+          role: 'Full Stack Developer',
+          text: 'Responsible for the backend services',
+          clarity: 25,
+          jdRelevance: 30,
+          issue: 'States a responsibility, not a concrete fact',
+          suggestion: 'Owned 4 backend services handling 120k requests/day',
+        },
+      ],
+      aiSmellFixes: [],
       matchedKeywords: ['React', 'TypeScript'],
       missingKeywords: ['Docker', 'AWS', 'CI/CD'],
       tips: [
-        { tip: 'Add required keywords: Docker, AWS', priority: 'critical' },
+        { tip: 'Your strongest fact is buried — move it to the first bullet of your most recent role.', priority: 'high' },
+        { tip: 'Add required keywords: Docker, AWS', priority: 'high' },
         { tip: 'Include quantitative metrics', priority: 'medium' },
       ],
       optimalTemplate: {

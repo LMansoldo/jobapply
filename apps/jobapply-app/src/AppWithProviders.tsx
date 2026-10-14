@@ -1,12 +1,15 @@
 import React from 'react'
 import { ConfigProvider } from 'antd'
+import { ThemeProvider } from '@emotion/react'
 import ptBR from 'antd/locale/pt_BR'
 import App from './App'
+import { theme } from './styles/theme/emotionTheme'
 import './i18n'
 
 export default function AppWithProviders() {
   return (
-    <ConfigProvider
+    <ThemeProvider theme={theme}>
+      <ConfigProvider
       locale={ptBR}
       theme={{
         token: {
@@ -72,8 +75,9 @@ export default function AppWithProviders() {
           },
         },
       }}
-    >
-      <App />
-    </ConfigProvider>
+      >
+        <App />
+      </ConfigProvider>
+    </ThemeProvider>
   )
 }

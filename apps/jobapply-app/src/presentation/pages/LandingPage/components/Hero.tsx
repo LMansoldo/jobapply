@@ -1,33 +1,34 @@
 import { useTranslation } from 'react-i18next'
-import { css } from '@emotion/css'
-import { sectionHeroCls, displayCls, accentCls, leadCls, btnDarkLgCls, btnGhostLgCls, heroFadeInCls, tokens } from '../LandingPage.styles'
+import styled from '@emotion/styled'
+import { SectionHero, Display, Accent, Lead, BtnDarkLg, BtnGhostLg, revealHeroStyles, tokens } from '../LandingPage.styles'
 import AppScreenshot from './AppScreenshot'
+import { HeroCtas } from './Hero.styles'
 
-const subCls = css`display:flex;align-items:flex-end;justify-content:space-between;gap:48px;margin-top:48px;flex-wrap:wrap`
-const actionsCls = css`display:flex;gap:14px;align-items:center`
-const hlCls = css`color:${tokens.ink};font-weight:700`
-const shotCls = css`margin-top:80px;position:relative`
+const HeroTitle = styled(Display)`${revealHeroStyles}`
+const HeroSub = styled.div`display:flex;align-items:flex-end;justify-content:space-between;gap:48px;margin-top:48px;flex-wrap:wrap;${revealHeroStyles}`
+const HeroShot = styled.div`margin-top:80px;position:relative;${revealHeroStyles}`
+const Hl = styled.span`color:${tokens.ink};font-weight:700`
 
 export default function Hero() {
   const { t } = useTranslation()
   return (
-    <section className={sectionHeroCls}>
-      <h1 className={`${displayCls} ${heroFadeInCls}`}>
+    <SectionHero>
+      <HeroTitle data-reveal="hero">
         {t('landing.hero.title1')}<br />{t('landing.hero.title2')}<br />
-        {t('landing.hero.title3')} <span className={accentCls}>{t('landing.hero.titleAccent')}</span>.
-      </h1>
-      <div className={`${subCls} ${heroFadeInCls}`}>
-        <p className={leadCls}>
-          {t('landing.hero.leadPre')}<span className={hlCls}>{t('landing.hero.leadHl')}</span>{t('landing.hero.leadPost')}
-        </p>
-        <div className={actionsCls}>
-          <a href="/register" className={btnDarkLgCls}>{t('landing.hero.ctaMain')} →</a>
-          <a href="#como-funciona" className={btnGhostLgCls}>{t('landing.hero.ctaSec')}</a>
-        </div>
-      </div>
-      <div className={`${shotCls} ${heroFadeInCls}`}>
+        {t('landing.hero.title3')} <Accent>{t('landing.hero.titleAccent')}</Accent>.
+      </HeroTitle>
+      <HeroSub data-reveal="hero">
+        <Lead>
+          {t('landing.hero.leadPre')}<Hl>{t('landing.hero.leadHl')}</Hl>{t('landing.hero.leadPost')}
+        </Lead>
+        <HeroCtas>
+          <BtnDarkLg href="/register">{t('landing.hero.ctaMain')} →</BtnDarkLg>
+          <BtnGhostLg href="#como-funciona">{t('landing.hero.ctaSec')}</BtnGhostLg>
+        </HeroCtas>
+      </HeroSub>
+      <HeroShot data-reveal="hero">
         <AppScreenshot />
-      </div>
-    </section>
+      </HeroShot>
+    </SectionHero>
   )
 }

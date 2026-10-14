@@ -1,7 +1,5 @@
-import { genAI } from '../../lib/gemini'
+import { generate } from '../../lib/glm'
 import type { GraphState, GenericPhrase } from '../../types'
-
-const model = genAI.getGenerativeModel({ model: 'gemini-flash-lite-latest' })
 
 const CLICHE_REGEX = new RegExp(
   [
@@ -48,8 +46,7 @@ Respond ONLY with valid JSON array (max 5 items):
 If no generics found, respond with: []`
 
   try {
-    const result = await model.generateContent(prompt)
-    const raw = result.response.text()
+    const raw = await generate(prompt)
     const clean = raw.replace(/^```json\s*/i, '').replace(/```\s*$/, '').trim()
     const parsed = JSON.parse(clean)
     if (!Array.isArray(parsed)) return []

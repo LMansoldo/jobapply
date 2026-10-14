@@ -1,41 +1,24 @@
-import { CheckOutlined } from '@ant-design/icons'
 import type { WizardStepperProps } from './WizardStepper.types'
-import { styles } from './WizardStepper.styles'
+import { Stepper, Step, StepCircle, StepCheckIcon, StepLabel } from './WizardStepper.styles'
 
 export function WizardStepper({ steps, current }: WizardStepperProps) {
   return (
-    <div style={styles.stepper}>
+    <Stepper>
       {steps.map((step, index) => {
         const isDone = index < current
         const isActive = index === current
 
         return (
-          <div
-            key={index}
-            style={{
-              ...styles.step,
-              ...(isActive ? styles.stepActive : styles.stepDefault),
-            }}
-          >
-            <div
-              style={{
-                ...styles.circle,
-                ...(isDone ? styles.circleDone : isActive ? styles.circleActive : styles.circleDefault),
-              }}
-            >
-              {isDone ? <CheckOutlined style={{ fontSize: '1.2rem' }} /> : index + 1}
-            </div>
-            <span
-              style={{
-                ...styles.label,
-                ...(isActive ? styles.labelActive : styles.labelDefault),
-              }}
-            >
+          <Step key={index} $active={isActive}>
+            <StepCircle $done={isDone} $active={isActive}>
+              {isDone ? <StepCheckIcon /> : index + 1}
+            </StepCircle>
+            <StepLabel $active={isActive}>
               {step.label}
-            </span>
-          </div>
+            </StepLabel>
+          </Step>
         )
       })}
-    </div>
+    </Stepper>
   )
 }

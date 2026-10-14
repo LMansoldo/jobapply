@@ -1,4 +1,5 @@
 import type { AgentInput, CV, CVLocaleVersion, MappedCV, SkillGroup } from '../../types'
+import { parseExperiencePositions } from '../resume/source'
 
 const URL_PATTERN = /https?:\/\/[^\s"'<>]+/g
 
@@ -108,7 +109,16 @@ export function mapFromMarkdown(cvMarkdown: string): MappedCV {
       urls: [...new Set(urls)],
       experiencePeriods,
     },
-    raw: {} as CV,
+    // markdown input carries no structured CV: reconstruct experience so
+    // downstream consumers (contentQuality scoring, resume source) see bullets
+    raw: {
+      experience: parseExperiencePositions(experienceRaw).map((p) => ({
+        role: p.header.replace(/^###\s*/, ''),
+        context: p.context,
+        highlights: p.bullets,
+        period: p.period,
+      })),
+    } as CV,
   }
 }
 

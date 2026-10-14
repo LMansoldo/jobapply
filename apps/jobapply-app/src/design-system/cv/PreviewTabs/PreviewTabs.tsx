@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next'
 import type { PreviewTabsProps, PreviewTabKey } from './PreviewTabs.types'
-import { styles } from './PreviewTabs.styles'
+import { Container, Tab } from './PreviewTabs.styles'
 
 export function PreviewTabs({ activeTab, onChange }: PreviewTabsProps) {
   const { t } = useTranslation()
@@ -11,20 +11,17 @@ export function PreviewTabs({ activeTab, onChange }: PreviewTabsProps) {
   ]
 
   return (
-    <div style={styles.container}>
+    <Container>
       {tabs.map((tab) => (
-        <button
+        <Tab
           key={tab.key}
           type="button"
-          style={{
-            ...styles.tab,
-            ...(tab.key === activeTab ? styles.tabActive : {}),
-          }}
+          $active={tab.key === activeTab}
           onClick={() => onChange(tab.key)}
         >
           {tab.label}
-        </button>
+        </Tab>
       ))}
-    </div>
+    </Container>
   )
 }

@@ -1,0 +1,16 @@
+{
+  "name": "@jobapply/contracts",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Tipos TypeScript compartilhados (CV, ATSReport, AgentInput, EditorKeywords). Consumido via fonte, sem build.",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "scripts": {
+    "lint": "echo 'no lint yet'",
+    "typecheck": "tsc --noEmit",
+    "build": "echo 'no build yet'"
+  },
+  "devDependencies": {
+    "typescript": "^5.4.5"
+  }
+}

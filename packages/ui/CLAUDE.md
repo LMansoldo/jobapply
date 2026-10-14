@@ -1,11 +1,11 @@
 # @jobapply/ui
 
-Design system compartilhado. Wrappers sobre Ant Design com convenções do projeto.
+Kit de primitives UI em `@emotion/styled`, consumido via fonte pelo app (sem build step). Componentes em `src/components/<Name>/`.
 
-## Status
-Em setup. Componentes serão migrados de `apps/jobapply-app/src/components/` em tarefa futura.
+## Componentes (9 primitives)
+Badge, DSButton, DSCard, DSInput, InlineBadge, ProgressBar, ScoreRing, SkillTag, TipBox.
 
-## Convenções (quando migrar componentes)
+## Convenções
 
 Cada componente segue a estrutura:
 ```
@@ -16,10 +16,14 @@ ComponentName/
 └── index.ts                 — re-export público
 ```
 
-`src/index.ts` exporta tudo que é público.
+- `src/index.ts` exporta tudo que é público (barrel).
+- Contrato de tema: `src/theme.ts` (`UITheme`) — o kit NÃO importa tokens do app; o app é dono dos valores e tipa seu tema com `UITheme`.
+- `src/emotion.d.ts` aplica `UITheme` ao `Theme` do @emotion/react dentro do kit.
+- `src/theme.mock.ts` é theme de teste (stories/testes do kit).
+- DSButton/DSInput/TipBox usam antd direto (Button/Input/Alert) dentro de `styled()`.
 
 ## PROIBIDO
 
 - Importar de `apps/` — este pacote não conhece a aplicação
 - Lógica de negócio ou chamadas HTTP
-- Dependências de runtime além de `react` e `antd`
+- Build step — pacote de fonte

@@ -1,6 +1,7 @@
 import type { ThemeConfig } from 'antd'
 import { Colors } from './colors'
 import { FontFamily } from './typography'
+import { Shadows } from './shadows'
 
 export const antdTheme: ThemeConfig = {
   token: {
@@ -18,7 +19,7 @@ export const antdTheme: ThemeConfig = {
     colorBorder: Colors.surfaceBorder,
     colorTextBase: Colors.textMain,
     colorTextSecondary: Colors.textSub,
-    boxShadow: '0 2px 16px rgba(124, 58, 237, 0.08)',
+    boxShadow: Shadows.sm,
   },
   components: {
     Button: {

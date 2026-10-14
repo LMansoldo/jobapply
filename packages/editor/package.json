@@ -1,0 +1,38 @@
+{
+  "name": "@jobapply/editor",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Rich markdown editor (TipTap) com sugestões ATS inline, diff e rail. Consumido via fonte pelo app, sem build.",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "scripts": {
+    "lint": "echo 'no lint yet'",
+    "typecheck": "tsc --noEmit",
+    "build": "echo 'no build yet'",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@ant-design/icons": "^5.3.7",
+    "@emotion/react": "^11.14.0",
+    "@emotion/styled": "^11.14.0",
+    "@jobapply/contracts": "^0.1.0",
+    "@jobapply/ui": "^0.1.0",
+    "@tiptap/core": "3.31.3",
+    "@tiptap/markdown": "3.31.3",
+    "@tiptap/pm": "3.31.3",
+    "@tiptap/react": "3.31.3",
+    "@tiptap/starter-kit": "3.31.3",
+    "antd": "^5.17.0"
+  },
+  "peerDependencies": {
+    "react": "^18",
+    "react-dom": "^18",
+    "react-i18next": "^17"
+  },
+  "devDependencies": {
+    "@types/react": "^18.3.3",
+    "@types/react-dom": "^18.3.0",
+    "typescript": "^5.4.5",
+    "vitest": "^3"
+  }
+}

@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ats-agent — Boolean Keyword Matchmaking</title>
+<style>
+  :root {
+    --bg: #0d1117; --bg2: #161b22; --bg3: #1c2333;
+    --border: #2d333b; --text: #e6edf3; --muted: #8b949e;
+    --llm: #d29922; --llm-bg: #2a2205;
+    --det: #3fb950; --det-bg: #0d2818;
+    --store: #58a6ff; --store-bg: #0d2137;
+    --accent: #7ee787; --pink: #ff7b72; --purple: #d2a8ff;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg); color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    line-height: 1.6; padding-bottom: 80px;
+  }
+  .wrap { max-width: 1080px; margin: 0 auto; padding: 0 24px; }
+  header {
+    background: linear-gradient(180deg, var(--bg3), var(--bg));
+    border-bottom: 1px solid var(--border); padding: 56px 0 40px; margin-bottom: 48px;
+  }
+  h1 { font-size: 2.4rem; letter-spacing: -0.02em; }
+  h1 .dim { color: var(--muted); font-weight: 400; }
+  .tagline { color: var(--muted); font-size: 1.15rem; margin-top: 8px; max-width: 720px; }
+  .badges { margin-top: 20px; display: flex; gap: 10px; flex-wrap: wrap; }
+  .badge {
+    font-size: .8rem; padding: 4px 12px; border-radius: 999px;
+    border: 1px solid var(--border); background: var(--bg2); color: var(--muted);
+  }
+  .badge b { color: var(--text); font-weight: 600; }
+  h2 {
+    font-size: 1.45rem; margin: 56px 0 18px; padding-top: 24px;
+    border-top: 1px solid var(--border); letter-spacing: -0.01em;
+  }
+  h2 .anchor { color: var(--accent); margin-right: 10px; }
+  h3 { font-size: 1.05rem; margin: 26px 0 10px; color: var(--purple); }
+  p { margin: 12px 0; color: #c9d1d9; max-width: 860px; }
+  ul, ol { margin: 12px 0 12px 24px; color: #c9d1d9; max-width: 860px; }
+  li { margin: 6px 0; }
+  code, pre {
+    font-family: "SF Mono", ui-monospace, Menlo, Consolas, monospace;
+    font-size: .86rem;
+  }
+  code.inline {
+    background: var(--bg3); border: 1px solid var(--border);
+    padding: 1px 7px; border-radius: 6px; color: var(--accent);
+  }
+  pre.block {
+    background: var(--bg2); border: 1px solid var(--border);
+    border-radius: 10px; padding: 18px 20px; overflow-x: auto;
+    margin: 14px 0; line-height: 1.55;
+  }
+  pre.block .k { color: var(--pink); }      /* keyword/type */
+  pre.block .f { color: var(--accent); }    /* field */
+  pre.block .c { color: var(--muted); font-style: italic; } /* comment */
+  pre.block .s { color: #a5d6ff; }          /* string */
+  pre.block .n { color: #d2a8ff; }          /* number/const */
+  .legend { display: flex; gap: 18px; margin: 14px 0; flex-wrap: wrap; }
+  .legend span { display: inline-flex; align-items: center; gap: 8px; font-size: .85rem; color: var(--muted); }
+  .dot { width: 12px; height: 12px; border-radius: 4px; display: inline-block; }
+  .dot.llm { background: var(--llm); } .dot.det { background: var(--det); } .dot.store { background: var(--store); }
+  .diagram {
+    background: var(--bg2); border: 1px solid var(--border);
+    border-radius: 12px; padding: 22px; margin: 18px 0; overflow-x: auto;
+  }
+  .diagram svg { display: block; min-width: 860px; width: 100%; height: auto; }
+  table { border-collapse: collapse; width: 100%; margin: 16px 0; font-size: .92rem; }
+  th, td { border: 1px solid var(--border); padding: 9px 14px; text-align: left; vertical-align: top; }
+  th { background: var(--bg3); color: var(--text); font-weight: 600; }
+  td { color: #c9d1d9; }
+  tr:nth-child(even) td { background: var(--bg2); }
+  .pill { font-size: .74rem; padding: 2px 9px; border-radius: 999px; font-weight: 600; white-space: nowrap; }
+  .pill.llm { color: var(--llm); background: var(--llm-bg); border: 1px solid #5a4408; }
+  .pill.det { color: var(--det); background: var(--det-bg); border: 1px solid #1d4525; }
+  .pill.store { color: var(--store); background: var(--store-bg); border: 1px solid #1a3a5c; }
+  .callout {
+    border-left: 3px solid var(--accent); background: var(--bg2);
+    padding: 14px 18px; border-radius: 0 10px 10px 0; margin: 18px 0; max-width: 860px;
+  }
+  .callout.red { border-left-color: var(--pink); }
+  .callout.blue { border-left-color: var(--store); }
+  .callout p { margin: 4px 0; }
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin: 16px 0; }
+  @media (max-width: 800px) { .grid2 { grid-template-columns: 1fr; } }
+  .card {
+    background: var(--bg2); border: 1px solid var(--border);
+    border-radius: 12px; padding: 18px 20px;
+  }
+  .card h4 { font-size: .95rem; margin-bottom: 10px; color: var(--store); }
+  .scorebar { display: flex; height: 34px; border-radius: 8px; overflow: hidden; margin: 14px 0 6px; border: 1px solid var(--border); font-size: .8rem; font-weight: 600; }
+  .scorebar div { display: flex; align-items: center; justify-content: center; }
+  .scorebar .kw { width: 70%; background: #1d4525; color: var(--det); }
+  .scorebar .cq { width: 15%; background: #2a2205; color: var(--llm); }
+  .scorebar .fm { width: 15%; background: #0d2137; color: var(--store); }
+  .scorecap { font-size: .8rem; color: var(--muted); margin-bottom: 20px; }
+  .case-flow { display: flex; flex-direction: column; gap: 0; }
+  .kwrow { display: flex; flex-wrap: wrap; gap: 8px; margin: 10px 0; align-items: center; }
+  .chip { font-size: .8rem; padding: 3px 11px; border-radius: 999px; border: 1px solid; }
+  .chip.match { color: var(--det); border-color: #1d4525; background: var(--det-bg); }
+  .chip.rephr { color: var(--llm); border-color: #5a4408; background: var(--llm-bg); }
+  .chip.absent { color: var(--pink); border-color: #67262b; background: #2d1214; }
+  .chip.nice { color: var(--purple); border-color: #3d2d52; background: #211433; }
+  .chip-label { font-size: .78rem; color: var(--muted); min-width: 150px; }
+  .diff { font-size: .9rem; }
+  .diff .from { color: var(--pink); text-decoration: line-through; text-decoration-color: #67262b; }
+  .diff .to { color: var(--det); }
+  .arrow-down { text-align: center; color: var(--muted); font-size: 1.2rem; margin: 2px 0; }
+  footer { margin-top: 72px; padding-top: 24px; border-top: 1px solid var(--border); color: var(--muted); font-size: .85rem; }
+  a { color: var(--store); }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap">
+    <h1>ats-agent <span class="dim">/ boolean keyword matchmaking</span></h1>
+    <p class="tagline">
+      Serviço Fastify + LangGraph + GLM que analisa um CV contra uma job description,
+      pontua por <b style="color:var(--text)">busca booleana literal</b> de keywords e gera
+      dicas de rephrase para os casos de <em>"mesma coisa, palavras diferentes"</em>.
+    </p>
+    <div class="badges">
+      <span class="badge">porta <b>3001</b></span>
+      <span class="badge">LLM <b>GLM · Z.ai</b></span>
+      <span class="badge">índice <b>node:sqlite</b></span>
+      <span class="badge">orquestração <b>LangGraph</b></span>
+      <span class="badge">score <b>0.70 keyword · 0.15 conteúdo · 0.15 formato</b></span>
+    </div>
+  </div>
+</header>
+
+<div class="wrap">
+
+<!-- ══════════════════════ 1. VISÃO MACRO ══════════════════════ -->
+<h2><span class="anchor">01</span>Visão macro</h2>
+
+<div class="diagram">
+<svg viewBox="0 0 960 190" xmlns="http://www.w3.org/2000/svg" font-family="-apple-system, sans-serif">
+  <defs>
+    <marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#8b949e"/>
+    </marker>
+  </defs>
+  <g font-size="13" fill="#e6edf3">
+    <!-- jobapply-app -->
+    <rect x="20" y="60" width="130" height="52" rx="10" fill="#161b22" stroke="#2d333b"/>
+    <text x="85" y="82" text-anchor="middle" font-weight="600">jobapply-app</text>
+    <text x="85" y="100" text-anchor="middle" font-size="11" fill="#8b949e">Vite + React</text>
+    <!-- jobapply-api -->
+    <rect x="215" y="60" width="140" height="52" rx="10" fill="#161b22" stroke="#2d333b"/>
+    <text x="285" y="82" text-anchor="middle" font-weight="600">jobapply-api</text>
+    <text x="285" y="100" text-anchor="middle" font-size="11" fill="#8b949e">Express + Mongo</text>
+    <!-- ats-agent -->
+    <rect x="430" y="40" width="180" height="92" rx="10" fill="#0d2137" stroke="#1a3a5c"/>
+    <text x="520" y="66" text-anchor="middle" font-weight="600">ats-agent</text>
+    <text x="520" y="86" text-anchor="middle" font-size="11" fill="#8b949e">LangGraph pipeline</text>
+    <text x="520" y="104" text-anchor="middle" font-size="11" fill="#8b949e">jobs em memória · TTL 30min</text>
+    <!-- sqlite -->
+    <rect x="470" y="150" width="100" height="32" rx="8" fill="#0d2137" stroke="#1a3a5c"/>
+    <text x="520" y="170" text-anchor="middle" font-size="12" fill="#58a6ff">SQLite chunks</text>
+    <line x1="520" y1="132" x2="520" y2="148" stroke="#58a6ff" marker-end="url(#arr)" stroke-dasharray="3 3"/>
+    <!-- glm -->
+    <rect x="760" y="60" width="150" height="52" rx="10" fill="#2a2205" stroke="#5a4408"/>
+    <text x="835" y="82" text-anchor="middle" font-weight="600">GLM (Z.ai)</text>
+    <text x="835" y="100" text-anchor="middle" font-size="11" fill="#8b949e">glm-5.3-flash</text>
+    <!-- mongo -->
+    <rect x="240" y="150" width="90" height="32" rx="8" fill="#161b22" stroke="#2d333b"/>
+    <text x="285" y="170" text-anchor="middle" font-size="12" fill="#8b949e">MongoDB</text>
+    <line x1="285" y1="112" x2="285" y2="148" stroke="#8b949e" marker-end="url(#arr)" stroke-dasharray="3 3"/>
+    <!-- arrows -->
+    <line x1="150" y1="86" x2="210" y2="86" stroke="#8b949e" marker-end="url(#arr)"/>
+    <text x="180" y="76" text-anchor="middle" font-size="10" fill="#8b949e">REST+JWT</text>
+    <line x1="355" y1="86" x2="425" y2="86" stroke="#8b949e" marker-end="url(#arr)"/>
+    <text x="390" y="76" text-anchor="middle" font-size="10" fill="#8b949e">HTTP</text>
+    <line x1="610" y1="86" x2="755" y2="86" stroke="#d29922" marker-end="url(#arr)"/>
+    <text x="682" y="76" text-anchor="middle" font-size="10" fill="#d29922">2-5 chamadas/request</text>
+  </g>
+</svg>
+</div>
+
+<ul>
+  <li><strong>Nunca acessa o MongoDB</strong> — o único estado local é o SQLite de chunks, cache derivado e reconstruível dos inputs.</li>
+  <li><code class="inline">jobapply-api</code> trata o relatório como <code class="inline">unknown</code> (pass-through): o contrato vive nos tipos do agente.</li>
+  <li>O score é <strong>estritamente booleano</strong>: sinônimo conceitual não pontua — vira dica de rephrase.</li>
+</ul>
+
+<!-- ══════════════════════ 2. PIPELINE ══════════════════════ -->
+<h2><span class="anchor">02</span>grafo do pipeline</h2>
+
+<div class="legend">
+  <span><span class="dot llm"></span> chamada LLM (token)</span>
+  <span><span class="dot det"></span> determinístico (grátis)</span>
+  <span><span class="dot store"></span> persistência SQLite</span>
+</div>
+
+<div class="diagram">
+<svg viewBox="0 0 960 330" xmlns="http://www.w3.org/2000/svg" font-family="-apple-system, sans-serif">
+  <defs>
+    <marker id="arr2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#8b949e"/>
+    </marker>
+    <marker id="arrW" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#58a6ff"/>
+    </marker>
+  </defs>
+  <g font-size="12.5">
+    <!-- row 1 -->
+    <rect x="15" y="30" width="118" height="58" rx="10" fill="#0d2818" stroke="#1d4525"/>
+    <text x="74" y="54" text-anchor="middle" font-weight="600" fill="#e6edf3">mapper</text>
+    <text x="74" y="72" text-anchor="middle" font-size="10.5" fill="#8b949e">cv/md → MappedCV</text>
+
+    <rect x="175" y="30" width="130" height="58" rx="10" fill="#2a2205" stroke="#5a4408"/>
+    <text x="240" y="54" text-anchor="middle" font-weight="600" fill="#e6edf3">jdExtractor</text>
+    <text x="240" y="72" text-anchor="middle" font-size="10.5" fill="#8b949e">JD → chunks + título</text>
+
+    <rect x="347" y="30" width="130" height="58" rx="10" fill="#2a2205" stroke="#5a4408"/>
+    <text x="412" y="54" text-anchor="middle" font-weight="600" fill="#e6edf3">cvExtractor</text>
+    <text x="412" y="72" text-anchor="middle" font-size="10.5" fill="#8b949e">CV → chunks</text>
+
+    <rect x="519" y="30" width="146" height="58" rx="10" fill="#2a2205" stroke="#5a4408"/>
+    <text x="592" y="54" text-anchor="middle" font-weight="600" fill="#e6edf3">keywordComposer</text>
+    <text x="592" y="72" text-anchor="middle" font-size="10.5" fill="#8b949e">chunks → {term,tier,variants}</text>
+
+    <rect x="707" y="30" width="140" height="58" rx="10" fill="#0d2818" stroke="#1d4525"/>
+    <text x="777" y="54" text-anchor="middle" font-weight="600" fill="#e6edf3">booleanMatcher</text>
+    <text x="777" y="72" text-anchor="middle" font-size="10.5" fill="#8b949e">word-boundary + plural</text>
+
+    <!-- row 2 -->
+    <rect x="707" y="170" width="140" height="58" rx="10" fill="#0d2818" stroke="#1d4525"/>
+    <text x="777" y="194" text-anchor="middle" font-weight="600" fill="#e6edf3">scoreComposer</text>
+    <text x="777" y="212" text-anchor="middle" font-size="10.5" fill="#8b949e">0.70/0.15/0.15 + bônus</text>
+
+    <rect x="519" y="170" width="146" height="58" rx="10" fill="#2a2205" stroke="#5a4408"/>
+    <text x="592" y="194" text-anchor="middle" font-weight="600" fill="#e6edf3">gapAdvisor</text>
+    <text x="592" y="212" text-anchor="middle" font-size="10.5" fill="#8b949e">rephrase | absent</text>
+
+    <rect x="347" y="170" width="130" height="58" rx="10" fill="#0d2818" stroke="#1d4525"/>
+    <text x="412" y="194" text-anchor="middle" font-weight="600" fill="#e6edf3">aggregator</text>
+    <text x="412" y="212" text-anchor="middle" font-size="10.5" fill="#8b949e">monta ATSReport</text>
+
+    <rect x="175" y="170" width="130" height="58" rx="10" fill="#0d2137" stroke="#1a3a5c"/>
+    <text x="240" y="194" text-anchor="middle" font-weight="600" fill="#e6edf3">resposta</text>
+    <text x="240" y="212" text-anchor="middle" font-size="10.5" fill="#8b949e">report · resume</text>
+
+    <!-- sqlite cache under extractors -->
+    <rect x="240" y="272" width="260" height="36" rx="9" fill="#0d2137" stroke="#1a3a5c"/>
+    <text x="370" y="295" text-anchor="middle" font-size="12" fill="#58a6ff">SQLite · jd_chunks · cv_chunks · jd_meta</text>
+    <line x1="255" y1="88" x2="300" y2="270" stroke="#58a6ff" marker-end="url(#arrW)" stroke-dasharray="4 3"/>
+    <line x1="400" y1="88" x2="380" y2="270" stroke="#58a6ff" marker-end="url(#arrW)" stroke-dasharray="4 3"/>
+    <text x="255" y="255" text-anchor="middle" font-size="10.5" fill="#58a6ff">cache por hash do input · sem TTL</text>
+    <line x1="430" y1="270" x2="360" y2="92" stroke="#58a6ff" marker-end="url(#arrW)" stroke-dasharray="4 3"/>
+    <line x1="290" y1="270" x2="430" y2="92" stroke="#58a6ff" marker-end="url(#arrW)" stroke-dasharray="4 3"/>
+
+    <!-- flow arrows row1 -->
+    <line x1="133" y1="59" x2="173" y2="59" stroke="#8b949e" marker-end="url(#arr2)"/>
+    <line x1="305" y1="59" x2="345" y2="59" stroke="#8b949e" marker-end="url(#arr2)"/>
+    <line x1="477" y1="59" x2="517" y2="59" stroke="#8b949e" marker-end="url(#arr2)"/>
+    <line x1="665" y1="59" x2="705" y2="59" stroke="#8b949e" marker-end="url(#arr2)"/>
+    <!-- wrap arrow -->
+    <path d="M 847 88 L 847 130 L 777 130 L 777 168" fill="none" stroke="#8b949e" marker-end="url(#arr2)"/>
+    <!-- flow arrows row2 -->
+    <line x1="705" y1="199" x2="667" y2="199" stroke="#8b949e" marker-end="url(#arr2)"/>
+    <line x1="517" y1="199" x2="479" y2="199" stroke="#8b949e" marker-end="url(#arr2)"/>
+    <line x1="345" y1="199" x2="307" y2="199" stroke="#8b949e" marker-end="url(#arr2)"/>
+
+    <!-- skip annotation -->
+    <text x="592" y="245" text-anchor="middle" font-size="10.5" fill="#d29922">gapAdvisor roda só se houver missing keywords</text>
+  </g>
+</svg>
+</div>
+
+<h3>custo por request (chamadas LLM)</h3>
+<table>
+  <tr><th>endpoint</th><th>frio (JD + CV novos)</th><th>warm (chunks em cache)</th></tr>
+  <tr><td><code class="inline">POST /analyze</code></td><td>4 — jdExtract, cvExtract, compose, gap</td><td>2 — compose, gap</td></tr>
+  <tr><td><code class="inline">POST /generate-resume</code></td><td>5 — as 4 + draft</td><td>3 — compose, gap, draft</td></tr>
+  <tr><td>re-score do resume gerado</td><td colspan="2" style="color:var(--det)">0 — booleanMatcher determinístico sobre o markdown renderizado</td></tr>
+</table>
+
+<div class="callout">
+  <p>Antes do redesign, o <code class="inline">/generate-resume</code> fazia <b>até ~10 chamadas LLM</b> (re-analisava o resume com semanticMatcher + recruiterReviewer, podendo repetir tudo). Hoje: máx. 5, e o loop de retry é gratuito.</p>
+</div>
+
+<!-- ══════════════════════ 3. CHUNK INDEX ══════════════════════ -->
+<h2><span class="anchor">03</span>chunk index (SQLite)</h2>
+
+<p>Os dois inputs enormes (CV completo e JD completa) são quebrados uma única vez em <strong>chunks cegos</strong> — átomos curtos, tipados e comparáveis. Todo o resto do pipeline consome só esses dados refinados, nunca os textos crus.</p>
+
+<pre class="block"><span class="c">-- id = sha256(type :: attr normalizado) — acento/pontuação/case-insensitive
+-- PK composta: o mesmo chunk pode pertencer a várias JDs/CVs</span>
+<span class="k">CREATE TABLE</span> jd_chunks (
+  id         <span class="k">TEXT</span> <span class="k">NOT NULL</span>,
+  jd_id      <span class="k">TEXT</span> <span class="k">NOT NULL</span>,   <span class="c">-- hash do texto da JD (chave de cache)</span>
+  type       <span class="k">TEXT</span> <span class="k">NOT NULL</span>,   <span class="c">-- skill | tool | domain | credential | soft | req</span>
+  attr       <span class="k">TEXT</span> <span class="k">NOT NULL</span>,   <span class="c">-- o átomo (≤ 8 palavras)</span>
+  tier       <span class="k">TEXT</span> <span class="k">NOT NULL</span>,   <span class="c">-- must-have | important | nice-to-have</span>
+  created_at <span class="k">INTEGER</span> <span class="k">NOT NULL</span>,
+  <span class="k">PRIMARY KEY</span> (jd_id, id)
+);
+
+<span class="k">CREATE TABLE</span> cv_chunks (
+  id <span class="k">TEXT</span> <span class="k">NOT NULL</span>, cv_id <span class="k">TEXT</span> <span class="k">NOT NULL</span>,
+  type <span class="k">TEXT</span> <span class="k">NOT NULL</span>, attr <span class="k">TEXT</span> <span class="k">NOT NULL</span>,
+  section <span class="k">TEXT</span> <span class="k">NOT NULL</span>,          <span class="c">-- summary | skills | experience | ...</span>
+  created_at <span class="k">INTEGER</span> <span class="k">NOT NULL</span>,
+  <span class="k">PRIMARY KEY</span> (cv_id, id)
+);
+
+<span class="k">CREATE TABLE</span> jd_meta ( jd_id <span class="k">TEXT PRIMARY KEY</span>, job_title <span class="k">TEXT</span>, created_at <span class="k">INTEGER</span> );</pre>
+
+<h3>taxonomia de <code class="inline">type</code></h3>
+<table>
+  <tr><th>type</th><th>significado</th><th>exemplos</th></tr>
+  <tr><td><code class="inline">tool</code></td><td>software/biblioteca/plataforma nomeada</td><td>React, Kubernetes, Figma</td></tr>
+  <tr><td><code class="inline">skill</code></td><td>habilidade ou prática nomeada</td><td>unit testing, system design, REST APIs</td></tr>
+  <tr><td><code class="inline">domain</code></td><td>indústria / domínio de negócio</td><td>fintech, e-commerce, healthtech</td></tr>
+  <tr><td><code class="inline">credential</code></td><td>grau, certificação, idioma, autorização</td><td>BSc Computer Science, inglês fluente</td></tr>
+  <tr><td><code class="inline">soft</code></td><td>trait interpessoal / comportamental</td><td>ownership, comunicação</td></tr>
+  <tr><td><code class="inline">req</code></td><td>condição dura — anos, senioridade, availability</td><td>5+ years of experience</td></tr>
+</table>
+
+<div class="callout blue">
+  <p><strong>Cache = pureza:</strong> chunks são funções puras do input (mesmo texto → mesmos chunks), então o cache é keyed por hash de conteúdo e <b>sem TTL</b>. Analisar o mesmo CV contra 10 JDs paga a extração do CV 1×. Em teste: <code class="inline">CHUNKS_DB_PATH=:memory:</code>.</p>
+</div>
+
+<!-- ══════════════════════ 4. TIPOS ══════════════════════ -->
+<h2><span class="anchor">04</span>tipos principais</h2>
+
+<h3>entrada e composição</h3>
+<pre class="block"><span class="k">interface</span> <span class="f">AgentInput</span> {
+  cv?: <span class="k">CV</span>                    <span class="c">// CV estruturado (JSON do Mongo)</span>
+  cvMarkdown?: <span class="k">string</span>        <span class="c">// ou CV em markdown</span>
+  jobDescription: <span class="k">string</span>
+  locale?: <span class="s">'en'</span> | <span class="s">'pt-BR'</span>
+}
+
+<span class="k">interface</span> <span class="f">ComposedKeyword</span> {  <span class="c">// saída do keywordComposer</span>
+  term: <span class="k">string</span>               <span class="c">// forma canônica, wording da JD, lowercase</span>
+  tier: <span class="s">'must-have'</span> | <span class="s">'important'</span> | <span class="s">'nice-to-have'</span>
+  variants: <span class="k">string</span>[]         <span class="c">// SÓ superfícies literais: "k8s", "nodejs", plurais</span>
+}                            <span class="c">// sinônimo conceitual NUNCA vira variante</span>
+
+<span class="k">interface</span> <span class="f">KeywordMatch</span> {
+  term: <span class="k">string</span>; tier: <span class="k">ChunkTier</span>
+  matched: <span class="k">boolean</span>
+  section: <span class="k">string</span>            <span class="c">// onde casou; '' quando não casou</span>
+}</pre>
+
+<h3>saída do gapAdvisor</h3>
+<pre class="block"><span class="k">interface</span> <span class="f">GapAnalysis</span> {
+  rephraseGaps: <span class="f">RephraseGap</span>[]   <span class="c">// "mesma coisa, palavras diferentes"</span>
+  absentKeywords: <span class="k">string</span>[]       <span class="c">// sem evidência nenhuma no CV</span>
+  keywordPhrases: <span class="f">KeywordPhrase</span>[]  <span class="c">// frases prontas só p/ absent</span>
+  removeSuggestions: <span class="f">RemoveSuggestion</span>[]
+}
+
+<span class="k">interface</span> <span class="f">RephraseGap</span> {
+  keyword: <span class="k">string</span>           <span class="c">// keyword da JD que não casou</span>
+  cvPhrase: <span class="k">string</span>          <span class="c">// como o CV diz hoje</span>
+  suggestedRewrite: <span class="k">string</span>  <span class="c">// como reescrever com o termo exato da JD</span>
+}</pre>
+
+<h3>contrato de saída (ATSReport) — imutável para api/frontend</h3>
+<pre class="block"><span class="k">interface</span> <span class="f">ATSReport</span> {
+  universalScore: <span class="k">number</span>              <span class="c">// 0-100</span>
+  scoreBreakdown: {
+    keywordCoverage: <span class="k">number</span>          <span class="c">// booleano ponderado por tier</span>
+    contentQuality: <span class="k">number</span>           <span class="c">// genéricas + densidade de métricas (regex)</span>
+    format: <span class="k">number</span>                   <span class="c">// seções obrigatórias + períodos (regex)</span>
+  }
+  matchedKeywords: <span class="k">string</span>[]
+  missingKeywords: <span class="k">string</span>[]
+  semanticGaps: <span class="k">string</span>[]             <span class="c">// hoje: dicas de rephrase em texto</span>
+  optimalTemplate: {
+    sectionsOrder: <span class="k">string</span>[]
+    keywordsToAdd: <span class="k">string</span>[]          <span class="c">// só os truly-absent, ordenados por tier</span>
+    keywordPhrases: <span class="f">KeywordPhrase</span>[]
+    keywordsToRephrase: { from: <span class="k">string</span>; to: <span class="k">string</span> }[]
+    formatFixes: <span class="k">string</span>[]
+  }
+  tips: { priority: <span class="s">'critical'</span> | <span class="s">'high'</span> | <span class="s">'medium'</span>; tip: <span class="k">string</span> }[]
+  removeSuggestions: <span class="f">RemoveSuggestion</span>[]
+}</pre>
+
+<!-- ══════════════════════ 5. SCORE ══════════════════════ -->
+<h2><span class="anchor">05</span>modelo de score</h2>
+
+<div class="scorebar">
+  <div class="kw">keyword 0.70</div>
+  <div class="cq">conteúdo 0.15</div>
+  <div class="fm">formato 0.15</div>
+</div>
+<div class="scorecap">bônus de nice-to-have: +5 no máximo, só soma, nunca penaliza</div>
+
+<pre class="block"><span class="n">TIER_WEIGHT</span>  = { <span class="s">'must-have'</span>: 3, important: 2, <span class="s">'nice-to-have'</span>: 0 }
+
+<span class="c">// keywordCoverage = soma dos pesos casados / soma dos pesos obrigatórios</span>
+universalScore = min(100,
+    <span class="n">0.70</span> × keywordCoverage
+  + <span class="n">0.15</span> × contentQuality      <span class="c">// frases genéricas -8 · métricas < 40% dos bullets</span>
+  + <span class="n">0.15</span> × format               <span class="c">// seção faltante -12 · período ausente -10</span>
+  + niceToHaveBonus × <span class="n">0.05</span>
+)</pre>
+
+<div class="grid2">
+  <div class="card">
+    <h4>matching literal (booleanMatcher)</h4>
+    <ul>
+      <li><code class="inline">norm()</code> compartilhado: NFD → lowercase → pontuação vira espaço → trim</li>
+      <li>word-boundary regex — <code class="inline">go</code> não casa dentro de <code class="inline">django</code></li>
+      <li>plural/singular no último termo — <code class="inline">rest api</code> casa <code class="inline">rest apis</code></li>
+      <li>term + variants — <code class="inline">node js</code> casa <code class="inline">Node.js</code> (pontuação normalizada)</li>
+    </ul>
+  </div>
+  <div class="card">
+    <h4>guardas do resume (verifier, 0 token)</h4>
+    <ul>
+      <li><code class="inline">metric-dropped / metric-invented</code> — todo número do original tem que continuar</li>
+      <li><code class="inline">low-overlap</code> — reescrita com Jaccard &lt; 0.2 volta ao original</li>
+      <li><code class="inline">generic-phrase</code> — AI-smell ("leveraged", "responsible for") rejeitado</li>
+      <li><code class="inline">invalid-source</code> — sourceIndex fora do range/duplicado descartado</li>
+    </ul>
+  </div>
+</div>
+
+<div class="callout red">
+  <p><strong>Regra de ouro:</strong> semântica não credita score. Se o CV diz "component library development" e a JD pede "design systems", o coverage <b>não</b> sobe — a falta vira uma dica <code class="inline">keywordsToRephrase</code>. O score só melhora quando o candidato reescreve de verdade. É o que um ATS real faria.</p>
+</div>
+
+<!-- ══════════════════════ 6. CASE REAL ══════════════════════ -->
+<h2><span class="anchor">06</span>case real (smoke E2E)</h2>
+
+<p>CV: senior frontend dev (React, TypeScript, Node, Postgres, CI/CD, component library, e-commerce checkout).
+JD: <em>"Senior Frontend Engineer — Fintech"</em> pedindo 5+ anos, TypeScript, React, <b>design systems</b>, REST APIs, PostgreSQL, CI/CD; nice-to-have fintech, Kubernetes, GraphQL.</p>
+
+<h3>/analyze</h3>
+<div class="case-flow">
+  <div class="card">
+    <h4>1 · extração e composição</h4>
+    <div class="kwrow">
+      <span class="chip-label">jd_chunks 12 · cv_chunks 24 → 12 keywords</span>
+    </div>
+    <div class="kwrow"><span class="chip match">typescript</span><span class="chip match">react</span><span class="chip match">rest apis</span><span class="chip match">postgresql</span><span class="chip match">ci cd pipelines</span><span class="chip match">e commerce</span></div>
+    <div class="kwrow"><span class="chip rephr">web application</span><span class="chip rephr">design systems</span><span class="chip absent">fintech</span><span class="chip absent">kubernetes</span><span class="chip absent">graphql</span></div>
+    <p style="font-size:.85rem; color:var(--muted)">match = literal · rephr = conceito presente com outras palavras · absent = sem evidência</p>
+  </div>
+  <div class="arrow-down">↓</div>
+  <div class="card">
+    <h4>2 · score 73 &nbsp;<span style="color:var(--muted); font-weight:400">{ keywordCoverage 71 · contentQuality 50 · format 100 }</span></h4>
+    <div class="diff">
+      <p><span class="from">"component library development"</span> &nbsp;→&nbsp; <span class="to">"Contributed to design systems through component library development used across multiple product teams."</span></p>
+      <p><span class="from">"Senior frontend developer"</span> &nbsp;→&nbsp; <span class="to">"Senior frontend developer with 6 years of web application experience building React and Next.js products."</span></p>
+    </div>
+    <p style="font-size:.85rem; color:var(--muted)">keywordsToAdd: fintech, kubernetes, graphql · tips: 1 critical (must-haves) + 2 high (rephrase) + 1 medium (nice-to-have)</p>
+  </div>
+</div>
+
+<h3>/generate-resume</h3>
+<div class="case-flow">
+  <div class="card">
+    <h4>score 85 → <span style="color:var(--det)">94</span> &nbsp;<span style="color:var(--muted); font-weight:400">(re-score determinístico do markdown gerado)</span></h4>
+    <div class="diff">
+      <p>skills: <span class="from">Backend: Node.js, Express, PostgreSQL</span> → <span class="to">Backend: Node.js, Express, PostgreSQL, <b>REST APIs</b></span></p>
+      <p>skills: <span class="from">Practices: unit testing, CI/CD</span> → <span class="to">Engineering Practices: unit testing with Jest, CI/CD pipelines with GitHub Actions, <b>Design systems and component libraries</b></span></p>
+      <p>bullet: <span class="from">"Built a shared component library adopted by 4 squads"</span> → <span class="to">"...contributing to <b>design systems</b> across products..."</span> — mantendo os 4 squads e os 28%</p>
+    </div>
+    <p style="font-size:.85rem; color:var(--muted)">honesty rule funcionando: "fintech" ficou fora do resume — não há evidência no CV. 1 violação do verifier reconvertida ao original.</p>
+  </div>
+</div>
+
+<!-- ══════════════════════ 7. API ══════════════════════ -->
+<h2><span class="anchor">07</span>endpoints</h2>
+
+<table>
+  <tr><th>método + rota</th><th>o que faz</th><th>resposta</th></tr>
+  <tr>
+    <td><code class="inline">POST /analyze</code></td>
+    <td>pipeline completo, job em background (<code class="inline">Map</code> em memória, TTL 30min)</td>
+    <td><code class="inline">{ requestId }</code> → poll em <code class="inline">/result/:id</code> → <code class="inline">{ status, report }</code></td>
+  </tr>
+  <tr>
+    <td><code class="inline">POST /generate-resume</code></td>
+    <td>pipeline + draft LLM alimentado com keywords exatas e mapa de rephrase; verifier + renderer + sanitizer; re-score booleano</td>
+    <td><code class="inline">{ resume, verification, scoreBefore, scoreAfter }</code></td>
+  </tr>
+  <tr>
+    <td><code class="inline">POST /generate-cv</code></td>
+    <td>mesmo grafo do /analyze</td>
+    <td><code class="inline">{ report }</code></td>
+  </tr>
+  <tr>
+    <td><code class="inline">POST /interview-prep</code></td>
+    <td>mapper + interviewPrepAnalyzer (fora do escopo do redesign)</td>
+    <td><code class="inline">InterviewPrep</code></td>
+  </tr>
+  <tr>
+    <td><code class="inline">GET /health</code> · <code class="inline">GET /result/:id</code></td>
+    <td>liveness · poll de job</td>
+    <td><code class="inline">{ status: 'ok' }</code> · job</td>
+  </tr>
+</table>
+
+<pre class="block"><span class="c"># body comum aos endpoints de análise</span>
+{
+  <span class="s">"cvMarkdown"</span>: <span class="s">"## Summary\nSenior frontend developer..."</span>,  <span class="c">// ou "cv": { ...CV estruturado }</span>
+  <span class="s">"jobDescription"</span>: <span class="s">"Senior Frontend Engineer - Fintech..."</span>,
+  <span class="s">"locale"</span>: <span class="s">"en"</span>
+}</pre>
+
+<!-- ══════════════════════ 8. DECISÕES ══════════════════════ -->
+<h2><span class="anchor">08</span>decisões de design</h2>
+<ol>
+  <li><strong>Booleano estrito, sem crédito semântico.</strong> Score espelha o que um ATS real faz; semântica vira conselho, não pontuação.</li>
+  <li><strong>Chunks cegos como única representação.</strong> Composição, matching e dicas operam sobre átomos tipados — os textos crus só entram nos extratores.</li>
+  <li><strong>Cache sem TTL.</strong> Chunks são puros; hash de conteúdo + INSERT OR IGNORE. Invalidação natural: muda o input, muda o hash.</li>
+  <li><strong>Variantes ≠ sinônimos.</strong> "k8s" é variante de "kubernetes"; "cloud" não é. O rephrase existe justamente para o caso conceitual.</li>
+  <li><strong>Guardas determinísticas > validação LLM.</strong> Verifier, sanitizer e fallbacks locais são gratuitos e determinísticos; LLM só onde há julgamento (extrair, compor, aconselhar, redigir).</li>
+  <li><strong>Contrato estável.</strong> <code class="inline">ATSReport</code> manteve a mesma forma consumida pelo frontend (<code class="inline">universalScore</code>, 3 categorias de breakdown, <code class="inline">optimalTemplate</code>, tips) — <code class="inline">jobapply-api</code> não precisou de mudança.</li>
+</ol>
+
+<footer>
+  <div class="wrap">
+    ats-agent · apps/ats-agent · fontes: <code>src/graph/index.ts</code> (grafo), <code>src/db/chunks.ts</code> (índice), <code>src/types.ts</code> (contratos) · 70 testes · node:sqlite · LangGraph
+  </div>
+</footer>
+
+</div>
+</body>
+</html>

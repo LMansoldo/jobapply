@@ -1,10 +1,9 @@
-import { CheckOutlined } from '@ant-design/icons'
 import type { HorizontalStepperProps } from './HorizontalStepper.types'
 import * as styles from './HorizontalStepper.styles'
 
 export function HorizontalStepper({ steps, current, onStepClick }: HorizontalStepperProps) {
   return (
-    <div className={styles.root}>
+    <styles.Root>
       {steps.map((step, index) => {
         const isDone = index < current
         const isActive = index === current
@@ -13,27 +12,28 @@ export function HorizontalStepper({ steps, current, onStepClick }: HorizontalSte
         const state = isDone ? 'done' : isActive ? 'active' : 'inactive'
 
         return (
-          <div key={index} className={styles.stepOuter(isLast)}>
-            <div className={styles.stepInner}>
-              <button
+          <styles.StepOuter key={index} $last={isLast}>
+            <styles.StepInner>
+              <styles.Circle
                 type="button"
-                className={styles.circle(state, clickable)}
+                $state={state}
+                $clickable={clickable}
                 onClick={clickable ? () => onStepClick!(index) : undefined}
               >
-                {isDone ? <CheckOutlined className={styles.checkIcon} /> : index + 1}
-              </button>
-              <div className={styles.labelWrapper}>
-                <p className={styles.stepLabel(isActive, isDone)}>{step.label}</p>
+                {isDone ? <styles.CheckIcon /> : index + 1}
+              </styles.Circle>
+              <styles.LabelWrapper>
+                <styles.StepLabel $active={isActive} $done={isDone}>{step.label}</styles.StepLabel>
                 {step.sublabel && (
-                  <p className={styles.stepSublabel}>{step.sublabel}</p>
+                  <styles.StepSublabel>{step.sublabel}</styles.StepSublabel>
                 )}
-              </div>
-            </div>
+              </styles.LabelWrapper>
+            </styles.StepInner>
 
-            {!isLast && <div className={styles.connector(isDone)} />}
-          </div>
+            {!isLast && <styles.Connector $done={isDone} />}
+          </styles.StepOuter>
         )
       })}
-    </div>
+    </styles.Root>
   )
 }

@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react'
-import { ATSPanel } from './ATSPanel'
+import { ATSPanel } from '@jobapply/ats-ui'
 
 const meta: Meta<typeof ATSPanel> = {
   title: 'Design System/ATS/ATSPanel',
